@@ -1,257 +1,162 @@
-[![Build Status](https://www.travis-ci.com/pydot/pydot.svg?branch=master)](https://www.travis-ci.com/pydot/pydot)
-[![PyPI](https://img.shields.io/pypi/v/pydot.svg)](https://pypi.org/project/pydot/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+# iocage
 
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/iocage/iocage.svg)](http://isitmaintained.com/project/iocage/iocage "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/iocage/iocage.svg)](http://isitmaintained.com/project/iocage/iocage "Percentage of issues still open")
+![Python Version](https://img.shields.io/badge/Python-3.6-blue.svg)
+[![GitHub issues](https://img.shields.io/github/issues/iocage/iocage.svg)](https://github.com/iocage/iocage/issues)
+[![GitHub forks](https://img.shields.io/github/forks/iocage/iocage.svg)](https://github.com/iocage/iocage/network)
+[![GitHub stars](https://img.shields.io/github/stars/iocage/iocage.svg)](https://github.com/iocage/iocage/stargazers)
+[![Twitter](https://img.shields.io/twitter/url/https/github.com/iocage/iocage.svg?style=social)](https://twitter.com/intent/tweet?text=@iocage)
 
-About
-=====
+## A FreeBSD jail manager
 
-`pydot`:
+iocage is a jail/container manager amalgamating some of the best features and
+technologies the FreeBSD operating system has to offer. It is geared for ease
+ of use with a simple and easy to understand command syntax.
 
-  - is an interface to [Graphviz][1]
-  - can parse and dump into the [DOT language][2] used by GraphViz,
-  - is written in pure Python,
+iocage is in the FreeBSD ports tree as sysutils/py-iocage.
+To install using binary packages, simply run: `pkg install py36-iocage`
 
-and [`networkx`][3] can convert its graphs to `pydot`.
+## Installation
 
-Development occurs at [GitHub][11], where you can report issues and
-contribute code.
+### GitHub:
 
+The FreeBSD source tree ***must*** be located at `$SRC_BASE` (`/usr/src` by default) to build from git.
 
-Examples
-========
+- `pkg install python36 git-lite py36-cython py36-pip`
+- `git clone --recursive https://github.com/iocage/iocage`
+- `make install` as root
 
-The examples here will show you the most common input, editing and
-output methods.
+To install subsequent updates: run `make install` as root.
 
-Input
------
+### Ports:
 
-No matter what you want to do with `pydot`, it will need some input to
-start with. Here are 3 common options:
+- Build the port as follows: `cd /usr/ports/sysutils/iocage/ ; make install clean`
 
-1. Import a graph from an existing DOT-file.
+### Pkg:
 
-    Use this method if you already have a DOT-file describing a graph,
-    for example as output of another program. Let's say you already
-    have this `example.dot` (based on an [example from Wikipedia][12]):
+- It is possible to install pre-built packages using pkg(8) if you are using FreeBSD 10 or above: `pkg install py36-iocage`
 
-    ```dot
-    graph my_graph {
-       bgcolor="yellow";
-       a [label="Foo"];
-       b [shape=circle];
-       a -- b -- c [color=blue];
-    }
-    ```
+#### Upgrading from `iocage_legacy`:
 
-    Just read the graph from the DOT-file:
+This repository replaces `iocage_legacy`. To upgrade to the current version:
 
-    ```python
-    import pydot
+1. Stop the jails (`service iocage stop; iocage stop ALL`)
+1. Back up your data
+1. Remove the old `iocage` package if it is installed (`pkg delete iocage`)
+1. Install `iocage` using one of the methods above
+1. Migrate the jails. This can be done by running `iocage list` as root
+1. Start the jails (`service iocage onestart`)
 
-    graphs = pydot.graph_from_dot_file("example.dot")
-    graph = graphs[0]
-    ```
+## Links
 
-2. or: Parse a graph from an existing DOT-string.
+- **[iocage Project Website](https://iocage.github.io/)**
+- **[Documentation](http://iocage.readthedocs.org/en/latest/index.html)**
+- **[Mailing list](https://groups.google.com/forum/#!forum/iocage)**
 
-    Use this method if you already have a DOT-string describing a
-    graph in a Python variable:
+## WARNING:
+- Some features of the previous iocage_legacy are either being dropped or simply not ported yet, feel free to open an issue asking about your favorite feature. But please search before opening a new one. PR's welcome for any feature you want!
 
-    ```python
-    import pydot
+## Raising an issue:
 
-    dot_string = """graph my_graph {
-        bgcolor="yellow";
-        a [label="Foo"];
-        b [shape=circle];
-        a -- b -- c [color=blue];
-    }"""
+We _like_ issues! If you are having trouble with `iocage` please open a GitHub [issue](https://github.com/iocage/iocage/issues) and we will ~~run around with our hair on fire~~ look into it. Before doing so, please give us some information about the situation:
 
-    graphs = pydot.graph_from_dot_data(dot_string)
-    graph = graphs[0]
-    ```
+- Tell us what version of FreeBSD you are using with something like `uname -ro`
+- It would also be helpful if you gave us the output of `iocage --version`
+- Most importantly, try to be detailed. Simply stating "I tried consoling into a jail and it broke" will not help us very much.
+- Use the [Markdown Basics](https://help.github.com/articles/markdown-basics/#code-formatting) GitHub page for more information on how to paste lines of code and terminal output.
 
-3. or: Create a graph from scratch using pydot objects.
+## Submitting a pull request:
 
-    Now this is where the cool stuff starts. Use this method if you
-    want to build new graphs from Python.
+Please be detailed on the exact use case of your change and a short demo of
+it. Make sure it conforms with PEP-8 and that you supply a test with it if
+relevant. Lines may not be longer then 80 characters.
 
-    ```python
-    import pydot
+## FEATURES
 
-    graph = pydot.Dot("my_graph", graph_type="graph", bgcolor="yellow")
+- Ease of use
+- Rapid jail creation within seconds
+- Automatic package installation
+- Virtual networking stacks (vnet)
+- Shared IP based jails (non vnet)
+- Transparent ZFS snapshot management
+- Export and import
+- And many more!
 
-    # Add nodes
-    my_node = pydot.Node("a", label="Foo")
-    graph.add_node(my_node)
-    # Or, without using an intermediate variable:
-    graph.add_node(pydot.Node("b", shape="circle"))
-
-    # Add edges
-    my_edge = pydot.Edge("a", "b", color="blue")
-    graph.add_edge(my_edge)
-    # Or, without using an intermediate variable:
-    graph.add_edge(pydot.Edge("b", "c", color="blue"))
-    ```
-
-    Imagine using these basic building blocks from your Python program
-    to dynamically generate a graph. For example, start out with a
-    basic `pydot.Dot` graph object, then loop through your data while
-    adding nodes and edges. Use values from your data as labels, to
-    determine shapes, edges and so forth. This way, you can easily
-    build visualizations of thousands of interconnected items.
-
-4. or: Convert a NetworkX graph to a pydot graph.
-
-    NetworkX has conversion methods for pydot graphs:
-
-    ```python
-    import networkx
-    import pydot
-
-    # See NetworkX documentation on how to build a NetworkX graph.
-
-    graph = networkx.drawing.nx_pydot.to_pydot(my_networkx_graph)
-    ```
-
-Edit
 ----
 
-You can now further manipulate your graph using pydot methods:
+## QUICK HOWTO
 
-- Add further nodes and edges:
+Activate a zpool:
 
-  ```python
-  graph.add_edge(pydot.Edge("b", "d", style="dotted"))
-  ```
+`iocage activate ZPOOL`
 
-- Edit attributes of graph, nodes and edges:
+*NOTE: ZPOOL is a placeholder. Use `zpool list` and substitute it for the
+zpool you wish to use.*
 
-  ```python
-  graph.set_bgcolor("lightyellow")
-  graph.get_node("b")[0].set_shape("box")
-  ```
+Fetch a release:
 
-Output
-------
+`iocage fetch`
 
-Here are 3 different output options:
+Create a jail:
 
-1. Generate an image.
+`iocage create -n myjail ip4_addr="em0|192.168.1.10/24" -r 11.0-RELEASE`
 
-    To generate an image of the graph, use one of the `create_*()` or
-    `write_*()` methods.
+*NOTE: em0 and 11.0-RELEASE are placeholders. Please replace them with your
+real interface (`ifconfig`) and RELEASE chosen during `iocage fetch`.*
 
-    - If you need to further process the output in Python, the
-      `create_*` methods will get you a Python bytes object:
+Start the jail:
 
-      ```python
-      output_graphviz_svg = graph.create_svg()
-      ```
+`iocage start myjail`
 
-    - If instead you just want to save the image to a file, use one of
-      the `write_*` methods:
+Congratulations, you have created your first jail with iocage!
+You can now use it like you would a real system.
+Since SSH won't be available by default, `iocage console myjail` is a useful
+spot to begin configuration of your jail.
 
-      ```python
-      graph.write_png("output.png")
-      ```
+To see a list of commands available to you now, type `iocage` outside the jail.
 
-2. Retrieve the DOT string.
+----
 
-    There are two different DOT strings you can retrieve:
+### REQUIREMENTS
 
-    - The "raw" pydot DOT: This is generated the fastest and will
-      usually still look quite similar to the DOT you put in. It is
-      generated by pydot itself, without calling Graphviz.
+- FreeBSD 9.3-RELEASE amd64 and higher or HardenedBSD/TrueOS
+- ZFS file system
+- Python 3.6+
+- UTF-8 locale (place into your ~/.login_conf):
 
-      ```python
-      # As a string:
-      output_raw_dot = graph.to_string()
-      # Or, save it as a DOT-file:
-      graph.write_raw("output_raw.dot")
-      ```
+```plain
+me:\
+        :charset=UTF-8:\
+        :lang=en_US.UTF-8:\
+        :setenv=LC_COLLATE=C:
+```
 
-    - The Graphviz DOT: You can use it to check how Graphviz lays out
-      the graph before it produces an image. It is generated by
-      Graphviz.
+### Optional
 
-      ```python
-      # As a bytes literal:
-      output_graphviz_dot = graph.create_dot()
-      # Or, save it as a DOT-file:
-      graph.write_dot("output_graphviz.dot")
-      ```
+- Kernel compiled with:
 
-3. Convert to a NetworkX graph.
+        # This is optional and only needed if you need VNET
 
-    Here as well, NetworkX has a conversion method for pydot graphs:
+        options         VIMAGE # VNET/Vimage support
 
-    ```python
-    my_networkx_graph = networkx.drawing.nx_pydot.from_pydot(graph)
-    ```
+### Helpful Considerations
 
-More help
----------
+- For the explanations on jail properties read jail(8)
+- Create bridge0 and bridge1 interfaces for VNET jails to attach to.
+- Use `iocage set` to modify properties and `iocage get` to retrieve property
+ values
+- Type `iocage COMMAND --help` to see any flags the command supports and their help, for example:
 
-For more help, see the docstrings of the various pydot objects and
-methods. For example, `help(pydot)`, `help(pydot.Graph)` and
-`help(pydot.Dot.write)`.
+        iocage create --help
+        iocage fetch --help
+        iocage list --help
+- If using VNET consider adding the following to `/etc/sysctl.conf` on the host:
 
-More [documentation contributions welcome][13].
+        net.inet.ip.forwarding=1       # Enable IP forwarding between interfaces
+        net.link.bridge.pfil_onlyip=0  # Only pass IP packets when pfil is enabled
+        net.link.bridge.pfil_bridge=0  # Packet filter on the bridge interface
+        net.link.bridge.pfil_member=0  # Packet filter on the member interface
+- Lots of jails or a big server? Mount `fdescfs`:
 
-
-Installation
-============
-
-From [PyPI][4] using [`pip`][5]:
-
-`pip install pydot`
-
-From source:
-
-`python setup.py install`
-
-
-Dependencies
-============
-
-- [`pyparsing`][6]: used only for *loading* DOT files,
-  installed automatically during `pydot` installation.
-
-- GraphViz: used to render graphs as PDF, PNG, SVG, etc.
-  Should be installed separately, using your system's
-  [package manager][7], something similar (e.g., [MacPorts][8]),
-  or from [its source][9].
-
-
-License
-=======
-
-Distributed under an [MIT license][10].
-
-
-Contacts
-========
-
-Maintainers:
-- Sebastian Kalinowski <sebastian@kalinowski.eu> (GitHub: @prmtl)
-- Peter Nowee <peter@peternowee.com> (GitHub: @peternowee)
-
-Original author: Ero Carrera <ero.carrera@gmail.com>
-
-
-[1]: https://www.graphviz.org
-[2]: https://en.wikipedia.org/wiki/DOT_%28graph_description_language%29
-[3]: https://github.com/networkx/networkx
-[4]: https://pypi.python.org/pypi
-[5]: https://github.com/pypa/pip
-[6]: https://github.com/pyparsing/pyparsing
-[7]: https://en.wikipedia.org/wiki/Package_manager
-[8]: https://www.macports.org
-[9]: https://gitlab.com/graphviz/graphviz
-[10]: https://github.com/pydot/pydot/blob/master/LICENSE
-[11]: https://github.com/pydot/pydot
-[12]: https://en.wikipedia.org/w/index.php?title=DOT_(graph_description_language)&oldid=1003001464#Attributes
-[13]: https://github.com/pydot/pydot/issues/130
+        mount -t fdescfs null /dev/fd
