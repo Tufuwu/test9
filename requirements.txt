@@ -1,11 +1,5 @@
-sphinx>=1.4
-pandas>=0.17.1
-scipy>=0.12.1
-pytest
-jupyter_client
-ipykernel
-nbsphinx
-sphinx-argparse
-sphinxcontrib-napoleon
-sphinx-rtd-theme
-autodoc
+numpy>=1.13.3
+scipy>=0.19.1
+scikit-image>=0.13.0
+lightgbm>=2.0.11
+sentinelhub>=3.4.2

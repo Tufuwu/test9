@@ -1,101 +1,54 @@
-# IsoCor - **Iso**tope **Cor**rection for mass spectrometry labeling experiments
+[![Package version](https://badge.fury.io/py/s2cloudless.svg)](https://pypi.org/project/s2cloudless)
+[![Conda version](https://img.shields.io/conda/vn/conda-forge/s2cloudless.svg)](https://anaconda.org/conda-forge/s2cloudless)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/s2cloudless.svg?style=flat-square)](https://pypi.org/project/s2cloudless)
+[![Build Status](https://github.com/sentinel-hub/sentinel2-cloud-detector/actions/workflows/ci_action.yml/badge.svg?branch=master)](https://github.com/sentinel-hub/sentinel2-cloud-detector/actions)
+[![Overall downloads](https://pepy.tech/badge/s2cloudless)](https://pepy.tech/project/s2cloudless)
+[![Last month downloads](https://pepy.tech/badge/s2cloudless/month)](https://pepy.tech/project/s2cloudless)
+[![Code coverage](https://codecov.io/gh/sentinel-hub/sentinel2-cloud-detector/branch/master/graph/badge.svg)](https://codecov.io/gh/sentinel-hub/sentinel2-cloud-detector)
 
-[![PyPI version](https://badge.fury.io/py/IsoCor.svg)](https://badge.fury.io/py/IsoCor)
-[![PyPI pyversions](https://img.shields.io/pypi/pyversions/isocor.svg)](https://pypi.python.org/pypi/isocor/)
-[![Build Status](https://travis-ci.com/MetaSys-LISBP/IsoCor.svg?branch=master)](https://travis-ci.com/MetaSys-LISBP/IsoCor)
-[![Documentation Status](https://readthedocs.org/projects/isocor/badge/?version=latest)](http://isocor.readthedocs.io/?badge=latest)
+# Sentinel Hub's cloud detector for Sentinel-2 imagery
 
-[![IsoCor graphical user interface](https://raw.githubusercontent.com/MetaSys-LISBP/IsoCor/master/doc/_static/isocor_GUI.png)](https://isocor.readthedocs.io/en/latest/)
+**NOTE: s2cloudless masks are now available as a precomputed layer within Sentinel Hub. Check the [announcement blog post](https://medium.com/sentinel-hub/cloud-masks-at-your-service-6e5b2cb2ce8a) and [technical documentation](https://docs.sentinel-hub.com/api/latest/#/API/data_access?id=cloud-masks-and-cloud-probabilities).**
 
+The **s2cloudless** Python package provides automated cloud detection in
+Sentinel-2 imagery. The classification is based on a *single-scene pixel-based cloud detector*
+developed by Sentinel Hub's research team and is described in more detail
+[in this blog](https://medium.com/sentinel-hub/improving-cloud-detection-with-machine-learning-c09dc5d7cf13).
 
-## What is IsoCor?
-**IsoCor is a scientific software dedicated to the correction of mass spectrometry (MS) data for naturally
-occuring isotopes**.
-IsoCor corrects raw MS data (mass fractions) for
-naturally-occurring isotopes of all elements and purity of the
-isotopic tracer.
-The output of IsoCor is the isotopologue distribution of the molecule
-(i.e. the relative fractions of molecular entities differing only in the number
-of isotopic substitutions of the tracer). IsoCor also calculates
-the mean enrichment (i.e. the mean isotopic content in the molecule) in metabolites.
+## Installation
 
-It is one of the routine tools that we use at the [MetaSys team](http://www.lisbp.fr/en/research/molecular-physiology-and-metabolism/metasys.html) and [MetaToul platform](http://www.metatoul.fr) in isotopic studies of metabolic systems.
+The package requires a Python version >= 3.7. The package is available on
+the PyPI package manager and can be installed with
 
-The code is open-source, and available under a GPLv3 license. Additional information can be found in [IsoCor publication](https://doi.org/10.1093/bioinformatics/btz209).
-
-Detailed documentation can be found online at Read the Docs ([https://isocor.readthedocs.io/](https://isocor.readthedocs.io/)).
-Check out the [Tutorials](https://isocor.readthedocs.io/en/latest/tutorials.html) to use the best correction option!
-
-## Key features
-* **correction of naturally occuring isotopes**, both for non-tracer and tracer elements,
-* **correction of tracer purity**,
-* shipped as a library with both a **graphical and command line interface**,
-* mass-spectrometer and resolution agnostic,
-* can be applied to singly- and multiply-charged ions
-* can be used with any tracer element (having two or more isotopes)
-* account for the contribution of derivatization steps (if any),
-* generate isotopic InChIs of the tracer isotopologues,
-* open-source, free and easy to install everywhere where Python 3 and pip run,
-* biologist-friendly.
-
-## Quick-start
-IsoCor requires Python 3.5 or higher and run on all plate-forms.
-Please check [the documentation](https://isocor.readthedocs.io/en/latest/quickstart.html) for complete
-installation and usage instructions.
-
-Use `pip` to **install IsoCor from PyPi**:
-
-```bash
-$ pip install isocor
+```
+$ pip install s2cloudless
 ```
 
-Then, start the graphical interface with:
-
-```bash
-$ isocor
+To install the package manually, clone the repository and
+```
+$ pip install .
 ```
 
-IsoCor is also available directly from command-line and as a Python library.
+One of `s2cloudless` dependencies is `lightgbm` package. If having problems during installation, please
+check the [LightGBM installation guide](https://lightgbm.readthedocs.io/en/latest/Installation-Guide.html).
 
-## Bug and feature requests
-If you have an idea on how we could improve IsoCor please submit a new *issue*
-to [our GitHub issue tracker](https://github.com/MetaSys-LISBP/IsoCor/issues).
+Before installing `s2cloudless` on **Windows**, it is recommended to install package `shapely` from
+[Unofficial Windows wheels repository](https://www.lfd.uci.edu/~gohlke/pythonlibs/)
 
+## Input: Sentinel-2 scenes
 
-## Developers guide
-### Contributions
-Contributions are very welcome! :heart:
+The inputs to the cloud detector are Sentinel-2 images. In particular, the cloud detector requires the following 10 Sentinel-2 band reflectances: B01, B02, B04, B05, B08, B8A, B09, B10, B11, B12, which are obtained from raw reflectance values in the following way: `B_i/10000`. From product baseline `04.00` onward additional harmonization factors have to be applied to data according to [instructions from ESA](https://sentinels.copernicus.eu/en/web/sentinel/-/copernicus-sentinel-2-major-products-upgrade-upcoming).
 
-Please work on your own fork,
-follow [PEP8](https://www.python.org/dev/peps/pep-0008/) style guide,
-and make sure you pass all the tests before a pull request.
+You don't need to worry about any of this, if you are using Sentinel-2 data obtained from [Sentinel Hub Process API](https://docs.sentinel-hub.com/api/latest/api/process/). By default, the data is already harmonized according to [documentation](https://docs.sentinel-hub.com/api/latest/data/sentinel-2-l1c/#harmonize-values). The API is supported in Python with [sentinelhub-py](https://github.com/sentinel-hub/sentinelhub-py) package and used within `s2cloudless.CloudMaskRequest` class.
 
-### Local install with pip
-In development mode, do a `pip install -e /path/to/IsoCor` to install
-locally the development version.
+## Examples
 
-### Unit tests
-Isotope correction is a complex task and we use unit tests to make sure
-that critical features are not compromised during development.
+A Jupyter notebook on how to use the cloud detector to produce cloud mask or cloud probability map
+can be found in the [examples folder](https://github.com/sentinel-hub/sentinel2-cloud-detector/tree/master/examples).
 
-You can run all tests by calling `pytest` in the shell at project's root directory.
+## License
 
-### Build the documentation locally
-Build the HTML documentation with:
-
-```bash
-$ cd doc
-$ make html
-```
-
-The PDF documentation can be built locally by replacing `html` by `latexpdf`
-in the command above. You will need a recent latex installation.
-
-## How to cite
-Millard P., Delépine B., Guionnet M., Heuillet M., Bellvert F. and Letisse F. IsoCor: isotope correction for high-resolution MS labeling experiments. Bioinformatics, 2019, [doi: 10.1093/bioinformatics/btz209](https://doi.org/10.1093/bioinformatics/btz209)
-
-## Authors
-Baudoin Delépine, Matthieu Guionnet, Pierre Millard
-
-## Contact
-:email: Pierre Millard, millard@insa-toulouse.fr
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
+<img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a>
+<br />
+This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
