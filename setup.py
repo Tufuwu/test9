@@ -1,87 +1,30 @@
-"""
-URL filter and manipulation tools
-http://github.com/adbar/courlan
-"""
-
-import re
-
-from pathlib import Path
-from setuptools import setup
+from setuptools import setup, find_packages
+import shutil
 
 
+if shutil.which("gramtools") is None:
+    raise RuntimeError("Please install gramtools. Cannot continue")
 
-def get_version(package):
-    "Return package version as listed in `__version__` in `init.py`"
-    # version = Path(package, '__init__.py').read_text() # Python >= 3.5
-    with open(str(Path(package, '__init__.py')), 'r', encoding='utf-8') as filehandle:
-        initfile = filehandle.read()
-    return re.search('__version__ = [\'"]([^\'"]+)[\'"]', initfile).group(1)
-
-
-def get_long_description():
-    "Return the README"
-    with open('README.rst', 'r', encoding='utf-8') as filehandle:
-        long_description = filehandle.read()
-    #long_description += "\n\n"
-    #with open("CHANGELOG.md", encoding="utf8") as f:
-    #    long_description += f.read()
-    return long_description
-
+with open("requirements.txt") as f:
+    install_requires = [x.rstrip() for x in f]
 
 setup(
-    name='courlan',
-    version=get_version('courlan'),
-    description='Clean, filter, normalize, and sample URLs',
-    long_description=get_long_description(),
+    name="bio-minos",
+    version="0.12.0",
+    description="Variant call adjudication",
+    packages=find_packages(),
+    author="Martin Hunt",
+    author_email="mhunt@ebi.ac.uk",
+    url="https://github.com/iqbal-lab-org/minos",
+    test_suite="nose.collector",
+    tests_require=["pytest"],
+    entry_points={"console_scripts": ["minos = minos.__main__:main"]},
+    install_requires=install_requires,
+    license="MIT",
     classifiers=[
-        # As from http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 4 - Beta',
-        #'Development Status :: 5 - Production/Stable',
-        #'Development Status :: 6 - Mature',
-        'Environment :: Console',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Education',
-        'Intended Audience :: Information Technology',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: Microsoft :: Windows',
-        'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Scientific/Engineering :: Information Analysis',
-        'Topic :: Text Processing :: Filters',
+        "Development Status :: 4 - Beta",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Programming Language :: Python :: 3 :: Only",
+        "License :: OSI Approved :: MIT License",
     ],
-    keywords=['urls', 'url-parsing', 'url-manipulation', 'preprocessing', 'validation', 'webcrawling'],
-    url='http://github.com/adbar/courlan',
-    author='Adrien Barbaresi',
-    author_email='barbaresi@bbaw.de',
-    license='GPLv3+',
-    packages=['courlan'],
-    project_urls={
-        "Source": "https://github.com/adbar/courlan",
-        "Coverage": "https://codecov.io/github/adbar/courlan",
-        "Tracker": "https://github.com/adbar/courlan/issues",
-    },
-    #package_data={},
-    include_package_data=True,
-    python_requires='>=3.5',
-    install_requires=[
-        'tldextract; python_version < "3.6"',
-        'tld; python_version >= "3.6"',
-        'urllib3>=1.25,<2',
-    ],
-    #extras_require=extras,
-    entry_points = {
-        'console_scripts': ['courlan=courlan.cli:main'],
-    },
-    # platforms='any',
-    tests_require=['pytest', 'tox'],
-    zip_safe=False,
 )
