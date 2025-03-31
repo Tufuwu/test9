@@ -1,14 +1,31 @@
-# global
+# python
 *.pyc
-*.pyo
-*~
-__pycache__
 
-# /
-/.coverage
-/.tox
-/build
-/coverage
+# setuptools
 /dist
-/distribute-*.egg
-/python_stdnum.egg-info
+/*.egg-info
+/share
+
+# virtualenv
+/venv
+/pip-selfcheck.json
+
+# Node
+node_modules
+package-lock.json
+
+# dev
+.idea/
+
+# tests
+/.coverage
+/htmlcov
+/media
+/.cache
+.pytest_cache
+
+# SQlite DBs
+*.sqlite3*
+
+# Local instance specific settings
+/tests/project/local.py

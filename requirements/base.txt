@@ -1,0 +1,19 @@
+bleach==3.3.0
+Django==2.2.24 # pyup: <2.3
+django-allauth==0.44.0
+django-autoslug==1.9.8
+django-background-tasks==1.2.5
+django-ckeditor==6.1.0
+django-enumfield==2.0.2
+django-filter==2.4.0
+django-multiselectfield==0.1.12
+django-widget-tweaks==1.4.8
+djangorestframework==3.12.4
+easy-thumbnails==2.7.1
+html5lib==1.1
+jsonfield==3.1.0
+psycopg2-binary==2.8.6
+python-dateutil==2.8.1
+python-magic==0.4.24
+rules==3.0
+XlsxWriter==1.4.3
