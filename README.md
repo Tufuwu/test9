@@ -1,98 +1,83 @@
-# JILL.py
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1206141.svg)](https://doi.org/10.5281/zenodo.1206141)
+[![Build Status](https://travis-ci.com/cherab/core.svg?branch=master)](https://travis-ci.com/cherab/core)
 
-[![py version](https://img.shields.io/pypi/pyversions/jill.svg?logo=python&logoColor=white)](https://pypi.org/project/jill)
-[![version](https://img.shields.io/pypi/v/jill.svg)](https://github.com/johnnychen94/jill.py/releases)
-[![Actions Status](https://github.com/johnnychen94/jill.py/workflows/Unit%20test/badge.svg
-)](https://github.com/johnnychen94/jill.py/actions)
-[![codecov](https://codecov.io/gh/johnnychen94/jill.py/branch/master/graph/badge.svg)](https://codecov.io/gh/johnnychen94/jill.py)
+Cherab
+======
 
-The Python fork of [JILL](https://github.com/abelsiqueira/jill) - Julia Installer 4 Linux (and MacOS) - Light
+Welcome to the Cherab project.
 
-## Features
+Please see our [documentation](https://cherab.github.io/documentation/index.html)
+for guidance on using the code.
 
-* download *latest* Julia release from *nearest* mirror server. Check [sources](jill/config/sources.json) for the list of all registered mirrors.
-* install julia for Linux and MacOS (including nightly build: `latest`)
-* easily set up a new release mirror 🚧
+Installation
+------------
 
-## Installation
+Cherab is a large code framework consisting of a core package and feature  
+packages. Users will generally install the core package and the specific  
+feature packages they need for their work. For example, users working on the  
+JET tokamak will require the ``cherab-core`` package, and the ``cherab-jet``  
+package.
 
-`pip install jill --user -U`
+Unless developing new code for a cherab package, most users should clone the 
+master branch. When developing new features for cherab, the development branch 
+should be used as the base.
 
-Note that `Python >= 3.6` is required.
+All cherab packages are standard python packages and basic installation is 
+achieved with:
 
-## Basic usage examples
+```
+python setup.py install
+```
 
-* download:
-    - latest stable release for current system: `jill download`
-    - latest `1.y` version: `jill download 1`
-    - latest `1.3.z` version: `jill download 1.3`
-    - from specific upstream: `jill download --upstream Official`
-    - specific release version: `jill download --version 1.3.0`
-    - specific system: `jill download --sys freebsd`
-    - specific architecture: `jill download --arch i686`
-    - download Julia to specific dir: `jill download --outdir another/dir`
-* install Julia for current system:
-    - system-wide: `sudo jill install` (make symlink in `/usr/bin`)
-    - only for current user: `jill install` (make symlink in `~/.local/bin`)
-    - don't need interactive promopt: `jill install --confirm`
-* check if there're new Julia versions:
-    - `jill update`
-    - add `--update` flag to `download` or `install` commands
-* find out all registered upstreams: `jill upstream`
-* check the not-so-elaborative documentation: `jill [COMMAND] -h` (e.g., `jill download -h`)
+This will compile the Cherab cython extensions and install the package. If you 
+don't have administrator access to install the package, add the ``--user`` flag 
+to the above line to install the package under your own user account.
 
-## Mirror 🚧
+When developing cherab it is usually preferred that the packages be installed 
+in "develop" mode:
 
-`jill mirror [outdir]` downloads all Julia releases into `outdir`(default `./julia_pkg`)
+```
+python setup.py develop
+```
 
-You can create a `mirror.json` in current folder to override the default mirror
-behaviors. The [mirror configuration example](mirror.example.json) shows all possible
-configurable items, where only `version` is required.
+This will cause the original installation folder to be added to the 
+site-package path. Modifications to the code will therefore be visible to 
+python next time the code is imported. The ``--user`` flag should be used if 
+you do not have administrative permission for your python installation.
 
-## Register new mirror
+As all the Cherab packages are dependent on the ``cherab-core`` package, this 
+package must be installed first. Note that other packages may have their own 
+inter-dependencies, see the specific package documentation for more 
+information.
 
-If it's an public mirror and you want to share it worldwide. You can add an entry to the
-[public registry](jill/config/sources.json), make a PR, then I will tag a new release for that.
+Governance
+----------
 
-If it's an internal mirror and you don't plan to make it public, you can create a config
-file at `~/.config/jill/sources.json` locally. The contents will be appended to
-the public registry and overwrite already existing items if there are.
+The management of the project is divided into Scientific and Technical Project 
+Management. The Scientific management happens through the normal community 
+routes such as JET and MST1 task force meetings, ITPA meetings, etc.
 
-In the registry config file, a new mirror is a dictionary in the `upstream` field:
+The Technical Management Committee (TMC) is a smaller subset of the community, 
+being responsible for ensuring the integrity and high code quality of Cherab is 
+maintained. These TMC members would have in-depth knowledge of the code base 
+through a demonstrated history of contributing to the project. The TMC would 
+primarily be responsible for accepting / rejecting merge requests on the basis 
+of code / physics algorithm quality standards.
 
-* `name`: a distinguishable mirror name
-* `urls`: URL template to retrive Julia release
-* `latest_urls`: URL template to retrive the nightly build of Julia release
 
-## Placeholders
+TMC Members
+-----------
 
-Placeholders are used to register new mirrors. For example, the stable release url of
-the "Official" release server owned by [JuliaComputing](https://juliacomputing.com) is
-`"https://julialang2.s3.amazonaws.com/bin/$sys/$arch/$minor_version/$filename"`
+- Alys Brett (chairwoman, master account holder, responsible for delegation, UKAEA, UK)
+- Matt Carr (External consultant, diagnostic physics models)
+- Jack Lovell (Oak Ridge, USA)
+- Alex Meakins (External consultant, Architecture, software integrity)
+- Vlad Neverov (NRC Kurchatov Institute, Moscow)
+- Matej Tomes (Compass, IPP, Prague)
 
-There're several predefined placeholders for various systems and architectures:
 
-* `system`: `windows`, `macos`, `linux`, `freebsd`
-* `sys`: `winnt`, `mac`, `linux`, `freebsd`
-* `os`: `win`, `mac`, `linux`, `freebsd`
-* `architecture`: `x86_64`, `i686`, `ARMv7`, `ARMv8`
-* `arch`: `x86`, `x64`, `armv7l`, `aarch64`
-* `osarch`: `win32`, `win64`, `mac64`, `linux-armv7l`, `linux-aarch64`
-* `osbit`: `win32`, `win64`, `linux32`, `linux64`, `linuxaarch64`
-* `bit`: `32`, `64`
-* `extension`: `exe`, `tar.gz`, `dmg` (no leading `.`)
-
-There're also placeholders for versions:
-
-* `patch_version`: `1.2.3`, `latest`
-* `minor_version`: `1.2`, `latest`
-* `major_version`: `1`
-* `version`: `v1.2.3-pre`, `latest`
-* `vpatch_version`: `v1.2.3`, `latest`
-* `vminor_version`: `v1.2`, `latest`
-* `vmajor_version`: `v1`, `latest`
-
-To keep consistent names with official releases, you can use predefined name placeholders:
-
-* stable release `filename`: `julia-$patch_version-$osarch.$extension`
-* nightly release `latest_filename`: `"julia-latest-$osbit.$extension"`
+Citing The Code
+---------------
+* Dr Carine Giroud, Dr Alex Meakins, Dr Matthew Carr, Dr Alfonso Baciero, & 
+Mr Corentin Bertrand. (2018, March 23). Cherab Spectroscopy Modelling Framework 
+(Version v0.1.0). Zenodo. http://doi.org/10.5281/zenodo.1206142

@@ -1,4 +1,5 @@
-wget
-requests
-fire
-semantic_version
+cython>=0.28
+numpy>=1.14
+scipy
+matplotlib
+raysect==0.7

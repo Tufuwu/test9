@@ -1,55 +1,36 @@
-name: Unit test
+name: CI
 
 on:
   push:
-    branches:
-      - main
   pull_request:
 
 jobs:
-  unit_test:
+  tests:
+    name: Run tests
     runs-on: ubuntu-latest
-
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        python: ["3.9", "3.10"]
-
+        numpy-version: ["1.15.0", "1.16.6", "1.19.2"]
+        python-version: ["3.9", "3.10"]
     steps:
-      - uses: actions/checkout@v1
-      - name: add symlink dir to PATH
-        run: echo "::add-path::$HOME/.local/bin"
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install coverage
-
-      - name: Test jill download and install
-        run: |
-          make test
-
-      - name: Test jill upstream
-        run: |
-          coverage run -a -m jill upstream
-
-      - name: Test jill update
-        run: |
-          coverage run -a -m jill update
-          coverage run -a -m jill update --upstream Official
-
-      - name: generate covrage report
-        run: |
-          coverage report
-          coverage xml
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Python dependencies
+      run: python -m pip install cython>=0.28 numpy==${{ matrix.numpy-version }} scipy matplotlib
+    - name: Install Raysect from pypi on main branch
+      if: github.ref == 'refs/heads/main'
+      run: pip install raysect
+    - name: Install Raysect from github
+      if: github.ref != 'refs/heads/main'
+      run: pip install git+https://github.com/raysect/source@development
+    - name: Build cherab
+      run: dev/build.sh
+    - name: Run tests
+      run: dev/test.sh
