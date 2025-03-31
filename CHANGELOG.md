@@ -1,99 +1,83 @@
-v2020.11.7
-----------
-- Use version 0.7.0 of `pypi-simple`
-- Drop support for Python 3.5
+v0.8.0 (in development)
+-----------------------
 - Support Python 3.9
-- Use version 1.7.0 of `wheel-inspect`
 
-v2020.6.22
-----------
-- Strip leading & trailing whitespace from search terms before searching
-- Use version 1.5.0 of `wheel-inspect`
-- Internal changes:
-    - Define an index on `WheelData.processed` in order to speed up the
-      "Recently-Analyzed Wheels" page
-    - Added a `has_wheels` column to `Project` in order to speed up some
-      queries
-    - Run Ansible deployment tasks under Python 3
+v0.7.0 (2020-10-15)
+-------------------
+- Drop support for Python 2.7, Python 3.4, and Python 3.5
+- `DistributionPackage.has_sig` is now `None` if the package repository does
+  not report this information
+- Added type annotations
+- Moved documentation from README file to a Read the Docs site
+- Added new methods to `PyPISimple`:
+    - `get_index_page()` — Returns an `IndexPage` instance with a `projects:
+      List[str]` attribute plus other attributes for repository metadata
+    - `get_project_page()` — Returns a `ProjectPage` instance with a `packages:
+      List[DistributionPackage]` attribute plus other attributes for repository
+      metadata
+    - `stream_project_names()` — Retrieves project names from a repository
+      using a streaming request
+- New utility functions:
+    - `parse_repo_links()` — Parses an HTML page and returns a pair of
+      repository metadata and a list of `Link` objects
+    - `parse_repo_project_page()` — Parses a project page and returns a
+      `ProjectPage` instance
+    - `parse_repo_project_response()` — Parses a `requests.Response` object
+      containing a project page and returns a `ProjectPage` instance
+    - `parse_links_stream()` — Parses an HTML page as stream of `bytes` or
+      `str` and returns a generator of `Link` objects
+    - `parse_links_stream_response()` — Parses a streaming `requests.Response`
+      object containing an HTML page and returns a generator of `Link` objects
+    - `parse_repo_index_page()` — Parses a simple repository index/root page
+      and returns an `IndexPage` instance
+    - `parse_repo_index_response()` — Parses a `requests.Response` object
+      containing an index page and returns an `IndexPage` instance
+- The following functions & methods are now deprecated and will be removed in a
+  future version:
+    - `PyPISimple.get_projects()`
+    - `PyPISimple.get_project_files()`
+    - `parse_simple_index()`
+    - `parse_project_page()`
+    - `parse_links()`
+- Support Warehouse's ``X-PyPI-Last-Serial`` header by attaching the value to
+  the objects returned by `get_index_page()` and `get_project_page()`
+- Support PEP 629 by attaching the repository version to the objects returned
+  by `get_index_page()` and `get_project_page()` and by raising an
+  `UnsupportedRepoVersionError` when a repository with an unsupported version
+  is encountered
 
-v2020.3.29
-----------
-- Added a page listing the most depended-on projects
-- Added a description for the `flake8_import_order.styles` entry point group
-- Lower the logging level of most messages from `purge-old-versions`
-- File search results are now displayed as 50 wheels per page, each with up to
-  5 files listed under them
-- Internal changes:
-    - Added a `source_project_id` column to `dependency_tbl`, changing it to an
-      association object, in order to speed up the query behind the "most
-      depended-on projects" page
-- Deployment changes:
-    - Updated `ssl_protocols` setting in Nginx
-    - Log slow database queries
-
-v2020.3.18
-----------
-- Added a description of the wheel data schema to the JSON API page
-- Internal changes:
-    - Replace the uses of `pkg_resources` with `importlib-metadata` and
-      `importlib-resources`
-- Deployment changes:
-    - Increase wheel processing size limit to 5 MiB
-
-v2020.2.14
-----------
-- Properly sort `py_version_nodot` strings containing underscores (e.g.,
-  `3_10`)
-- Use version 1.4.0 of `wheel-inspect`
-- Internal changes:
-    - Trim whitespace from keywords and delete empty keywords in database
-
-v2019.11.14
------------
-- Prevent line-breaking on hyphens in timestamps
-- Internal changes:
-    - Record the `wheel-inspect` version whenever a wheel processing error
-      occurs
-    - Greatly speed up `purge_old_versions()`
-
-v2019.10.30
------------
-- Highlight alternate rows of RECORD tables
-- Internal changes:
-    - Added a uniqueness constraint to the keywords table
-    - Convert `wheels.uploaded` to a timestamp type
-    - Use the JSON API's new `"upload_time_iso_8601"` field instead of
-      `"upload_time"`
+v0.6.0 (2020-03-01)
+-------------------
 - Support Python 3.8
+- `DistributionPackage.sig_url` is now always non-`None`, as Warehouse does not
+  report proper values for `has_sig`
 
-v2019.5.9
----------
-- Use version 1.3.0 of `wheel-inspect`
+v0.5.0 (2019-05-12)
+-------------------
+- The `PyPISimple` constructor now takes an optional `session` argument which
+  can be used to specify a `requests.Session` object with more complicated
+  configuration than just authentication
+- Support for PEP 592; `DistributionPackage` now has a `yanked` attribute
 
-v2019.4.21
-----------
-- Fix a typo in the "Down for Maintenance" message
-- Fix a bug in handling of "orphan" wheels
+v0.4.0 (2018-09-06)
+-------------------
+- Publicly (i.e., in the README) document the utility functions
+- Gave `PyPISimple` an `auth` parameter for specifying login/authentication
+  details
 
-v2019.4.20
-----------
-- Use version 1.2.0 of `wheel-inspect`
-- Gave the scheduled commands provisions for logging statistics to files
+v0.3.0 (2018-09-03)
+-------------------
+- When fetching the list of files for a project, the project name is now used
+  to resolve ambiguous filenames.
+- The filename parser now requires all filenames to be all-ASCII (except for
+  wheels).
 
-v2018.11.14
------------
-- "Recently-Analyzed Wheels" page: Use `%z` instead of `%Z` for timestamp
-  timezones
-- Added descriptions for the `pygments.*` and `pytest11` entry point groups
-- Support listing entry point groups by entry point quantity
+v0.2.0 (2018-09-01)
+-------------------
+- The filename parser now rejects invalid project names, blatantly invalid
+  versions, and non-ASCII digits.
+- RPM packages are now recognized.
 
-v2018.10.28
------------
-- Show "[empty]" for empty dist-info files (other than
-  `zip-safe`/`not-zip-safe`)
-- Added a "Search Projects" box at the top of most pages
-- Use version 1.1.0 of `wheel-inspect`
-
-v2018.10.17
------------
-Initial public release
+v0.1.0 (2018-08-31)
+-------------------
+Initial release

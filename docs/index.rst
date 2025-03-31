@@ -1,30 +1,21 @@
-.. image:: http://www.repostatus.org/badges/latest/active.svg
-    :target: http://www.repostatus.org/#active
-    :alt: Project Status: Active — The project has reached a stable, usable
-          state and is being actively developed.
+.. module:: pypi_simple
 
-.. image:: https://github.com/jwodder/pypi-simple/workflows/Test/badge.svg?branch=master
-    :target: https://github.com/jwodder/pypi-simple/actions?workflow=Test
-    :alt: CI Status
-
-.. image:: https://codecov.io/gh/jwodder/pypi-simple/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/jwodder/pypi-simple
-
-.. image:: https://img.shields.io/pypi/pyversions/pypi-simple.svg
-    :target: https://pypi.org/project/pypi-simple/
-
-.. image:: https://img.shields.io/github/license/jwodder/pypi-simple.svg
-    :target: https://opensource.org/licenses/MIT
-    :alt: MIT License
-
-.. image:: https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg
-    :target: https://saythanks.io/to/jwodder
+=======================================================
+pypi-simple — PyPI Simple Repository API client library
+=======================================================
 
 `GitHub <https://github.com/jwodder/pypi-simple>`_
 | `PyPI <https://pypi.org/project/pypi-simple/>`_
 | `Documentation <https://pypi-simple.readthedocs.io>`_
 | `Issues <https://github.com/jwodder/pypi-simple/issues>`_
-| `Changelog <https://github.com/jwodder/pypi-simple/blob/master/CHANGELOG.md>`_
+| :doc:`Changelog <changelog>`
+
+.. toctree::
+    :hidden:
+
+    high-level-api
+    low-level-api
+    changelog
 
 ``pypi-simple`` is a client library for the Python Simple Repository API as
 specified in :pep:`503` and updated by :pep:`592` and :pep:`629`.  With it, you
@@ -33,9 +24,6 @@ can query `the Python Package Index (PyPI) <https://pypi.org>`_ and other `pip
 projects and lists of each project's available package files.  The library also
 allows you to query package files for their project version, package type, file
 digests, ``requires_python`` string, and PGP signature URL.
-
-See `the documentation <https://pypi-simple.readthedocs.io>`_ for more
-information.
 
 
 Installation
@@ -48,7 +36,7 @@ Installation
 
 
 Example
-=======
+========
 
 >>> from pypi_simple import PyPISimple
 >>> client = PyPISimple()
@@ -68,3 +56,9 @@ DistributionPackage(filename='requests-0.2.0.tar.gz', url='https://files.pythonh
 'sdist'
 >>> pkg.get_digests()
 {'sha256': '813202ace4d9301a3c00740c700e012fb9f3f8c73ddcfe02ab558a8df6f175fd'}
+
+
+Indices and tables
+==================
+* :ref:`genindex`
+* :ref:`search`
