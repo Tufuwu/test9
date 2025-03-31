@@ -2,6 +2,10 @@
 __pycache__/
 *.py[cod]
 
+venv/
+.vscode
+build/
+
 # C extensions
 *.so
 
@@ -13,6 +17,7 @@ develop-eggs/
 dist/
 downloads/
 eggs/
+.eggs/
 lib/
 lib64/
 parts/
@@ -27,7 +32,6 @@ var/
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
-MANIFEST
 
 # Installer logs
 pip-log.txt
@@ -37,9 +41,11 @@ pip-delete-this-directory.txt
 htmlcov/
 .tox/
 .coverage
+.coverage.*
 .cache
 nosetests.xml
 coverage.xml
+*,cover
 
 # Translations
 *.mo
@@ -48,24 +54,10 @@ coverage.xml
 # Django stuff:
 *.log
 
-# shell stuff
-#*.sh
-
 # Sphinx documentation
 docs/_build/
 
 # PyBuilder
-.idea/
-
-# ignore all .ipynb_checkpoints
-.ipynb_checkpoints
-
-# Visual Studio Code
-.vscode/
-
-# Ignore mypy cache
-.mypy_cache
-
-# Autotest artifacts
-autotest/bin
-autotest/temp
+target/
+db.sqlite3
+site/
