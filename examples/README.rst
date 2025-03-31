@@ -1,1 +1,0 @@
-Examples have been moved to http://github.com/rm-hull/luma.examples

@@ -1,0 +1,5 @@
+{% if "2.8." in settings.VERSION or "2.9." in settings.VERSION %}
+    {% include 'netbox_onboarding/onboardingtask_lt210.html' %}
+{% else %}
+    {% include 'netbox_onboarding/onboardingtask_ge210.html' %}
+{% endif %}
