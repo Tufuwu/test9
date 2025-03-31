@@ -1,50 +1,31 @@
-from itertools import chain
-from setuptools import setup, find_packages
-from orix import __name__, __version__, __author__, __author_email__, __description__
+import os
+import setuptools
 
-# Projects with optional features for building the documentation and running
-# tests. From setuptools:
-# https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-extras-optional-features-with-their-own-dependencies
-extra_feature_requirements = {
-    "doc": ["sphinx >= 3.0.2", "sphinx-rtd-theme >= 0.4.3"],
-    "tests": ["pytest >= 5.4", "pytest-cov >= 2.8.1", "coverage >= 5.0"],
-}
-extra_feature_requirements["dev"] = ["black >= 19.3b0", "pre-commit >= 1.16"] + list(
-    chain(*list(extra_feature_requirements.values()))
-)
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-setup(
-    name=__name__,
-    version=str(__version__),
-    license="GPLv3",
-    author=__author__,
-    author_email=__author_email__,
-    description=__description__,
-    long_description=open("README.rst").read(),
+
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+
+requirements = read("requirements.txt").split()
+
+setuptools.setup(
+    name="pagai",
+    version="0.1.0",
+    author="Arkhn",
+    author_email="contact@arkhn.org",
+    description="Pagai is a SQL database inspection tool implemented in Python.",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/arkhn/pagai/",
+    packages=setuptools.find_packages(),
+    install_requires=requirements,
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Natural Language :: English",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
-        "Topic :: Scientific/Engineering",
-        "Topic :: Scientific/Engineering :: Physics",
     ],
-    packages=find_packages(exclude=["orix/tests"]),
-    extras_require=extra_feature_requirements,
-    # fmt: off
-    install_requires=[
-        "diffpy.structure >= 3",
-        "h5py",
-        "matplotlib >= 3.3",
-        "numpy",
-        "scipy",
-        "tqdm",
-    ],
-    # fmt: on
-    package_data={"": ["LICENSE", "README.rst", "readthedocs.yml"], "orix": ["*.py"],},
+    python_requires=">=3.6",
 )

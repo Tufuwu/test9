@@ -1,3 +1,15 @@
+conf.custom.yml
+.env.dev.custom
+.vscode
+./models
+notebooks/
+notebooks/data/
+
+# config.yml
+
+.DS_Store
+.idea/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -8,7 +20,6 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -24,6 +35,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -54,6 +66,7 @@ coverage.xml
 # Django stuff:
 *.log
 local_settings.py
+db.sqlite3
 
 # Flask stuff:
 instance/
@@ -63,16 +76,13 @@ instance/
 .scrapy
 
 # Sphinx documentation
-doc/_build/
-doc/build/
-doc/source/_autosummary/
+docs/_build/
 
 # PyBuilder
 target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-*.ipynb
 
 # pyenv
 .python-version
@@ -83,13 +93,13 @@ celerybeat-schedule
 # SageMath parsed files
 *.sage.py
 
-# dotenv
-.env
-
-# virtualenv
+# Environments
 .venv
+env/
 venv/
 ENV/
+env.bak/
+venv.bak/
 
 # Spyder project settings
 .spyderproject
@@ -98,15 +108,8 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# PyCharm project settings
-.idea
-
 # mkdocs documentation
 /site
 
 # mypy
 .mypy_cache/
-
-# Visual Studio Code
-*.code-workspace
-.vscode
