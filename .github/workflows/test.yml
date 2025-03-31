@@ -1,22 +1,119 @@
-name: Tests
-on: [push]
+name: Continuous Integration
+
+env:
+  TERM: screen-256color
+
+on:
+  pull_request:
+    branches: ["main", "main"]
+    paths-ignore: ["docs/**"]
+
+  push:
+    branches: ["main", "main"]
+    paths-ignore: ["docs/**"]
+    tags:
+      - "v*"
+
 jobs:
-  runtests:
-    runs-on: ubuntu-latest
+
+  # Runs all steps on the VM
+  test:
+
+    runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
+        os: [ubuntu-latest, macos-10.15, windows-2019]
         python-version: ["3.9", "3.10"]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.ppython-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Run tests
-      run: |
-        python runtests.py
+
+      - name: Checkout Code Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox tox-gh-actions
+          pip install codecov
+
+      - name: "Run tox targets for Python ${{ matrix.python-version }} on ${{ matrix.os }}"
+        run: |
+          tox
+
+      - name: Upload Coverage to Codecov
+        uses: "codecov/codecov-action@v2"
+        with:
+          fail_ci_if_error: true
+
+  # Runs all steps on the VM
+  # Deploy to PyPI & create a GitHub Release when the test job succeeds, and only on pushes to tags.
+  deploy:
+
+    needs: test
+
+    if: needs.test.result == 'success' && startsWith( github.ref, 'refs/tags/v' )
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_dev.txt
+
+      - name: Build Package
+        run: |
+          invoke dist
+
+      - name: Publish 🐍 distribution 📦 to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+
+      - name: Publish 🐍 distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          verbose: true
+
+      - name: Get the version
+        id: get_version
+        run: |
+          echo "${{ github.ref }}"
+          echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+      - name: Generate Release Title
+        id: get_release_title
+        shell: bash
+        run: |
+          export TODAY="($(TZ=Africa/Lusaka date --iso))"
+          echo ::set-output name=RELEASE_NAME::"${{ steps.get_version.outputs.VERSION }} $TODAY"
+
+      - name: Extract Release Notes
+        # This creates a file LATEST_RELEASE_NOTES.md in the parent directory (../)
+        run: |
+          invoke get-release-notes
+
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ steps.get_release_title.outputs.RELEASE_NAME }}
+          body_path: ../LATEST_RELEASE_NOTES.md
+          files: dist/*
