@@ -1,6 +1,0 @@
-<snippet>
-	<content><![CDATA[container_type]]></content>
-	<tabTrigger>container_type</tabTrigger>
-	<scope>source.python</scope>
-	<description>Returns ContainerTyper</description>
-</snippet>

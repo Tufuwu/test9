@@ -1,8 +1,0 @@
-<snippet>
-    <content><![CDATA[
-dispense_full_plate(ref=${1:Container ref}, reagent="${2:Str reagent}", volume="${3:Str volume}")
-]]></content>
-    <tabTrigger>dispense_full_plate</tabTrigger>
-    <scope>source.python</scope>
-    <description>Dispense to every well</description>
-</snippet>

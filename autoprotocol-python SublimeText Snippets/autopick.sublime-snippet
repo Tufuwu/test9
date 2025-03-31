@@ -1,8 +1,0 @@
-<snippet>
-    <content><![CDATA[
-autopick(sources=${1:[Well sources]}, dests=${2:[Well dests]})
-]]></content>
-    <tabTrigger>autopick</tabTrigger>
-    <scope>source.python</scope>
-    <description>Pick colonies from agar</description>
-</snippet>

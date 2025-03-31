@@ -1,8 +1,0 @@
-<snippet>
-    <content><![CDATA[
-humanize()
-]]></content>
-    <tabTrigger>humanize</tabTrigger>
-    <scope>source.python</scope>
-    <description>Returns the string from a well</description>
-</snippet>

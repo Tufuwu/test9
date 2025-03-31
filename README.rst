@@ -1,135 +1,90 @@
-=============================
- Autoprotocol Python Library
-=============================
+Visions
+=======
 
-.. image:: https://img.shields.io/pypi/v/autoprotocol.svg?maxAge=86400
-   :target: https://pypi.python.org/pypi/autoprotocol
-   :alt: PyPI Version
+|JossPaper|
+|PyPiDownloadsBadge|
+|PyPiDownloadsMonthlyBadge|
+|PyPiVersionBadge|
+|PythonBadge|
+|BinderBadge|
 
-.. image:: https://github.com/autoprotocol/autoprotocol-python/workflows/CI/badge.svg?branch=master
-   :target: https://github.com/autoprotocol/autoprotocol-python/actions?query=workflow%3ACI+branch%3Amaster
-   :alt: Build Status
+..
 
-.. image:: https://codecov.io/gh/autoprotocol/autoprotocol-python/branch/master/graph/badge.svg
-   :target: https://codecov.io/gh/autoprotocol/autoprotocol-python
-   :alt: Code Coverage
+    *And these visions of data types, they kept us up past the dawn.*
 
-.. image:: https://img.shields.io/pypi/dm/autoprotocol?logo=pypi
-   :target: https://autoprotocol-python.readthedocs.io
-   :alt: PyPI - Downloads
+..
 
-.. image:: https://badges.gitter.im/autoprotocol/autoprotocol-python.svg
-   :target: https://gitter.im/autoprotocol/autoprotocol-python?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-   :alt: Gitter Chat
+``Visions`` provides an extensible suite of tools to support common data analysis operations including
+
+* type inference on unknown data
+* casting data types
+* automated data summarization
 
 
-Autoprotocol_ is the standard way to express experiments in life science. This repository contains a python library for generating Autoprotocol.
 
-Installation
-------------
+.. image:: https://github.com/dylan-profiler/visions/raw/develop/docsrc/source/_static/side-by-side.png
 
-To work from the latest stable release:
 
-.. code-block:: bash
-
-    pip install autoprotocol
-
-check the the releases_ for more information about the changes that will be downloaded.
-
-Alternatively to get more up-to-date features:
-
-.. code-block:: bash
-
-    git clone https://github.com/autoprotocol/autoprotocol-python
-    cd autoprotocol-python
-    python setup.py install
-
-check the changelog_ for information about features included on `master` but not yet released.
-
-Building a Protocol
--------------------
-
-A basic protocol is written by declaring :code:`Protocol.ref` objects and acting on them with :code:`Protocol.instruction` methods.
-
-.. code-block:: python
-
-    import json
-    from autoprotocol.protocol import Protocol
-
-    # instantiate a protocol object
-    p = Protocol()
-
-    # generate a ref
-    # specify where it comes from and how it should be handled when the Protocol is done
-    plate = p.ref("test pcr plate", id=None, cont_type="96-pcr", discard=True)
-
-    # generate seal and spin instructions that act on the ref
-    # some parameters are explicitly specified and others are left to vendor defaults
-    p.seal(
-        ref=plate,
-        type="foil",
-        mode="thermal",
-        temperature="165:celsius",
-        duration="1.5:seconds"
-    )
-    p.spin(
-        ref=plate,
-        acceleration="1000:g",
-        duration="1:minute"
-    )
-
-    # serialize the protocol as Autoprotocol JSON
-    print(json.dumps(p.as_dict(), indent=2))
-
-which prints
-
-.. code-block:: json
-
-    {
-      "instructions": [
-        {
-          "op": "seal",
-          "object": "test pcr plate",
-          "type": "foil",
-          "mode": "thermal",
-          "mode_params": {
-            "temperature": "165:celsius",
-            "duration": "1.5:second"
-          }
-        },
-        {
-          "op": "spin",
-          "object": "test pcr plate",
-          "acceleration": "1000:g",
-          "duration": "1:minute"
-        }
-      ],
-      "refs": {
-        "test pcr plate": {
-          "new": "96-pcr",
-          "discard": true
-        }
-      }
-    }
-
-Extras
-------
-
-Select SublimeText snippets are included with this repository.
-To use them copy the :code:`autoprotocol-python SublimeText Snippet` folder to your local Sublime :code:`/Packages/User` directory.
 
 Documentation
 -------------
 
-For more information, see the documentation_.
+Full documentation can be found `here <https://dylan-profiler.github.io/visions/>`_.
 
-Contributing
+Installation
 ------------
 
-For more information, see CONTRIBUTING_.
+You can install ``visions`` via pip:
 
-.. _Autoprotocol: http://www.autoprotocol.org
-.. _releases: http://github.com/autoprotocol/autoprotocol-python/releases
-.. _changelog: http://autoprotocol-python.readthedocs.io/en/latest/changelog.html
-.. _CONTRIBUTING: http://autoprotocol-python.readthedocs.io/en/latest/CONTRIBUTING.html
-.. _documentation: http://autoprotocol-python.readthedocs.org/en/latest/
+.. code-block:: console
+
+    pip install visions
+
+Alternatives and more details can be found in the `documentation <https://dylan-profiler.github.io/visions/visions/getting_started/installation.html>`_.
+
+Supported frameworks
+--------------------
+
+These frameworks are supported out-of-the-box in addition to native Python types:
+
+.. image:: https://github.com/dylan-profiler/visions/raw/develop/docsrc/source/_static/frameworks.png
+
+- Pandas (feature complete)
+- Numpy (boolean, complex, date time, float, integer, string, time deltas, string, objects)
+- Spark (boolean, categorical, date, date time, float, integer, numeric, object, string)
+- Python (string, float, integer, date time, time delta, boolean, categorical, object, complex - other datatypes are untested)
+
+Contributing and support
+------------------------
+Contributions to ``visions`` are welcome.
+For more information, please visit the `Community contributions page <https://dylan-profiler.github.io/visions/visions/contributing/contributing.html>`_.
+The `the Github issues tracker <https://github.com/dylan-profiler/visions/issues/new/choose>`_ is used for reporting bugs, feature requests and support questions.
+
+Acknowledgements
+----------------
+
+This package is part of the `dylan-profiler <https://github.com/dylan-profiler>`_ project.
+The package is core component of `pandas-profiling <https://github.com/pandas-profiling/pandas-profiling>`_.
+More information can be found `here <https://dylan-profiler.github.io/visions/visions/background/about.html>`__.
+This work was partially supported by `SIDN Fonds <https://www.sidnfonds.nl/projecten/dylan-data-analysis-leveraging-automatisation>`_.
+
+
+.. image:: https://github.com/dylan-profiler/visions/raw/master/SIDNfonds.png
+
+.. |BinderBadge| image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/gh/dylan-profiler/visions/master
+ 
+.. |JossPaper| image:: https://joss.theoj.org/papers/10.21105/joss.02145/status.svg
+    :target: https://doi.org/10.21105/joss.02145
+    
+.. |PythonBadge| image:: https://img.shields.io/pypi/pyversions/visions
+    :target: https://pypi.org/project/visions/
+    
+.. |PyPiDownloadsBadge| image:: https://pepy.tech/badge/visions
+    :target: https://pypi.org/project/visions/
+    
+.. |PyPiDownloadsMonthlyBadge| image:: https://pepy.tech/badge/visions/month
+    :target: https://pypi.org/project/visions/
+    
+.. |PyPiVersionBadge| image:: https://badge.fury.io/py/visions.svg
+    :target: https://pypi.org/project/visions/

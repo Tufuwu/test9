@@ -1,8 +1,0 @@
-<snippet>
-    <content><![CDATA[
-fluorescence(ref=${1:Container ref}, wells=${2:WellGroup wells}, excitation="${3:Str excitation}", emission="${4:Str emission}", dataref="${5:Str dataref}")
-]]></content>
-    <tabTrigger>fluorescence</tabTrigger>
-    <scope>source.python</scope>
-    <description>Read the fluoresence of well</description>
-</snippet>

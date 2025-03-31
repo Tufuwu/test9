@@ -1,8 +1,0 @@
-<snippet>
-    <content><![CDATA[
-robotize(well_ref="${1:Str well_ref}")
-]]></content>
-    <tabTrigger>robotize</tabTrigger>
-    <scope>source.python</scope>
-    <description>Returns int</description>
-</snippet>

@@ -1,6 +1,0 @@
-<snippet>
-    <content><![CDATA[as_dict()]]></content>
-    <tabTrigger>as_dict</tabTrigger>
-    <scope>source.python</scope>
-    <description>Returns protocol as dict</description>
-</snippet>

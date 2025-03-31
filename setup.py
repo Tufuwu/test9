@@ -1,77 +1,70 @@
-#!/usr/bin/env python3
-import sys
+from pathlib import Path
 
-from setuptools import setup
-from setuptools.command.test import test as TestCommand
+from setuptools import find_packages, setup
 
-# Load version
-exec(open("autoprotocol/version.py").read())  # pylint: disable=exec-used
+# Read the contents of README file
+source_root = Path(".")
+with (source_root / "README.rst").open(encoding="utf-8") as f:
+    long_description = f.read()
 
-# Test Runner (reference: https://docs.pytest.org/en/latest/goodpractices.html)
-class PyTest(TestCommand):
-    user_options = [("pytest-args=", "a", "Arguments to pass to pytest")]
+# Read the requirements
+with (source_root / "requirements.txt").open(encoding="utf8") as f:
+    requirements = f.readlines()
 
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.pytest_args = "--cov=autoprotocol --cov-report=term"  # pylint: disable=attribute-defined-outside-init
+with (source_root / "requirements_dev.txt").open(encoding="utf8") as f:
+    dev_requirements = f.readlines()
 
-    def run_tests(self):
-        import shlex
+with (source_root / "requirements_test.txt").open(encoding="utf8") as f:
+    test_requirements = f.readlines()
 
-        # import here, cause outside the eggs aren't loaded
-        import pytest
+type_geometry_requires = ["shapely"]
+type_image_path_requires = ["imagehash", "Pillow"]
 
-        errno = pytest.main(shlex.split(self.pytest_args))
-        sys.exit(errno)
+extras_requires = {
+    "type_geometry": type_geometry_requires,
+    "type_image_path": type_image_path_requires,
+    "plotting": ["pydot", "pygraphviz", "matplotlib"],
+    "dev": dev_requirements,
+    "test": test_requirements,
+}
 
-
-# Test and Documentation dependencies
-test_deps = [
-    "coverage>=4.5, <5",
-    "pre-commit>=2.4, <3",
-    "pylint==2.5.2",  # should be consistent with .pre-commit-config.yaml
-    "pytest>=5.4, <6",
-    "pytest-cov>=2, !=2.8.1",
-    "tox>=3.15, <4",
+extras_requires["all"] = requirements + [
+    dependency
+    for name, dependencies in extras_requires.items()
+    if name.startswith("type_") or name == "plotting"
+    for dependency in dependencies
 ]
 
-doc_deps = [
-    "releases>=1.6.3, <2",
-    "Sphinx>=2.4, <3",
-    "sphinx_rtd_theme>=0.4.3, <1",
-    "semantic-version==2.6.0",
-    "six>=1.15.0, <2",
-]
+__version__ = None
+with (source_root / "src/visions/version.py").open(encoding="utf8") as f:
+    exec(f.read())
 
 
 setup(
-    name="autoprotocol",
-    url="https://github.com/autoprotocol/autoprotocol-python",
-    maintainer="The Autoprotocol Development Team",
-    description="Python library for generating Autoprotocol",
-    long_description=open("README.rst").read(),
-    long_description_content_type="text/x-rst",
-    license="BSD",
-    maintainer_email="support@strateos.com",
-    version=__version__,  # pylint: disable=undefined-variable
-    install_requires=["Pint==0.9"],
+    name="visions",
+    version=__version__,
+    url="https://github.com/dylan-profiler/visions",
+    description="Visions",
+    license="BSD License",
+    author="Dylan Profiler",
+    author_email="visions@ictopzee.nl",
+    package_data={"vision": ["py.typed"]},
+    packages=find_packages("src"),
+    package_dir={"": "src"},
+    install_requires=requirements,
+    include_package_data=True,
+    extras_require=extras_requires,
+    tests_require=test_requirements,
     python_requires=">=3.6",
-    tests_require=test_deps,
-    extras_require={"docs": doc_deps, "test": test_deps},
-    cmdclass={"pytest": PyTest},
-    packages=["autoprotocol", "autoprotocol.liquid_handle"],
+    long_description=long_description,
+    long_description_content_type="text/x-rst",
+    zip_safe=False,
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
-        "Operating System :: MacOS :: MacOS X",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: Unix",
-        "Programming Language :: Python",
-        "Topic :: Scientific/Engineering",
-        "Topic :: Software Development",
+        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
 )
