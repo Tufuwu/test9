@@ -1,33 +1,17 @@
-# Coverage testing files.
-.coverage
-/htmlcov
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Environment configuration file.
-.env
+# VSCODE and Python linter specefic
+.vscode/**
 
-# Virtual environment files (pipenv may use this convention).
-.venv
+# conf file
+conf.toml
 
-# Docker deployment files.
-docker-compose.yml
+# Temp files
+temp.png
 
-# IDE configuration files.
-/.idea
-
-# Node development dependencies.
-/node_modules
-
-# Python files.
-*.pyc
-
-# App static file directories.
-/*/static
-
-# Django media root directory.
-/media
-
-# Pipfile.lock.
-# Committing this file makes it difficult to support multiple Python versions as
-# requirements can different between versions, but the Pipfile only supports
-# locking to one version.
-Pipfile.lock
+# Pyrogram
+*.session
