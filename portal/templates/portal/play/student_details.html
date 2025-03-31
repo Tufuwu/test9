@@ -1,0 +1,77 @@
+{% extends 'portal/base.html' %}
+{% load static %}
+{% load app_tags %}
+
+{% block studentButtons %}
+<div class="dropdown">
+    <a href="{% url 'student_details' %}" id="student_dashboard_button"
+       class="button--menu button--menu--secondary button--menu--enabled button--menu--student--active">My Games</a>
+    <div class="dropdown-content">
+        <a href="{% url 'levels' %}"><small>Rapid Router</small></a>
+        {% if not user|is_independent_student %}
+            <a href="{% url_for_aimmo_dashboard %}"><small>Kurono</small></a>
+        {% endif %}
+    </div>
+</div>
+{% if user|is_logged_in_as_school_user %}
+<div class="dropdown">
+    <a href="{% url 'scoreboard' %}" id="student_scoreboards_button"
+       class="button--menu button--menu--secondary button--menu--enabled">View Scoreboards</a>
+    <div class="dropdown-content">
+        <a href="{% url 'scoreboard' %}"><small>Rapid Router</small></a>
+    </div>
+</div>
+{% endif %}
+{% if not user.new_student.class_field %}
+<a href="{% url 'student_join_organisation' %}" id="student_join_school_button"
+   class="button--menu button--menu--secondary button--menu--enabled">Join a school</a>
+{% endif %}
+{% endblock studentButtons %}
+
+{% block subNav %}
+{{ block.super }}
+<section class="banner banner--teacher row">
+    <h1 class="banner__text--primary">Welcome, {{ user|make_into_username }}</h1>
+</section>
+{% endblock subNav %}
+
+{% block content %}
+<div id="play_dashboard_page" class="background">
+    {% if user.new_student.class_field %}
+    <div class="grid-games col-center col-sm-7">
+    {% else %}
+    <div class="grid-games col-center col-sm-4">
+    {% endif %}
+        <section>
+            <a href="{% url 'levels'%}"><img title="Rapid Router" alt="Rapid Router" src="{% static 'portal/img/RR_logo.png' %}"></a>
+            <h4>Anyone can code &mdash; you can, too!</h4>
+            <div class="background">
+                <a href="{% url 'levels' %}" class="button button--regular button--primary--navigation">Enter</a>
+            </div>
+        </section>
+        <p>Rapid Router guides you, and makes learning to code easy and great fun.
+            Using Blockly, you can advance through the levels to become an Ocado delivery hero.</p>
+        <div>
+            <p><a href="{% url 'play_rapid_router' %}">Learn more about Rapid Router</a></p>
+            {% if user|is_logged_in_as_school_user %}
+            <p><a href="{% url 'scoreboard' %}">View my score</a></p>
+            {% endif %}
+        </div>
+        {% if user.new_student.class_field %}
+            <section>
+                <a href="{% url_for_aimmo_dashboard %}"><img title="Kurono" alt="Kurono" src="{% static 'portal/img/kurono_logo.svg' %}"></a>
+                <h4>Take your coding to the next level!</h4>
+                <div class="background">
+                    <a href="{% url_for_aimmo_dashboard %}" class="button button--regular button--primary--navigation">Enter</a>
+                </div>
+            </section>
+            <p>It is the year 3000 and the museum is in big trouble!
+            The priceless artifacts are lost and scattered across timelines.
+            Your team&rsquo;s mission is to travel through time and bring them back into the museum.</p>
+            <div>
+                <p><a href="{% url 'play_aimmo' %}">Learn more about Kurono</a></p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

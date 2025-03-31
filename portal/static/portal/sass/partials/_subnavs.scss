@@ -1,0 +1,126 @@
+@import 'base';
+
+.sub-nav,
+.hijacked-warning {
+  @include _padding(0px, 20px, 0px, 20px);
+  align-items: center;
+  display: flex;
+  height: 80px;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  z-index: $nav-bar-level - 1;
+
+  .button--regular {
+    @include _margin(0px, 16px, 0px, 16px);
+  }
+
+  form {
+    padding: 0;
+
+    .button {
+      margin: 0;
+    }
+
+  }
+
+  p {
+    @include _padding(0px, 20px, 0px, 20px);
+    text-align: left;
+  }
+
+}
+
+.sub-nav--hidden {
+  display: none;
+}
+
+.sub-nav--fixed {
+  margin: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: $nav-bar-level + 1;
+}
+
+.sub-nav--warning {
+  background-color: $color-background-warning;
+
+  p,
+  a,
+  a:hover {
+    color: $color-text-primary;
+  }
+
+  .button--secondary--dark {
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: $color-background-tertiary;
+      color: $color-text-secondary;
+    }
+  }
+}
+
+.sub-nav--warning--fixed {
+  margin: 0;
+  position: fixed;
+  top: 80px;
+  width: 100%;
+  z-index: $nav-bar-level - 1;
+}
+
+.sub-nav--message--fixed {
+  margin: 0;
+  position: fixed;
+  top: 80px;
+  width: 100%;
+  z-index: $nav-bar-level - 1;
+}
+
+.sub-nav--filler {
+  padding-top: 160px;
+}
+
+.sub-nav--teacher {
+  background-color: $color-background-teach;
+
+  a:focus,
+  a:hover,
+  a:active {
+    background-color: $color-background-secondary;
+    color: $color-teacher-blue;
+  }
+}
+
+.sub-nav--student {
+  background-color: $color-background-play;
+
+  .button--secondary--background-light {
+    color: $color-background-play;
+  }
+}
+
+.success {
+  background-color: $color-background-tint-quaternary;
+  border-bottom: 1px solid $color-message-border;
+}
+
+.info {
+  background-color: $color-background-tint-primary;
+  border-bottom: 1px solid $color-message-border;
+}
+
+.hijacked-warning {
+  .close {
+    display: none;
+  }
+}
+
+@media (max-width: $mobile-max-width) {
+
+  .sub-nav--teacher,
+  .sub-nav--student {
+    display: none;
+  }
+}

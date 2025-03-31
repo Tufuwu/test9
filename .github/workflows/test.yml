@@ -1,59 +1,77 @@
-name: Tests
-
+name: CI/CD
 on:
-  pull_request:
   push:
     branches:
       - main
-  schedule:
-    - cron: '0 0 * * 0' # weekly
-
+  pull_request:
 jobs:
-  tests:
-    timeout-minutes: 30
+  test:
+    name: Run tests
+    if: ${{ github.event.pusher.email != 'action@github.com' }}
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:10
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    env:
+      LANG: C.UTF-8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9.7'
+          architecture: 'x64'
+      - name: Install pip requirements
+        run: |
+          pip install codecov
+          pip install pytest-cov
+          pip install pipenv
+          pipenv install --dev --system
+      - name: Collect static
+        run: python example_project/manage.py collectstatic --noinput --settings test_settings
+      - name: Run tests
+        run: pytest --cov=. --cov-report=xml
         env:
-          POSTGRES_PASSWORD: postgres
+          SELENIUM_WEBDRIVER: chrome-headless
+          SELENIUM_HEADLESS: True
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
 
+  publish-pypi-packages:
+    name: Publish PyPi Packages
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - uses: actions/setup-python@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Python 3.6.7
+        uses: actions/setup-python@v2
         with:
           python-version: 3.3.9
-
-#      uses: actions/cache@v4
-#        with:
-#          path: ~/.cache/pip
-#          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/dev.txt') }}
-#          restore-keys: |
-#            ${{ runner.os }}-pip-
-
-      - name: Test
-        env:
-          SALESFORCE_USERNAME: ${{ secrets.SALESFORCE_USERNAME }}
-          SALESFORCE_PWD: ${{ secrets.SALESFORCE_PWD }}
-          SALESFORCE_TOKEN: ${{ secrets.SALESFORCE_TOKEN }}
-          EVENTBRITE_API_KEY: ${{ secrets.EVENTBRITE_KEY }}
-          EVENTBRITE_API_SECRET: ${{ secrets.EVENTBRITE_SECRET }}
-          EVENTBRITE_API_PRIVATE_TOKEN: ${{ secrets.EVENTBRITE_TOKEN }}
-          EVENTBRITE_API_PUBLIC_TOKEN: ${{ secrets.EVENTBRITE_PUBLIC_TOKEN }}
-          SOCIAL_AUTH_OPENSTAX_KEY: ${{ secrets.SOCIAL_AUTH_KEY }}
-          SOCIAL_AUTH_OPENSTAX_SECRET: ${{ secrets.SOCIAL_AUTH_TOKEN }}
-          ACCESS_TOKEN_URL: ${{ secrets.ACCESS_TOKEN_URL }}
-          USERS_QUERY: ${{ secrets.USERS_QUERY }}
-          AUTHORIZATION_URL: ${{ secrets.AUTHORIZATION_URL }}
+      - name: Setup git user information
         run: |
-          pip install --upgrade pip wheel pip-tools
-          pip-sync requirements/dev.txt
-          python manage.py test --verbosity=2 --settings=openstax.settings.test
+          git config --global user.name "semantic-release (via Github Actions)"
+          git config --global user.email "semantic-release@github-actions"
+      - name: Release codeforlife-portal
+        uses: relekang/python-semantic-release@main
+        with:
+          github_token: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+          pypi_token: ${{ secrets.PYPI_TOKEN }}
+      - name: Build cfl-common package
+        run: |
+          pip install wheel
+          pushd cfl_common
+          python setup.py sdist bdist_wheel
+          popd
+      - name: Publish cfl-common package to PyPi
+        uses: pypa/gh-action-pypi-publish@main
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
+          packages_dir: cfl_common/dist/
+          skip_existing: true
+      - name: Notify Semaphore to deploy to staging
+        run: curl -d POST -v https://semaphoreci.com/api/v1/projects/${SEMAPHORE_PROJECT_ID}/main/build?auth_token=${SEMAPHORE_API_AUTH}
+        env:
+          SEMAPHORE_PROJECT_ID: ${{ secrets.SEMAPHORE_PROJECT_ID }}
+          SEMAPHORE_API_AUTH: ${{ secrets.SEMAPHORE_API_AUTH }}

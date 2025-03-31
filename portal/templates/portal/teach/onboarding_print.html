@@ -1,0 +1,123 @@
+{% extends 'portal/teach/base_registering.html' %}
+{% load staticfiles %}
+{% load app_tags %}
+
+{% block dashboard %}
+<a href="{% url 'dashboard' %}" class="button--menu button--menu--secondary button--menu--enabled button--menu--teacher--active">School / Club</a>
+{% endblock dashboard %}
+
+{% block css %}
+{{ block.super }}
+{% endblock css %}
+
+{% block scripts %}
+{{ block.super }}
+{% endblock scripts %}
+
+{% block pageID %}id="homeWrapper"{% endblock %}
+
+{% if not onboarding_done %}
+{% block createJoinSchoolStep %}
+<div class="onboarding-step onboarding-step--done">
+    <p><img title="Done" alt="Step done" src="{% static 'portal/img/step_done.png' %}">Create / Join school</p>
+</div>
+{% endblock createJoinSchoolStep %}
+{% block createClassStep %}
+<div class="onboarding-step onboarding-step--done">
+    <p><img title="Done" alt="Step done" src="{% static 'portal/img/step_done.png' %}">Create class</p>
+</div>
+{% endblock createClassStep %}
+{% block addStudentsStep %}
+<div class="onboarding-step onboarding-step--done">
+    <p><img title="Done" alt="Step done" src="{% static 'portal/img/step_done.png' %}">Add students</p>
+</div>
+{% endblock addStudentsStep %}
+{% block printStudentCardsStep %}
+<div class="onboarding-step onboarding-step--in-progress">
+    <p><img title="In progress" alt="Step in progress" src="{% static 'portal/img/step_in_progress.png' %}">Print student IDs</p>
+</div>
+{% endblock printStudentCardsStep %}
+
+{% endif %}
+
+{% block content %}
+{{ block.super }}
+
+<div id="onboarding_student_list_page"></div>
+
+<div id="sticky-warning" class="sub-nav sub-nav--warning">
+    <img title="Warning" alt="Warning sign" src="{% static 'portal/img/warning.png' %}">
+    <p><small><i>This is the only time you will be able to view this page. You can print PDF format <br>reminder cards that populate these details which can
+        be given to the students.</i></small></p>
+    <form target="_blank" method="post" action="{% url 'teacher_print_reminder_cards' class.access_code %}">
+        {% csrf_token %}
+        <input type="hidden" name="data" value="{{ query_data }}"/>
+        <div class="section">
+            <button class="button--regular button--primary--navigation" type="submit">Print reminder cards</button>
+            {% if onboarding_done %}
+            <a id="back_to_class_button" href="{% url 'view_class' class.access_code %}" class="button button--regular button--secondary button--secondary--dark">Back to class</a>
+            {% else %}
+            <a href="{% url 'onboarding-complete' %}" class="button button--regular button--secondary button--secondary--dark">Finish setup</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+{% if onboarding_done %}
+<div class="background background--quaternary">
+{% else %}
+<div class="background background--primary">
+{% endif %}
+    <div class="form col-sm-4 col-center">
+        <h4>{{ user.new_teacher.school.name }}</h4>
+        {% if passwords_reset %}
+        <h3>Students&rsquo; passwords reset for class {{ class.name }} ({{ class.access_code }})</h3>
+        <p>The following students have had their passwords reset:</p><br>
+        {% else %}
+        <h3>New students created in class: {{ class.name }} ({{ class.access_code }})</h3>
+        <p>The following students have been created for your class. When they log in for the first time, you may want students to change their
+            passwords to something more memorable. You will be able to reset these students&rsquo; passwords at any time.</p><br>
+        {% endif %}
+        <p>The Class Access Code for this class is: {{ class.access_code }}.</p>
+        <table id="student_table" class="header-primary data-quinary">
+            <tr>
+                <th><p>Name</p></th>
+                <th><p>Password</p></th>
+            </tr>
+            {% for name_token in name_tokens %}
+            <tr>
+                <td><p><small>{{ name_token.name }}</small></p></td>
+                <td><p><small>{{ name_token.password }}</small></p></td>
+            </tr>
+            {% endfor %}
+        </table>
+        <section>
+            <form target="_blank" method="post" action="{% url 'teacher_print_reminder_cards' class.access_code %}">
+                {% csrf_token %}
+                <input type="hidden" name="data" value="{{ query_data }}"/>
+                <div class="button-group">
+                    <button class="button--regular button--primary--navigation" type="submit">Print reminder cards</button>
+                    {% if onboarding_done %}
+                        <a href="{% url 'view_class' class.access_code %}" class="button button--regular button--secondary button--secondary--dark">Back to class</a>
+                    {% else %}
+                        <a href="{% url 'onboarding-complete' %}" class="button button--regular button--secondary button--secondary--dark">Finish setup</a>
+                    {% endif %}
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        if($(window).width() > 760) {
+            {% if not onboarding_done %}
+                toggleStickySubnav($('.banner').outerHeight());
+            {% else %}
+                toggleStickySubnav(0);
+            {% endif %}
+        }
+    });
+</script>
+
+{% endblock content %}
