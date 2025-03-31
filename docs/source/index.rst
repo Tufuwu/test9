@@ -1,27 +1,64 @@
-.. Pysmo documentation master file, created by
-   sphinx-quickstart on Mon Sep 10 22:39:42 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+================================
+circuits |version| Documentation
+================================
 
-Welcome to Pysmo's documentation!
-=================================
+
+:Release: |release|
+:Date: |today|
+
+
+About
+=====
+
+.. include:: ../../README.rst
+
+
+.. _documentation-index:
+
+
+Documentation
+=============
+
 
 .. toctree::
-   :maxdepth: 2
-   :numbered:
-   :caption: Contents:
+   :maxdepth: 1
 
-   intro
-   installation
-   sac
-   tools
-   contrib
-   developing
+   start/index
+   tutorials/index
+   man/index
+   web/index
+   api/index
+   dev/index
+   changes
+   roadmap
+   contributors
+   faq
+
+.. toctree::
+   :hidden:
+
+   glossary
+   examples/index
+
+.. ifconfig:: devel
+
+   .. toctree::
+      :hidden:
+
+      todo
+      readme
 
 
 Indices and tables
 ==================
 
-* :ref:`genindex`
+
+* :ref:`Index <genindex>`
 * :ref:`modindex`
 * :ref:`search`
+* :doc:`glossary`
+
+.. ifconfig:: devel
+
+   * :doc:`todo`
+   * :doc:`readme`
