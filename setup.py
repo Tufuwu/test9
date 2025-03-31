@@ -1,81 +1,25 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""
-A setuptools based setup module.
-
-See:
-https://packaging.python.org/en/latest/distributing.html
-"""
-
-import io
-from os import path
-
-try:
-    from pip.req import parse_requirements
-except ImportError:
-    # pip >= 10
-    from pip._internal.req import parse_requirements
-
 from setuptools import setup, find_packages
 
-
-def get_requirements(requirements_file):
-    """Use pip to parse requirements file."""
-    requirements = []
-    dependencies = []
-    if path.isfile(requirements_file):
-        for req in parse_requirements(requirements_file, session="hack"):
-            try:
-                # check markers, such as
-                #
-                #     rope_py3k    ; python_version >= '3.0'
-                #
-                if req.match_markers():
-                    requirements.append(str(req.req))
-                    if req.link:
-                        dependencies.append(str(req.link))
-            except AttributeError:
-                requirements.append(req.requirement)
-    return requirements, dependencies
-
-
-if __name__ == "__main__":
-    HERE = path.abspath(path.dirname(__file__))
-    INSTALL_REQUIRES, DEPENDENCY_LINKS = (
-        get_requirements(path.join(HERE, "requirements.txt")))
-
-    with io.open(path.join(HERE, "README.rst"), encoding="utf-8") as readme:
-        LONG_DESCRIPTION = readme.read()
-
-    setup(
-        name="modoboa-radicale",
-        description="The Radicale frontend of Modoboa",
-        long_description=LONG_DESCRIPTION,
-        license="MIT",
-        url="http://modoboa.org/",
-        author="Antoine Nguyen",
-        author_email="tonio@ngyn.org",
-        classifiers=[
-            "Development Status :: 5 - Production/Stable",
-            "Environment :: Web Environment",
-            "Framework :: Django :: 2.2",
-            "Intended Audience :: System Administrators",
-            "License :: OSI Approved :: MIT License",
-            "Operating System :: OS Independent",
-            "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.5",
-            "Programming Language :: Python :: 3.6",
-            "Programming Language :: Python :: 3.7",
-            "Topic :: Communications :: Email",
-            "Topic :: Internet :: WWW/HTTP",
-        ],
-        keywords="modoboa email radicale calendar caldav",
-        packages=find_packages(exclude=["docs", "test_project"]),
-        include_package_data=True,
-        zip_safe=False,
-        install_requires=INSTALL_REQUIRES,
-        dependency_links=DEPENDENCY_LINKS,
-        use_scm_version=True,
-        setup_requires=["setuptools_scm"],
-    )
+setup(
+    name='panoptescli',
+    version='1.1.3',
+    url='https://github.com/zooniverse/panoptes-cli',
+    author='Adam McMaster',
+    author_email='adam@zooniverse.org',
+    description=(
+        'A command-line client for Panoptes, the API behind the Zooniverse'
+    ),
+    packages=find_packages(),
+    include_package_data=True,
+    install_requires=[
+        'Click>=6.7,<7.1',
+        'PyYAML>=5.1,<5.5',
+        'panoptes-client>=1.3,<2.0',
+        'humanize>=0.5.1,<1.1',
+        'pathvalidate>=0.29.0,<0.30',
+    ],
+    entry_points='''
+        [console_scripts]
+        panoptes=panoptes_cli.scripts.panoptes:cli
+    ''',
+)
