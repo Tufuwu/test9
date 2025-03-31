@@ -1,9 +1,56 @@
-/.eggs
-/.tox
-/*.egg-info/
-*.pyc
-/build/
-/dist/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# generated file
-/emoji_fzf/emoji_fzf_emojilib.py
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.tox/
+.cache
+
+# Translations
+*.mo
+
+# IDEs
+/.idea
+/.geany
+/.mr.developer.cfg
+/.project
+/.pydevproject
+/.settings
+/.release
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# pyenv
+.python-version
