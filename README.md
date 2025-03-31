@@ -1,123 +1,107 @@
-# multicodec
+```
+                              __   _ __      _______  _____            __
+                             / /  (_) /____ / __/ _ \/ ___/__ ________/ /
+                            / /__/ / __/ -_)\ \/ // / /__/ _ `/ __/ _  /
+                           /____/_/\__/\__/___/____/\___/\_,_/_/  \_,_/
 
-[![](https://img.shields.io/badge/made%20by-Protocol%20Labs-blue.svg?style=flat-square)](http://ipn.io)
-[![](https://img.shields.io/badge/project-multiformats-blue.svg?style=flat-square)](https://github.com/multiformats/multiformats)
-[![](https://img.shields.io/badge/freenode-%23ipfs-blue.svg?style=flat-square)](https://webchat.freenode.net/?channels=%23ipfs)
-[![](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+                               Copyright 2017-2020 / EnjoyDigital
+                               Copyright 2017-2018 / LambdaConcept
 
-> Canonical table of of codecs used by various multiformats
+                            A small footprint and configurable SDCard
+                                    core powered by Migen & LiteX
+```
 
-## Table of Contents
+[![](https://github.com/enjoy-digital/litesdcard/workflows/ci/badge.svg)](https://github.com/enjoy-digital/litesdcard/actions) ![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)
 
-- [Motivation](#motivation)
-- [Description](#description)
-- [Examples](#examples)
-- [Multicodec table](#multicodec-table)
-  - [Adding new multicodecs to the table](#adding-new-multicodecs-to-the-table)
-- [Implementations](#implementations)
-- [Reserved Code Ranges](#reserved-code-ranges)
-- [FAQ](#faq)
-- [Contribute](#contribute)
-- [License](#license)
 
-## Motivation
+[> Intro
+--------
+LiteSDCard is a small footprint and configurable SDCard core.
 
-Multicodec is an agreed-upon codec table. It is designed for use in binary representations, such as keys or identifiers (i.e [CID](https://github.com/ipld/cid)).
+LiteSDCard is part of LiteX libraries whose aims are to lower entry level of
+complex FPGA cores by providing simple, elegant and efficient implementations
+of components used in today's SoC such as Ethernet, SATA, PCIe, SDRAM Controller...
 
-## Description
+Using Migen to describe the HDL allows the core to be highly and easily configurable.
 
-The code of a multicodec is usually encoded as unsigned varint as defined by [multiformats/unsigned-varint](https://github.com/multiformats/unsigned-varint). It is then used as a prefix to identify the data that follows.
+LiteSDCard can be used as LiteX library or can be integrated with your standard
+design flow by generating the verilog rtl that you will use as a standard core.
 
-## Examples
+[> Features
+-----------
+PHY:
+  - Generic PHY validated on Xilinx, Altera, Lattice FPGAs
 
-Multicodec is used in various [Multiformats](https://github.com/multiformats/multiformats). In [Multihash](https://github.com/multiformats/multihash) it is used to identify the hashes, in the machine-readable [Multiaddr](https://github.com/multiformats/multiaddr) to identify components such as IP addresses, domain names, identities, etc.
+Core:
+  - Command & Data CRC Inserters/Checkers
+  - Single and Multiple blocks write/read
+  - Errors detection and reporting
+  - Dynamically configurable clock speed
 
-## Multicodec table
+Frontend:
+  - Synthetizable BIST
+  - DMAs
 
-Find the canonical table of multicodecs at [table.csv](/table.csv). There's also a sortable [viewer](https://ipfs.io/ipfs/QmXec1jjwzxWJoNbxQF5KffL8q6hFXm9QwUGaa3wKGk6dT/#title=Multicodecs&src=https://raw.githubusercontent.com/multiformats/multicodec/master/table.csv).
+[> Performances
+---------------
+SD0: Good RAM 8GB (cheap SD Card)
+SD1: SanDisk Ultra 32GB
+SD2: SanDisk Extreme 128GB
 
-### Status
+W/R(MB/s) performance vs SD frequency:
 
-Each multicodec is marked with a status:
+| SDCard | 20MHz | 40MHz | 75MHz | 100MHz | 125MHz |
+|--------|-------|-------|-------|--------|--------|
+|   SD0  |  4/9  | 6/18  |  7/33 |   7/44 |  7/56  |
+|   SD1  |  6/9  | 9/18  | 12/33 |  14/44 | 15/56  |
+|   SD2  |  9/9  | 18/18 | 33/33 |  43/44 | 54/55  |
 
-* draft - this codec has been reserved but may be reassigned if it doesn't gain wide adoption.
-* permanent - this codec has been widely adopted and may not reassigned.
+[> Possible improvements
+------------------------
+- add standardized interfaces (AXI, Avalon-ST)
+- add vendor agnostic phy for low speeds
+- add support for Altera FPGAs.
+- add support for Lattice FPGAs.
+- add Linux drivers.
+- ... See below Support and consulting :)
 
-NOTE: Just because a codec is marked draft, don't assume that it can be re-assigned. Check to see if it ever gained wide adoption and, if so, mark it as permanent.
+If you want to support these features, please contact us.
 
-### Adding new multicodecs to the table
+[> Getting started
+------------------
+1. Install Python 3.6+ and FPGA vendor's development tools.
+2. Install LiteX and the cores by following the LiteX's wiki [installation guide](https://github.com/enjoy-digital/litex/wiki/Installation).
+3. You can find examples of integration of the core with LiteX in LiteX-Boards and in the examples directory.
 
-The process to add a new multicodec to the table is the following:
+[> License
+----------
+LiteSDCard is released under the very permissive two-clause BSD license. Under the
+terms of this license, you are authorized to use LiteSDCard for closed-source
+proprietary designs.
+Even though we do not require you to do so, those things are awesome, so please
+do them if possible:
+ - tell us that you are using LiteSDCard
+ - cite LiteSDCard in publications related to research it has helped
+ - send us feedback and suggestions for improvements
+ - send us bug reports when something goes wrong
+ - send us the modifications and improvements you have done to LiteSDCard.
 
-1. Fork this repo
-2. Add your codecs to the table. Each newly proposed codec must have:
-  1. A unique codec.
-  2. A unique name.
-  3. A category.
-  4. A status of "draft".
-3. Submit a Pull Request
+[> Support and consulting
+-------------------------
+We love open-source hardware and like sharing our designs with others.
 
-This ["first come, first assign"](https://github.com/multiformats/multicodec/pull/16#issuecomment-260146609) policy is a way to assign codes as they are most needed, without increasing the size of the table (and therefore the size of the multicodecs) too rapidly.
+LiteSDCard is developed and maintained by EnjoyDigital & LambdaConcept.
 
-The first 127 bits are encoded as a single-byte varint, hence they are reserved for the most widely used multicodecs. So if you are adding your own codec to the table, you most likely would want to ask for a codec bigger than `0x80`.
+If you would like to know more about LiteSDCard or if you are already a happy user
+and would like to extend it for your needs, EnjoyDigital can provide standard
+commercial support as well as consulting services.
 
-Codec names should be easily convertible to constants in common programming languages using basic transformation rules (e.g. upper-case, conversion of `-` to `_`, etc.). Therefore they should contain alphanumeric characters, with the first character being alphabetic. The primary delimiter for multi-part names should be `-`, with `_` reserved for cases where a secondary delimiter is required. For example: `bls12_381-g1-pub` contains 3 parts: `bls_381`, `g1` and `pub`, where `bls_381` is "BLS 381" which is not commonly written as "BLS381" and therefore requires a secondary separator.
+So feel free to contact us, we'd love to work with you! (and eventually shorten
+the list of the possible improvements :)
 
-The `validate.py` script can be used to validate the table once it's edited.
-
-## Implementations
-
-- [go](https://github.com/multiformats/go-multicodec/)
-- [JavaScript](https://github.com/multiformats/js-multicodec)
-- [Python](https://github.com/multiformats/py-multicodec)
-- [Haskell](https://github.com/multiformats/haskell-multicodec)
-- [Elixir](https://github.com/nocursor/ex-multicodec)
-- [Scala](https://github.com/fluency03/scala-multicodec)
-- [Ruby](https://github.com/sleeplessbyte/ruby-multicodec)
-- [Add yours today!](https://github.com/multiformats/multicodec/edit/master/table.csv)
-
-## Reserved Code Ranges
-
-The following code ranges have special meaning and may only have meanings assigned to as specified in their description:
-
-### Private Use Area
-
-*Range*: `0x300000 – 0x3FFFFF`
-
-Codes in this range are reserved for internal use by applications and will never be assigned any meaning as part of the Multicodec specification.
-
-## FAQ
-
-> Why varints?
-
-So that we have no limitation on protocols.
-
-> What kind of varints?
-
-An Most Significant Bit unsigned varint, as defined by the [multiformats/unsigned-varint](https://github.com/multiformats/unsigned-varint).
-
-> Don't we have to agree on a table of protocols?
-
-Yes, but we already have to agree on what protocols themselves are, so this is not so hard. The table even leaves some room for custom protocol paths, or you can use your own tables. The standard table is only for common things.
-
-> Where did multibase go?
-
-For a period of time, the [multibase](https://github.com/multiformats/multibase) prefixes lived in this table. However, multibase prefixes are *symbols* that may map to *multiple* underlying byte representations (that may overlap with byte sequences used for other multicodecs). Including them in a table for binary/byte identifiers lead to more confusion than it solved.
-
-You can still find the table in [multibase.csv](https://github.com/multiformats/multibase/blob/master/multibase.csv).
-
-> Can I use multicodec for my own purpose?
-
-Sure, you can use multicodec whenever you have the need for self-identifiable data. Just prefix your own data with the corresponding varint encodec multicodec.
-
-## Contribute
-
-Contributions welcome. Please check out [the issues](https://github.com/multiformats/multicodec/issues).
-
-Check out our [contributing document](https://github.com/multiformats/multiformats/blob/master/contributing.md) for more information on how we work, and about contributing in general. Please be aware that all interactions related to multiformats are subject to the IPFS [Code of Conduct](https://github.com/ipfs/community/blob/master/code-of-conduct.md).
-
-Small note: If editing the README, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
-
-## License
-
-This repository is only for documents. All of these are licensed under the [CC-BY-SA 3.0](https://ipfs.io/ipfs/QmVreNvKsQmQZ83T86cWSjPu2vR3yZHGPm5jnxFuunEB9u) license © 2016 Protocol Labs Inc. Any code is under a [MIT](LICENSE) © 2016 Protocol Labs Inc.
+[> Contact
+----------
+E-mail:
+florent [AT] enjoy-digital.fr
+po [AT] lambdaconcept.com
+ramtin [AT] lambdaconcept.com
