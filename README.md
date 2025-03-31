@@ -1,156 +1,75 @@
-[![Build Status](https://github.com/red-hat-storage/cephci/workflows/tests/badge.svg)](https://github.com/red-hat-storage/cephci/actions)
-# Ceph-CI
-CEPH-CI is a framework tightly coupled with CentralCI and Red Hat Builds for
-testing Ceph downstream builds with CentralCI and Jenkins.
+<h1>
+    <a href="https://pyinfra.com">
+        <img src="https://raw.githubusercontent.com/Fizzadar/pyinfra/master/docs/static/logo_full.png" height="48px" />
+    </a>
+</h1>
 
-It uses a modified version of Mita to create/destroy Ceph resources dynamically
+[![PyPI version](https://img.shields.io/pypi/v/pyinfra?color=blue)](https://pypi.python.org/pypi/pyinfra)
+[![PyPi downloads](https://pepy.tech/badge/pyinfra)](https://pepy.tech/project/pyinfra)
+[![Docs status](https://img.shields.io/readthedocs/pyinfra)](https://docs.pyinfra.com)
+[![Travis.CI status](https://img.shields.io/travis/com/Fizzadar/pyinfra/master)](https://travis-ci.com/Fizzadar/pyinfra)
+[![Codecov Coverage](https://img.shields.io/codecov/c/gh/Fizzadar/pyinfra)](https://codecov.io/github/Fizzadar/pyinfra)
+[![MIT Licensed](https://img.shields.io/pypi/l/pyinfra)](https://github.com/Fizzadar/pyinfra/blob/develop/LICENSE.md)
 
-## Getting Started
-#### Prerequisites
-1. Python 3.6 or newer.
+pyinfra automates/provisions/manages/deploys infrastructure super fast at massive scale. It can be used for ad-hoc command execution, service deployment, configuration management and more. Core design features include:
 
-#### Installing
-It is recommended that you use a python virtual environment to install the necessary dependencies and execute cephci.
++ 🚀 **Super fast** execution over thousands of hosts with predictable performance.
++ 🚨 **Instant debugging** with stdout & stderr output on error or as required (`-v`|`-vv`|`-vvv`).
++ 📦 **Extendable** with _any_ Python package as configured & written in standard Python.
++ 💻 **Agentless execution** against SSH/Docker/subprocess/winrm hosts.
++ ❗️ **Two stage process** that enables `--dry` runs before executing any changes.
++ 🔌 **Integrated** with Docker, Vagrant/Mech & Ansible out of the box.
 
-1. Setup a Python 3 virtual environment.
-    * `python3 -m venv <path/to/venv>`
-    * `source <path/to/venv>/bin/activate`
-2. Install requirements with `pip install -r requirements.txt`
+When you run pyinfra you'll see something like ([non animated version](https://raw.githubusercontent.com/Fizzadar/pyinfra/master/docs/static/example_deploy.png)):
 
-#### Initial Setup
-Configure your cephci.yaml file:
+<img width="100%" src="https://raw.githubusercontent.com/Fizzadar/pyinfra/master/docs/static/example_deploy.gif" />
 
-This file is used to allow configuration around a number of things within cephci.
-The template can be found at the top level of the repository, `cephci.yaml.template`.
-The required keys are in the template. Values are placeholders and should be replaced by legitimate values.
-Values for report portal or polarion are only required if you plan on posting to that particular service.
+## Quickstart
 
-Move a copy of the template to your user directory and edit it from there with the proper values.
-```
-cp cephci.yaml.template ~/.cephci.yaml
-```
+pyinfra can be installed via pip:
 
-## Tests
-#### CentralCI Authentication
-CentralCI auth files are kept in the `osp` directory.
-
-The `osp-cred-ci-2.yaml` file has OpenStack credentials details to create/destroy resources.
-For local cephci runs, you will want to replace the username/password with
-your own OpenStack credentials.
-
-#### Cluster Configuration
-Cluster configuration files are kept in a directory under `conf` for each ceph version.
-For jewel, configs are under `conf/jewel`.
-For luminous, configs are under `conf/luminous`.
-For nautilus, configs are under `conf/nautilus`
-
-The conf files describes the test bed configuration.
-The image-name inside globals: define what image is used to clone ceph-nodes(
-mon, osd, mds etc), The role maps to ceph role that the node will take
-and osd generally attach 3 additional volumes with disk-size as specified in
-config.
-
-#### Inventory Files
-Inventory files are kept under `conf/inventory`,
-and are used to specify which operating system to be used for the cluster resources.
-
-#### Test Suites
-All test suite configurations are found inside the `suites` directory.
-
-There are various suites that are mapped to versions of Ceph under test
-
-```
-suites/jewel/ansible/sanity_ceph_ansible will be valid for 2.0 builds
-suites/luminous/ansible/sanity_ceph_ansible will be valid for 3.0 builds
-```
-The tests inside the suites are described in yaml format
-
-```
-tests:
-   - test:
-      name: ceph deploy
-      module: test_ceph_deploy.py
-      config:
-        base_url: 'http://download-node-02.eng.bos.redhat.com/rcm-guest/ceph-drops/auto/ceph-1.3-rhel-7-compose/RHCEPH-1.3-RHEL-7-20161010.t.0/'
-        installer_url: 
-      desc: test cluster setup using ceph-deploy
-      destroy-cluster: False
-      abort-on-fail: True
-      
-   - test:
-      name: rados workunit
-      module: test_workunit.py
-      config:
-            test_name: rados/test_python.sh
-            branch: hammer
-      desc: Test rados python api
-```
-The above snippet describes two tests and the module is the name of the python
-script that is executed to verify the test, every module can take a config
-dict that is passed to it from the run wrapper, The run wrapper executes
-the tests serially found in the suites. The test scripts are location in
-the `tests` folder.
-
-## Usage
-`run.py` is the main script for ceph-ci. You can view the full usage details by passing in the `--help` argument.
-```
-python run.py --help
-```
-#### Required Arguments
-There are a few arguments that are required for cephci execution:
-
-* `--rhbuild <build_version>`
-* `--osp-cred <cred_file>`
-* `--global-conf <conf_file>`
-* `--inventory <inventory_file>`
-* `--suite <suite_file>`
-
-#### Useful Arguments
-Some non-required arguments that we end up using a lot:
-* `--log level <level>` - set the log level that is output to stdout.
-
-#### Examples
-Ceph ansible install suite:
-```
-python run.py --rhbuild 3.3 --global-conf conf/luminous/ansible/sanity-ansible-lvm.yaml --osp-cred osp/osp-cred-ci-2.yaml
---inventory conf/inventory/rhel-7.8-server-x86_64.yaml --suite suites/luminous/ansible/sanity_ceph_ansible_lvm.yaml
---log-level info
-```
-Upgrade suite:
-```
-python run.py --rhbuild 3.2 --global-conf conf/luminous/upgrades/upgrade.yaml --osp-cred osp/osp-cred-ci-2.yaml
---inventory conf/inventory/rhel-7.8-server-x86_64-released.yaml --suite suites/luminous/upgrades/upgrades.yaml
---log-level info
-```
-Containerized upgrade suite:
-```
-python run.py --rhbuild 3.2 --global-conf conf/luminous/upgrades/upgrade.yaml --osp-cred osp/osp-cred-ci-2.yaml
---inventory conf/inventory/rhel-7.8-server-x86_64-released.yaml --suite suites/luminous/upgrades/upgrades_containerized.yaml
---log-level info --ignore-latest-container --insecure-registry --skip-version-compare
+```sh
+pip install pyinfra
 ```
 
-#### Manual cluster cleanup
-Ceph-CI also has the ability to manually clean up cluster nodes if anything was left behind during a test run.
-All you need to provide is your osp credentials and the instances name for the cluster. Don't use subset naming for custom instances name.eg: --instances-name vp and --instances-name vpoliset  at same time.
+Now you can execute commands & operations over SSH:
 
-For example, this command will delete all volumes and nodes that have the substring `ceph-kdreyer` in their names:
+```sh
+# Execute an arbitrary shell command
+pyinfra my-server.net exec -- echo "hello world"
+
+# Install iftop apt package if not present
+pyinfra my-server.net apt.packages iftop sudo=true update=true
 ```
-python run.py --osp-cred <cred_file> --log-level info --cleanup ceph-kdreyer
+
+These can then be saved to a _deploy file_, let's call it `deploy.py`:
+
+```py
+from pyinfra.operations import apt
+
+apt.packages(
+    name='Ensure iftop is installed',
+    packages=['iftop'],
+    sudo=True,
+    update=True,
+)
 ```
 
-## Results
-In order to post results properly or receive results emails you must first configure your `~/.cephci.yaml` file.
-Please see the [Initial Setup](#initial-setup) section of the readme if you haven't done that.
+And executed with:
 
-#### Polarion
-Results are posted to polarion if the `--post-results` argument is passed to `run.py`.
-When this argument is used, any tests that have a `polarion-id` configured in the suite
-will have it's result posted to polarion.
+```sh
+pyinfra my-server.net deploy.py
+```
 
-#### Report Portal
-Results are posted to report portal if the `--report-portal` argument is passed to `run.py`.
+or
 
-#### Email
-A result email is automatically sent to the address configured in your `~/.cephci.yaml` file.
-In addition to personally configured emails, if the `--post-results` or `--report-portal` arguments are
-passed to `run.py` an email will also be sent to `cephci@redhat.com`.
+```sh
+pyinfra @docker/ubuntu deploy.py
+```
+
+## [Documentation](https://docs.pyinfra.com)
+
++ [Getting started](https://docs.pyinfra.com/page/getting_started.html)
++ [Writing deploys](https://docs.pyinfra.com/page/deploys.html)
++ [Using the CLI](https://docs.pyinfra.com/page/cli.html)
++ [Connectors](https://pyinfra.readthedocs.io/page/connectors.html)

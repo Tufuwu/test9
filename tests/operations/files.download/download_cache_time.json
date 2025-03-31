@@ -1,0 +1,21 @@
+{
+    "args": ["http://myfile"],
+    "kwargs": {
+        "dest": "/home/myfile",
+        "cache_time": 3600
+    },
+    "facts": {
+        "date": "datetime:2015-01-01T00:00:00",
+        "file": {
+            "/home/myfile": {
+                "mtime": "datetime:2015-01-01T00:00:00"
+            }
+        },
+        "which": {
+            "curl": "yes"
+        }
+    },
+    "commands": [
+        "curl -sSLf http://myfile -o /home/myfile"
+    ]
+}

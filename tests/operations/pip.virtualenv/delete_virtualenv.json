@@ -1,0 +1,17 @@
+{
+    "kwargs": {
+        "path": "/some/virtualenv",
+        "present": false
+    },
+    "facts": {
+        "file": {
+            "/some/virtualenv/bin/activate": true
+        },
+        "directory": {
+            "/some/virtualenv": true
+        }
+    },
+    "commands": [
+        "rm -rf /some/virtualenv"
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "args": ["somemodule"],
+    "facts": {
+        "kernel_modules": {
+            "somemodule": {}
+        }
+    },
+    "commands": [],
+    "noop_description": "module somemodule is loaded"
+}

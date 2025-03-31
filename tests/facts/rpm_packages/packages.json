@@ -1,0 +1,9 @@
+{
+    "command": "rpm --queryformat \"%{NAME} %{VERSION}-%{RELEASE}\\n\" -qa",
+    "output": [
+        "pydash 3.48.0"
+    ],
+    "fact": {
+        "pydash": ["3.48.0"]
+    }
+}

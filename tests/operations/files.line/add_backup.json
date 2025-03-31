@@ -1,0 +1,16 @@
+{
+    "args": ["somefile", "match_line"],
+    "kwargs": {
+        "backup": true
+    },
+    "facts": {
+        "find_in_file": {
+            "somefile": {
+                "^.*match_line.*$": []
+            }
+        }
+    },
+    "commands": [
+        "cp somefile somefile.a-timestamp && echo 'match_line' >> somefile"
+    ]
+}

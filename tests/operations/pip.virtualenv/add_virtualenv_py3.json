@@ -1,0 +1,14 @@
+{
+    "kwargs": {
+        "path": "/some/virtualenv",
+        "python": "python3"
+    },
+    "facts": {
+        "file": {
+            "/some/virtualenv/bin/activate": null
+        }
+    },
+    "commands": [
+        "virtualenv -p python3 /some/virtualenv"
+    ]
+}

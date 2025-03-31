@@ -1,0 +1,15 @@
+{
+    "args": ["somefile.txt", "/home/some file.txt"],
+    "files": ["somefile.txt"],
+    "facts": {
+        "file": {
+            "/home/some\\ file.txt": null
+        },
+        "directory": {
+            "/home": true
+        }
+    },
+    "commands": [
+        ["upload", "/somefile.txt", "/home/some\\ file.txt"]
+    ]
+}

@@ -1,0 +1,16 @@
+{
+    "kwargs": {
+        "path": "/some/virtualenv",
+        "present": false
+    },
+    "facts": {
+        "file": {
+            "/some/virtualenv/bin/activate": null
+        },
+        "directory": {
+            "/some/virtualenv": null
+        }
+    },
+    "commands": [],
+    "noop_description": "virtualenv /some/virtualenv does not exist"
+}

@@ -1,0 +1,14 @@
+{
+    "args": ["somefile"],
+    "kwargs": {
+        "database": "somedb",
+        "postgresql_user": "root",
+        "postgresql_password": "somepass"
+    },
+    "commands": [
+        [
+            "PGPASSWORD=\"somepass\" psql -d somedb -U root < somefile",
+            "*** psql -d somedb -U root < somefile"
+        ]
+    ]
+}

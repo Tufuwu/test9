@@ -1,0 +1,20 @@
+{
+    "args": ["myrepo", "/home/myrepo"],
+    "kwargs": {
+        "rebase": true
+    },
+    "facts": {
+        "directory": {
+            "/home/myrepo": {},
+            "/home/myrepo/.git": {
+                "mode": 0
+            }
+        },
+        "git_branch": {
+            "/home/myrepo": "master"
+        }
+    },
+    "commands": [
+        "cd /home/myrepo && git pull --rebase"
+    ]
+}

@@ -1,0 +1,13 @@
+{
+    "args": ["somefile", "match_line"],
+    "facts": {
+        "find_in_file": {
+            "somefile": {
+                "^.*match_line.*$": []
+            }
+        }
+    },
+    "commands": [
+        "echo 'match_line' >> somefile"
+    ]
+}

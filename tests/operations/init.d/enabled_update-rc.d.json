@@ -1,0 +1,20 @@
+{
+    "args": ["nginx"],
+    "kwargs": {
+        "enabled": true
+    },
+    "facts": {
+        "initd_status": {
+            "nginx": true
+        },
+        "find_links": {
+            "/etc/rc*.d/S*nginx": []
+        },
+        "linux_distribution": {
+            "name": "Ubuntu"
+        }
+    },
+    "commands": [
+        "update-rc.d nginx defaults"
+    ]
+}

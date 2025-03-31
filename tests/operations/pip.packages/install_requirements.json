@@ -1,0 +1,9 @@
+{
+    "kwargs": {
+        "requirements": "requirements.pip"
+    },
+    "facts": {},
+    "commands": [
+        "pip install -r requirements.pip"
+    ]
+}

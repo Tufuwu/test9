@@ -1,0 +1,15 @@
+{
+    "args": ["someuser"],
+    "kwargs": {
+        "present": false,
+        "user_hostname": "localwhat"
+    },
+    "facts": {
+        "mysql_users": {
+            "someuser@localwhat": {}
+        }
+    },
+    "commands": [
+        "mysql -Be 'DROP USER \"someuser\"@\"localwhat\"'"
+    ]
+}

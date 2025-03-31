@@ -1,0 +1,9 @@
+{
+    "command": "sestatus",
+    "output": [
+        ""
+    ],
+    "fact": {
+        "mode": null
+    }
+}

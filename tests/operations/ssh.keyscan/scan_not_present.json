@@ -1,0 +1,18 @@
+{
+    "args": ["remote-host.net"],
+    "facts": {
+        "directory": {
+            "~/.ssh": {
+                "mode": 700
+            }
+        },
+        "find_in_file": {
+            "~/.ssh/known_hosts": {
+                "remote-host.net": []
+            }
+        }
+    },
+    "commands": [
+        "ssh-keyscan -p 22 remote-host.net >> ~/.ssh/known_hosts"
+    ]
+}

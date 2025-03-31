@@ -1,0 +1,14 @@
+{
+    "args": [["test"]],
+    "kwargs": {
+        "pip": "pip3"
+    },
+    "facts": {
+        "pip_packages": {
+            "pip3": {}
+        }
+    },
+    "commands": [
+        "pip3 install test"
+    ]
+}
