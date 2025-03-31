@@ -1,94 +1,91 @@
-# Contribution guidelines
+# Contributing Guidelines
 
-Causallib welcomes community contributions to this repository.  
-This file provides the guidelines to contribute to this project.
+Thank you for your interest in contributing to our project. Whether it's a bug report, new feature, correction, or additional 
+documentation, we greatly value feedback and contributions from our community.
 
-## Contributions
-We welcome a wide range of contributions: 
- - estimation models
- - preprocessors
- - plots
- - improvements to the overall design
- - causal analysis examples using causallib in Jupyter Notebooks 
- - documentation 
- - bug reports
- - bug fixes
- - and more
+Please read through this document before submitting any issues or pull requests to ensure we have all the necessary 
+information to effectively respond to your bug report or contribution.
 
-## Prerequisites
-Causallib follows the [Github contribution workflow](https://git-scm.com/book/sv/v2/GitHub-Contributing-to-a-Project):
-forking the repository, cloning it, branching out a feature branch, developing,
-opening a pull request back to the causallib upstream once you are done,
-and performing an iterative review process.  
-If your changes require a lot of work, it is better to first make sure they are 
-aligned with the plans for the package. 
-Therefore, it is recommended that you first open an issue describing 
-what changes you think should be made and why.
-After a discussion with the core maintainers, we will decide whether the suggestion
-is welcomed or not. 
-If so, you are encouraged to link you pull request to its corresponding issue.
 
-### Tests
-Contribution of new code is best when accompanied by corresponding testing code.
-Unittests should be located in the `causallib/tests/` directory and run with `pytest`. 
+## Reporting Bugs/Feature Requests
 
-New bug fixes should, too, be ideally coupled with tests replicating the bug,
-ensuring it will not repeat in the future.
+We welcome you to use the GitHub issue tracker to report bugs or suggest features.
 
-### Documentation
-New code should also be well documented. 
-Causallib uses [Google docstring format](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html),
-and docstrings should include input and output typing 
-(if not [specified in the code](https://docs.python.org/3/library/typing.html)).  
-If there are relevant academic papers on which the contribution is based upon, 
-please cite it and link to it in the docstring.
+When filing an issue, please check [existing open](https://github.com/awslabs/aws-deployment-framework/issues), or [recently closed](https://github.com/awslabs/aws-deployment-framework/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aclosed%20), issues to make sure somebody else hasn't already 
+reported the issue. Please try to include as much information as you can. Details like these are incredibly useful:
 
-### Style
-The ultimate goal is to enhance the readability of the code.
-Causallib does not currently adhere to any strict style guideline.
-It follows the general guidance of PEP8 specifications,
-but encourages contributors to diverge from it if they see fit.
+* A reproducible test case or series of steps
+* The version of our code being used
+* Any modifications you've made relevant to the bug
+* Anything unusual about your environment or deployment
 
-Whenever in doubt - follow [the _Black_ code style guide](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html).
 
-### `Contrib` module
-The `contrib` module is designated to more state-of-the-art methods that are not
-yet well-established but nonetheless may benefit the community.
-Ideally, models should still adhere to the causallib's API 
-(namely, `IndividualOutcomeEstimator`, `PopulationOutcomeEstimator`, `WeightEstimator`).
-This module has its own requirements file and tests.
+## Contributing via Pull Requests
 
-### Contributor License Agreement
-The Causallib developer team works for IBM. 
-To accept contributions outside of IBM, 
-we need a signed Contributor License Agreement (CLA) 
-from you before code contributions can be reviewed and merged.
-By signing a contributor license agreement (CLA), 
-you're basically just attesting to the fact that 
-you are the author of the contribution and that you're freely
-contributing it under the terms of the Apache-2.0 license.
+Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
 
-When you contribute to the Causallib project with a new pull request,
-a bot will evaluate whether you have signed the CLA. If required, the
-bot will comment on the pull request, including a link to accept the
-agreement. 
-You can review the [individual CLA document as a PDF](https://www.apache.org/licenses/icla.pdf).
+1. You are working against the latest source on the *master* branch.
+2. You check existing open, and recently merged, pull requests to make sure someone else hasn't addressed the problem already.
+3. You open an issue to discuss any significant work - we would hate for your time to be wasted.
 
-**Note**:
-> If your contribution is part of your employment or your contribution
-> is the property of your employer, then you will likely need to sign a
-> [corporate CLA](https://www.apache.org/licenses/cla-corporate.txt) too and
-> email it to us at <ehudk@ibm.com>.
+To send us a pull request, please:
 
-## Contributors
-Ehud Karavani  
-Yishai Shimoni  
-Michael Danziger  
-Lior Ness  
-Itay Manes  
-Yoav Kan-Tor  
-Chirag Nagpal   
-Tal Kozlovski  
-Liran Szlak  
-Onkar Bhardwaj  
-Dennis Wei  
+1. Fork the repository.
+2. Modify the source; please focus on the specific change you are contributing. If you also reformat all the code, it will be hard for us to focus on your change.
+3. Ensure local tests pass.
+4. Commit to your fork using clear commit messages.
+5. Send us a pull request, answering any default questions in the pull request interface.
+6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
+
+GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and 
+[creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
+
+
+## Finding contributions to work on
+
+Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/duplicate/help wanted/invalid/question/wontfix), looking at any ['help wanted'](https://github.com/awslabs/aws-deployment-framework/labels/help%20wanted) issues is a great place to start. 
+
+
+## Use of examples
+
+To ensure that email addresses or account ids are not exposed by accident,
+it is recommended to use one of the following examples instead:
+
+In case you want to specify an example email address, please make use of one of
+the following email addresses:
+
+* `jane@example.com`
+* `john@example.com`
+* `janes_team@example.com`
+* Or another `@example.com`
+* For tests that could potentially create accounts (if mocks failed to work),
+  please use `test@amazon.com` instead.
+
+When you want to write documentation/tests and need an example account id, the
+following account ids may be used:
+
+* `111111111111`
+* `222222222222`
+* ... to ...
+* `999999999999`
+* or to show the length more easily:
+* `012345678910`
+* `012345671234`
+* `123456789012`
+
+
+## Code of Conduct
+
+This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct). 
+For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq) or contact 
+opensource-codeofconduct@amazon.com with any additional questions or comments.
+
+
+## Security issue notifications
+
+If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue.
+
+
+## Licensing
+
+See the [LICENSE](https://github.com/awslabs/aws-deployment-framework/blob/master/LICENSE) file for our project's licensing. We will ask you to confirm the licensing of your contribution.
