@@ -1,0 +1,12 @@
+configure: []
+dev_bundles: []
+gate_bundles:
+  - bundle
+smoke_bundles: []
+tests:
+  - zaza.openstack.charm_tests.ceph.osd.tests.SecurityTest
+  - zaza.openstack.charm_tests.ceph.osd.tests.ServiceTest
+target_deploy_status:
+  ntp:
+    workload-status: active
+    workload-status-message: "chrony: Ready"

@@ -1,4 +1,0 @@
-include Cargo.toml
-recursive-include src *
-global-exclude .git*
-global-exclude .git/**

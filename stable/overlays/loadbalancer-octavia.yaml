@@ -1,0 +1,82 @@
+---
+applications:
+  barbican-mysql-router:
+    charm: cs:mysql-router
+  barbican:
+    charm: cs:barbican
+    num_units: 1
+    options:
+      openstack-origin: distro
+    to:
+    - lxd:1
+  barbican-vault:
+    charm: cs:barbican-vault
+  octavia-ovn-chassis:
+    charm: cs:ovn-chassis
+  octavia-mysql-router:
+    charm: cs:mysql-router
+  octavia:
+    charm: cs:octavia
+    num_units: 1
+    options:
+      openstack-origin: distro
+    to:
+    - lxd:2
+  octavia-dashboard:
+    charm: cs:octavia-dashboard
+  glance-simplestreams-sync:
+    charm: cs:glance-simplestreams-sync
+    num_units: 1
+    options:
+      source: ppa:simplestreams-dev/trunk
+    to:
+    - lxd:0
+  octavia-diskimage-retrofit:
+    charm: cs:octavia-diskimage-retrofit
+    options:
+      amp-image-tag: 'octavia-amphora'
+relations:
+- - octavia-mysql-router:db-router
+  - mysql-innodb-cluster:db-router
+- - octavia-mysql-router:shared-db
+  - octavia:shared-db
+- - octavia:certificates
+  - vault:certificates
+- - barbican-mysql-router:db-router
+  - mysql-innodb-cluster:db-router
+- - barbican-mysql-router:shared-db
+  - barbican:shared-db
+- - barbican:certificates
+  - vault:certificates
+- - keystone:identity-service
+  - octavia:identity-service
+- - keystone:identity-service
+  - barbican:identity-service
+- - rabbitmq-server:amqp
+  - octavia:amqp
+- - rabbitmq-server:amqp
+  - barbican:amqp
+- - neutron-api:neutron-load-balancer
+  - octavia:neutron-api
+- - octavia-ovn-chassis:ovsdb-subordinate
+  - octavia:ovsdb-subordinate
+- - octavia-ovn-chassis:certificates
+  - vault:certificates
+- - octavia-ovn-chassis:ovsdb
+  - ovn-central:ovsdb
+- - octavia:ovsdb-cms
+  - ovn-central:ovsdb-cms
+- - openstack-dashboard:dashboard-plugin
+  - octavia-dashboard:dashboard
+- - barbican-vault:secrets
+  - barbican:secrets
+- - vault:secrets
+  - barbican-vault:secrets-storage
+- - glance-simplestreams-sync:juju-info
+  - octavia-diskimage-retrofit:juju-info
+- - keystone:identity-service
+  - glance-simplestreams-sync:identity-service
+- - glance-simplestreams-sync:certificates
+  - vault:certificates
+- - keystone:identity-credentials
+  - octavia-diskimage-retrofit:identity-credentials
