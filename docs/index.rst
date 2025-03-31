@@ -1,21 +1,21 @@
-.. msoffcrypto-tool documentation master file, created by
-   sphinx-quickstart on Sun May 13 00:50:02 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+`srt`: Parse SubRip files
+=========================
 
-msoffcrypto-tool
-============================================
+srt_ is a tiny Python library for parsing, modifying, and composing SRT files.
+
+.. _srt: https://github.com/cdown/srt
+
+Documentation
+=============
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
-    
-   cli
-   msoffcrypto
+
+   quickstart
+   api
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
