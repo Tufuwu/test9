@@ -1,0 +1,13 @@
+# Package Details
+include README.md
+include LICENSE
+
+# Package Example
+include example.py
+
+# Package Code
+graft content_hash
+
+# Ignore Cache
+global-exclude *.py[co]
+global-exclude __pycache__

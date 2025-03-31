@@ -1,44 +1,27 @@
-"""Run an example script to quickly test."""
-import asyncio
+"""Example for EIP 1577 content hash."""
 
-from aiohttp import ClientSession
-
-from pyiqvia import Client
-from pyiqvia.errors import IQVIAError
+import content_hash
 
 
-async def main() -> None:
-    """Create the aiohttp session and run the example."""
-    async with ClientSession() as websession:
-        await run(websession)
+def main():
+    """Handle example."""
+
+    # Get codec of content hash
+    chash = 'e6013148654c4c6f34757a6a614c65744678364e4833504d774650337162526254663344'
+    codec = content_hash.get_codec(chash)
+    print('Codec of content hash:', codec)
 
 
-async def run(websession):
-    """Run."""
-    try:
-        client = Client("17015", websession)
-        print(f'Client instantiated for ZIP "{client.zip_code}"')
+    # Decode content hash
+    chash = 'e6013148654c4c6f34757a6a614c65744678364e4833504d774650337162526254663344'
+    address = content_hash.decode(chash)
+    print('Decoded content hash:', address)
 
-        print()
-        print("Allergen Data:")
-        print(await client.allergens.current())
-        print(await client.allergens.extended())
-        print(await client.allergens.historic())
-        print(await client.allergens.outlook())
-
-        print()
-        print("Disease Data:")
-        print(await client.disease.current())
-        print(await client.disease.extended())
-        print(await client.disease.historic())
-
-        print()
-        print("Asthma Data:")
-        print(await client.asthma.current())
-        print(await client.asthma.extended())
-        print(await client.asthma.historic())
-    except IQVIAError as err:
-        print(err)
+    # Encode content hash
+    address = '1HeLLo4uzjaLetFx6NH3PMwFP3qbRbTf3D'
+    chash = content_hash.encode('zeronet', address)
+    print('Encoded content hash:', chash)
 
 
-asyncio.get_event_loop().run_until_complete(main())
+if __name__ == '__main__':
+    main()
