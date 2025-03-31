@@ -1,112 +1,61 @@
-# Tabcmd
+﻿# currency-symbols :money_with_wings:
 
-[![Tableau Supported](https://img.shields.io/badge/Support%20Level-Tableau%20Supported-53bd92.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)
+[![Build](https://github.com/arshadkazmi42/currency-symbols/actions/workflows/pytest.yml/badge.svg)](https://github.com/arshadkazmi42/currency-symbols/actions/workflows/pytest.yml)
+[![Downloads](https://img.shields.io/pypi/dm/currency-symbols.svg)](https://pypi.org/project/currency-symbols/)
+[![Repo Size](https://img.shields.io/github/languages/code-size/arshadkazmi42/currency-symbols.svg)](https://github.com/arshadkazmi42/currency-symbols)
+[![LICENSE](https://img.shields.io/pypi/l/currency-symbols.svg)](https://pypi.org/project/currency-symbols/)
+[![Version](https://img.shields.io/pypi/v/currency-symbols.svg)](https://pypi.org/project/currency-symbols/)
+[![Last Commit](https://img.shields.io/github/last-commit/arshadkazmi42/currency-symbols.svg)](https://github.com/arshadkazmi42/currency-symbols)
 
-A Python based app that replicates the functionality of the existing [Tabcmd command line utility](https://help.tableau.com/current/server/en-us/tabcmd.htm).
+Get currency symbol by currency code `eg: USD -> $`
 
-**Important Note:** tabcmd is a work in progress ("beta") which may be useful for test and development purposes, but is not yet recommended for production environments.
+## References
+[ISO 4217 - Currency Codes](https://www.iso.org/iso-4217-currency-codes.html)
 
-* [Why a Python based tabcmd\?](#whytabcmd)
-* [Demo](#demo)
-* [Get started](#get-started)
-  * [Prerequisites](#prerequisites)
-  * [Installation](#installation)
-* [Run](#run)
-  * [Available Commands](#available-commands)
-* [Contributions](#contributions)
+## Installation
 
-## Why a Python based Tabcmd?
+```
+$ pip3 install currency-symbols
+```
 
-* Run Tabcmd commands on MacOS (existing Tabcmd does not officially support MacOS)
-* Authenticate using Personal Access Tokens (existing Tabcmd does not support Personal Access Token login)
-* Easily use public endpoints available in Python based [Tableau Server Client](https://github.com/tableau/server-client-python/)
-* Add more functionality and extend script for other automation tasks
+## Usage
 
-## Demo/Samples
+```python
+from currency_symbols import CurrencySymbols
 
-_coming soon_
+dollarSymbol = CurrencySymbols.get_symbol('USD')
+print(dollarSymbol)
 
-## Get started
+# Output:
+# $
 
-This section describes how to install and configure tabcmd.
+euroSymbol = CurrencySymbols.get_symbol('EUR')
+print(euroSymbol)
 
-### Prerequisites
+# Output:
+# €
 
-To work with tabcmd, you need the following:
+britishPoundSymbol = CurrencySymbols.get_symbol('GBP')
+print(britishPoundSymbol)
 
-* MacOS / Windows
-* Python 3.7+ installed
+# Output:
+# £
 
-### Installation
+bitcoinSymbol = CurrencySymbols.get_symbol('BTC')
+print(bitcoinSymbol)
 
-To install tabcmd, follow these steps:
+# Output:
+# ฿
+```
 
-1. Clone the repo
-2. Run `pip install .`
+## Contributing
 
-## Run
+Interested in contributing to this project?
+You can log any issues or suggestion related to this library [here](https://github.com/arshadkazmi42/currency-symbols/issues/new)
 
-To run tabcmd, follow these steps:
+Read our contributing [guide](https://github.com/arshadkazmi42/currency-symbols/blob/master/CONTRIBUTING.md) on getting started with contributing to the codebase
 
-1. To run a command:
-    * `tabcmd [command_name] [--flags]`
-    * Examples:
-        * `tabcmd login --username [username] --password [password] --server
-         [server_name] --site [site_name]`
-        * `tabcmd createproject --name [project_name]`
 
-### Available Commands
+## Credits
 
-This table lists the development status of all commands, listed in the same order as the tabcmd help.
-
-These are the column definitions:
-
-* TSC: API support is available in [TSC](https://github.com/tableau/server-client-python/)
-* Completed: Code implemented, manually tested, unit tests for parsing added
-* Done: Error handling, all unit tests, logging, code review, can produce docs, merged into master
-
-| Command | TSC | Completed | Done | Notes |
-|-|-|-|-|-|
-| addusers (to group) | Yes (single user) | :heavy_check_mark: |  |  |
-| createextracts | Yes |  |  |  |
-| creategroup | Yes | :heavy_check_mark:  |  |  |
-| createproject | Yes | :heavy_check_mark:  |  |  |
-| createsite | Yes | :heavy_check_mark:  |  |  |
-| createsiteusers | Yes | :heavy_check_mark:  |  |  |
-| createusers | Yes (single user) | :heavy_check_mark:  |  |  |
-| decryptextracts | Yes |  |  |  |
-| delete workbook-name or datasource-name | Yes | :heavy_check_mark:  |  |  |
-| deleteextracts | Yes |  |  |  |
-| deletegroup | Yes | :heavy_check_mark:  |  |  |
-| deleteproject | Yes | :heavy_check_mark:  |  |  |
-| deletesite | Yes | :heavy_check_mark:  |  |  |
-| deletesiteusers | Yes | :heavy_check_mark:  |  |  |
-| deleteusers | No |  |  |  |
-| editdomain | No |  |  |  |
-| editsite | Yes | :heavy_check_mark:  |  |  |
-| encryptextracts | Yes |  |  |  |
-| export | Yes | :heavy_check_mark:  |  |  |
-| get url | Yes |  |  |  |
-| initialuser | No |  |  |  |
-| listdomains | No |  |  |  |
-| listsites | Yes | :heavy_check_mark:  |  |  |
-| login | Yes | :heavy_check_mark:  |  |  |
-| logout | Yes | :heavy_check_mark:  |  |  |
-| publish | Yes | :heavy_check_mark:  |  |  |
-| publishsamples | No |  |  |  |
-| reencryptextracts | Yes |  |  |  |
-| refreshextracts | No |  |  |  |
-| removeusers | Yes | :heavy_check_mark:  |  |  |
-| reset_openid_sub | No |  |  |  |
-| runschedule | No |  |  |  |
-| set | No |  |  |  |
-| syncgroup | No |  |  |  |
-| version | N/A |  |  |  |
-
-## Contributions
-
-Code contributions and improvements by the community are welcomed!
-
-See the LICENSE file for current open-source licensing and use information. See dev information at [contributing.md](./contributing.md)
-
-Before we can accept pull requests from contributors, we require a signed [Contributor License Agreement (CLA)](http://tableau.github.io/contributing.html).
+Inspired by work of [@bengourley](https://github.com/bengourley) on [currency-symbol-map](https://github.com/bengourley/currency-symbol-map#readme)

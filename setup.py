@@ -1,41 +1,21 @@
-import sys
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    from distutils.core import setup
+import setuptools
 
-# Only install pytest and runner when test command is run
-# This makes work easier for offline installs or low bandwidth machines
-needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
-pytest_runner = ['pytest-runner'] if needs_pytest else []
-test_requirements = ['mock', 'pycodestyle', 'pytest', 'requests-mock>=1.0,<2.0', 'pyinstaller']
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-setup(
-    name='tabcmd',
-    author='Tableau',
-    author_email='github@tableau.com',
-    description='A command line client for working with Tableau Server.',
-    entry_points={
-        'console_scripts': [
-            'tabcmd = tabcmd.tabcmd:main'
-        ]
-    },
-    license='MIT',
-    packages=find_packages(),
-    test_suite='tests',
-    url='https://github.com/tableau/tabcmd',
-
-    extras_require={
-        'test': test_requirements,
-        'package': ['pyinstaller>=4.8']
-    },
-    install_requires=[
-        'requests>=2.11,<3.0',
-        'setuptools>=24.3',
-        'tableauserverclient>=0.12',
-        'urllib3>=1.24.3,<2.0',
+setuptools.setup(
+    name="currency-symbols",
+    version="2.0.2",
+    author="Arshad Kazmi",
+    author_email="arshadkazmi42@gmail.com",
+    description="Get currency symbol by currency code",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/arshadkazmi42/currency-symbols",
+    packages=setuptools.find_packages(),
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
-    setup_requires=pytest_runner,
-    tests_require=test_requirements,
 )
