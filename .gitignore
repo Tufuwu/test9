@@ -1,40 +1,36 @@
-.DS_Store
-*.egg-info
-*.py[cod]
-.cache
-.discovery.lock
-.eggs
-.python-version
-.setupmeta.version
-.tox
-.venv*
+########################################################################
+# Modified: 2021-01-20
+# Author: Milos Atz
+# Comment: gitignore for DASSH
+########################################################################
 
-.idea/
-__pycache__/
-build/
+# None of the old code or my other maintenance directories
+old/
+misc/
 dist/
-test-reports/
+build/
+dassh.egg-info/
+animation.py
+misc_benchmarking_crap.py
+timing.py
+tmp_plot.py
 
-venv
-venv/
-staging/
+# No tests (for now; need to clean)
+# tests/
 
-.mypy_cache/
+# None of the test results
+tests/test_results/
 
-# Swap
-[._]*.s[a-v][a-z]
-[._]*.sw[a-p]
-[._]s[a-rt-v][a-z]
-[._]ss[a-gi-z]
-[._]sw[a-p]
+# Any pycache directories in DASSH source and tests
+__pycache__/
+dassh/__pycache__/
+dassh/_se2anl/__pycache__/
+dassh/correlations/__pycache__/
+tests/__pycache__/
 
-debian/*.bak
-debian/*.log
-debian/*.debhelper
-.nox
+# Any pycache files
+*.pyc
 
-# Notebooks
-notebooks/.ipynb_checkpoints/
-
-# Profiling
-prof
+# Any unix filesystem objects
+._*
+.DS_Store*

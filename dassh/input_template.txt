@@ -1,0 +1,140 @@
+[Setup]
+    axial_mesh_size = float(min=0.0, default=None)
+    axial_plane = force_list(default=None)
+    log_progress = integer(min=0, default=0)
+    conv_approx_dz_cutoff = float(min=0.0, default=None)
+    conv_approx = boolean(default=False)
+    calc_energy_balance = boolean(default=False)
+    se2geo = boolean(default=False)
+    debug = boolean(default=False)
+    param_update_tol = float(min=0.0, max=1.0, default=0.0)
+    parallel = boolean(default=False)
+    n_cpu = integer(min=1, default=None)
+    [[Dump]]
+        all = boolean(default=False)
+        coolant = boolean(default=False)
+        duct = boolean(default=False)
+        pins = boolean(default=False)
+        gap = boolean(default=False)
+        gap_fine = boolean(default=False)
+        average = boolean(default=False)
+        maximum = boolean(default=False)
+        interval = float(min=0.0, default=None)
+    [[Units]]
+        temperature = string(default='kelvin')
+        length = string(default='m')
+        mass_flow_rate = string(default='kg/s')
+    [[AssemblyTables]]
+        [[[__many__]]]
+            type = option('coolant_subchannel', 'duct_mw', 'coolant_bypass', 'coolant_pin', 'clad_od', 'clad_mw', 'clad_id', 'fuel_od', 'fuel_cl', default=None)
+            assemblies = force_list(default=None)
+            axial_positions = force_list(default=None)
+
+
+[Materials]
+    [[__many__]]
+        thermal_conductivity = force_list(default=None)
+        heat_capacity = force_list(default=None)
+        density = force_list(default=None)
+        viscosity = force_list(default=None)
+        beta = force_list(default=None)
+        from_file = string(default=None)
+
+
+[Power]
+    user_power = force_list(min=1, default=None)
+    total_power = float(min=0.0, default=None)
+    power_scaling_factor = float(min=0.0, default=1.0)
+    [[ARC]]
+        coolant_heating = option('sodium', 'na', 'sodium-potassium', 'nak', 'lead', 'pb', 'lead-bismuth', 'pb-bi', 'lead-bismuth-eutectic', 'lbe', None, default=None)
+        fuel_material = option('metal', 'oxide', 'nitride', default=None)
+        fuel_alloy = option('zr', 'zirconium', 'al', 'aluminum', None, default=None)
+        power_model = option('distribute', 'pin_only', default='distribute')
+        pmatrx = force_list(min=1, default=None)
+        geodst = force_list(min=1, default=None)
+        ndxsrf = force_list(min=1, default=None)
+        znatdn = force_list(min=1, default=None)
+        labels = force_list(min=1, default=None)
+        nhflux = force_list(min=1, default=None)
+        ghflux = force_list(min=1, default=None)
+    
+
+[Core]
+    coolant_inlet_temp = float
+    coolant_material = string
+    length = float
+    bypass_fraction = float(min=0.0, max=1.0, default=0.0)
+    assembly_pitch = float
+    gap_model = option('flow', 'no_flow', 'duct_average', 'none', default='no_flow')
+    htc_params_duct = float_list(default=None)
+
+
+[Assembly]
+    [[__many__]]
+        num_rings = integer
+        pin_pitch = float
+        pin_diameter = float
+        wire_pitch = float(min=0.0)
+        wire_diameter = float(min=0.0)
+        wire_direction = option('clockwise', 'counterclockwise', default='counterclockwise')
+        duct_ftf = float_list(min=2)
+        duct_material = string
+        clad_thickness = float
+        corr_mixing = option('MIT', 'CTD', 'UCTD', default='CTD')
+        corr_friction = option('NOV', 'REH', 'ENG', 'CTD', 'CTS', 'UCTD', default='CTD')
+        corr_flowsplit = option('NOV', 'SE2', 'MIT', 'CTD', 'UCTD', default='CTD')
+        corr_nusselt = string(default='DB')
+	dummy_pin = int_list(min=1, default=None)
+        htc_params_duct = float_list(default=None)
+        bypass_gap_flow_fraction = float(default=0.05)
+        bypass_gap_loss_coeff = float(default=None)
+        shape_factor = float(default=1.0)
+        use_low_fidelity_model = boolean(default=False)
+        low_fidelity_model = option(simple, 6node, default=simple)
+        convection_factor = string(default="calculate")
+        [[[AxialRegion]]]
+            [[[[__many__]]]]
+                model = string(default='simple')
+                z_lo = float(min=0.0)
+                z_hi = float(min=0.0)
+                vf_coolant = float(min=0.0, max=1.0)
+                structure_material = string(default=None)
+                hydraulic_diameter = float(default=0.0)
+                epsilon = float(default=0.0)
+                magic_knob = float(default=1.0)
+                htc_params = float_list(default=None)
+                convection_factor = float(min=0.000001, max=1.0, default=1.0)
+        [[[FuelModel]]]
+            fcgap_thickness = float(min=0.0, default=0.0)
+            gap_thickness = float(min=0.0, default=0.0)
+            clad_material = string(default=None)
+            gap_material = string(default=None)
+            htc_params_clad = float_list(default=None)
+            r_frac = force_list(default=list(0.0))
+            pu_frac = force_list(default=list(0.0))
+            zr_frac = force_list(default=list(0.0))
+            porosity = force_list(default=list(0.0))
+        [[[PinModel]]]
+            fcgap_thickness = float(min=0.0, default=0.0)
+            gap_material = string(default=None)
+            gap_thickness = float(min=0.0, default=0.0)
+            clad_material = string(default=None)
+            htc_params_clad = float_list(default=None)
+            pin_material = force_list(default=None)
+            r_frac = force_list(default=list(0.0))
+
+
+[Orificing]
+    assemblies_to_group = force_list(min=1, default=None)
+    n_groups = integer(min=1, default=None)
+    group_cutoff = float(min=0.001, max=1.0, default=0.05)
+    group_cutoff_delta = float(min=0.00001, max=1.0, default=0.001)
+    value_to_optimize = option('peak coolant temp', 'peak clad MW temp', 'peak clad ID temp', 'peak fuel temp', default=None)
+    bulk_coolant_temp = float(default=None)
+    iteration_limit = integer(min=1, default=10)
+    convergence_tol = float(min=1e-6, default=1e-3)
+    regroup = option('every', 'once', 'never', default='never')
+    regroup_option_tol = float(min=0.0, max=1.0, default=0.05)
+    regroup_improvement_tol = float(min=0.0, max=1.0, default=0.05)
+    pressure_drop_limit = float(min=0.0, default=None)
+    recycle_results = boolean(default=False)
