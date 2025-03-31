@@ -91,9 +91,9 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/luma.emulator.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/CryptoSite.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/luma.emulator.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/CryptoSite.qhc"
 
 .PHONY: applehelp
 applehelp:
@@ -110,8 +110,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/luma.emulator"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/luma.emulator"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/CryptoSite"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/CryptoSite"
 	@echo "# devhelp"
 
 .PHONY: epub
