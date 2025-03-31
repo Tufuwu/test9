@@ -1,57 +1,24 @@
-#!/usr/bin/env python
-"""
-Standard build script.
-"""
+#!/usr/bin/env python3
 
-__docformat__ = 'restructuredtext'
+from setuptools import setup
+from setuptools import find_packages
 
 
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    print('You must have setuptools installed to use setup.py. Exiting...')
-    raise SystemExit(1)
-
-
-install_dependencies = (
-    'requests',
-    'six'
-)
-test_requirements = (
-    'mock',
-    'pyhamcrest',
-    'pylama',
-    'pytest',
-    'requests_mock'
-)
 setup(
-    name="python-owasp-zap-v2.4",
-    version="0.0.19",
-    description="OWASP ZAP 2.10 API client",
-    long_description="OWASP Zed Attack Proxy 2.10 API Python client (the 2.4 package name has been kept to make it easier to upgrade)",
-    author="ZAP development team",
-    author_email='',
-    url="https://www.zaproxy.org/",
-    download_url="https://github.com/zaproxy/zap-api-python/releases/tag/0.0.19",
-    platforms=['any'],
-    license="ASL2.0",
-    package_dir={
-        '': 'src',
+    name="litescope",
+    description="Small footprint and configurable embedded FPGA logic analyzer core",
+    author="Florent Kermarrec",
+    author_email="florent@enjoy-digital.fr",
+    url="http://enjoy-digital.fr",
+    download_url="https://github.com/enjoy-digital/litescope",
+    test_suite="test",
+    license="BSD",
+    python_requires="~=3.6",
+    packages=find_packages(exclude=("test*", "sim*", "doc*", "examples*")),
+    include_package_data=True,
+    entry_points={
+        "console_scripts": [
+            "litescope_cli=litescope.software.litescope_cli:main",
+        ],
     },
-    packages=find_packages('src'),
-    classifiers=[
-        'License :: OSI Approved :: Apache Software License',
-        'Development Status :: 5 - Production/Stable',
-        'Topic :: Security',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Information Technology',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-    ],
-    install_requires=install_dependencies,
-    tests_require=test_requirements,
-    extras_require={'tests': test_requirements}
 )
