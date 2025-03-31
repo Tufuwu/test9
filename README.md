@@ -1,112 +1,25 @@
-[<img src="https://cdn.ipregistry.co/icons/icon-72x72.png" alt="Ipregistry" width="64"/>](https://ipregistry.co/) 
-# Ipregistry Python Client Library
+# 👨‍🍳 The Grill
+[![Build Status](https://travis-ci.org/thegrill/grill.svg?branch=main)](https://travis-ci.org/thegrill/grill)
+[![codecov](https://codecov.io/gh/thegrill/grill/branch/main/graph/badge.svg)](https://codecov.io/gh/thegrill/grill)
+[![Documentation Status](https://readthedocs.org/projects/grill/badge/?version=latest)](https://grill.readthedocs.io/en/latest/?badge=latest)
+[![PyPI version](https://badge.fury.io/py/grill.svg)](https://badge.fury.io/py/grill)
+[![PyPI](https://img.shields.io/pypi/pyversions/grill.svg)](https://pypi.python.org/pypi/grill)
 
-[![License](http://img.shields.io/:license-apache-blue.svg)](LICENSE)
-[![Travis](https://travis-ci.com/ipregistry/ipregistry-python.svg?branch=master&style=flat-square)](https://travis-ci.com/ipregistry/ipregistry-python)
-[![PyPI](https://img.shields.io/pypi/v/ipregistry)](https://pypi.org/project/ipregistry/)
+> Cook digital.
 
-This is the official Python client library for the [Ipregistry](https://ipregistry.co) IP geolocation and threat data API, 
-allowing you to lookup your own IP address or specified ones. Responses return up to 65 data points including 
-location, currency, timezone, threat information, and more.
+`The Grill` is a toolset that helps with digital content creation. This is the `grill` namespace, a meta-package with core tools and philosophy guidelines.
 
-## Getting Started
+With future users and readers in mind, `The Grill` aims to stick to the following principles:
 
-You'll need an Ipregistry API key, which you can get along with 100,000 free lookups by signing up for a free account at [https://ipregistry.co](https://ipregistry.co).
+- [DRY (don't repeat yourself)](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)
+- [SSOT (single source of truth)](https://en.wikipedia.org/wiki/Single_source_of_truth)
+- [Convention over configuration (sensible defaults)](https://en.wikipedia.org/wiki/Convention_over_configuration)
+- [SOLID (understandable, flexible and maintainable)](https://en.wikipedia.org/wiki/SOLID)
+- [KISS (keep it simple)](https://en.wikipedia.org/wiki/KISS_principle)
 
-### Installation
+Foundational tools:
+- [Python](https://docs.python.org/3/)
+- [USD](https://graphics.pixar.com/usd/docs/index.html)
+- [EdgeDB](https://edgedb.com)
 
-```
-pip install ipregistry
-```
-
-### Quick Start
-
-#### Single IP Lookup
-
-```python
-from ipregistry import IpregistryClient
-
-client = IpregistryClient("YOUR_API_KEY")
-ipInfo = client.lookup("54.85.132.205")
-print(ipInfo)
-```
-
-#### Batch IP Lookup
-
-```python
-from ipregistry import IpregistryClient
-
-client = IpregistryClient("YOUR_API_KEY")
-results = client.lookup(["54.85.132.205", "8.8.8.8", "2001:67c:2e8:22::c100:68b"])
-for ipInfo in results:
-    print(ipInfo)
-```
-
-#### Origin IP Lookup
-
-```python
-from ipregistry import IpregistryClient
-
-client = IpregistryClient("YOUR_API_KEY")
-ipInfo = client.lookup()
-print(ipInfo)
-```
-
-More advanced examples are available in the [samples](https://github.com/ipregistry/ipregistry-python/tree/master/samples) 
-folder.
-
-### Caching
-
-This Ipregistry client library has built-in support for in-memory caching. By default caching is disabled. 
-Below are examples to enable and configure a caching strategy. Once enabled, default cache strategy is to memoize up to 
-2048 lookups for at most 10min. You can change preferences as follows:
-
-#### Enabling caching
-
-Enable caching by passing an instance of `DefaultCache`:
-
-```python
-from ipregistry import DefaultCache, IpregistryClient
-
-client = IpregistryClient("YOUR_API_KEY", cache=DefaultCache(maxsize=2048, ttl=600))
-```
-
-#### Disabling caching
-
-Disable caching by passing an instance of `NoCache`:
-
-```python
-from ipregistry import IpregistryClient, NoCache
-
-client = IpregistryClient("YOUR_API_KEY", cache=NoCache())
-```
-
-### Errors
-
-All Ipregistry exceptions inherit `IpregistryError` class.
-
-Main subtypes are `ApiError` and `ClientError`.
-
-Errors of type _ApiError_ include a code field that maps to the one described in the [Ipregistry documentation](https://ipregistry.co/docs/errors).
-
-### Filtering bots
-
-You might want to prevent Ipregistry API requests for crawlers or bots browsing your pages.
-
-A manner to proceed is to identify bots using the `User-Agent` header. 
-To ease this process, the library includes a utility method:
-
-```python
-from ipregistry import UserAgent
-
-isBot = UserAgent.isBot('YOUR_USER_AGENT_HEADER_VALUE_HERE')
-```
-
-## Other Libraries
-
-There are official Ipregistry client libraries available for many languages including 
-[Java](https://github.com/ipregistry/ipregistry-java), 
-[Javascript](https://github.com/ipregistry/ipregistry-javascript), and more.
-
-Are you looking for an official client with a programming language or framework we do not support yet? 
-[let us know](mailto:support@ipregistry.co).
+Please [visit the docs](https://grill.rtfd.io) for a full walk-through!
