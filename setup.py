@@ -1,46 +1,53 @@
-# -*- coding: utf-8 -*-
-#
-# SPDX-FileCopyrightText: © 2013 The glucometerutils Authors
-# SPDX-License-Identifier: MIT
+import os
+import re
 
-# Ensure it's present.
-import setuptools_scm  # noqa: F401
-from setuptools import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
-extras_require = {
-    # These are all the drivers' dependencies. Optional dependencies are
-    # listed as mandatory for the feature.
-    "accucheck_reports": [],
-    "contourusb": ["construct", "hidapi"],
-    "fsinsulinx": ["freestyle-hid>=1.0.2"],
-    "fslibre": ["freestyle-hid>=1.0.2"],
-    "fsoptium": ["pyserial"],
-    "fsprecisionneo": ["freestyle-hid>=1.0.2"],
-    "glucomenareo": ["pyserial", "crcmod"],
-    "otultra2": ["pyserial"],
-    "otultraeasy": ["construct", "pyserial"],
-    "otverio2015": ["construct", "PYSCSI[sgio]>=2.0.1"],
-    "otverioiq": ["construct", "pyserial"],
-    "sdcodefree": ["construct", "pyserial"],
-    "td42xx": ["construct", "pyserial[cp2110]>=3.5b0"],
-    "dev": [
-        "absl-py",
-        "construct>=2.9",
-        "mypy",
-        "pre-commit",
-        "pytest-mypy",
-        "pytest-timeout>=1.3.0",
-        "pytest>=3.6.0",
-    ],
-}
+with open("win32_setctime.py", "r") as file:
+    regex_version = r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]'
+    version = re.search(regex_version, file.read(), re.MULTILINE).group(1)
 
-all_require = []
-for extra_require in extras_require.values():
-    all_require.extend(extra_require)
-
-extras_require["all"] = all_require
-
+with open("README.md", "rb") as file:
+    readme = file.read().decode("utf-8")
 
 setup(
-    extras_require=extras_require,
+    name="win32_setctime",
+    version=version,
+    py_modules=["win32_setctime"],
+    description="A small Python utility to set file creation time on Windows",
+    long_description=readme,
+    long_description_content_type='text/markdown',
+    author="Delgan",
+    author_email="delgan.py@gmail.com",
+    url="https://github.com/Delgan/win32-setctime",
+    download_url="https://github.com/Delgan/win32-setctime/archive/{}.tar.gz".format(version),
+    keywords=["win32", "windows", "filesystem", "filetime"],
+    license="MIT license",
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Topic :: System :: Filesystems",
+        "Intended Audience :: Developers",
+        "Environment :: Win32 (MS Windows)",
+        "Natural Language :: English",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: Microsoft",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: Implementation :: PyPy",
+        "Programming Language :: Python :: Implementation :: CPython",
+    ],
+    extras_require={
+        "dev": [
+            "black>=19.3b0 ; python_version>='3.6'",
+            "pytest>=4.6.2",
+        ]
+    },
+    python_requires=">=3.5",
 )
