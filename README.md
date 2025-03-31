@@ -1,114 +1,40 @@
+SublimeLinter-flow
+================================
 
-LensCalibrator
-========================
+[![Build Status](https://travis-ci.org/SublimeLinter/SublimeLinter-flow.svg?branch=master)](https://travis-ci.org/SublimeLinter/SublimeLinter-flow)
 
-[![Test Status](https://github.com/1024jp/LensCalibrator/workflows/Test/badge.svg)](https://github.com/1024jp/LensCalibrator/actions)
-
-__LensCalibrator__ converts coordinates in a picture to the real-world based on multiple reference points in the picture using openCV.
-
-Requirements
-------------------------
-
-- Python 3.x
-- modules
-    - see [requirements.txt](requirements.txt)
+This linter plugin for [SublimeLinter](https://github.com/SublimeLinter/SublimeLinter) provides an interface to [flow](http://flowtype.org/) (0.1.0 or later), a static type checker for JavaScript.
+It will be used with files that have the "JavaScript" syntax.
 
 
-Sample
-------------------------
+## Installation
 
-The blue circles in the images below are the reference points that located 1,700 mm height from the floor and were manually plotted from still frames. The blue lines are guidelines connecting reference points drawn on an assumption. Then, the red circles are re-calculated points via this script from the original (blue) reference points.
+SublimeLinter must be installed in order to use this plugin. 
 
-|                | Image |
-|----------------|-------|
-| original image | <img src="documentation/example_original.png" width="480"/> |
-| undistorted    | <img src="documentation/example_undistortion.png" width="480"/> |
-| undistorted + projected | <img src="documentation/example_projection.png" width="480"/> |
+Please use [Package Control](https://packagecontrol.io) to install the linter plugin.
 
+[Getting started with Flow](http://flowtype.org/docs/getting-started.html#installing-flow)
 
-Usage
-------------------------
-
-See `--help`.
-
-```sh
-$ ./calibrate.py --help
-usage: calibrate.py [-h] [--version] [-t] [-v] [--out FILE]
-                    [--size WIDTH HEIGHT] [--in_cols INDEX INDEX]
-                    [--out_cols INDEX INDEX] [-z Z]
-                    [FILE]
-
-Translate coordinates in a picture to the real world.
-
-positional arguments:
-  FILE                  path to source file
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --version             show program's version number and exit
-  -t, --test            test the program
-  -v, --verbose         display debug info to standard output (default: False)
-
-output options:
-  --out FILE            path to output file (default: display to standard
-                        output)
-
-input options:
-  --location FILE       path to location file (default: Localiton.csv in the
-                        same directory of source fil)
-  --camera FILE         path to camera model file for undistortion (default:
-                        points in source file are used)
-
-format options:
-  --size WIDTH HEIGHT   dimension of the image (default: (3840, 2160))
-  --in_cols INDEX INDEX
-                        column positions of x, y in file (default: [2, 3])
-  --out_cols INDEX INDEX
-                        column positions of x, y in file for calibrated data
-                        (default: same as in_cols
-```
+Please make sure that the path to `flow` is available to SublimeLinter.
+The docs cover [troubleshooting PATH configuration](http://sublimelinter.com/en/latest/troubleshooting.html#finding-a-linter-executable).
 
 
-Mechanism of coordinates translation
-------------------------
+## Settings
 
-This program, `calibrate.py`, translates x, y (,z) coordinates in a 2D picture to the real world in two steps:
+- SublimeLinter settings: http://sublimelinter.com/en/latest/settings.html
+- Linter settings: http://sublimelinter.com/en/latest/linter_settings.html
 
-1. __undistortion__: Remove the camera lens distortion.
-2. __projection__: Translate coordinates from a 2D space to the real-world space.
+Additional SublimeLinter-flow settings:
 
+|Setting|Description|
+|:------|:----------|
+|lib|Add a path to your interface files. [More info](http://flowtype.org/docs/third-party.html#interface-files)|
+|show-all-errors|It allows flow to output all errors instead of stopping at 50|
+|executable|Allows to specify the path to the flow executable|
+|coverage|Shows flow coverage warnings|
+|all|runs flow against all files regardless of `@flow` comment|
 
-### 1. Undistotion
+### Warning
 
-There are two strategies for the removal of the camera lens distortion:
+At this moment, using `all` in a medium to big sized node.js project may cause a **crash**.  It's recommended to use `flow` incrementally,  one file at a time.
 
-1. Use reference points in the location file.
-2. Use a camera model file.
-
-You can choose one of those according to your data source. When a valid camera model file is given to the `calibrate.py` script with `-- camera` option, the second strategy is used; otherwise, the reference points in the location file is also used for the undistortion. In general, using a camera model file is recommended, especially when you have only a small number of reference points. If you use your reference points for undistortion, take many reference points, such as 20 or 30, to calculate accurate lens distortion.
-
-
-### 2. Projection
-
-The undistorted coordinates are then translated to the real-world space based on pairs of the reference point coordinates in the real-world and the picture.
-
-When you take a video data, Shoot some reference points, of which x,y,z coordinates are known, with the same camera condition. Here, more than four reference points for each elevation level are required. Afterwards, measure the x, y coordinates of those reference points in the picture. The reference points are described in a location file and given to the program via `--location` option.
-
-
-
-
-File format
-------------------------
-
-### Location file
-
-- CSV format: comma-separated, LF line endings.
-- Each line describes the relationship between a reference point in the picture and the real world. The first three columns represent x, y, z coordinates in the real world in mm, and the remaining two columns represent x,y coordinates in the picture in pixel.
-- See file at `test/Location.csv` for example.
-
-
-### Camera model file
-
-Create a camera model file using `modelcamera.py`. Take more than 20 pictures of a checker pattern with different angles and place all of them in the same directory. Run `modelcamera.py` by passing the path to the checker pattern picture directory. See `modelcamera.py --help` for details.
-
-You can obtain a checker pattern image from the openCV repository: [checker pattern image by openCV](https://github.com/opencv/opencv/blob/master/doc/pattern.png).

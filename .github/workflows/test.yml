@@ -1,27 +1,28 @@
-name: Test
+name: flake8
 
-on: [push, pull_request]
+on:
+  schedule:
+    # flake8 regulary has breaking changes,
+    # so we re-check regulary as well.
+    - cron:  '0 9 * * 1'
+
+  push:
+  pull_request:
 
 jobs:
-  build:
-    name: Test Python code
-    runs-on: macOS-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
+  check:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.7
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install modules
+        python-version: 3.9
+    - name: Update pip and install flake8
       run: |
-        pip install -r requirements.txt
-        pip install pycodestyle
-    - name: Lint
+        python -m pip install --upgrade pip
+        pip install flake8 flake8-docstrings
+        echo '##[add-matcher]'$PWD/.github/python.json
+    - name: Lint with flake8
       run: |
-        pycodestyle .
-    - name: Test
-      run: |
-        python -m unittest calibrate.py
+        flake8 .
