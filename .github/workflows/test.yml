@@ -1,131 +1,51 @@
-name: POSIX
+name: Check lesson and build for all configs
 
 on:
   pull_request:
-    branches:
-      - main
-      - develop
-      - feature/**
   push:
     branches:
-      - main
-      - develop
-      - feature/**
-  workflow_dispatch:
-  release:
-    types: published
-
-env:
-  NINJA_BASE_URL: https://github.com/ninja-build/ninja/releases/download/
-  GN_BASE_URL: https://github.com/timniederhausen/gn/releases/download/2020.09/
+      - gh-pages
 
 jobs:
-  posix:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - slug: linux-gcc-i386
-            gen_args: 'gcc_cc="gcc-10" gcc_cxx="g++-10" target_cpu="x86" is_clang=false'
-            os: ubuntu-latest
-            install: "g++-10-multilib"
-            ninja_release_name: v1.7.2/ninja-linux.zip
-            gn_release_name: gn-linux-amd64.tar.gz
-
-          - slug: linux-gcc-amd64
-            gen_args: 'gcc_cc="gcc-10" gcc_cxx="g++-10" target_cpu="x64" is_clang=false'
-            os: ubuntu-latest
-            install: "g++-10"
-            ninja_release_name: v1.7.2/ninja-linux.zip
-            gn_release_name: gn-linux-amd64.tar.gz
-
-          - slug: linux-clang-i386
-            gen_args: 'clang_cc="clang-10" clang_cxx="clang++-10" target_cpu="x86" is_clang=true'
-            os: ubuntu-latest
-            install: "clang-10 g++-multilib"
-            ninja_release_name: v1.7.2/ninja-linux.zip
-            gn_release_name: gn-linux-amd64.tar.gz
-
-          - slug: linux-clang-amd64
-            gen_args: 'clang_cc="clang-10" clang_cxx="clang++-10" target_cpu="x64" is_clang=true'
-            os: ubuntu-latest
-            install: "clang-10"
-            ninja_release_name: v1.7.2/ninja-linux.zip
-            gn_release_name: gn-linux-amd64.tar.gz
-
-          # disabled on main for now
-          # see: https://github.com/timniederhausen/gn-build/runs/2483312992#step:9:24
-          - slug: macos-amd64
-            gen_args: 'is_clang=true is_official_build=true'
-            os: macos-10.15
-            ninja_release_name: v1.7.2/ninja-mac.zip
-            gn_release_name: gn-macos-amd64.tar.gz
-
-    runs-on: ${{ matrix.os }}
-
+  spellcheck:
+    runs-on: ubuntu-latest
     steps:
-      - name: Install packages
-        if: matrix.install
-        run: sudo apt install ${{ matrix.install }}
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install codespell
+      run: |
+        pip3 install codespell
+    - name: Check spelling
+      run: |
+        make spellcheck
 
-      - uses: actions/checkout@v2
-        with:
-          # we need all everything for `git describe` to work correctly
-          fetch-depth: 0
-
-      - name: Make dependencies directory
-        run: |
-          DEPS_DIR=$(cd ~; pwd)/deps
-          mkdir -p ${DEPS_DIR}
-          echo "export DEPS_DIR=$DEPS_DIR" >> "${GITHUB_WORKSPACE}/.env"
-
-      - name: Install recent Ninja
-        run: |
-          source .env
-          cd ${DEPS_DIR}
-          wget --no-check-certificate --quiet -O ninja.zip "${NINJA_BASE_URL}${{ matrix.ninja_release_name }}"
-          python -c 'import sys,zipfile;zipfile.ZipFile(sys.argv[1]).extractall()' ninja.zip
-          chmod +x ninja
-
-      - name: Install GN
-        run: |
-          source .env
-          cd ${DEPS_DIR}
-          wget --no-check-certificate --quiet -O gn.tgz "${GN_BASE_URL}${{ matrix.gn_release_name }}"
-          tar xvf gn.tgz
-          chmod +x gn
-
-      # Run gn_helpers unittests first - this should fail if we have an unsupported Python version
-      # Only support Python3+ for now, otherwise we have to ship the mocking lib
-      - name: Test gn_helpers
-        run: |
-          python3 gn_helpers_unittest.py
-
-      # Setup test project for our //build
-      - name: Setup test project
-        run: |
-          source .env
-          git clone --branch=testsrc --depth=1 https://github.com/timniederhausen/gn-build.git testsrc
-          mkdir testsrc/build
-          mv config testsrc/build/
-          mv toolchain testsrc/build/
-
-      # Try to generate ninja files with different python versions
-      - name: gen with python2
-        run: |
-          source .env
-          echo script_executable = \"python2\" >> testsrc/.gn
-          ${DEPS_DIR}/gn gen out --args='${{ matrix.gen_args }}' --root=testsrc
-      - name: gen with python3
-        run: |
-          source .env
-          echo script_executable = \"python3\" >> testsrc/.gn
-          ${DEPS_DIR}/gn gen out --args='${{ matrix.gen_args }}' --root=testsrc
-
-      # Try to build the test project
-      - name: Build
-        run: |
-          source .env
-          cat out/args.gn
-          ${DEPS_DIR}/ninja -C out
-          cd out &&  ./hello
+  check_lesson_and_build_default:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-ruby@v1
+      with:
+        ruby-version: '2.7'
+    - name: Install basic requirements
+      run: |
+        # Need this library for nokogiri
+        sudo apt-get install libxslt1-dev    
+        gem install bundler json kramdown kramdown-parser-gfm
+        bundle config set path '.vendor/bundle'
+        bundle config build.nokogiri --use-system-libraries
+        bundle install
+    - name: "Lint episode markdown"
+      run: |
+        find _episodes -name \*.md -exec bundle exec mdl -r MD001,MD003,MD005,MD006,MD007,MD008,MD009,MD010,MD011,MD012,MD015,MD016,MD017,MD018,MD019,MD020,MD021,MD022,MD023,MD025,MD035,MD036,MD037,MD038,MD039,MD046 {} \;
+    - name: "Check lesson for warnings"
+      run: |
+        make lesson-check-all
+    - name: "Check lesson for errors"
+      run: |
+        make lesson-check
+    - name: "Check build"
+      run: |
+        make --always-make site
