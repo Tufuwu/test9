@@ -1,108 +1,214 @@
-.. image:: https://raw.githubusercontent.com/jschneier/django-storages/master/docs/logos/horizontal.png
-    :alt: Django-Storages
-    :width: 100%
+aiocache
+########
 
-.. image:: https://img.shields.io/pypi/v/django-storages.svg
-    :target: https://pypi.org/project/django-storages/
-    :alt: PyPI Version
+Asyncio cache supporting multiple backends (memory, redis and memcached).
 
-.. image:: https://travis-ci.org/jschneier/django-storages.svg?branch=master
-    :target: https://travis-ci.org/jschneier/django-storages
-    :alt: Build Status
+.. image:: https://travis-ci.org/argaen/aiocache.svg?branch=master
+  :target: https://travis-ci.org/argaen/aiocache
 
-Installation
-============
-Installing from PyPI is as easy as doing:
+.. image:: https://codecov.io/gh/argaen/aiocache/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/argaen/aiocache
 
-.. code-block:: bash
+.. image:: https://badge.fury.io/py/aiocache.svg
+  :target: https://pypi.python.org/pypi/aiocache
 
-  pip install django-storages
+.. image:: https://img.shields.io/pypi/pyversions/aiocache.svg
+  :target: https://pypi.python.org/pypi/aiocache
 
-If you'd prefer to install from source (maybe there is a bugfix in master that
-hasn't been released yet) then the magic incantation you are looking for is:
+.. image:: https://api.codacy.com/project/badge/Grade/96f772e38e63489ca884dbaf6e9fb7fd
+  :target: https://www.codacy.com/app/argaen/aiocache
 
-.. code-block:: bash
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/ambv/black
 
-  pip install -e 'git+https://github.com/jschneier/django-storages.git#egg=django-storages'
+This library aims for simplicity over specialization. All caches contain the same minimum interface which consists on the following functions:
 
-Once that is done set ``DEFAULT_FILE_STORAGE`` to the backend of your choice.
-If, for example, you want to use the boto3 backend you would set:
+- ``add``: Only adds key/value if key does not exist.
+- ``get``: Retrieve value identified by key.
+- ``set``: Sets key/value.
+- ``multi_get``: Retrieves multiple key/values.
+- ``multi_set``: Sets multiple key/values.
+- ``exists``: Returns True if key exists False otherwise.
+- ``increment``: Increment the value stored in the given key.
+- ``delete``: Deletes key and returns number of deleted items.
+- ``clear``: Clears the items stored.
+- ``raw``: Executes the specified command using the underlying client.
 
-.. code-block:: python
 
-  DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+.. role:: python(code)
+  :language: python
+
+.. contents::
+
+.. section-numbering:
 
 
-If you are using the ``FileSystemStorage`` as your storage management class in your models ``FileField`` fields, remove them
-and don't specify any storage parameter. That way, the ``DEFAULT_FILE_STORAGE`` class will be used by default in your field.
-For example, if you have a `photo` field defined as:
+Installing
+==========
 
-.. code-block:: python
+- ``pip install aiocache``
+- ``pip install aiocache[redis]``
+- ``pip install aiocache[memcached]``
+- ``pip install aiocache[redis,memcached]``
+- ``pip install aiocache[msgpack]``
 
-    photo = models.FileField(
-        storage=FileSystemStorage(location=settings.MEDIA_ROOT),
-        upload_to='photos',
-    )
 
-Set it to just:
-
-.. code-block:: python
-
-    photo = models.FileField(
-        upload_to='photos',
-    )
-
-There are also a number of settings available to control how each storage backend functions,
-please consult the documentation for a comprehensive list.
-
-About
+Usage
 =====
-django-storages is a project to provide a variety of storage backends in a single library.
 
-This library is usually compatible with the currently supported versions of
-Django. Check the Trove classifiers in setup.py to be sure.
+Using a cache is as simple as
 
-django-storages is backed in part by `Tidelift`_. Check them out for all of your enterprise open source
-software commerical support needs.
+.. code-block:: python
 
-.. _Tidelift: https://tidelift.com/subscription/pkg/pypi-django-storages?utm_source=pypi-django-storages&utm_medium=referral&utm_campaign=enterprise&utm_term=repo
+    >>> import asyncio
+    >>> loop = asyncio.get_event_loop()
+    >>> from aiocache import Cache
+    >>> cache = Cache(Cache.MEMORY) # Here you can also use Cache.REDIS and Cache.MEMCACHED, default is Cache.MEMORY
+    >>> loop.run_until_complete(cache.set('key', 'value'))
+    True
+    >>> loop.run_until_complete(cache.get('key'))
+    'value'
 
-Security
-========
+Or as a decorator
 
-To report a security vulnerability, please use the `Tidelift security contact`_. Tidelift will coordinate the
-fix and disclosure. Please **do not** post a public issue on the tracker.
+.. code-block:: python
 
-.. _Tidelift security contact: https://tidelift.com/security
+    import asyncio
 
-History
-=======
-This repo began as a fork of the original library under the package name of django-storages-redux and
-became the official successor (releasing under django-storages on PyPI) in February of 2016.
+    from collections import namedtuple
 
-Found a Bug? Something Unsupported?
-===================================
-I suspect that a few of the storage engines in backends/ have been unsupported
-for quite a long time. I personally only really need the S3Storage backend but
-welcome bug reports (and especially) patches and tests for some of the other
-backends.
+    from aiocache import cached, Cache
+    from aiocache.serializers import PickleSerializer
+    # With this we can store python objects in backends like Redis!
 
-Issues are tracked via GitHub issues at the `project issue page
-<https://github.com/jschneier/django-storages/issues>`_.
+    Result = namedtuple('Result', "content, status")
+
+
+    @cached(
+        ttl=10, cache=Cache.REDIS, key="key", serializer=PickleSerializer(), port=6379, namespace="main")
+    async def cached_call():
+        print("Sleeping for three seconds zzzz.....")
+        await asyncio.sleep(3)
+        return Result("content", 200)
+
+
+    def run():
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(cached_call())
+        loop.run_until_complete(cached_call())
+        loop.run_until_complete(cached_call())
+        cache = Cache(Cache.REDIS, endpoint="127.0.0.1", port=6379, namespace="main")
+        loop.run_until_complete(cache.delete("key"))
+
+    if __name__ == "__main__":
+        run()
+
+The recommended approach to instantiate a new cache is using the `Cache` constructor. However you can also instantiate directly using `aiocache.RedisCache`, `aiocache.SimpleMemoryCache` or `aiocache.MemcachedCache`.
+
+
+You can also setup cache aliases so its easy to reuse configurations
+
+.. code-block:: python
+
+  import asyncio
+
+  from aiocache import caches
+
+  # You can use either classes or strings for referencing classes
+  caches.set_config({
+      'default': {
+          'cache': "aiocache.SimpleMemoryCache",
+          'serializer': {
+              'class': "aiocache.serializers.StringSerializer"
+          }
+      },
+      'redis_alt': {
+          'cache': "aiocache.RedisCache",
+          'endpoint': "127.0.0.1",
+          'port': 6379,
+          'timeout': 1,
+          'serializer': {
+              'class': "aiocache.serializers.PickleSerializer"
+          },
+          'plugins': [
+              {'class': "aiocache.plugins.HitMissRatioPlugin"},
+              {'class': "aiocache.plugins.TimingPlugin"}
+          ]
+      }
+  })
+
+
+  async def default_cache():
+      cache = caches.get('default')   # This always returns the SAME instance
+      await cache.set("key", "value")
+      assert await cache.get("key") == "value"
+
+
+  async def alt_cache():
+      cache = caches.create('redis_alt')   # This creates a NEW instance on every call
+      await cache.set("key", "value")
+      assert await cache.get("key") == "value"
+
+
+  def test_alias():
+      loop = asyncio.get_event_loop()
+      loop.run_until_complete(default_cache())
+      loop.run_until_complete(alt_cache())
+
+      loop.run_until_complete(caches.get('redis_alt').delete("key"))
+
+
+  if __name__ == "__main__":
+      test_alias()
+
+
+How does it work
+================
+
+Aiocache provides 3 main entities:
+
+- **backends**: Allow you specify which backend you want to use for your cache. Currently supporting: SimpleMemoryCache, RedisCache using aioredis_ and MemCache using aiomcache_.
+- **serializers**: Serialize and deserialize the data between your code and the backends. This allows you to save any Python object into your cache. Currently supporting: StringSerializer, PickleSerializer, JsonSerializer, and MsgPackSerializer. But you can also build custom ones.
+- **plugins**: Implement a hooks system that allows to execute extra behavior before and after of each command.
+
+ If you are missing an implementation of backend, serializer or plugin you think it could be interesting for the package, do not hesitate to open a new issue.
+
+.. image:: docs/images/architecture.png
+  :align: center
+
+Those 3 entities combine during some of the cache operations to apply the desired command (backend), data transformation (serializer) and pre/post hooks (plugins). To have a better vision of what happens, here you can check how ``set`` function works in ``aiocache``:
+
+.. image:: docs/images/set_operation_flow.png
+  :align: center
+
+
+Amazing examples
+================
+
+In `examples folder <https://github.com/argaen/aiocache/tree/master/examples>`_ you can check different use cases:
+
+- `Sanic, Aiohttp and Tornado <https://github.com/argaen/aiocache/tree/master/examples/frameworks>`_
+- `Python object in Redis <https://github.com/argaen/aiocache/blob/master/examples/python_object.py>`_
+- `Custom serializer for compressing data <https://github.com/argaen/aiocache/blob/master/examples/serializer_class.py>`_
+- `TimingPlugin and HitMissRatioPlugin demos <https://github.com/argaen/aiocache/blob/master/examples/plugins.py>`_
+- `Using marshmallow as a serializer <https://github.com/argaen/aiocache/blob/master/examples/marshmallow_serializer_class.py>`_
+- `Using cached decorator <https://github.com/argaen/aiocache/blob/master/examples/cached_decorator.py>`_.
+- `Using multi_cached decorator <https://github.com/argaen/aiocache/blob/master/examples/multicached_decorator.py>`_.
+
+
 
 Documentation
 =============
-Documentation for django-storages is located at https://django-storages.readthedocs.io/.
 
-Contributing
-============
+- `Usage <http://aiocache.readthedocs.io/en/latest>`_
+- `Caches <http://aiocache.readthedocs.io/en/latest/caches.html>`_
+- `Serializers <http://aiocache.readthedocs.io/en/latest/serializers.html>`_
+- `Plugins <http://aiocache.readthedocs.io/en/latest/plugins.html>`_
+- `Configuration <http://aiocache.readthedocs.io/en/latest/configuration.html>`_
+- `Decorators <http://aiocache.readthedocs.io/en/latest/decorators.html>`_
+- `Testing <http://aiocache.readthedocs.io/en/latest/testing.html>`_
+- `Examples <https://github.com/argaen/aiocache/tree/master/examples>`_
 
-#. `Check for open issues
-   <https://github.com/jschneier/django-storages/issues>`_ at the project
-   issue page or open a new issue to start a discussion about a feature or bug.
-#. Fork the `django-storages repository on GitHub
-   <https://github.com/jschneier/django-storages>`_ to start making changes.
-#. Add a test case to show that the bug is fixed or the feature is implemented
-   correctly.
-#. Bug me until I can merge your pull request. Also, don't forget to add
-   yourself to ``AUTHORS``.
+
+.. _aioredis: https://github.com/aio-libs/aioredis
+.. _aiomcache: https://github.com/aio-libs/aiomcache
