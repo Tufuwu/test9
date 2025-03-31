@@ -1,14 +1,18 @@
-*.egg
+# SPDX-FileCopyrightText: 2019 The usbmon-tools Authors
+#
+# SPDX-License-Identifier: Apache-2.0
+
 *.egg-info/
 *.pyc
-.cache/
-.coverage
-.eggs/
+*.so
+*~
+.cache
+.ipynb_checkpoints/
 .mypy_cache/
-.pytest_cache/
-.tox/
+.vscode/
+/MANIFEST
+/dist/
+/usbmon/linux/linux.c
+/venv/
 __pycache__/
-build/
-dist/
-docs/_build/
-venv/
+build
