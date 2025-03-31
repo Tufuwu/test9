@@ -1,23 +1,3 @@
-# Crossbar stuff
-*/dot_crossbar/key.priv
-*/dot_crossbar/key.pub
-*/dot_crossbar/node.pid
-
-# site_config
-default.yaml
-
-## github's .gitignore
-
-# tmp files
-*.swp
-*.bak
-
-# documentation
-docs/_build/
-
-# pytest
-.pytest_cache
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -40,7 +20,6 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -63,7 +42,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*.cover
+*,cover
 .hypothesis/
 
 # Translations
@@ -87,7 +66,7 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter Notebook
+# IPython Notebook
 .ipynb_checkpoints
 
 # pyenv
@@ -96,38 +75,15 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
-# SageMath parsed files
-*.sage.py
-
 # dotenv
 .env
 
 # virtualenv
-.venv
 venv/
 ENV/
 
 # Spyder project settings
 .spyderproject
-.spyproject
-
-# Pycharm files
-.idea/*
 
 # Rope project settings
 .ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-
-# Custom
-.crossbar/
-ocs/Lakeshore/ls.cfg
-ocs/Lakeshore/ips.json
-agents/aggregator/data/*
-agents/aggregator/data2/*
-key.*
-node.pid
