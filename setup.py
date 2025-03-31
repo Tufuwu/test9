@@ -1,155 +1,124 @@
-# -*- coding: utf-8 -*-
-# Copyright (C) 2009-2020, Luis Pedro Coelho <luis@luispedro.org>
-# vim: set ts=4 sts=4 sw=4 expandtab smartindent:
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-#  all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#  THE SOFTWARE.
-
-from __future__ import division
-try:
-    import setuptools
-except ImportError:
-    print('''
-setuptools not found.
-
-On linux, the package is often called python-setuptools''')
-    from sys import exit
-    exit(1)
+import io
 import os
-try:
-    import numpy
-except ImportError:
-    class FakeNumpy(object):
-        def get_include(self):
-           return []
-    numpy = FakeNumpy()
+from setuptools import setup, find_packages
+from sys import version_info
 
 
-from distutils.command.build_ext import build_ext
+def parse_requirements(file):
+    required_packages = []
+    with open(os.path.join(os.path.dirname(__file__), file)) as req_file:
+        for line in req_file:
+            if '/' not in line:
+                required_packages.append(line.strip())
+    return required_packages
 
-exec(compile(open('mahotas/mahotas_version.py').read(),
-             'mahotas/mahotas_version.py', 'exec'))
 
-try:
-    long_description = open('README.md', encoding='utf-8').read()
-except:
-    long_description = open('README.md').read()
+def get_main_requirements():
+    """ Collects requirements from a file and adds additional requirement for Python 3.6
+    """
+    requirements = parse_requirements('requirements.txt')
 
-undef_macros = []
-define_macros = []
-if os.environ.get('DEBUG'):
-    undef_macros = ['NDEBUG']
-    if os.environ.get('DEBUG') == '2':
-        define_macros = [('_GLIBCXX_DEBUG','1')]
+    if version_info.major == 3 and version_info.minor == 6:
+        requirements.append('dataclasses')
 
-define_macros.append(('NPY_NO_DEPRECATED_API','NPY_1_7_API_VERSION'))
-define_macros.append(('PY_ARRAY_UNIQUE_SYMBOL','Mahotas_PyArray_API_Symbol'))
+    return requirements
 
-extensions = {
-    'mahotas._bbox': ['mahotas/_bbox.cpp'],
-    'mahotas._center_of_mass': ['mahotas/_center_of_mass.cpp'],
-    'mahotas._convex': ['mahotas/_convex.cpp'],
-    'mahotas._convolve': ['mahotas/_convolve.cpp', 'mahotas/_filters.cpp'],
-    'mahotas._distance': ['mahotas/_distance.cpp'],
-    'mahotas._histogram': ['mahotas/_histogram.cpp'],
-    'mahotas._interpolate': ['mahotas/_interpolate.cpp', 'mahotas/_filters.cpp'],
-    'mahotas._labeled': ['mahotas/_labeled.cpp', 'mahotas/_filters.cpp'],
-    'mahotas._morph': ['mahotas/_morph.cpp', 'mahotas/_filters.cpp'],
-    'mahotas._thin': ['mahotas/_thin.cpp'],
 
-    'mahotas.features._lbp': ['mahotas/features/_lbp.cpp'],
-    'mahotas.features._surf': ['mahotas/features/_surf.cpp'],
-    'mahotas.features._texture': ['mahotas/features/_texture.cpp', 'mahotas/_filters.cpp'],
-    'mahotas.features._zernike': ['mahotas/features/_zernike.cpp'],
-}
+def get_version():
+    for line in open(os.path.join(os.path.dirname(__file__), 'sentinelhub', '_version.py')):
+        if line.find("__version__") >= 0:
+            version = line.split("=")[1].strip()
+            return version.strip('"').strip("'")
 
-ext_modules = [setuptools.Extension(key, sources=sources, undef_macros=undef_macros, define_macros=define_macros, include_dirs=[numpy.get_include()]) for key,sources in extensions.items()]
 
-packages = setuptools.find_packages()
+def get_long_description():
+    return io.open('README.md', encoding="utf-8").read()
 
-package_dir = {
-    'mahotas.tests': 'mahotas/tests',
-    'mahotas.demos': 'mahotas/demos',
-    }
-package_data = {
-    'mahotas.tests': ['data/*'],
-    'mahotas.demos': ['data/*'],
-    }
 
-install_requires = open('requirements.txt').read().strip().split('\n')
+def update_package_config():
+    """ Every time sentinelhub package is installed entire config.json is overwritten. However this function
+    will check if sentinelhub is already installed and try to copy those parameters from old config.json that are by
+    default set to an empty value (i.e. instance_id, aws_access_key_id and aws_secret_access_key) into new config.json
+    file.
+    """
+    try:
+        import importlib
+        import sys
+        import json
 
-tests_require = open('tests-requirements.txt').read().strip().split('\n')
+        path = importlib.machinery.PathFinder().find_spec('sentinelhub', sys.path[1:]).submodule_search_locations[0]
+        old_config_filename = os.path.join(path, 'config.json')
 
-copt={
-    'msvc': ['/EHsc'], 
-    'intelw': ['/EHsc']  
-}
+        with open(old_config_filename, 'r') as file:
+            old_config = json.load(file)
 
-class build_ext_subclass(build_ext):
-    def build_extensions(self):
-        c = self.compiler.compiler_type
-        if c in copt:
-           for e in self.extensions:
-               e.extra_compile_args = copt[c]
-        build_ext.build_extensions(self)
+        from sentinelhub.config import SHConfig
 
-classifiers = [
-'Development Status :: 5 - Production/Stable',
-'Intended Audience :: Developers',
-'Intended Audience :: Science/Research',
-'Topic :: Scientific/Engineering :: Image Recognition',
-'Topic :: Software Development :: Libraries',
-'Programming Language :: Python',
-'Programming Language :: Python :: 2',
-'Programming Language :: Python :: 2.7',
-'Programming Language :: Python :: 3',
-'Programming Language :: Python :: 3.3',
-'Programming Language :: Python :: 3.4',
-'Programming Language :: Python :: 3.5',
-'Programming Language :: Python :: 3.6',
-'Programming Language :: Python :: 3.7',
-'Programming Language :: C++',
-'Operating System :: OS Independent',
-'License :: OSI Approved :: MIT License',
-]
+        config = SHConfig()
+        for attr, value in old_config.items():
+            if hasattr(config, attr) and not getattr(config, attr):
+                setattr(config, attr, value)
 
-setuptools.setup(name = 'mahotas',
-      version = __version__,
-      description = 'Mahotas: Computer Vision Library',
-      long_description = long_description,
-      long_description_content_type = 'text/markdown',
-      author = 'Luis Pedro Coelho',
-      author_email = 'luis@luispedro.org',
-      license = 'MIT',
-      platforms = ['Any'],
-      classifiers = classifiers,
-      url = 'http://luispedro.org/software/mahotas',
-      packages = packages,
-      ext_modules = ext_modules,
-      package_dir = package_dir,
-      package_data = package_data,
-      entry_points={
-          'console_scripts': [
-              'mahotas-features = mahotas.features_cli:main',
-          ],
-      },
-      install_requires = install_requires,
-      tests_require = tests_require,
-      cmdclass = {'build_ext': build_ext_subclass}
-      )
+        config.save()
 
+    except BaseException:
+        pass
+
+
+def try_create_config_file():
+    """ After the package is installed it will try to trigger saving a config.json file
+    """
+    try:
+        from sentinelhub.config import SHConfig
+        SHConfig()
+    except BaseException:
+        pass
+
+
+update_package_config()
+
+setup(
+    name='sentinelhub',
+    python_requires='>=3.6',
+    version=get_version(),
+    description='Sentinel Hub Utilities',
+    long_description=get_long_description(),
+    long_description_content_type="text/markdown",
+    url='https://github.com/sentinel-hub/sentinelhub-py',
+    author='Sinergise ltd.',
+    author_email='info@sentinel-hub.com',
+    license='MIT',
+    packages=find_packages(),
+    package_data={'sentinelhub': ['sentinelhub/config.json', 'sentinelhub/.utmzones.geojson']},
+    include_package_data=True,
+    install_requires=get_main_requirements(),
+    extras_require={
+        'DEV': parse_requirements('requirements-dev.txt'),
+        'DOCS': parse_requirements('requirements-docs.txt')
+    },
+    zip_safe=False,
+    entry_points={'console_scripts': ['sentinelhub=sentinelhub.commands:main_help',
+                                      'sentinelhub.aws=sentinelhub.commands:aws',
+                                      'sentinelhub.config=sentinelhub.commands:config',
+                                      'sentinelhub.download=sentinelhub.commands:download']},
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Education',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: MacOS',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: Unix',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: Implementation :: PyPy',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Software Development'
+    ]
+)
+try_create_config_file()

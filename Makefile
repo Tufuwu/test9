@@ -1,28 +1,22 @@
-debug: mahotas/*.cpp mahotas/*.h mahotas/*.hpp
-	DEBUG=2 python setup.py build --build-lib=.
+# Makefile for creating a new release of the package and uploading it to PyPI
+# This way is preferred to manual because it also resets config.json
 
-debug3: mahotas/*.cpp mahotas/*.h mahotas/*.hpp
-	DEBUG=2 python3 setup.py build --build-lib=.
+PYTHON = python3
+CONFIG = sentinelhub.config
 
-fast: mahotas/*.cpp mahotas/*.h mahotas/*.hpp
-	python setup.py build --build-lib=.
+help:
+	@echo "Use 'make upload' to reset config.json and upload the package to PyPi"
 
-install:
-	python setup.py install
+reset-config:
+	$(CONFIG) --reset
 
-fast3: mahotas/*.cpp mahotas/*.h mahotas/*.hpp
-	python3 setup.py build --build-lib=.
+upload: reset-config
+	rm -r dist | true
+	$(PYTHON) setup.py sdist
+	twine upload --skip-existing dist/*
 
-clean:
-	rm -rf build mahotas/*.so mahotas/features/*.so
-
-tests: debug
-	pytest -v
-
-docs:
-	rm -rf build/docs
-	cd docs && make html && cp -r build/html ../build/docs
-	@echo python setup.py upload_docs
-
-.PHONY: clean docs tests fast debug install fast3 debug3
-
+# For testing:
+test-upload: reset-config
+	rm -r dist | true
+	$(PYTHON) setup.py sdist
+	twine upload --repository testpypi --skip-existing dist/*
