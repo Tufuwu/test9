@@ -1,27 +1,21 @@
-import setuptools
+from setuptools import setup, find_packages
 
-with open("README.md", "r") as fh:
+with open('README.md', 'r') as f:
+    long_description = f.read()
 
-    long_description = fh.read()
-
-setuptools.setup(
-     name='vtt_to_srt3',
-     version='0.1.9.0',
-     author="Jeison Cardoso",
-     author_email="cardoso.jeison@gmail.com",
-     description="vtt to srt subtitles converter package",
-     long_description=long_description,
-     long_description_content_type="text/markdown",
-     url="https://github.com/jsonzilla/vtt-to-srt.py",
-     packages=setuptools.find_packages(),
-     classifiers=[
-         "Programming Language :: Python :: 3.7",
-         "Operating System :: OS Independent",
-     ],
-     entry_points={
-        "console_scripts": [
-            "vtt_to_srt=vtt_to_srt.vtt_to_srt:main",
-        ]
-    }
-
- )
+setup(
+    name='panda_gym',
+    description='OpenAI Gym Franka Emika Panda robot environment based on PyBullet.',
+    author='Quentin GALLOUÉDEC',
+    author_email='gallouedec.quentin@gmail.com',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    url='https://github.com/quenting44/panda-gym',
+    packages=find_packages(),
+    include_package_data=True,
+    package_data={
+        'panda_gym': ['envs/assets/*.json']
+    },
+    version='0.1.1',
+    install_requires=['gym', 'pybullet', 'numpy']
+)
