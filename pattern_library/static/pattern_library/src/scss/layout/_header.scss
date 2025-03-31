@@ -1,0 +1,28 @@
+.header {
+    background-color: $color-primary;
+    display: flex;
+    align-items: center;
+    height: 45px;
+    -ms-grid-column: 1;
+    -ms-grid-row: 1;
+    -ms-grid-column-span: 2;
+    grid-column: 1 / span 2;
+
+    &__title {
+        color: $white;
+        font-weight: 200;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 16px;
+        margin-left: 15px;
+
+        &::after {
+            content: $site-title;
+        }
+
+        @media only screen and (min-width: 600px) {
+            font-size: 22px;
+            letter-spacing: 5px;
+        }
+    }
+}

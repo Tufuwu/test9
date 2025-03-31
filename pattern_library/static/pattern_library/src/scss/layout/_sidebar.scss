@@ -1,0 +1,30 @@
+.sidebar {
+    background-color: $off-white;
+    padding: 20px;
+    height: 100vh;
+    margin-left: 0;
+    overflow: auto;
+    -ms-grid-column: 1;
+    -ms-grid-row: 2;
+
+    &__search {
+        width: 100%;
+        padding: 10px;
+        font-size: 15px;
+        margin: 0 0 15px;
+    }
+
+    &__search-results {
+        > a {
+            margin-bottom: 7px;
+            display: block;
+            font-size: 13px;
+        }
+    }
+
+    &__nav {
+        &--inactive {
+            display: none;
+        }
+    }
+}

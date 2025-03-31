@@ -1,0 +1,59 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    font-family: $family-primary;
+    height: 100%;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+    font-weight: 400;
+}
+
+a {
+    word-wrap: break-word;
+    color: $link-color;
+}
+
+.section-group-heading:not(:first-of-type) {
+    margin-top: 100px;
+}
+
+.pattern-group-heading {
+    font-weight: 500;
+    margin: 30px 0 10px;
+}
+
+.border-group {
+    box-sizing: border-box;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 2px solid #eee;
+    display: block;
+    border-radius: 5px;
+    transition: background-color 300ms ease;
+}
+
+.border-group:hover {
+    background: #f1f1f1;
+}
+
+.is-hidden {
+    @include hidden();
+}
+
+.sr-only {
+    @include hidden();
+}
