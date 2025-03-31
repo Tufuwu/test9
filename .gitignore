@@ -1,11 +1,13 @@
-# VS Code Configuration File
+sample/
+.cache
+venv
+docs/build/
+.idea
+__pycache__/
+.coverage
+chalice.egg-info/
+.hypothesis/
+.pytest_cache/
+.mypy_cache/
+*.pyc
 .vscode
-# Audit result files
-*.out
-# Website generation stuff
-TOC.md
-node_modules/
-site/
-generated/
-.DS_Store
-news.xml
