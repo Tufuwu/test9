@@ -1,4 +1,0 @@
-"""
-Test jack audio server!
-"""
-

@@ -1,6 +1,0 @@
-References
-=============
-
-.. _references:
-
-.. bibliography::

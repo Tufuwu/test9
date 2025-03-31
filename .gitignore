@@ -9,7 +9,6 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
-build/
 develop-eggs/
 dist/
 downloads/
@@ -43,8 +42,11 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*,cover
+*.cover
 .hypothesis/
+
+# pytest cache
+.pytest_cache/
 
 # Translations
 *.mo
@@ -76,34 +78,38 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
+# SageMath parsed files
+*.sage.py
+
 # dotenv
 .env
 
 # virtualenv
-.venv/
+.venv
 venv/
 ENV/
-venv3/
 
 # Spyder project settings
 .spyderproject
+.spyproject
 
 # Rope project settings
 .ropeproject
 
-# ------------------
-# PyCharm stuff
-.idea/*
+# mkdocs documentation
+/site
 
-# OSX stuff
-.DS_Store
+# mypy
+.mypy_cache/
 
-# rendered docs
+# Config file
+yeti.conf
 
-# viz renders
-/*/viz/*.html
-venv38
-venv*
-transform_scratch.py
+# environment
+.tags
 
-_skbuild
+# vue and node things
+node_modules/
+
+# VS studio code
+.vscode
