@@ -1,0 +1,108 @@
+//affiliation picker
+.live_questions__select > .select2-container {
+    min-width: 100%;
+    margin: 0 0 1rem;
+
+    @media screen and (min-width: $breakpoint-xs) {
+        min-width: 15rem;
+    }
+}
+
+.live_questions__char-count {
+    color: $gray-lighter;
+    font-size: $font-size-sm;
+    margin-top: -0.75*$spacer;
+    margin-bottom: $spacer;
+}
+
+.livequestions__control-bar--mod,
+.livequestions__control-bar--user {
+    display: flex;
+    justify-content: space-between;
+
+    .livequestions__action-bar,
+    .livequestions__filter-bar {
+        display: flex;
+        min-width: 100%;
+        position: relative;
+        flex-wrap: wrap;
+
+        @media screen and (min-width: $breakpoint) {
+            margin-bottom: $spacer;
+        }
+
+        @media screen and (min-width: $breakpoint-lg) {
+            display: inline-block;
+            min-width: inherit;
+            position: inherit;
+        }
+    }
+
+    .livequestions__action-bar--btn,
+    .livequestions__filter--btn {
+        padding: 0.5*$spacer $spacer;
+        display: block;
+        flex-basis: 100%;
+
+        @media screen and (min-width: $breakpoint) {
+            padding: 0 0 0 $spacer;
+            display: inline-block;
+            flex-basis: 50%;
+        }
+
+        @media screen and (min-width: $breakpoint-lg) {
+            display: inline-block;
+        }
+    }
+
+    //to ensure flex children fill space
+    .btn--light,
+    .checkbox-btn__text {
+        min-width: 100%;
+    }
+}
+
+.livequestions__filter--open {
+    position: absolute;
+    left: $spacer;
+    top: 8*$spacer;
+
+    @media screen and (min-width: $breakpoint) {
+        top: 3.5*$spacer;
+    }
+
+    @media screen and (min-width: $breakpoint-lg) {
+        left: inherit;
+        right: $spacer;
+    }
+}
+
+.livequestions__control-bar--user {
+    .livequestions__action-bar--btn,
+    .livequestions__filter--btn {
+        min-width: 100%;
+    }
+
+    .livequestions__filter--btn {
+        padding-right: $spacer;
+    }
+}
+
+.livequestion__info-box > .btn {
+    float: right;
+}
+
+.livequestions__count {
+    position: absolute;
+    bottom: 0;
+    color: $text-color-gray;
+}
+
+.livequestion_anchor {
+    position: relative;
+    bottom: -7*$spacer;
+}
+
+.livequestion-detail__image {
+    width: 100%;
+}

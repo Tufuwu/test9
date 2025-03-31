@@ -1,0 +1,25 @@
+.l-menu__menu,
+.l-menu__content,
+.l-menu__aside {
+    margin-bottom: 2em;
+}
+
+.l-menu {
+    @extend .row;
+}
+
+.l-menu__menu {
+    @extend .col-md-3;
+}
+
+.l-menu__content {
+    @extend .col-md-9;
+}
+
+.l-menu__content--aside {
+    @extend .col-md-6;
+}
+
+.l-menu__aside {
+    @extend .col-md-3;
+}

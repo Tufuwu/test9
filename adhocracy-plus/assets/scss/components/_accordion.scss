@@ -1,0 +1,54 @@
+.accordion {
+    border-top: solid 1px $border-color;
+    overflow: hidden;
+
+    &:last-child {
+        border-bottom: solid 1px $border-color;
+    }
+}
+
+.accordion__title {
+    display: block;
+    position: relative;
+    padding: $padding/2 1em $padding/2 1.2em;
+    color: inherit;
+    border-bottom: solid 1px $border-color;
+
+    &.collapsed {
+        border-bottom: none;
+    }
+
+    i {
+        font-size: 1.7rem;
+        position: absolute;
+        top: 1.5rem;
+        right: $padding;
+        transition: transform 0.3s;
+    }
+
+    &[aria-expanded="true"] .fa-plus:before {
+        font-family: "Font Awesome 5 Free", sans-serif;
+        font-weight: 900;
+        content: "\f068"; // plus
+    }
+}
+
+.accordion__body {
+    padding: $padding;
+
+    ul {
+        list-style: none;
+        margin-left: 0;
+        padding: 0;
+    }
+
+    li {
+        margin-bottom: 0.2em;
+    }
+
+    a[href^="/documents"]:before {
+        content: '\f016'; // file-o
+        font-family: 'FontAwesome', sans-serif;
+        margin-right: 0.3em;
+    }
+}

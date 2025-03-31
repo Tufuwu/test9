@@ -1,5 +1,7 @@
 [run]
-source = nutils
-
-[html]
-directory = build/coverage/
+source =
+    apps
+omit =
+    */migrations/*
+    */tests.py
+    */test_*.py
