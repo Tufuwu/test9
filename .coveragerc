@@ -1,5 +1,0 @@
-[run]
-source = py17track
-
-omit =
-    py17track/track.py
