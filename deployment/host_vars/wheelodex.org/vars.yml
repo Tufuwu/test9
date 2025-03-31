@@ -1,0 +1,23 @@
+---
+ansible_host: 174.138.60.140
+ansible_user: admin
+# DO NOT set `ansible_become_user: root`.  Ansible seems to set that
+# implicitly, and setting it explicitly messes with tasks with `become_user:`.
+ansible_python_interpreter: /usr/bin/python3
+
+config_options:
+    WHEELODEX_MAX_WHEEL_SIZE: 5242880  # 5 MiB
+    WHEELODEX_STATS_LOG_DIR: "{{wheelodex_log_path}}"
+
+server_names:
+    - www.wheelodex.org
+    - wheelodex.org
+
+register_wheels_per_day: 3
+register_wheels_start: 0
+
+process_wheels_per_day: 1
+process_wheels_start: 6
+
+uwsgi_processes: 4
+uwsgi_threads: 2

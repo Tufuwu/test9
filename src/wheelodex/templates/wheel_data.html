@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+
+{% block title %}Wheelodex &#x2014; {{project.display_name|e}}{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+    <a href="{{url_for('.index')}}">Wheelodex</a>
+    &#xBB; <a href="{{url_for('.project_list')}}">Projects</a>
+    {% if not subpage %}
+        &#xBB; {{project.display_name|e}}
+    {% else %}
+        &#xBB; <a href="{{url_for('.project', project=project.name)}}">{{project.display_name|e}}</a>
+        &#xBB; {{whl.filename}}
+    {% endif %}
+</div>
+
+<div class="search-header">
+    <form action="{{url_for('.search_projects')}}" method="GET">
+        <input type="text" name="q" placeholder="Search Projects"/>
+    </form>
+</div>
+
+<h1>{{project.display_name|e}}</h1>
+
+<p style="text-align: center">
+    <a href="https://pypi.org/project/{{project.display_name|e}}/{{whl.version.display_name|e}}/">View on PyPI</a> &#x2014;
+    <a href="{{url_for('.rdepends', project=project.name)}}">Reverse Dependencies</a> ({{rdepends_qty}})
+</p>
+
+<table class="versions-wheels-grid">
+    {% for v, wheels in all_wheels %}
+        <tr>
+            <td class="version">{{v|e}}</td>
+            {% for w,d in wheels %}
+                {% if not loop.first %}
+                    <tr><td></td>
+                {% endif %}
+                <td class="{% if d %}wheel-data{% else %}wheel-nodata{% endif %}{% if w.id == whl.id %} current-wheel{% endif %}">
+                    <a href="{{url_for('.wheel_data', wheel=w.filename, project=project.name)}}">{{w.filename|e}}</a>
+                </td>
+            </tr>
+            {% endfor %}
+    {% endfor %}
+</table>
+
+<h2>Wheel Details</h2>
+
+<table>
+    <tr>
+        <td><b>Project:</b></td>
+        <td>{{whl.project.display_name|e}}</td>
+    </tr>
+    <tr>
+        <td><b>Version:</b></td>
+        <td>{{whl.version.display_name|e}}</td>
+    </tr>
+    <tr>
+        <td><b>Filename:</b></td>
+        <td>{{whl.filename|e}}</td>
+    </tr>
+    <tr>
+        <td><b>Download:</b></td>
+        <td><a href="{{whl.url}}">[link]</a></td>
+    </tr>
+    <tr>
+        <td><b>Size:</b></td>
+        <td>{{whl.size}}</td>
+    </tr>
+    <tr>
+        <td><b>MD5:</b></td>
+        {% if whl.md5 == None %}
+        <td>[Unknown]</td>
+        {% else %}
+        <td><code>{{whl.md5}}</code></td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td><b>SHA256:</b></td>
+        {% if whl.sha256 == None %}
+        <td>[Unknown]</td>
+        {% else %}
+        <td><code>{{whl.sha256}}</code></td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td><b>Uploaded:</b></td>
+        <td class="timestamp">{{whl.uploaded.strftime("%Y-%m-%d %H:%M:%S %z")}}</td>
+    </tr>
+</table>
+
+{% if whl.data != None %}
+{% set data = whl.data.raw_data %}
+
+{% if not data['valid'] %}
+<p>This wheel failed validation; the error message was:
+<code>{{data['validation_error']['str']|e}}</code></p>
+{% endif %}
+
+<h2>dist-info</h2>
+
+<p class="dist_info_links">
+    {% set middot = joiner('·') %}
+    {% if 'metadata' in data['dist_info'] %}{{middot()}} <a href="#metadata">METADATA</a>{% endif %}
+    {% if 'wheel' in data['dist_info'] %}{{middot()}} <a href="#wheel">WHEEL</a>{% endif %}
+    {% if 'record' in data['dist_info'] %}{{middot()}} <a href="#record">RECORD</a>{% endif %}
+    {% if 'top_level' in data['dist_info'] %}{{middot()}} <a href="#top_level">top_level.txt</a>{% endif %}
+    {% if 'entry_points' in data['dist_info'] %}{{middot()}} <a href="#entry_points">entry_points.txt</a>{% endif %}
+    {% if 'namespace_packages' in data['dist_info'] %}{{middot()}} <a href="#namespace_packages">namespace_packages.txt</a>{% endif %}
+    {% if 'dependency_links' in data['dist_info'] %}{{middot()}} <a href="#dependency_links">dependency_links.txt</a>{% endif %}
+    {% if 'zip_safe' in data['dist_info'] %}
+        {{middot()}} <a href="#zip_safe">
+            {% if data['dist_info']['zip_safe'] %}
+                zip-safe
+            {% else %}
+                not-zip-safe
+            {% endif %}
+        </a>
+    {% endif %}
+</p>
+
+{% if 'metadata' in data['dist_info'] %}
+    <h3 class="dist_info_filename" id="metadata">METADATA</h3>
+    {% set metadata = data['dist_info']['metadata'] %}
+    {% if metadata %}
+        <div class="dist_info_file metadata">
+            <table class="keyvalues">
+                {% for field, value in metadata|flatten_metadata %}
+                    <tr>
+                        <td class="key">{{field|e}}:</td>
+                        <td class="value">{{value|e}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% if metadata.get('description') != None %}
+                <div class="body">[Description omitted; length: {{metadata["description"]["length"]}} characters{% if not data["derived"]["readme_renders"] %}; fails to render{% endif %}]</div>
+            {% else %}
+                <div class="body">[No description]</div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="empty-file">[empty]</div>
+    {% endif %}
+{% endif %}
+
+{% if 'wheel' in data['dist_info'] %}
+    <h3 class="dist_info_filename" id="wheel">WHEEL</h3>
+    {% set wheelinfo = data['dist_info']['wheel'] %}
+    {% if wheelinfo %}
+        <div class="dist_info_file">
+            <table class="keyvalues">
+                {% for field, value in wheelinfo|flatten_wheel_info %}
+                    <tr>
+                        <td class="key">{{field|e}}:</td>
+                        <td class="value">{{value|e}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% if 'BODY' in wheelinfo %}
+                <div class="body">{{wheelinfo['BODY']|e}}</div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="empty-file">[empty]</div>
+    {% endif %}
+{% endif %}
+
+{% if 'record' in data['dist_info'] %}
+    <h3 class="dist_info_filename" id="record">RECORD</h3>
+    {% if data['dist_info']['record'] %}
+        <table class="record">
+            <tr>
+                <th>Path</th>
+                <th>Digest</th>
+                <th>Size</th>
+            </tr>
+            {% for entry in data['dist_info']['record'] %}
+                <tr>
+                    <td class="path">{{entry['path']|e}}</td>
+                    {% if entry['digests'] %}
+                        <td class="digests">
+                            {% set middigest = joiner('<br/>'|safe) %}
+                            {% for alg, value in entry['digests'].items() %}
+                                {{middigest()}}{{alg|e}}={{value|e}}
+                            {% endfor %}
+                        </td>
+                    {% else %}
+                        <td class="nil">&#x2014;</td>
+                    {% endif %}
+                    {% if entry['size'] != None %}
+                        <td class="size">{{entry['size']}}</td>
+                    {% else %}
+                        <td class="nil">&#x2014;</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div class="empty-file">[empty]</div>
+    {% endif %}
+{% endif %}
+
+{% if 'top_level' in data['dist_info'] %}
+    <h3 class="dist_info_filename" id="top_level">top_level.txt</h3>
+    {% if data['dist_info']['top_level'] %}
+        <div class="dist_info_file">
+            {% for pkg in data["dist_info"]["top_level"] %}
+                <div>{{pkg|e}}</div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-file">[empty]</div>
+    {% endif %}
+{% endif %}
+
+{% if 'entry_points' in data['dist_info'] %}
+    <h3 class="dist_info_filename" id="entry_points">entry_points.txt</h3>
+    {% if data['dist_info']['entry_points'] %}
+        <div class="dist_info_file entry_points">
+            {% for group, eps in data['dist_info']['entry_points'].items()|sort %}
+                <div class="epgroup">
+                    <div class="epgroupname">
+                        [<a href="{{url_for('.entry_point', group=group)}}">{{group|e}}</a>]
+                    </div>
+                    {% for name, ep in eps.items()|sort %}
+                        <div class="ep">
+                            {{name|e}} = {{ep["module"]|e}}{% if ep["attr"] %}:{{ep["attr"]|e}}{% endif %}{% if ep["extras"] %} [{{ep["extras"]|join(",")}}]{% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-file">[empty]</div>
+    {% endif %}
+{% endif %}
+
+{% if 'namespace_packages' in data['dist_info'] %}
+    <h3 class="dist_info_filename" id="namespace_packages">namespace_packages.txt</h3>
+    {% if data['dist_info']['namespace_packages'] %}
+        <div class="dist_info_file">
+            {% for pkg in data["dist_info"]["namespace_packages"] %}
+                <div>{{pkg|e}}</div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-file">[empty]</div>
+    {% endif %}
+{% endif %}
+
+{% if 'dependency_links' in data['dist_info'] %}
+    <h3 class="dist_info_filename" id="dependency_links">dependency_links.txt</h3>
+    {% if data['dist_info']['dependency_links'] %}
+        <div class="dist_info_file">
+            {% for url in data["dist_info"]["dependency_links"] %}
+                <div>{{url|extlink}}</div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-file">[empty]</div>
+    {% endif %}
+{% endif %}
+
+{% if 'zip_safe' in data['dist_info'] %}
+    <h3 class="dist_info_filename" id="zip_safe">
+        {% if data['dist_info']['zip_safe'] %}
+            zip-safe
+        {% else %}
+            not-zip-safe
+        {% endif %}
+    </h3>
+{% endif %}
+
+{% elif whl.errors %}
+<p>An error occurred while processing this wheel; it might be malformed.</p>
+{% elif whl.size > config["WHEELODEX_MAX_WHEEL_SIZE"] %}
+<p>This wheel exceeds Wheelodex's maximum wheel size policy; it will not be analyzed.</p>
+{% else %}
+<p>This wheel has not yet been analyzed.</p>
+{% endif %}
+{% endblock %}

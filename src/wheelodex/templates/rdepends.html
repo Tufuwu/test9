@@ -1,0 +1,36 @@
+{% from 'macros.j2' import render_pagination %}
+{% extends 'base.html' %}
+
+{% block title %}Wheelodex &#x2014; {{project.display_name|e}} &#x2014; Reverse Dependencies{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+    <a href="{{url_for('.index')}}">Wheelodex</a>
+    &#xBB; <a href="{{url_for('.project_list')}}">Projects</a>
+    &#xBB; <a href="{{url_for('.project', project=project.name)}}">{{project.display_name|e}}</a>
+    &#xBB; Reverse Dependencies
+</div>
+
+<div class="search-header">
+    <form action="{{url_for('.search_projects')}}" method="GET">
+        <input type="text" name="q" placeholder="Search Projects"/>
+    </form>
+</div>
+
+<h2>Reverse Dependencies of {{project.display_name|e}}</h2>
+
+{% if rdepends.total == 0 %}
+<p>There are no known projects with a declared dependency on {{project.display_name|e}}.</p>
+{% else %}
+<p>The following projects have a declared dependency on {{project.display_name|e}}:</p>
+
+<ul>
+    {% for rd in rdepends.items %}
+        <li><a href="{{url_for('.project', project=rd.name)}}">{{rd.display_name|e}}</a> &#x2014; {% if rd.summary != None %}{{rd.summary|e}}{% else %}<span class="no-summary">no summary</span>{% endif %}</li>
+    {% endfor %}
+</ul>
+
+{{render_pagination(rdepends, '.rdepends', project=project.name)}}
+{% endif %}
+
+{% endblock %}
