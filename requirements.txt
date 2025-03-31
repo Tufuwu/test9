@@ -1,11 +1,4 @@
-anytree>=2.8.0
-Biopython>=1.79
-PyVCF3>=1.0.3
-requests>=2.27.1
-mongoengine>=0.24.1
-cython>=0.29.28
-numpy==1.21.5
-## Testing
-tox
-pytest
-pytest-cov
+modoboa>=1.15.0
+chardet
+html2text
+idna
