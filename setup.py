@@ -1,67 +1,104 @@
-import setuptools
-from flintrock import __version__
+# coding: utf-8
+
+from codecs import open   # pylint:disable=redefined-builtin
+from os.path import dirname, join
+import re
+import sys
+
+from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
 
 
-with open('README.md') as f:
-    long_description = f.read()
+CLASSIFIERS = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: Apache Software License',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: Implementation :: CPython',
+    'Programming Language :: Python :: Implementation :: PyPy',
+    'Operating System :: OS Independent',
+    'Operating System :: POSIX',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: MacOS :: MacOS X',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+]
 
-setuptools.setup(
-    name='Flintrock',
-    version=__version__,
-    description='A command-line tool for launching Apache Spark clusters.',
-    long_description=long_description,
-    # FYI: This option requires setuptools >= 38.6.0.
-    long_description_content_type="text/markdown",
-    url='https://github.com/nchammas/flintrock',
-    author='Nicholas Chammas',
-    author_email='nicholas.chammas@gmail.com',
-    license='Apache License 2.0',
-    python_requires='>= 3.7',
 
-    # See: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
+class PyTest(TestCommand):
+    # pylint:disable=attribute-defined-outside-init
 
-        'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
+    user_options = [(b'pytest-args=', b'a', b"Arguments to pass to py.test")]
 
-        'Topic :: Utilities',
-        'Environment :: Console',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: POSIX',
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.pytest_args = None
 
-        'License :: OSI Approved :: Apache Software License',
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
 
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3 :: Only',
-    ],
-    keywords=['Apache Spark'],
+    def run_tests(self):
+        # Do the import here, once the eggs are loaded.
+        # pylint:disable=import-outside-toplevel
+        import pytest
+        errno = pytest.main(self.pytest_args)
+        sys.exit(errno)
 
-    packages=setuptools.find_packages(),
-    include_package_data=True,
 
-    # We pin dependencies because sometimes projects do not
-    # strictly follow semantic versioning, so new "feature"
-    # releases end up making backwards-incompatible changes.
-    # Sometimes, new releases even introduce bugs which
-    # totally break Flintrock.
-    # For example: https://github.com/paramiko/paramiko/issues/615
-    install_requires=[
-        'boto3 == 1.21.44',
-        'botocore == 1.24.44',
-        'click == 7.1.2',
-        'paramiko == 2.10.3',
-        'PyYAML == 6.0',
-        # This is to address reports that PyInstaller-packaged versions
-        # of Flintrock intermittently fail due to an out-of-date version
-        # of Cryptography being used.
-        # See: https://github.com/nchammas/flintrock/issues/169
-        'cryptography >= 1.7.2',
-    ],
+def main():
+    base_dir = dirname(__file__)
+    install_requires = [
+        'attrs>=17.3.0',
+        'requests>=2.4.3',
+        'requests-toolbelt>=0.4.0, <1.0.0',
+        'wrapt>=1.10.1'
+    ]
+    redis_requires = ['redis>=2.10.3']
+    jwt_requires = ['pyjwt>=1.3.0', 'cryptography>=3, <3.5.0']
+    extra_requires = {'jwt': jwt_requires, 'redis': redis_requires, 'all': jwt_requires + redis_requires}
+    test_requires = [
+        'bottle',
+        'jsonpatch>1.14',
+        'mock>=2.0.0, <4.0.0',
+        'pycodestyle',
+        'pylint',
+        'sphinx',
+        'sqlalchemy<1.4.0',
+        'tox',
+        'pytest>=2.8.3, <4.0.0',
+        'pytest-cov',
+        'pytest-xdist<1.28.0',
+        'coveralls',
+        'coverage',
+        'tox-gh-actions',
+        'pytz',
+    ]
+    extra_requires['test'] = test_requires
+    with open('boxsdk/version.py', 'r', encoding='utf-8') as config_py:
+        version = re.search(r'^\s+__version__\s*=\s*[\'"]([^\'"]*)[\'"]', config_py.read(), re.MULTILINE).group(1)
+    setup(
+        name='boxsdk',
+        version=version,
+        description='Official Box Python SDK',
+        long_description=open(join(base_dir, 'README.rst'), encoding='utf-8').read(),  # pylint:disable=consider-using-with
+        author='Box',
+        author_email='oss@box.com',
+        url='http://opensource.box.com',
+        packages=find_packages(exclude=['demo', 'docs', 'test', 'test*', '*test', '*test*']),
+        install_requires=install_requires,
+        extras_require=extra_requires,
+        tests_require=test_requires,
+        cmdclass={'test': PyTest},
+        classifiers=CLASSIFIERS,
+        keywords='box oauth2 sdk',
+        license='Apache Software License, Version 2.0, http://www.apache.org/licenses/LICENSE-2.0',
+        package_data={'boxsdk': ['py.typed']},
+    )
 
-    entry_points={
-        'console_scripts': [
-            'flintrock = flintrock.__main__:main',
-        ],
-    },
-)
+
+if __name__ == '__main__':
+    main()

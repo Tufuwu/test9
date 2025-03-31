@@ -1,34 +1,24 @@
-# Started from: https://github.com/github/gitignore/blob/master/Python.gitignore
-
-.vscode/
-.metals/
-config.yaml
-venv/
-*example.py
-flintrock-logo/
-.hypothesis/
-*.prf
-.DS_Store
-.pytest_cache/
-/resources/
-.python-version
+# Backup files
+*.~
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+.pytest_cache/
 
 # C extensions
 *.so
 
 # Distribution / packaging
+bin/
 .Python
-env/
+env*/
 build/
 develop-eggs/
 dist/
+pypi-dist/
 downloads/
 eggs/
-.eggs/
 lib/
 lib64/
 parts/
@@ -37,6 +27,13 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
+.eggs/
+.env*/
+.pyenv/
+venv*/
+.venv*/
+python.properties
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -52,10 +49,11 @@ pip-delete-this-directory.txt
 htmlcov/
 .tox/
 .coverage
-.coverage.*
 .cache
 nosetests.xml
 coverage.xml
+.coverage.*
+*,cover
 
 # Translations
 *.mo
@@ -69,3 +67,19 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# IntelliJ
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# Mac
+.DS_Store
+
+# Misc
+tokens.pk
+
+#pyenv
+.python-version
