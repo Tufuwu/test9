@@ -1,0 +1,331 @@
+#!/bin/bash
+#
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -eo pipefail
+
+for i in "$@"
+do
+case $i in
+  --deployer=*)
+    deployer="${i#*=}"
+    shift
+    ;;
+  --parameters=*)
+    parameters="${i#*=}"
+    shift
+    ;;
+  --wait_timeout=*)
+    wait_timeout="${i#*=}"
+    shift
+    ;;
+  --istio=*)
+    istio="${i#*=}"
+    shift
+    ;;
+  # TODO(#344) Remove this flag once we have better support
+  --additional_deployer_role=*)
+    additional_deployer_role="${i#*=}"
+    shift
+    ;;
+  --image_pull_secret=*)
+    image_pull_secret="${i#*=}"
+    shift
+    ;;
+  *)
+    echo "Unrecognized flag: $i"
+    exit 1
+    ;;
+esac
+done
+
+[[ -z "$deployer" ]] && deployer="$APP_DEPLOYER_IMAGE"
+[[ -z "$parameters" ]] && parameters="{}"
+[[ -z "$wait_timeout" ]] && wait_timeout=600
+
+error_summary_path="$(mktemp)"
+
+function delete_apiservices() {
+  # Remove apiservices that are unavailable or attached to $NAMESPACE
+  # Namespaces cannot be deleted if there are any unavailable apiservices
+  # See: https://github.com/kubernetes/kubernetes/issues/60807 and
+  # NamespaceDeletionDiscoveryFailure
+  mapfile -t services < <({
+    kubectl get apiservices | grep False | awk '{print $1}'
+    kubectl get apiservices -o json |
+      jq -r --arg namespace $NAMESPACE '.items[] | select(.spec.service.namespace == $namespace) | .metadata.name'
+  } | sort | uniq)
+  if ((${#services[@]})); then
+    echo "INFO Deleting APIServices " "${services[@]}"
+    kubectl delete apiservices "${services[@]}"
+  fi
+}
+
+function delete_namespace() {
+  if [[ -z "$namespace_deleted" ]]; then
+    echo "INFO Collecting events for namespace \"$NAMESPACE\""
+    kubectl get events --namespace="$NAMESPACE" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\""
+    error_events="$(kubectl get events --namespace="$NAMESPACE" --field-selector="type!=Normal" || echo "ERROR Failed to get events for namespace \"$NAMESPACE\"")"
+
+    if [[ ! -z $deployer_name ]]; then
+      echo "INFO Collecting logs for deployer"
+      deployer_logs="$(kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" --tail 9999 || echo "ERROR Failed to get logs for deployer $deployer_name")"
+      echo "$deployer_logs"
+
+      deployer_errors="$(echo "$deployer_logs" | /scripts/filter_deployer_logs.py)"
+    fi
+
+    delete_apiservices
+    
+    echo "INFO Deleting namespace \"$NAMESPACE\""
+    kubectl get all --namespace "$NAMESPACE" --output=yaml
+    kubectl delete namespace "$NAMESPACE"
+    namespace_deleted="true"
+  fi
+}
+
+function clean_resources() {
+  if [[ -z "$resources_cleaned" ]]; then
+    echo "INFO cleaning all resources."
+    delete_namespace
+    if [[ ! -z "$deployer_role_name" ]]; then
+      kubectl delete clusterrolebinding "$deployer_role_name"
+    fi
+    resources_cleaned="true"
+  fi
+}
+
+function clean_and_exit() {
+  if [[ -n "$1" ]]; then
+    echo "$1"
+    echo "$1" >> "$error_summary_path"
+  fi
+  clean_resources
+  exit 1
+}
+
+function print_summary() {
+  if [[ -n "$error_events" ]]; then
+    echo >> "$error_summary_path"
+    echo "Error events found in namespace \"$NAMESPACE\"" >> "$error_summary_path"
+    echo "$error_events" >> "$error_summary_path"
+  fi
+
+  if [[ -n "$deployer_errors" ]]; then
+    echo >> "$error_summary_path"
+    echo "Error traces found in deployer" >> "$error_summary_path"
+    echo "$deployer_errors" >> "$error_summary_path"
+  fi
+
+  if [[ -n "$validation_errors" ]]; then
+    echo "=== SCHEMA VALIDATION WARNING ==="
+    echo "WARNING: Schema is incompatible with the latest deployer, would fail with:"
+    echo
+    echo "$validation_errors"
+    echo "======== END OF WARNING ========="
+  fi
+
+  if [[ -s "$error_summary_path" ]]; then
+    echo "=== ERROR SUMMARY ==="
+    cat "$error_summary_path"
+    echo "====================="
+  fi
+
+  echo
+  echo "=== VERIFICATION STATUS ==="
+  echo "$1"
+  echo "==========================="
+}
+
+# If any command returns with non-zero exit code, set -e will cause the script
+# to exit. Printing the summary prior to exit
+handle_failure() {
+  code=$?
+  clean_resources
+  print_summary "FAILED"
+  exit $code
+}
+trap "handle_failure" EXIT
+
+# Extract schema and values files.
+docker run \
+    --entrypoint=/bin/bash \
+    --rm "${deployer}" \
+    -c 'cat /data/schema.yaml' \
+> /data/schema.yaml
+
+# If parameters is a gcs file, use the content of the file instead
+if [[ "$parameters" = "gs://"* ]]; then
+  echo "Using parameters from $parameters"
+  parameters="$(gsutil cat $parameters)"
+  echo "$parameters"
+fi
+
+echo "$parameters" \
+  | json2yaml \
+> /data/values.yaml
+
+function random_string() {
+  cat /dev/urandom \
+    | tr -dc 'a-z0-9' \
+    | head -c 8 \
+    || true
+}
+
+# Compose test id.
+test_id="$(random_string)"
+
+# Extract keys for name and namespace.
+name_key="$(extract_schema_key.py \
+    --schema_file=/data/schema.yaml \
+    --type NAME)"
+namespace_key="$(extract_schema_key.py \
+    --schema_file=/data/schema.yaml \
+    --type NAMESPACE)"
+
+export NAME="apptest-$test_id"
+export NAMESPACE="apptest-$test_id"
+
+# Validate the schema, outputting any errors as a warning.
+set +e
+validation_errors=$(/bin/validate_schema.py --values_mode raw 2>&1)
+set -e
+
+# Stitch in name and namespace parameters.
+parameters=$(echo "$parameters" \
+  | jq ".\"$name_key\" = \"$NAME\" | .\"$namespace_key\" = \"$NAMESPACE\"")
+
+echo "INFO Parameters: $parameters"
+
+echo "INFO Creates namespace \"$NAMESPACE\""
+kubectl create namespace "$NAMESPACE"
+
+if [[ -n "$image_pull_secret" ]]; then
+  echo "Copying secret/$image_pull_secret from namespace/default to namespace/$NAMESPACE."
+  kubectl get secret "$image_pull_secret" --namespace=default --export -o=yaml | kubectl create --namespace="$NAMESPACE" -f -
+  kubectl get secret "$image_pull_secret" --namespace="$NAMESPACE"
+  kubectl patch namespace "$NAMESPACE" -p "{\"metadata\": {\"annotations\": {\"marketplace.cloud.google.com/imagePullSecret\": \"$image_pull_secret\"}}}"
+fi
+
+if [[ "$istio" = "enabled" ]]; then
+  echo "INFO Enabling istio in \"$NAMESPACE\" (istio-injection=enabled)."
+  kubectl label namespace "$NAMESPACE" istio-injection=enabled
+
+  # TODO(#327): Handle multiple ISTIO_ENABLED properties in schema.
+  istio_enabled_key="$(extract_schema_key.py \
+    --schema_file=/data/schema.yaml \
+    --type=ISTIO_ENABLED \
+    | head -n 1)"
+
+  # Stitch in ISTIO_ENABLED parameter if applicable.
+  if [[ -n $istio_enabled_key ]]; then
+    parameters=$(echo "$parameters" \
+      | jq ".\"$istio_enabled_key\" = true")
+  fi
+fi
+
+reporting_secret_key="$(extract_schema_key.py \
+  --schema_file=/data/schema.yaml \
+  --type=REPORTING_SECRET \
+  | head -n 1)"
+
+# Stitch in fake REPORTING_SECRET parameter if applicable.
+if [[ -n "$reporting_secret_key" ]]; then
+  if [[ "$(echo "$parameters" | jq ".\"$reporting_secret_key\"")" == "null" ]]; then
+    reporting_secret_name="fake-reporting-secret-$(random_string)"
+    echo "Creating fake reporting secret $reporting_secret_name"
+    cat "/data/fake-reporting-secret-manifest.yaml" \
+      | env -i "SECRET_NAME=$reporting_secret_name" envsubst \
+      | kubectl apply -f - --namespace="$NAMESPACE"
+    parameters=$(echo "$parameters" \
+      | jq ".\"$reporting_secret_key\" = \"$reporting_secret_name\"")
+  fi
+fi
+
+# Add additional role if deployer needs more privileges.
+if [[ ! -z "$additional_deployer_role" ]]; then
+  deployer_role_name="$NAMESPACE-deployer-sa-$additional_deployer_role"
+  kubectl create clusterrolebinding "$deployer_role_name" --clusterrole "$additional_deployer_role" --user "system:serviceaccount:$NAMESPACE:$NAMESPACE-deployer-sa"
+fi
+
+echo "INFO Initializes the deployer container which will deploy all the application components"
+/scripts/install \
+  --deployer="$deployer" \
+  --parameters="$parameters" \
+  --entrypoint='/bin/deploy_with_tests.sh' \
+  || clean_and_exit "ERROR Failed to start deployer"
+
+echo "INFO wait for the deployer to succeed"
+deployer_name="${NAME}-deployer"
+
+start_time=$(date +%s)
+poll_interval=4
+while true; do
+  deployer_status=$(kubectl get "jobs/$deployer_name" --namespace="$NAMESPACE" -o=json | jq '.status' || echo "{}")
+  failure=$(echo $deployer_status | jq '.failed')
+  if [[ "$failure" -gt "0" ]]; then
+    clean_and_exit "ERROR Deployer failed"
+  fi
+
+  success=$(echo $deployer_status | jq '.succeeded')
+  if [[ "$success" -gt "0" ]]; then
+    echo "INFO Deployer job succeeded"
+    break
+  fi
+
+  elapsed_time=$(( $(date +%s) - $start_time ))
+  printf "Elapsed ${elapsed_time}s\r"
+  if [[ "$elapsed_time" -gt "$wait_timeout" ]]; then
+    clean_and_exit "ERROR Deployer job timeout"
+  fi
+
+  sleep "$poll_interval"
+done
+
+# Get the logs from the deployer before deleting the application. Set deployer name to empty so clean up doesn't try to get its logs again.
+kubectl logs "jobs/$deployer_name" --namespace="$NAMESPACE" || echo "ERROR Failed to get logs for deployer $deployer_name"
+deployer_name=""
+
+echo "INFO Stop the application"
+kubectl delete "application/$NAME" \
+    --namespace="$NAMESPACE" \
+  || clean_and_exit "ERROR Failed to stop application"
+
+deletion_timeout=180
+echo "INFO Wait for the applications to be deleted"
+/scripts/wait_for_deletion.sh \
+  --namespace="$NAMESPACE" \
+  --kind=applications.app.k8s.io \
+  --timeout="$deletion_timeout" \
+  || clean_and_exit "ERROR Some applications were not deleted"
+
+echo "INFO Wait for standard resources were deleted."
+/scripts/wait_for_deletion.sh \
+  --namespace="$NAMESPACE" \
+  --kind=all \
+  --timeout="$deletion_timeout" \
+  || clean_and_exit "ERROR Some resources were not deleted"
+
+echo "INFO Wait for service accounts to be deleted."
+/scripts/wait_for_deletion.sh \
+  --namespace="$NAMESPACE" \
+  --kind=serviceaccounts,roles,rolebindings \
+  --timeout="$deletion_timeout" \
+  || clean_and_exit "ERROR Some service accounts or roles were not deleted"
+
+trap - EXIT
+
+clean_resources
+print_summary "PASSED"
