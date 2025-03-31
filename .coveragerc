@@ -1,8 +1,6 @@
-# .coveragerc to control coverage.py
 [run]
-source = luma.core
 omit =
-    luma/__init__.py
-    setup.py
-    .tox/*
-    doc/*
+	plugins/*
+	*/test_*.py
+	cardinal/fixtures/*
+include=cardinal/*

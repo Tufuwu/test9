@@ -1,72 +1,63 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
 *.py[cod]
-*.py.orig
+
+# Cardinal configuration files
+/config/*
+!/config/config.example.json
+
+# Docker-compose overrides
+docker-compose.*.yml
 
 # C extensions
 *.so
 
-# Distribution / packaging
+# Packages
 .Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
 *.egg
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-MANIFEST
-*.manifest
-*.spec
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+include
 
 # Installer logs
 pip-log.txt
-pip-delete-this-directory.txt
+pip-selfcheck.json
 
 # Unit test / coverage reports
-htmlcov/
-.tox/
 .coverage
-.cache
-.pytest_cache
+.tox
 nosetests.xml
-coverage.xml
-
-# Eclipse
-.project
-.pydevproject
-.settings/
+.cache
 
 # Translations
 *.mo
-*.pot
 
-# Django stuff:
-*.log
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
 
-# Sphinx documentation
-doc/_build/
+# Sublime Text 2
+*.sublime-project
+*.sublime-workspace
 
-# PyBuilder
-target/
-.ropeproject
-*~
+# vim
+*.swp
 
-# OSX
+# PyCharm
+.idea/
+
+# Persistence files generated at runtime
+storage/database/*
+storage/logs/*
+
+# OS X
 .DS_Store
-
-.vscode
-.python-version
