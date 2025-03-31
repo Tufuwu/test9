@@ -1,7 +1,44 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Unit test / coverage reports
+reports/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
 .pytest_cache
-__pycache__
-build
-data/orig
-dataiter.egg-info
-dist
-doc/_build
+queryable_properties.db
+
+# Translations
+*.mo
+*.pot
+
+# Sphinx
+docs/_build
+
+# IDE
+.idea/
