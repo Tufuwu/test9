@@ -1,167 +1,89 @@
-django-zen-queries
-====================
+[![PyPI version](https://badge.fury.io/py/alns.svg)](https://badge.fury.io/py/alns)
+[![ALNS](https://github.com/N-Wouda/ALNS/actions/workflows/alns.yml/badge.svg)](https://github.com/N-Wouda/ALNS/actions/workflows/alns.yml)
+[![codecov](https://codecov.io/gh/N-Wouda/ALNS/branch/master/graph/badge.svg)](https://codecov.io/gh/N-Wouda/ALNS)
 
-[![Build Status](https://travis-ci.com/dabapps/django-zen-queries.svg?branch=master)](https://travis-ci.com/dabapps/django-zen-queries)
-[![pypi release](https://img.shields.io/pypi/v/django-zen-queries.svg)](https://pypi.python.org/pypi/django-zen-queries)
-
-
-Gives you control over which parts of your code are allowed to run queries, and which aren't.
-
-Tested against Django 1.8, 1.11, 2.0, 2.1 and 2.2 on Python 2.7, 3.5, 3.6 and 3.7
-
-### Motivation
-
-> Explicit is better than implicit
-
-(The [Zen Of Python](https://www.python.org/dev/peps/pep-0020/))
-
-The greatest strength of Django's ORM is also its greatest weakness. By freeing developers from having to think about when database queries are run, the ORM encourages developers to _not think about when database queries are run!_ This often has great benefits for quick development turnaround, but can have major performance implications in anything other than trivially simple systems.
-
-Django's ORM makes queries _implicit_. The Zen of Python tells us that **explicit is better than implicit**, so let's be explicit about which parts of our code are allowed to run queries, and which aren't.
-
-Check out [this blog post](https://www.dabapps.com/blog/performance-issues-caused-by-django-implicit-database-queries/) for more background.
-
-### Example
-
-Imagine a pizza restaurant website with the following models:
-
-```python
-class Topping(models.Model):
-    name = models.CharField(max_length=100)
-
-
-class Pizza(models.Model):
-    name = models.CharField(max_length=100)
-    toppings = models.ManyToManyField(Topping)
+This package offers a general, well-documented and tested
+implementation of the adaptive large neighbourhood search (ALNS)
+meta-heuristic, based on the description given in [Pisinger and Ropke
+(2010)][1]. It may be installed in the usual way as
+```
+pip install alns
 ```
 
-And here's the menu view:
+### Examples
+If you wish to dive right in, the `examples/` directory contains example notebooks
+showing how the ALNS library may be used. These include:
 
-```python
-def menu(request):
-    pizzas = Pizza.objects.all()
-    context = {'pizzas': pizzas}
-    return render(request, 'pizzas/menu.html', context)
-```
+- The travelling salesman problem (TSP), [here][2]. We solve an
+  instance of 131 cities to within 2.1% of optimality, using simple
+  destroy and repair heuristics with a post-processing step.
+- The cutting-stock problem (CSP), [here][4]. We solve an instance with
+  180 beams over 165 distinct sizes to within 1.35% of optimality in
+  only a very limited number of iterations.
+- The resource-constrained project scheduling problem, [here][6]. We solve an
+  instance with 90 jobs and 4 resources to within 4% of the best known solution,
+  using a number of different operators and enhancement techniques from the 
+  literature.
 
-Finally, the template:
+Finally, the weight schemes and acceptance criteria notebook gives an overview
+of various options available in the `alns` package (explained below). In the
+notebook we use these different options to solve a toy 0/1-knapsack problem. The
+notebook is a good starting point for when you want to use the different schemes
+and criteria yourself. It is available [here][5].
 
-```
-<h1>Pizza Menu</h1>
+## How to use
+The `alns` package exposes two classes, `ALNS` and `State`. The first
+may be used to run the ALNS algorithm, the second may be subclassed to
+store a solution state - all it requires is to define an `objective`
+member function, returning an objective value.
 
-<ul>
-{% for pizza in pizzas %}
-  <li>{{ pizza.name }}</li>
-{% endfor %}
-</ul>
-```
+The ALNS algorithm must be supplied with a _weight scheme_ and an _acceptance
+criterion_.
 
-How many queries are run here? Well, the answer is easy to see: it's just one! The query emitted by `Pizza.objects.all()` is all you need to get the information to show on the menu.
+### Weight scheme
+The weight scheme determines how to select destroy and repair operators in each
+iteration of the ALNS algorithm. Several have already been implemented for you,
+in `alns.weight_schemes`:
 
-Now: imagine the client asks for each pizza on the menu to include a count of how many toppings are on the pizza. Easy! Just change the template:
+- `SimpleWeights`. This weight scheme applies a convex combination of the 
+   existing weight vector, and a reward given for the current candidate 
+   solution.
+- `SegmentedWeights`. This weight scheme divides the iteration horizon into
+   segments. In each segment, scores are summed for each operator. At the end
+   of each segment, the weight vector is updated as a convex combination of 
+   the existing weight vector, and these summed scores.
 
-```
-<h1>Pizza Menu</h1>
+Each weight scheme inherits from `WeightScheme`, which may be used to write 
+your own.
 
-<ul>
-{% for pizza in pizzas %}
-  <li>{{ pizza.name }} ({{ pizza.toppings.count }})</li>
-{% endfor %}
-</ul>
-```
+### Acceptance criterion
+The acceptance criterion determines the acceptance of a new solution state at
+each iteration. An overview of common acceptance criteria is given in
+[Santini et al. (2018)][3]. Several have already been implemented for you, in
+`alns.criteria`:
 
-But how many queries are run now? Well, this is the classic _n queries problem_. We now have one query to get all our pizzas, and then another query _per pizza_ to get the toppings count. The more pizzas we have, the slower the app gets. **And we probably won't discover this until the website is in production**.
+- `HillClimbing`. The simplest acceptance criterion, hill-climbing solely
+  accepts solutions improving the objective value.
+- `RecordToRecordTravel`. This criterion accepts solutions when the improvement
+  meets some updating threshold.
+- `SimulatedAnnealing`. This criterion accepts solutions when the
+  scaled probability is bigger than some random number, using an
+  updating temperature.
 
-If you were reading a Django performance tutorial, the next step would be to tell you how to fix this problem (`.annotate` and `Count` etc). But that's not the point. The example above is just an illustration of how code in different parts of the codebase, at different levels of abstraction, even possibly (in larger projects) the responsibility of different developers, can interact to result in poor performance. Object-oriented design encourages black-box implementation hiding, but hiding the points at which queries are executed is the _worst_ thing you can do if your aim is to build high-performance web applications. So how do we fix this without breaking all our abstractions?
+Each acceptance criterion inherits from `AcceptanceCriterion`, which may
+be used to write your own.
 
-There are two tricks here:
+## References
+- Pisinger, D., and Ropke, S. (2010). Large Neighborhood Search. In M.
+  Gendreau (Ed.), _Handbook of Metaheuristics_ (2 ed., pp. 399-420).
+  Springer.
+- Santini, A., Ropke, S. & Hvattum, L.M. (2018). A comparison of
+  acceptance criteria for the adaptive large neighbourhood search
+  metaheuristic. *Journal of Heuristics* 24 (5): 783-815.
 
-1. Prevent developers from accidentally running queries without realising.
-2. Encourage code design that separates _fetching data_ from _rendering data_.
-
-This package provides three very simple things:
-
-1. A context manager to allow developers to be explicit about where queries are run.
-2. A utility to make querysets less lazy.
-3. Some tools to make it easy to use the context manager with Django templates and Django REST framework serializers.
-
-To be absolutely clear: this package does _not_ give you any tools to actually improve your query patterns. It just tells you when you need to do it!
-
-### Instructions
-
-To demonstrate how to use `django-zen-queries`, let's go back to our example. We want to make it impossible for changes to a template to trigger queries. So, we change our view as follows:
-
-```python
-def menu(request):
-    pizzas = Pizza.objects.all()
-    context = {'pizzas': pizzas}
-    with queries_disabled():
-        return render(request, 'pizzas/menu.html', context)
-```
-
-The `queries_disabled` context manager here does one very simple thing: it stops any code inside it from running database queries. At all. If they try to run a query, the application will raise a `QueriesDisabledError` exception and blow up.
-
-That's _almost_ enough to give us what we need, but not quite. The code above will _always_ raise a `QueriesDisabledError`, because the queryset (`Pizza.objects.all()`) is _lazy_. The database query doesn't actually get run until the queryset is iterated - which happens in the template! So, `django-zen-queries` provides a tiny helper function, `fetch`, which forces evaluation of a queryset:
-
-```python
-def menu(request):
-    pizzas = Pizza.objects.all()
-    context = {'pizzas': fetch(pizzas)}
-    with queries_disabled():
-        return render(request, 'pizzas/menu.html', context)
-```
-
-Now we have exactly what we need: when a developer comes along and adds `{{ pizza.toppings.count }}` in the template, **it just _won't work_**. They will be forced to figure out how to use `annotate` and `Count` in order to get the data they need _up front_, rather than sometime in the future when customers are complaining that the website is getting slower and slower!
-
-#### Decorator
-
-You can also use `queries_disabled` as a decorator to prohibit database interactions for a whole function or method:
-```
-@queries_disabled()
-def validate_xyz(pizzas):
-    ...
-```
-
-This also works with Django's [`method_decorator`](https://docs.djangoproject.com/en/3.0/topics/class-based-views/intro/#decorating-the-class) utility.
-
-### Extra tools
-
-As well as the context managers, the package provides some tools to make it easier to use in common situations:
-
-#### Render shortcut
-
-If you're using the Django `render` shortcut (as in the example above), to avoid having to add the context manager to every view, you can change your import `from django.shortcuts import render` to `from zen_queries import render`. All the views in that file will automatically be disallowed from running queries during template rendering.
-
-#### TemplateResponse subclass
-
-`TemplateResponse` (and `SimpleTemplateResponse`) objects are lazy, meaning that template rendering happens on the way "out" of the Django stack. `zen_queries.TemplateResponse` and `zen_queries.SimpleTemplateResponse` are subclasses of these with `queries_disabled` applied to the `render` method.
-
-#### Django REST framework Serializer and View mixins
-
-Django REST framework serializers are another major source of unexpected queries. Adding a field to a serializer (perhaps deep within a tree of nested serializers) can very easily cause your application to suddenly start emitting hundreds of queries. `zen_queries.rest_framework.QueriesDisabledSerializerMixin` can be added to any serializer to wrap `queries_disabled` around the `.data` property, meaning that the serialization phase is not allowed to execute any queries.
-
-You can add this mixin to an existing serializer *instance* with `zen_queries.rest_framework.disable_serializer_queries` like this: `serializer = disable_serializer_queries(serializer)`.
-
-If you're using REST framework generic views, you can also add a view mixin, `zen_queries.rest_framework.QueriesDisabledViewMixin`, which overrides `get_serializer` to mix the `QueriesDisabledSerializerMixin` into your existing serializer. This is useful because you may want to use the same serializer class between multiple views but only disable queries in some contexts, such as in a list view.  Remember that Python MRO is left-right, so the mixin must come before (to the left of) any base classes that implement `get_serializer`. The view mixin only disables queries on `GET` requests, so can safely be used with `ListCreateAPIView` and similar.
-
-#### Escape hatch
-
-If you absolutely definitely can't avoid running a query in a part of your codebase that's being executed under a `queries_disabled` block, there is another context manager called `queries_dangerously_enabled` which allows you to temporarily re-enable database queries.
-
-### Permissions gotcha
-
-Accessing permissions in your templates (via the `{{ perms }}` template variable) can be a source of queries at template-render time. Fortunately, Django's permission checks are [cached by the `ModelBackend`](https://docs.djangoproject.com/en/2.2/topics/auth/default/#permission-caching), which can be pre-populated by calling `request.user.get_all_permissions()` in the view, before rendering the template.
-
-### How does it work?
-
-Probably best not to ask.
-
-### Installation
-
-Install from PyPI
-
-    pip install django-zen-queries
-
-## Code of conduct
-
-For guidelines regarding the code of conduct when contributing to this repository please review [https://www.dabapps.com/open-source/code-of-conduct/](https://www.dabapps.com/open-source/code-of-conduct/)
+[1]: http://orbit.dtu.dk/en/publications/large-neighborhood-search(61a1b7ca-4bf7-4355-96ba-03fcdf021f8f).html
+[2]: https://github.com/N-Wouda/ALNS/blob/master/examples/travelling_salesman_problem.ipynb
+[3]: https://link.springer.com/article/10.1007%2Fs10732-018-9377-x
+[4]: https://github.com/N-Wouda/ALNS/blob/master/examples/cutting_stock_problem.ipynb
+[5]: https://github.com/N-Wouda/ALNS/blob/master/examples/weight_schemes_acceptance_criteria.ipynb
+[6]: https://github.com/N-Wouda/ALNS/blob/master/examples/resource_constrained_project_scheduling_problem.ipynb
