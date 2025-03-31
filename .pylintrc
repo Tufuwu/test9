@@ -1,4 +1,21 @@
+[BASIC]
+good-names=id
+
+[LOGGING]
+logging-format-style=fstr
+
 [MESSAGES CONTROL]
-disable=bad-continuation,missing-module-docstring,invalid-name,too-few-public-methods,import-error,import-outside-toplevel,no-member,inconsistent-return-statements
-ignored-argument-names=arg|args|kw|kwargs
-max-line-length=100
+disable=
+     missing-module-docstring,
+     missing-class-docstring,
+     missing-function-docstring,
+     no-self-use,
+     too-few-public-methods,
+     too-many-public-methods,
+     too-many-arguments,
+     bad-continuation,
+     import-error,
+     unsubscriptable-object,
+     fixme,
+     pointless-string-statement,
+     redefined-builtin
