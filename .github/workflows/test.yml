@@ -1,35 +1,54 @@
-name: Django CI
+name: Build
 
 on:
-  push:
-    branches: [ main ]
+  schedule:
+    - cron: "0 12 * * SUN"
   pull_request:
-    branches: [ main ]
+    branches:
+     -  '*'
+  push:
+    branches:
+      - "*"
+
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 4
       matrix:
         python-version: ["3.9", "3.10"]
-
+        os: [ubuntu-latest, macos-latest]
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install flake8
-    - name: Fix settings.py
-      run: |
-        sed -i.bak "s/^SECRET_KEY = ''$/SECRET_KEY = 'randomstring'/g" tramcar/settings.py
-    - name: Run Tests
-      run: |
-        flake8 .
-        python manage.py test
+      - uses: actions/checkout@v2
+      - name: Decrypt large secret
+        run: ./.github/scripts/decrypt_secrets.sh
+        env:
+          SECRET_PASSPHRASE: ${{ secrets.SECRET_PASSPHRASE }}
+
+      - name: Copying Config.yml to random_word folder
+        run: cp $HOME/secrets/config.yml random_word/
+
+      - name: Print Directory Structure of random_word
+        run: ls -la random_word
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: Install packages
+        run: |
+            pip install pipenv
+            pip install autopep8
+            pip install nose
+            pipenv install
+            pipenv run python setup.py install
+      
+      - name: Python Lint
+        run: |
+          make lint
+
+      - name: Run tests
+        run: |
+          pipenv run nosetests

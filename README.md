@@ -1,144 +1,130 @@
-# Welcome!
+# random-word
 
-Tramcar is a _multi-site_, _self-hosted_ __job board__ built using
-[Django](https://www.djangoproject.com/).  This project is still in its infancy,
-but we welcome your involvement to help us get Tramcar ready for production
-installs.
+![Build](https://github.com/vaibhavsingh97/random-word/workflows/Build/badge.svg)
+[![PyPI version](https://badge.fury.io/py/Random-Word.svg)](https://badge.fury.io/py/Random-Word)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/Django.svg)](https://pypi.org/project/random-word/)
+[![PyPI - Status](https://img.shields.io/pypi/status/Django.svg)](https://pypi.org/project/random-word/)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d6ff0d51be474f1bb8b031c2c418b541)](https://www.codacy.com/app/vaibhavsingh97/random-word?utm_source=github.com&utm_medium=referral&utm_content=vaibhavsingh97/random-word&utm_campaign=Badge_Grade)
+[![Downloads](http://pepy.tech/badge/random-word)](http://pepy.tech/project/random-word)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://vaibhavsingh97.mit-license.org/)
 
-## Features
+This is a simple python package to generate random english words.
+If you need help after reading the below, please find me at [@vaibhavsingh97](https://twitter.com/vaibhavsingh97) on Twitter.
 
-* Host multiple job boards on the same instance using Django's "sites" framework
-* Allow free or paid job postings, with paid postings using Stripe Checkout for payment processing
-* Automatically tweet job details when a post is activated
-* Automatically expire jobs after an admin-defined period
-* E-mail notifications alert the admin when a post is made and the job owner when their job has expired
-* Job posts support Markdown for creating rich text descriptions and application information
-* Send weekly Mailchimp e-mail containing list of jobs posted in last 7 days
+If you love the package, please :star2: the repo.
 
 ## Installation
 
-First, clone and install dependencies.  This requires python 3.5, pip, and
-virtualenv to already be installed.
+You should be able to install using `easy_install` or `pip` in the usual ways:
 
-```
-$ git clone https://github.com/tramcar/tramcar
-$ cd tramcar
-$ virtualenv .venv
-$ source .venv/bin/activate
-(.venv) $ pip install -r requirements.txt
+```sh
+$ easy_install random-word
+$ pip install random-word
 ```
 
-Tramcar defaults `SECRET_KEY` in `tramcar/settings.py` to an empty string
-which will prevent Django from starting up.  This is done to ensure that
-deployers do not accidentally deploy with a default value.  Before proceeding,
-set a unique value for `SECRET_KEY` in `tramcar/settings.py`.  If you have `pwgen`
-installed, simply do this:
+Or just clone this repository and run:
 
-```
-$ RANDOM_PWD=$(pwgen -s 50 1)
-$ sed -i.bak "s/^SECRET_KEY = ''$/SECRET_KEY = '$RANDOM_PWD'/g" tramcar/settings.py
+```sh
+$ python3 setup.py install
 ```
 
-Now, apply database migrations, create an admin user, and start the
-development server:
+Or place the `random-word` folder that you downloaded somewhere where it can be accessed by your scripts.
 
-```
-(.venv) $ python manage.py migrate
-(.venv) $ python manage.py createsuperuser
-Username (leave blank to use 'root'): admin
-Email address: admin@tramcar.org
-Password:
-Password (again):
-Superuser created successfully.
-```
+## Basic Usage
 
-The default site has a domain of `example.com`, this will need to be changed to
-`localhost` for development testing or to whatever live domain you will be
-using in production.  For example, to test Tramcar locally, issue the following
-command:
+```python
+from random_word import RandomWords
+r = RandomWords()
 
-```
-(.venv) $ sqlite3 db.sqlite3 "UPDATE django_site SET domain='localhost' WHERE name='example.com';"
+# Return a single random word
+r.get_random_word()
+# Return list of Random words
+r.get_random_words()
+# Return Word of the day
+r.word_of_the_day()
 ```
 
-## Fixtures
+## Advance Usage
 
-We have a fixtures file in `job_board/fixtures/countries.json`, which you can
-load into your database by running the following:
+1.  To generate single random word we can use these optional parameters
 
-```
-(.venv) $ python manage.py loaddata countries.json
-```
+    - `hasDictionaryDef (string)` - Only return words with dictionary definitions (optional)
+    - `includePartOfSpeech (string)` - CSV part-of-speech values to include (optional)
+    - `excludePartOfSpeech (string)` - CSV part-of-speech values to exclude (optional)
+    - `minCorpusCount (integer)` - Minimum corpus frequency for terms (optional)
+    - `maxCorpusCount (integer)` - Maximum corpus frequency for terms (optional)
+    - `minDictionaryCount (integer)` - Minimum dictionary count (optional)
+    - `maxDictionaryCount (integer)` - Maximum dictionary count (optional)
+    - `minLength (integer)` - Minimum word length (optional)
+    - `maxLength (integer)` - Maximum word length (optional)
 
-This will save you having to import your own list of countries.  However, be
-aware that any changes made to the `job_board_country` table will be lost if
-you re-run the above.
+    ```python
+    r.get_random_word(hasDictionaryDef="true", includePartOfSpeech="noun,verb", minCorpusCount=1, maxCorpusCount=10, minDictionaryCount=1, maxDictionaryCount=10, minLength=5, maxLength=10)
 
-## Start Tramcar
+    # Output: pediophobia
+    ```
 
-To run Tramcar in a development environment, you can now start it using the
-light-weight development web server:
+2.  To generate list of random word we can use these optional parameters
 
-```
-(.venv) $ python manage.py runserver
-```
+    - `hasDictionaryDef (string)` - Only return words with dictionary definitions (optional)
+    - `includePartOfSpeech (string)` - CSV part-of-speech values to include (optional)
+    - `excludePartOfSpeech (string)` - CSV part-of-speech values to exclude (optional)
+    - `minCorpusCount (integer)` - Minimum corpus frequency for terms (optional)
+    - `maxCorpusCount (integer)` - Maximum corpus frequency for terms (optional)
+    - `minDictionaryCount (integer)` - Minimum dictionary count (optional)
+    - `maxDictionaryCount (integer)` - Maximum dictionary count (optional)
+    - `minLength (integer)` - Minimum word length (optional)
+    - `maxLength (integer)` - Maximum word length (optional)
+    - `sortBy (string)` - Attribute to sort by `alpha` or `count` (optional)
+    - `sortOrder (string)` - Sort direction by `asc` or `desc` (optional)
+    - `limit (integer)` - Maximum number of results to return (optional)
 
-To run Tramcar using Apache2 and mod_wsgi, see the
-[following](https://github.com/tramcar/tramcar/wiki/Production-Deployment-Notes)
-for more information.
+    ```python
+    r.get_random_words(hasDictionaryDef="true", includePartOfSpeech="noun,verb", minCorpusCount=1, maxCorpusCount=10, minDictionaryCount=1, maxDictionaryCount=10, minLength=5, maxLength=10, sortBy="alpha", sortOrder="asc", limit=15)
 
-## Final Steps
+    # Output: ['ambivert', 'calcspar', 'deaness', 'entrete', 'gades', 'monkeydom', 'outclimbed', 'outdared', 'pistoleers', 'redbugs', 'snake-line', 'subrules', 'subtrends', 'torenia', 'unhides']
+    ```
 
-At this point, Tramcar should be up and running and ready to be used.  Before
-you can create a company and job, log into <http://localhost:8000/admin> using
-the username and password defined above.  Once in, click Categories under
-JOB_BOARD and add an appropriate category for the localhost site.
+3.  To get word of the day we can use these optional parameters
 
-That's it!  With those steps completed, you can now browse
-<http://localhost:8000> to create a new company, and then post a job with that
-newly created company.
+    - `date (string)` - Fetches by date in yyyy-MM-dd (optional)
 
-(If deploying with a non-localhost domain, replace `localhost` above with
-the domain you are using)
+    ```python
+    r.word_of_the_day(date="2018-01-01")
 
-## Job Expiration
+    # Output: {"word": "qualtagh", "definations": [{"text": "The first person one encounters, either after leaving one\'s home or (sometimes) outside one\'s home, especially on New Year\'s Day.", "source": "wiktionary", "partOfSpeech": "noun"}, {"text": "A Christmas or New Year\'s ceremony, in the Isle of Man; one who takes part in the ceremony. See the first extract.", "source": "century", "partOfSpeech": "noun"}]}
+    ```
 
-Jobs can be expired manually by logging in as an admin user and then clicking
-the `Expire` button under `Job Admin` when viewing a given job.  A simpler
-solution is to run this instead:
+## Development
 
-```
-(.venv) $ python manage.py expire
-```
+Assuming that you have [`Python`](https://www.python.org/) and [`pipenv`](https://docs.pipenv.org) installed, set up your environment and install the required dependencies like this instead of the `pip install random-word` defined above:
 
-The above will scan through all jobs across all sites and expire out any jobs
-older than the site's `expire_after` value.  Ideally, the above should be
-scheduled with cron so that jobs are expired in a consistent manner.
-
-## Mailshot Automation
-
-If a site has `mailchimp_username`, `mailchimp_api_key`, and `mailchimp_list_id`
-set, run the following to create and send a Mailchimp campaign containing a list
-of all jobs posted in the last 7 days:
-
-```
-(.venv) $ python manage.py send_mailshot
-```
-
-Again, cron the above to run once a week so that these campaigns are built and
-sent automatically.
-
-If you're unsure what the `mailchimp_list_id` is for the list in question,
-populate `mailchimp_username` and `mailchimp_api_key` for the site and then run
-the following command to display all lists on this site's MailChimp account:
-
-```
-(.venv) $ python manage.py display_lists <site_domain>
+```sh
+$ git clone https://github.com/vaibhavsingh97/random-word.git
+$ cd random-word
+$ pipenv install
+...
+$ pipenv shell
 ```
 
-The value under the ID column for the associated list is what should get
-assigned to `mailchimp_list_id`.
+Add API Key in `random_word` directory defining API Key in `config.py`. If you don't have an API key than request your API key [here](https://developer.wordnik.com)
 
-## Support
+```sh
+API_KEY = "<API KEY>"
+```
 
-Found a bug or need help with installation?  Please feel free to create an [issue](https://github.com/tramcar/tramcar/issues/new) and we will assist as soon as possible.
+After that, install your package locally
+
+```sh
+$ pip install -e .
+```
+
+## Issues
+
+You can report the bugs at the [issue tracker](https://github.com/vaibhavsingh97/random-word/issues)
+
+## License
+
+Built with ♥ by Vaibhav Singh([@vaibhavsingh97](https://github.com/vaibhavsingh97)) under [MIT License](https://vaibhavsingh97.mit-license.org/)
+
+You can find a copy of the License at <https://vaibhavsingh97.mit-license.org/>
