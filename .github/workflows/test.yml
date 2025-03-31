@@ -1,59 +1,32 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+name: Test
 
-name: Test Matrix
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, workflow_dispatch]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.9", "3.10"]
-        django-version: ["2.2", "3.2", "4.0"]  # Todo: add "dev" back
-        exclude:
-           - python-version: "3.9"
-             django-version: "4.0"
-#           - python-version: "3.9"
-#             django-version: "dev"
-           - python-version: "3.9"
-             django-version: "4.0"
-#           - python-version: "3.9"
-#             django-version: "dev"
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                python-version: ["3.9", "3.10"]
+                with-gpl: ["True", "False"]
 
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install OS dependencies
-      run: |
-        sudo apt install -y binutils libproj-dev gdal-bin libsqlite3-mod-spatialite
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-python@v1
+              with:
+                  python-version: ${{ matrix.python-version }}
+            - uses: Gr1N/setup-poetry@v7
+            - uses: actions/cache@v4
+              with:
+                  path: ~/.cache/pypoetry/virtualenvs
+                  key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip wheel virtualenv tox coveralls
-    - name: Erase cached coverage
-      run: |
-        coverage erase
-    - name: Flake8
-      run: |
-        tox -e py${{matrix.python-version}}-flake8
-    - name: Docs
-      run: |
-        tox -e py${{matrix.python-version}}-docs
-    - name: Test with Tox
-      run: |
-        tox -e py${{matrix.python-version}}-dj${{matrix.django-version}}
-    - name: Upload coverage data to coveralls.io
-      run: coveralls --service=github
-      continue-on-error: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+            - name: install with GPL
+              if: ${{ matrix.with-gpl == 'True' }}
+              run: poetry install
+
+            - name: install without GPL
+              if: ${{ matrix.with-gpl == 'False' }}
+              run: poetry add --lock pytest && poetry install --no-dev
+
+            - run: poetry run pytest
