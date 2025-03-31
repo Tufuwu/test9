@@ -1,21 +1,30 @@
+# virtual environment
+venv/
+venv3
+
+# compiled python
 *.pyc
-*.egg-info
-*~
-*.swp
 
-build/
-cas/
-dist/
-db.sqlite3
-manage.py
-coverage.xml
-docs/_build/
-docs/django.inv
+# generated files
+output/
 
-.tox
-test_venv
-.coverage
-htmlcov/
-tox_logs/
-.cache/
-.eggs/
+# package installation files
+repo_stat.egg-info/
+
+
+#csv export unittest output folder
+test/csv_outs
+
+# pycharm project
+.idea
+# Visual Studio files 
+.vscode
+
+# pip install --develop files
+build
+dist
+
+# stdeb files
+deb_dist/
+*.tar.gz
+/.mailmap

@@ -1,72 +1,48 @@
-import os
-import pkg_resources
 from setuptools import setup
-from cas_server import VERSION
+from tools.configuration import Configuration
 
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
-    README = readme.read()
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-if __name__ == '__main__':
-    # allow setup.py to be run from any path
-    os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+with open('requirements.txt', "r") as req_file:
+    requirements = req_file.read().splitlines()
 
-    setup(
-        name='django-cas-server',
-        version=VERSION,
-        packages=[
-            'cas_server', 'cas_server.migrations',
-            'cas_server.management', 'cas_server.management.commands',
-            'cas_server.tests', 'cas_server.templatetags'
-        ],
-        include_package_data=True,
-        license='GPLv3',
-        description=(
-            'A Django Central Authentication Service server '
-            'implementing the CAS Protocol 3.0 Specification'
-        ),
-        long_description=README,
-        author='Valentin Samir',
-        author_email='valentin.samir@crans.org',
-        classifiers=[
-            'Environment :: Web Environment',
-            'Development Status :: 5 - Production/Stable',
-            'Framework :: Django',
-            'Framework :: Django :: 1.11',
-            'Framework :: Django :: 2.2',
-            'Framework :: Django :: 3.1',
-            'Framework :: Django :: 3.2',
-            'Intended Audience :: Developers',
-            'Intended Audience :: System Administrators',
-            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-            'Operating System :: OS Independent',
-            'Programming Language :: Python',
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.5',
-            'Programming Language :: Python :: 3.6',
-            'Programming Language :: Python :: 3.7',
-            'Programming Language :: Python :: 3.8',
-            'Programming Language :: Python :: 3.9',
-            'Programming Language :: Python :: 3.10',
-            'Topic :: Software Development :: Libraries :: Python Modules',
-            'Topic :: Internet :: WWW/HTTP',
-            'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-            'Topic :: System :: Systems Administration :: Authentication/Directory'
-        ],
-        package_data={
-            'cas_server': [
-                'templates/cas_server/*',
-                'static/cas_server/*',
-                'locale/*/LC_MESSAGES/*',
-            ]
-        },
-        keywords=['django', 'cas', 'cas3', 'server', 'sso', 'single sign-on', 'authentication', 'auth'],
-        install_requires=[
-            'Django >= 1.11,<4.2', 'requests >= 2.4', 'requests_futures >= 0.9.5',
-            'lxml >= 3.4', 'six >= 1'
-        ],
-        url="https://github.com/nitmir/django-cas-server",
-        download_url="https://github.com/nitmir/django-cas-server/releases/latest",
-        zip_safe=False,
-        setup_requires=['pytest-runner'],
-        tests_require=['pytest', 'pytest-django', 'pytest-pythonpath', 'pytest-warnings', 'mock>=1'],
-    )
+# such name for package is used here because 'repostat' is already occupied by https://pypi.org/project/repostat/
+setup(name='repostat-app',
+      version=Configuration.get_release_data_info()['develop_version'],
+      description='Desktop git repository analyser and report creator.',
+      keywords='git analysis statistics vcs python visualization',
+      url='https://github.com/vifactor/repostat',
+      author='Viktor Kopp',
+      author_email='vifactor@gmail.com',
+      license='GPLv3',
+      long_description=long_description,
+      long_description_content_type="text/markdown",
+      classifiers=[
+          "Development Status :: 5 - Production/Stable",
+          "Environment :: Console",
+          "Intended Audience :: Developers",
+          "Intended Audience :: Science/Research",
+          "Intended Audience :: Education",
+          "Programming Language :: Python :: 3.6",
+          "Programming Language :: Python :: 3.7",
+          "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+          "Topic :: Software Development :: Version Control",
+          "Topic :: Utilities",
+          "Operating System :: OS Independent",
+          "Operating System :: POSIX",
+          "Operating System :: MacOS :: MacOS X",
+          "Operating System :: Microsoft :: Windows",
+      ],
+      python_requires='>3.5',
+      packages=['analysis', 'tools', 'report'],
+      package_data={'report': ['templates/*.html',
+                               'templates/*.js',
+                               'assets/images/*.gif',
+                               'assets/*.js',
+                               'assets/*.css'],
+                    'tools': ['release_data.json']},
+      install_requires=requirements,
+      entry_points={"console_scripts": ["repostat = analysis.repostat:main"]},
+      include_package_data=True,
+      zip_safe=False)
