@@ -1,94 +1,95 @@
-[![Build Status](https://travis-ci.com/circuits/circuits.svg)](https://travis-ci.com/circuits/circuits)
+[![pytest](https://github.com/amccaugh/phidl/actions/workflows/pytest.yml/badge.svg)](https://github.com/amccaugh/phidl/actions/workflows/pytest.yml)
+[![pre-commit](https://github.com/amccaugh/phidl/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/amccaugh/phidl/actions/workflows/pre-commit.yml)
 
-[![codecov](https://codecov.io/gh/circuits/circuits/branch/master/graph/badge.svg)](https://codecov.io/gh/circuits/circuits)
+# PHIDL
+GDS scripting for Python that's intuitive, fast, and powerful.
 
-[![Stories Ready](https://badge.waffle.io/circuits/circuits.png?label=ready&title=Ready)](https://waffle.io/circuits/circuits)
+- [**Installation / requirements**](#installation--requirements)
+- [**Tutorial + examples**](https://phidl.readthedocs.io/en/latest/tutorials.html) (or [try an interactive notebook](https://mybinder.org/v2/gh/amccaugh/phidl/master?filepath=phidl_tutorial_example.ipynb))
+- [**Geometry library + function documentation**](https://phidl.readthedocs.io/en/latest/geometry_reference.html)
+- [Changelog](https://github.com/amccaugh/phidl/blob/master/CHANGELOG.md) (latest update 1.6.0 on Sept 28, 2021)
+    - Huge new routing rewrite for `phidl.routing`, including automatic manhattan routing with custom cross-sections!  See [the routing documentation](https://phidl.readthedocs.io/en/latest/tutorials/routing.html) for details. Big thanks to Jeffrey Holzgrafe @jolzgrafe for this contribution
+    - `Path`s can now be used to produce sharp angles, in addition to smooth bends. See [the Path documentation](https://phidl.readthedocs.io/en/latest/tutorials/waveguides.html#Sharp/angular-paths)
 
-circuits is a **Lightweight** **Event** driven and **Asynchronous** **Application Framework** for the [Python Programming Language](http://www.python.org/) with a strong **Component** Architecture.
+```python
+import phidl.routing as pr
+D_left = pr.route_smooth(port1, port2, radius=8, layer = 2)
+D_right = pr.route_sharp(port1, port2, layer = 2)
+```
 
-circuits also includes a lightweight, high performance and scalable HTTP/WSGI compliant web server as well as various I/O and Networking components.
+![phidl example image](https://amccaugh.github.io/phidl/readme_9.png)
 
--   [Website](http://circuitsframework.com/)
--   [Downloads](https://github.com/circuits/circuits/releases)
--   [Documentation](http://circuits.readthedocs.org/en/latest/)
+# Citation
 
-Got questions?
+If you found PHIDL useful, please consider citing it in (just one!) of your publications -- we appreciate it greatly. ([BibTeX](https://raw.githubusercontent.com/amccaugh/phidl/master/CITATION.bib))
+ - McCaughan, A. N., et. al. PHIDL: Python-based layout and geometry creation for nanolithography. *J. Vac. Sci. Technol. B* 39, 062601 (2021). http://dx.doi.org/10.1116/6.0001203
 
--   [Ask a Question](http://stackoverflow.com/questions/ask) (Tag it: `circuits-framework`)
+# Gallery
 
-Examples
-========
+<img src="https://amccaugh.github.io/phidl/phidl1.png" width="30%"></img> <img src="https://amccaugh.github.io/phidl/phidl2.png" width="30%"></img> <img src="https://amccaugh.github.io/phidl/phidl3.png" width="30%"></img> <img src="https://amccaugh.github.io/phidl/phidl4.png" width="30%"></img> <img src="https://amccaugh.github.io/phidl/phidl5.png" width="30%"></img> <img src="https://amccaugh.github.io/phidl/phidl6.png" width="30%"></img> <img src="https://amccaugh.github.io/phidl/phidl7.png" width="30%"></img> <img src="https://amccaugh.github.io/phidl/phidl8.png" width="30%"></img> <img src="https://amccaugh.github.io/phidl/phidl9.png" width="30%"></img> <img src="https://amccaugh.github.io/phidl/phidl10.png" width="30%"></img> <img src="https://amccaugh.github.io/phidl/phidl11.png" width="30%"></img> <img src="https://amccaugh.github.io/phidl/phidl12.png" width="30%"></img>
 
-Features
-========
+# Installation / requirements
+- Install or upgrade with `pip install -U phidl`
+- Python version >=3.5
+- If you are on Windows or Mac and don't already have `gdspy` installed, you will need a C++ compiler
+    - For Windows + Python 3, install ["Build Tools for Visual Studio"](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019) (make sure to check the "C++ build tools" checkbox when installing)
+    - For Mac, install "Xcode" from the App Store, then run the command `xcode-select --install` in the terminal
 
--   event driven
--   concurrency support
--   component architecture
--   asynchronous I/O components
--   no required external dependencies
--   full featured web framework (circuits.web)
--   coroutine based synchronization primitives
+# About PHIDL
 
-Requirements
-============
+*fiddle (verb) - /ˈfidl/ - to make minor manual movements, especially to adjust something*
 
--   circuits has no dependencies beyond the [Python Standard Library](http://docs.python.org/library/).
+PHIDL is an open-source GDS-based CAD tool for Python that significantly extends the excellent [gdspy](https://github.com/heitzmann/gdspy).  The base installation includes a large library of simple shapes (e.g. rectangles, circles), photonic structures (e.g. sine curve waveguides), and superconducting nanowire shapes (e.g. single photon detectors) that are fully parameterized. It also has a built-in quick-plotting function based on matplotlib (or Qt) that allows you view the state of any GDS object, useful when scripting geometry-making functions. It also has a [__geometry library reference__](https://phidl.readthedocs.io/) and a set of [__very thorough tutorials__](https://phidl.readthedocs.io/en/latest/tutorials.html) that will walk you through the process of getting acquainted with PHIDL.
 
-Supported Platforms
-===================
+The goal is to bring the usability of Illustrator / Inkscape drawing programs to the GDS scripting world. Like Python itself, it aims to be readable, and intuitive.  For instance, when building a geometry you don't have to worry about what the exact coordinates are anymore. If you want to separate two ellipses in the x direction by 5 units, you can do things like this:
 
--   Linux, FreeBSD, Mac OS X, Windows
--   Python 2.7, 3.4, 3.5, 3.6
--   pypy (the newer the better)
+`ellipse1.xmin = ellipse2.xmax + 5`
 
-Installation
-============
+or if you want to move then rotate one ellipse by 45 degrees you can do
 
-The simplest and recommended way to install circuits is with pip. You may install the latest stable release from PyPI with pip:
+`ellipse2.move([1,7]).rotate(45)`
 
-    $ pip install circuits
+There's a few dozen shortcuts like this that make life easier built into PHIDL--they're simple, but they make a world of difference when you just want to e.g. space a ring resonator some distance from a waveguide without having to track each and every coordinate of the shape.
 
-If you do not have pip, you may use easy\_install:
+[](http://amccaugh.github.io/phidl)
 
-    $ easy_install circuits
+![phidl example image](https://amccaugh.github.io/phidl/readme_1.png)
 
-Alternatively, you may download the source package from the [PyPi](http://pypi.python.org/pypi/circuits) or the [Downloads](https://github.com/circuits/circuits/releases) extract it and install using:
 
-    $ python setup.py install
+There's also a "port" functionality that allows you to snap together geometry like Legos without caring about where exactly the absolute coordinates of either geometry is.  For instance, connecting the above misaligned rectangles is a two-line command:
 
-> **note**
->
-> You can install the [development version](https://github.com/circuits/circuits/archive/master.zip#egg=circuits-dev)  
-> via `pip install circuits==dev`.
->
-License
-=======
+![phidl example image](https://amccaugh.github.io/phidl/readme_2.png)
 
-circuits is licensed under the [MIT License](http://www.opensource.org/licenses/mit-license.php).
+It also allows you to do things like add text and create smooth or straight routing curves between "ports" of different devices, convenient for making electrical or optical connections:
 
-Feedback
-========
+![phidl example image](https://amccaugh.github.io/phidl/readme_3.png)
+![phidl example image](https://amccaugh.github.io/phidl/readme_4.png)
 
-We welcome any questions or feedback about bugs and suggestions on how to improve circuits.
 
-Let us know what you think about circuits. [@pythoncircuits](http://twitter.com/pythoncircuits).
+Other useful functionality available are standard operations like booleans:
 
-Do you have suggestions for improvement? Then please [Create an Issue](https://github.com/circuits/circuits/issues/new) with details of what you would like to see. I'll take a look at it and work with you to either incorporate the idea or find a better solution.
+![phidl example image](https://amccaugh.github.io/phidl/readme_8.png)
 
-Community
-=========
+ and less standard ones like creating outlines. A whole layout can be outlined directly in the GDS without requiring you to use Beamer (useful for positive-tone resist structures):
 
-There are also several places you can reach out to the circuits community:
+`pg.outline(D, distance = 0.7, layer = 4)`
 
--   [Mailing List](http://groups.google.com/group/circuits-users)
--   [Google+ Group](https://plus.google.com/communities/107775112577294599973)
--   [\#circuits IRC Channel](http://webchat.freenode.net/?randomnick=1&channels=circuits&uio=d4) on the [FreeNode IRC Network](http://freenode.net)
--   [Ask a Question](http://stackoverflow.com/questions/ask) on [Stackoverflow](http://stackoverflow.com/) (Tag it: `circuits-framework`)
+![phidl example image](https://amccaugh.github.io/phidl/readme_5.png)
 
-------------------------------------------------------------------------
+The geometry library also has useful resolution test-structures built into it, for instance
 
-Disclaimer
-==========
+```
+pg.litho_calipers(num_notches = 7, offset_per_notch = 0.1)
+pg.litho_steps(line_widths = [1,2,4,8,16])
+pg.litho_star(num_lines = 16, line_width = 3)
+```
 
-Whilst I (James Mills) continue to contribute and maintain the circuits project I do not represent the interests or business of my employer Facebook Inc. The contributions I make are of my own free time and have no bearing or relevance to Facebook Inc.
+![phidl example image](https://amccaugh.github.io/phidl/readme_7.png)
+
+There are also handy functions to help pack shapes into as small an area as possible:
+
+```
+pg.packer(D_list, spacing = 1.25, aspect_ratio = (2,1))
+```
+
+![phidl example image](https://amccaugh.github.io/phidl/packer.png)
