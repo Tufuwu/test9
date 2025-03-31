@@ -1,0 +1,15 @@
+# Do not include any settings
+MemberManagement/local_settings.py
+MemberManagement/prod_settings.py
+
+# virtualenv
+.venv
+venv/
+ENV/
+
+node_modules/
+assets/bundles/
+
+# Countries data
+allCountries.txt
+allCountries.zip

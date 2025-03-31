@@ -1,0 +1,32 @@
+{% extends "base/base.html" %}
+{% load uikit_tags %}
+{% load static %}
+{% load render_entrypoint from webpack_loader %}
+
+{% block title %}Membership Portal - Token Login{% endblock %}
+
+{% block head %}
+{% if not error %}
+    {% render_entrypoint "custom_auth__token_login" %}
+{% endif %}
+{% endblock %}
+
+{% block pagetitle %}
+Magic Login
+{% endblock %}
+
+{% block content %}
+<div>
+    <form method='POST' id="token_form">
+        <input type="hidden" name="token" value="{{ token }}">
+        <input type="hidden" name="next" value="{{ next }}">
+        {% csrf_token %}
+    </form>
+
+    {% if error %}
+    <div class="uk-alert-danger" uk-alert class="uk-width-1-1">    
+        <p>We could not log you in. <a href="{% url 'login' %}">Try Again</a></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

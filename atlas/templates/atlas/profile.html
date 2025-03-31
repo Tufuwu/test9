@@ -1,0 +1,162 @@
+{% extends "base/base.html" %}
+
+{% load registry_display %}
+{% load static %}
+{% load render_entrypoint from webpack_loader %}
+
+{% block title %}Member{% endblock %}
+
+
+{% block head %}
+{% render_entrypoint "atlas__profile" "css" %}
+{% endblock %}
+
+{% block pagetitle %}
+    {{ alumni.fullName }}
+            
+    {% if alumni.atlas.contactInfoVisible %}
+        <span id="id_socials">
+            {% if alumni.social.facebook %}
+                <a class="uk-icon-button" target="_blank" href="{{alumni.social.facebook}}" uk-icon="icon: facebook" alt="Facebook">
+                </a>
+            {% endif %}
+            {% if alumni.social.linkedin %}
+                <a class="uk-icon-button" target="_blank" href="{{alumni.social.linkedin}}" uk-icon="icon: linkedin" alt="LinkedIn">
+                </a>
+            {% endif %}
+            {% if alumni.social.twitter %}
+                <a class="uk-icon-button" target="_blank" href="{{alumni.social.twitter}}" uk-icon="icon: twitter" alt="Twitter">
+                </a>
+            {% endif %}
+            {% if alumni.social.instagram %}
+                <a class="uk-icon-button" target="_blank" href="{{alumni.social.instagram}}" uk-icon="icon: instagram" alt="instagram">
+                </a>
+            {% endif %}
+        </span>
+    {% endif %}
+
+    <span class="uk-label">{{ alumni |get_choice_field:"category" }}
+{% endblock %}
+
+{% block content %}
+<div class="uk-grid uk-child-width-1-2@s">
+    <div>
+        <p class="uk-article-lead">
+            {% if alumni.atlas.contactInfoVisible %}
+                <span id="id_contact">
+                    <a href="mailto:{{alumni.approval.gsuite}}">{{alumni.approval.gsuite}}</a>
+                    {% if alumni.social.homepage %}
+                    &nbsp;-&nbsp; <a href="{{alumni.social.homepage}}" target="_blank">{{alumni.social.homepage}}</a>
+                    {% endif %}
+                    <br />
+                </span>
+            {% endif %}
+
+            {% if alumni.jacobs.degree %}
+                {{ alumni.jacobs|get_choice_field:"degree" }}, 
+            {% endif %}
+
+            {{ alumni.jacobs|get_choice_field:"graduation" }}
+
+            {% if alumni.atlas.birthdayVisible %}
+                <br />Birthday: {{ alumni.birthday|date:"dS F" }}
+            {% endif %}
+        </p>
+
+        <p>
+            <table class="uk-table uk-table-striped">
+                <thead>
+                    <tr>
+                        <th colspan="2">
+                            <h4>Job</h4>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if alumni.job.employer %}
+                        <tr>
+                            <td>Employer</td>
+                            <td>{{ alumni.job.employer }}</td>
+                        </tr>
+                    {% endif %}
+
+                    {% if alumni.job.position %}
+                        <tr>
+                            <td>Position</td>
+                            <td>{{ alumni.job.position }}</td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td>Job</td>
+                        <td>{{ alumni.job|get_choice_field:"job" }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Industry</td>
+                        <td>{{ alumni.job|get_choice_field:"industry" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="uk-table uk-table-striped">
+                <thead>
+                        <tr>
+                            <th colspan="2">
+                                <h4>Education and Skills</h4>
+                            </th>
+                        </tr>
+                    </thead>
+
+                <tbody>
+                    {% if alumni.skills.otherDegrees %}
+                        <tr>
+                            <td>Other Degrees</td>
+                            <td>{{ alumni.skills.otherDegrees }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if alumni.skills.spokenLanguages %}
+                        <tr>
+                            <td>Spoken Languages</td>
+                            <td>{{ alumni.skills.spokenLanguages }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if alumni.skills.programmingLanguages %}
+                        <tr>
+                            <td>Programming Languages</td>
+                            <td>{{ alumni.skills.programmingLanguages }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if alumni.skills.areasOfInterest %}
+                        <tr>
+                            <td>Areas of Interest</td>
+                            <td>{{ alumni.skills.areasOfInterest }}</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </p>
+    </div>
+
+    
+    <div class="uk-card uk-card-default uk-card-body" style="text-align: right; ">
+        <p>
+            <div id="map" class="map"></div>
+            lives in <i>{{alumni.address.city}}, {{alumni.address.country.name}}</i>
+            {% if alumni.jacobs.college %}
+                <br />
+                lived in <span class="uk-label" id='college' data-college="{{ alumni.jacobs.college }}">{{ alumni.jacobs|get_choice_field:"college" }}</span>
+            {% endif %}
+        </p>
+    </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extrascripts %}
+    <script type="text/javascript">
+        window.alumni_profile_point = {{ alumni_coords }};
+    </script>
+    {% render_entrypoint "atlas__profile" "js" %}
+{% endblock %}
