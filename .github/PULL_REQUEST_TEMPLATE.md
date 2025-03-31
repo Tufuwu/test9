@@ -1,6 +1,11 @@
-*Issue #, if available:*
+## Rationale
 
-*Description of changes:*
+[//]: # (Briefly explain the reason behind this change.)
 
+<!--
+Issue: [Title](link) or #123 for Github issues.
+-->
 
-By submitting this pull request, I confirm that you can use, modify, copy, and redistribute this contribution, under the terms of your choice.
+## Changes
+
+[//]: # (Summarize what has changed.)

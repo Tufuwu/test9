@@ -1,91 +1,43 @@
 # Contributing Guidelines
 
-Thank you for your interest in contributing to our project. Whether it's a bug report, new feature, correction, or additional 
-documentation, we greatly value feedback and contributions from our community.
+We love improvements to our tools! There are a few key ways you can help us improve our projects:
 
-Please read through this document before submitting any issues or pull requests to ensure we have all the necessary 
-information to effectively respond to your bug report or contribution.
+### Submitting Feedback, Requests, and Bugs
 
+Our process for submitting feedback, feature requests, and reporting bugs usually begins by discussion on [our chat](http://wiki.kiwix.org/wiki/Communication#Chat) and, after initial clarification, through [GitHub issues](https://help.github.com/articles/about-issues/). Each project repository generally maintains its own set of issues:
 
-## Reporting Bugs/Feature Requests
+        https://github.com/openzim/<repository-name>/issues
 
-We welcome you to use the GitHub issue tracker to report bugs or suggest features.
+Some projects have additional templates or sets of questions for each issue, which you will be prompted to fill out when creating one.
 
-When filing an issue, please check [existing open](https://github.com/awslabs/aws-deployment-framework/issues), or [recently closed](https://github.com/awslabs/aws-deployment-framework/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aclosed%20), issues to make sure somebody else hasn't already 
-reported the issue. Please try to include as much information as you can. Details like these are incredibly useful:
+Issues that span multiple projects or are about coordinating how we work overall are in the [Overview Issue Tracker](https://github.com/openzim/overview/issues).
 
-* A reproducible test case or series of steps
-* The version of our code being used
-* Any modifications you've made relevant to the bug
-* Anything unusual about your environment or deployment
+### Submitting Code and Documentation Changes
 
+We still do not have [project guidelines](./guidelines/project_guidelines.md) for all of the projects hosted in our [GitHub Organization](https://github.com/openzim), which new repositories should follow during their creation.
 
-## Contributing via Pull Requests
+Our process for accepting changes operates by [Pull Request (PR)](https://help.github.com/articles/about-pull-requests/) and has a few steps:
 
-Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
+1.  If you haven't submitted anything before, and you aren't (yet!) a member of our organization, **fork and clone** the repo:
 
-1. You are working against the latest source on the *master* branch.
-2. You check existing open, and recently merged, pull requests to make sure someone else hasn't addressed the problem already.
-3. You open an issue to discuss any significant work - we would hate for your time to be wasted.
+        $ git clone git@github.com:<your-username>/<repository-name>.git
 
-To send us a pull request, please:
+    Organization members should clone the upsteam repo, instead of working from a personal fork:
 
-1. Fork the repository.
-2. Modify the source; please focus on the specific change you are contributing. If you also reformat all the code, it will be hard for us to focus on your change.
-3. Ensure local tests pass.
-4. Commit to your fork using clear commit messages.
-5. Send us a pull request, answering any default questions in the pull request interface.
-6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
+        $ git clone git@github.com:openzim/<repository-name>.git
 
-GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and 
-[creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
+1.  Create a **new branch** for the changes you want to work on. Choose a topic for your branch name that reflects the change:
 
+        $ git checkout -b <branch-name>
 
-## Finding contributions to work on
+1.  **Create or modify the files** with your changes. If you want to show other people work that isn't ready to merge in, commit your changes then create a pull request (PR) with _WIP_ or _Work In Progress_ in the title.
 
-Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/duplicate/help wanted/invalid/question/wontfix), looking at any ['help wanted'](https://github.com/awslabs/aws-deployment-framework/labels/help%20wanted) issues is a great place to start. 
+        https://github.com/openzim/<repository-name>/pull/new/master
 
+1.  Once your changes are ready for final review, commit your changes then modify or **create your pull request (PR)**, assign as a reviewer or ping (using "`@<username>`") a Lieutenant (someone able to merge in PRs) active on the project (all Lieutenants can be pinged via `@openzim/lieutenants`)
 
-## Use of examples
+1.  Allow others sufficient **time for review and comments** before merging. We make use of GitHub's review feature to comment in-line on PRs when possible. There may be some fixes or adjustments you'll have to make based on feedback.
 
-To ensure that email addresses or account ids are not exposed by accident,
-it is recommended to use one of the following examples instead:
+1.  Once you have integrated comments, or waited for feedback, a Lieutenant should merge your changes in!
 
-In case you want to specify an example email address, please make use of one of
-the following email addresses:
-
-* `jane@example.com`
-* `john@example.com`
-* `janes_team@example.com`
-* Or another `@example.com`
-* For tests that could potentially create accounts (if mocks failed to work),
-  please use `test@amazon.com` instead.
-
-When you want to write documentation/tests and need an example account id, the
-following account ids may be used:
-
-* `111111111111`
-* `222222222222`
-* ... to ...
-* `999999999999`
-* or to show the length more easily:
-* `012345678910`
-* `012345671234`
-* `123456789012`
-
-
-## Code of Conduct
-
-This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct). 
-For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq) or contact 
-opensource-codeofconduct@amazon.com with any additional questions or comments.
-
-
-## Security issue notifications
-
-If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue.
-
-
-## Licensing
-
-See the [LICENSE](https://github.com/awslabs/aws-deployment-framework/blob/master/LICENSE) file for our project's licensing. We will ask you to confirm the licensing of your contribution.
+_These guidelines are based on [Tools for Government Data Archiving](https://github.com/edgi-govdata-archiving/overview/blob/master/CONTRIBUTING.md)'s._

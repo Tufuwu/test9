@@ -1,17 +1,42 @@
-# AWS Deployment Framework
+# ZIM Farm
 
-[![Build Status](https://travis-ci.org/awslabs/aws-deployment-framework.svg?branch=master)](https://travis-ci.org/awslabs/aws-deployment-framework)
+[![Build Status](https://travis-ci.com/openzim/zimfarm.svg?branch=master)](https://travis-ci.com/openzim/zimfarm)
+[![CodeFactor](https://www.codefactor.io/repository/github/openzim/zimfarm/badge)](https://www.codefactor.io/repository/github/openzim/zimfarm)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![codecov](https://codecov.io/gh/openzim/zimfarm/branch/master/graph/badge.svg)](https://codecov.io/gh/openzim/zimfarm)
 
-The AWS Deployment Framework *(ADF)* is an extensive and flexible framework to manage and deploy resources across multiple AWS accounts and regions within an AWS Organization.
+The ZIM farm (zimfarm) is a half-decentralised software solution to
+build [ZIM files](http://www.openzim.org/) efficiently. This means scrapping Web contents,
+packaging them into a ZIM file and uploading the result to an online
+ZIM files repository.
 
-ADF allows for staged, parallel, multi-account, cross-region deployments of applications or resources via the structure defined in [AWS Organizations](https://aws.amazon.com/organizations/) while taking advantage of services such as [AWS CodePipeline](https://aws.amazon.com/codepipeline/), [AWS CodeBuild](https://aws.amazon.com/codebuild/) and [AWS CodeCommit](https://aws.amazon.com/codecommit/) to alleviate the heavy lifting and management compared to a traditional CI/CD setup.
+## Principle
 
-ADF allows for clearly defined deployment and approval stages which are stored in a centralized configuration file. It also allows for account based bootstrapping, by which you define an [AWS CloudFormation](https://aws.amazon.com/cloudformation/) template and assign it to a specific Organization Unit (OU) within AWS Organizations. From there, any account you move into this OU will automatically apply this template as its baseline.
+The whole zimfarm system works as a task scheduler and is made of two components:
 
-## Quick Start
+* The [**dispatcher**](http://hub.docker.com/r/openzim/zimfarm-dispatcher), the central node, which takes and dispatches zim file generation
+  tasks. It is managed by the openZIM project admin and
+  hosted somewhere on the Internet.
 
-Launch ADF via the [Serverless Application Repository](https://console.aws.amazon.com/lambda/home?region=us-east-1#/create/app?applicationId=arn:aws:serverlessrepo:us-east-1:112893979820:applications/aws-deployment-framework) within the AWS Console.
+* The [**workers**](http://hub.docker.com/r/openzim/zimfarm-worker-manager), task executers, which are hosted by
+  openZIM volunteers in different places around the world through Internet.
 
-- Refer to the [Installation Guide](/docs/installation-guide.md) for Installation steps.
-- Refer to the [User Guide](/docs/user-guide.md) for using ADF once it is setup.
-- Refer to the [Samples Guide](/docs/samples-guide.md) for a detailed walk through of the provided samples.
+To get a new ZIM file the typical workflow is:
+
+1. User submits a new task (to get a specific ZIM file made).
+2. Dispatcher enqueues the task.
+3. A worker pulls the task.
+4. Worker generates the ZIM file and upload it.
+
+
+Refer to [workers](https://github.com/openzim/zimfarm/tree/master/workers) to run a worker.
+
+## Architecture
+
+The whole system is built by reusing the best of free software
+libraries components. The whole ZIM farm solution itself is made
+available using Docker images.
+
+Actually, we use even more Docker images, as the ZIM file are produced
+in dedicated custom Docker images the worker has to "invoke" depending
+of the properties of the task he has to accomplish.

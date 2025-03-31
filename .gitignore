@@ -1,41 +1,16 @@
-.vscode
-.idea
-.pyc
-.zip
-.DS_Store
-cleanup.py
-config
-config.sec
-config.bak
-policy.json
-pipeline.yml
-packaged.yaml
-template-sam.yml
-template-deploy.yml
-template-sam-out.yml
-master-deploy.yml
-.pytest_cache
-shared_layer.zip
-.aws-sam
-samconfig.toml
-pipeline.json
-template-sam.yml
-deploy.sh
-
 # Byte-compiled / optimized / DLL files
-__pycache__
+__pycache__/
 *.py[cod]
 *$py.class
-outfile
+
 # C extensions
 *.so
 
 # Distribution / packaging
-package.yaml
-aws_deployment_framework.egg-info
 .Python
+env/
+build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -44,11 +19,9 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -63,15 +36,13 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
-.nox/
 .coverage
 .coverage.*
 .cache
 nosetests.xml
 coverage.xml
-*.cover
+*,cover
 .hypothesis/
-.pytest_cache/
 
 # Translations
 *.mo
@@ -80,7 +51,6 @@ coverage.xml
 # Django stuff:
 *.log
 local_settings.py
-db.sqlite3
 
 # Flask stuff:
 instance/
@@ -95,12 +65,8 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter Notebook
+# IPython Notebook
 .ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
 
 # pyenv
 .python-version
@@ -108,32 +74,60 @@ ipython_config.py
 # celery beat schedule file
 celerybeat-schedule
 
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
+# virtualenv
 venv/
 ENV/
-env.bak/
-venv.bak/
 
 # Spyder project settings
 .spyderproject
-.spyproject
 
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
+# dependencies
+/node_modules
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+# IDEs and editors
+.idea
+.vscode
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
 
-# Pyre type checker
-.pyre/
+# compiled output
+/dist
+/tmp
+/out-tsc
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+testem.log
+/typings
+yarn-error.log
+
+# e2e
+/e2e/*.js
+/e2e/*.map
+
+# System Files
+.DS_Store
+Thumbs.db
+
+dispatcher/docker_data/
+dispatcher/frontend/node_modules/
+id_rsa
+
+worker/setting.json
+worker/dist/
+worker/temp/
+.pytest_cache
+.reg
+
+environ.js
