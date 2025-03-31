@@ -1,40 +1,39 @@
-#!/usr/bin/python3
-
 from setuptools import setup, find_packages
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+from os import path
+from io import open
+
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
+version = '2.0.2'
 
 setup(
-    name="eth-event",
-    version="1.0.0",  # do not edit directly, use bumpversion
-    license="MIT",
-    description="Ethereum event decoder and topic generator",
+    name='django-mptt-admin',
+    version=version,
+    packages=find_packages(),
+    license='Apache License, Version 2.0',
     long_description=long_description,
-    long_description_content_type="text/markdown",
-    author="Benjamin Hauser",
-    author_email="ben@hauser.id",
-    url="https://github.com/iamdefinitelyahuman/eth-event",
+    long_description_content_type='text/markdown',
     include_package_data=True,
-    py_modules=["eth_event"],
-    setup_requires=[],
     zip_safe=False,
-    keywords=["ethereum"],
-    packages=find_packages(exclude=["tests", "tests.*"]),
-    python_requires=">=3.6, <4",
-    install_requires=[
-        "eth-abi>=2.0.0,<3.0.0",
-        "eth-hash[pycryptodome]>=0.2.0,<1.0.0",
-        "hexbytes>=0.2.0,<1.0.0",
-    ],
+    author='Marco Braak',
+    author_email='mbraak@ridethepony.nl',
+    install_requires=['django-mptt'],
+    description='Django-mptt-admin provides a nice Django Admin interface for Mptt models',
+    url='https://github.com/mbraak/django-mptt-admin',
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
+        "Framework :: Django",
+        "Framework :: Django :: 2.2",
+        "Framework :: Django :: 3.0",
+        "Framework :: Django :: 3.1",
         "Intended Audience :: Developers",
-        "Topic :: Software Development :: Build Tools",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-    ],
+        "Programming Language :: Python :: Implementation :: CPython"
+    ]
 )
