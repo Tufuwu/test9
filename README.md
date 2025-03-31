@@ -1,40 +1,93 @@
-SublimeLinter-flow
-================================
 
-[![Build Status](https://travis-ci.org/SublimeLinter/SublimeLinter-flow.svg?branch=master)](https://travis-ci.org/SublimeLinter/SublimeLinter-flow)
+# SIMD Kalman
+[![Docs Status](https://readthedocs.org/projects/simdkalman/badge/?version=latest)](http://simdkalman.readthedocs.io/en/latest/?badge=latest)
+[![PyPI](https://img.shields.io/pypi/v/simdkalman.svg)](https://pypi.python.org/pypi/simdkalman)
 
-This linter plugin for [SublimeLinter](https://github.com/SublimeLinter/SublimeLinter) provides an interface to [flow](http://flowtype.org/) (0.1.0 or later), a static type checker for JavaScript.
-It will be used with files that have the "JavaScript" syntax.
+Fast Kalman filters in Python leveraging single-instruction multiple-data
+vectorization. That is, running _n_ similar Kalman filters on _n_
+independent series of observations. Not to be confused with SIMD processor
+instructions.
 
+```python
+import simdkalman
 
-## Installation
+kf = simdkalman.KalmanFilter(
+    state_transition = np.array([[1,1],[0,1]]),
+    process_noise = np.diag([0.1, 0.01]),
+    observation_model = np.array([[1,0]]),
+    observation_noise = 1.0)
 
-SublimeLinter must be installed in order to use this plugin. 
+data = numpy.random.normal(size=(200, 1000))
 
-Please use [Package Control](https://packagecontrol.io) to install the linter plugin.
+# smooth and explain existing data
+smoothed = kf.smooth(data)
+# predict new data
+pred = kf.predict(data, 15)
+```
+See `examples/example.py` for a more comprehensive example and
+[ReadTheDocs](https://simdkalman.readthedocs.io/) for the full documentation.
+For the changelog, see [releases page](https://github.com/oseiskar/simdkalman/releases)
 
-[Getting started with Flow](http://flowtype.org/docs/getting-started.html#installing-flow)
+According to `examples/benchmark.py`. This can be up to **100x faster** than
+[pykalman](https://pykalman.github.io/) and **70x faster** than
+[filterpy](https://github.com/rlabbe/filterpy) when can be vectorized over
+many independent timeseries. Also in the non-vectorized case, it can be 2x
+faster.
 
-Please make sure that the path to `flow` is available to SublimeLinter.
-The docs cover [troubleshooting PATH configuration](http://sublimelinter.com/en/latest/troubleshooting.html#finding-a-linter-executable).
+### Installation
 
+    pip install simdkalman
 
-## Settings
+### Development
 
-- SublimeLinter settings: http://sublimelinter.com/en/latest/settings.html
-- Linter settings: http://sublimelinter.com/en/latest/linter_settings.html
+ 1. Create virtualenv
+    * Python 2: `virtualenv venvs/python2`
+    * Python 3: `python3 -m venv venvs/python3`
+ 1. Activate virtualenv: `source venvs/pythonNNN/bin/activate`
+ 1. Install locally `pip install -e .[dev,test,docs]`
+ 1. `./run-tests.sh`
+ 1. `deactivate` virtualenv
 
-Additional SublimeLinter-flow settings:
+### Distribution
 
-|Setting|Description|
-|:------|:----------|
-|lib|Add a path to your interface files. [More info](http://flowtype.org/docs/third-party.html#interface-files)|
-|show-all-errors|It allows flow to output all errors instead of stopping at 50|
-|executable|Allows to specify the path to the flow executable|
-|coverage|Shows flow coverage warnings|
-|all|runs flow against all files regardless of `@flow` comment|
+(personal howto)
 
-### Warning
+Once:
 
-At this moment, using `all` in a medium to big sized node.js project may cause a **crash**.  It's recommended to use `flow` incrementally,  one file at a time.
+ 1. create an account in https://testpypi.python.org/pypi and
+    https://pypi.python.org/pypi
+ 1. create `~/.pypirc` as described [here](https://packaging.python.org/guides/migrating-to-pypi-org)
+ 1. `sudo pip install twine`
+ 1. create testing virutalenvs:
+    * `virtualenv venvs/test-python2`
+    * `python3 -m venv venvs/test-python3`
 
+Each distribution:
+
+    # first, set version in setup.py
+    # then create distributable package
+    python setup.py bdist_wheel
+    # test PyPI site
+    twine upload --repository testpypi dist/simdkalman-VERSION*
+    # the real thing
+    twine upload dist/simdkalman-VERSION*
+    # update git tags
+    git tag VERSION -m "released VERSION"
+    git push --tags
+
+Test installation from the test site with
+
+    source venvs/test-pythonNNN/bin/activate
+    pip install \
+        --index-url https://test.pypi.org/simple/ \
+        --extra-index-url https://pypi.org/simple \
+        simdkalman --upgrade
+    # or the real thing with just
+    # pip install simdkalman
+    pip install matplotlib
+    python examples/example.py
+    deactivate
+
+### TODO
+
+ - [ ] EM algorithm documentation and options
