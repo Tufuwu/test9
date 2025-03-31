@@ -1,52 +1,50 @@
-"""Setup file for micropipenv python package."""
-from setuptools import setup
-import os
+from itertools import chain
+from setuptools import setup, find_packages
+from orix import __name__, __version__, __author__, __author_email__, __description__
 
-_HERE = os.path.dirname(os.path.abspath(__file__))
-
-
-def get_version():
-    """Get version of micropipenv.py."""
-    with open(os.path.join(_HERE, "micropipenv.py")) as f:
-        content = f.readlines()
-
-    for line in content:
-        if line.startswith("__version__ ="):
-            # dirty, remove trailing and leading chars
-            return line.split(" = ")[1][1:-2]
-
-    raise ValueError("No version identifier found")
-
+# Projects with optional features for building the documentation and running
+# tests. From setuptools:
+# https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-extras-optional-features-with-their-own-dependencies
+extra_feature_requirements = {
+    "doc": ["sphinx >= 3.0.2", "sphinx-rtd-theme >= 0.4.3"],
+    "tests": ["pytest >= 5.4", "pytest-cov >= 2.8.1", "coverage >= 5.0"],
+}
+extra_feature_requirements["dev"] = ["black >= 19.3b0", "pre-commit >= 1.16"] + list(
+    chain(*list(extra_feature_requirements.values()))
+)
 
 setup(
-    name="micropipenv",
-    version=get_version(),
-    description="A simple wrapper around pip to support requirements.txt, Pipenv and Poetry files for containerized applications",
-    keywords=["packaging", "pipenv", "poetry", "pip", "dependencies", "dependency-management", "utilities"],
-    url="https://github.com/thoth-station/micropipenv",
-    download_url="https://pypi.org/project/micropipenv",
-    long_description=open(os.path.join(_HERE, "README.rst")).read(),
-    long_description_content_type="text/x-rst",
-    author="Fridolin Pokorny",
-    author_email="fridex.devel@gmail.com",
-    maintainer="Fridolin Pokorny",
-    maintainer_email="fridex.devel@gmail.com",
-    license="LGPLv3+",
-    py_modules=["micropipenv"],
-    install_requires=["pip>=9"],
-    entry_points={"console_scripts": ["micropipenv=micropipenv:main"]},
+    name=__name__,
+    version=str(__version__),
+    license="GPLv3",
+    author=__author__,
+    author_email=__author_email__,
+    description=__description__,
+    long_description=open("README.rst").read(),
     classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
-        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: Implementation :: CPython",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Physics",
     ],
-    extras_require={
-        "toml": ["toml"],
-    },
+    packages=find_packages(exclude=["orix/tests"]),
+    extras_require=extra_feature_requirements,
+    # fmt: off
+    install_requires=[
+        "diffpy.structure >= 3",
+        "h5py",
+        "matplotlib >= 3.3",
+        "numpy",
+        "scipy",
+        "tqdm",
+    ],
+    # fmt: on
+    package_data={"": ["LICENSE", "README.rst", "readthedocs.yml"], "orix": ["*.py"],},
 )
