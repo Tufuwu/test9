@@ -1,37 +1,64 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+from distutils.core import Extension
+import os
+import re
 
-with open('README.md', 'r') as fh:
-    long_description = fh.read()
+DISTNAME = 'mhkit'
+PACKAGES = find_packages()
+EXTENSIONS = []
+DESCRIPTION = 'Marine and Hydrokinetic Toolkit'
+AUTHOR = 'MHKiT developers'
+MAINTAINER_EMAIL = ''
+LICENSE = 'Revised BSD'
+URL = 'https://github.com/MHKiT-Software/mhkit-python'
+CLASSIFIERS=['Development Status :: 3 - Alpha',
+             'Programming Language :: Python :: 3',
+             'Topic :: Scientific/Engineering',
+             'Intended Audience :: Science/Research',
+             'Operating System :: OS Independent',
+            ]
+DEPENDENCIES = ['pandas>=1.0.0', 
+                'numpy<1.21.0', 
+                'scipy',
+                'matplotlib', 
+                'requests', 
+                'pecos>=0.1.9',
+                'fatpack',
+                'lxml',
+                'scikit-learn',
+		        'NREL-rex>=0.2.61',
+                'six>=1.13.0',
+                'netCDF4', 
+                'xarray']
 
-setup(
-    name='linkedin-jobs-scraper',
-    version='1.4.0',
-    author='Ludovico Fabbri',
-    author_email='ludovico.fabbri@gmail.com',
-    description='Scrape public available jobs on Linkedin using headless browser',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    url='https://github.com/spinlud/py-linkedin-jobs-scraper.git',
-    packages=[
-        'linkedin_jobs_scraper',
-        'linkedin_jobs_scraper.chrome_cdp',
-        'linkedin_jobs_scraper.events',
-        'linkedin_jobs_scraper.exceptions',
-        'linkedin_jobs_scraper.filters',
-        'linkedin_jobs_scraper.query',
-        'linkedin_jobs_scraper.strategies',
-        'linkedin_jobs_scraper.utils',
-    ],
-    install_requires=[
-        'selenium',
-        'websocket-client'
-    ],
-    classifiers=[
-        'Intended Audience :: Developers',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3.6',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-    ],
-    python_requires='>=3.6',
-)
+# use README file as the long description
+file_dir = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(file_dir, 'README.md'), encoding='utf-8') as f:
+    LONG_DESCRIPTION = f.read()
+
+# get version from __init__.py
+with open(os.path.join(file_dir, 'mhkit', '__init__.py')) as f:
+    version_file = f.read()
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        VERSION = version_match.group(1)
+    else:
+        raise RuntimeError("Unable to find version string.")
+        
+setup(name=DISTNAME,
+      version=VERSION,
+      packages=PACKAGES,
+      ext_modules=EXTENSIONS,
+      description=DESCRIPTION,
+      long_description=LONG_DESCRIPTION,
+      author=AUTHOR,
+      maintainer_email=MAINTAINER_EMAIL,
+      license=LICENSE,
+      url=URL,
+      classifiers=CLASSIFIERS,
+      zip_safe=False,
+      install_requires=DEPENDENCIES,
+      scripts=[],
+      include_package_data=True
+  )
