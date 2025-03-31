@@ -1,56 +1,19 @@
-.idea/
-examples/**/results*
-docs/_static/
-.pytest_cache/
-.vscode/
+# PySys Output directories
+Output/
+pysys-junit-report/
+pysys-testsummary*.xml
+coverage-python-*
 
-# Created by https://www.gitignore.io/api/python,fortran
-
-### Fortran ###
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 
 # C extensions
+*.so
 
 # Distribution / packaging
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -66,6 +29,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -85,16 +49,17 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*,cover
+*.cover
 .hypothesis/
+.pytest_cache/
 
 # Translations
 *.mo
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
+db.sqlite3
 
 # Flask stuff:
 instance/
@@ -121,13 +86,14 @@ celerybeat-schedule
 # SageMath parsed files
 *.sage.py
 
-# dotenv
+# Environments
 .env
-
-# virtualenv
 .venv
+env/
 venv/
 ENV/
+env.bak/
+venv.bak/
 
 # Spyder project settings
 .spyderproject
@@ -139,4 +105,5 @@ ENV/
 # mkdocs documentation
 /site
 
-# End of https://www.gitignore.io/api/python,fortran
+# mypy
+.mypy_cache/
