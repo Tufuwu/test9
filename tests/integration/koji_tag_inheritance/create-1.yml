@@ -1,0 +1,32 @@
+# Create a basic inheritance relationship.
+---
+
+- koji_tag:
+    name: create-1-parent
+    state: present
+
+- koji_tag:
+    name: create-1-child
+    state: present
+
+- koji_tag_inheritance:
+    parent_tag: create-1-parent
+    child_tag: create-1-child
+    priority: 0
+
+# Assert that we have the new parent with the default inheritance settings.
+
+- koji_call:
+    name: getInheritanceData
+    args: [create-1-child]
+  register: inheritance
+
+- assert:
+    that:
+      - inheritance.data|length == 1
+      - inheritance.data[0].name == 'create-1-parent'
+      - not inheritance.data[0].intransitive
+      - inheritance.data[0].maxdepth is none
+      - not inheritance.data[0].noconfig
+      - inheritance.data[0].pkg_filter == ''
+      - inheritance.data[0].priority == 0
