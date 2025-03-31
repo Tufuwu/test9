@@ -1,0 +1,173 @@
+Ampoule 22.5.0 (2022-05-23)
+===========================
+
+  - Various packaging metadata fixes to work better with current versions of
+    pip-tools (as well as other packaging tools).
+
+Ampoule 19.12.0 (2019-12-21)
+============================
+
+  - Replace all uses of twisted.python.log with twisted.logger.
+  - Don't return an already-dead worker to the ready pool.
+
+Ampoule 19.6.0 (2019-06-18)
+===========================
+
+  - Fix a process leak when a process exits non-zero on recycling.
+
+Ampoule 0.3.1 (2017-12-10)
+==========================
+
+  - Restored to original name after maintenance handover.
+  - Updated home page to new source code location.
+  - Minor python 2 compatibility issue in the tests (introduced in 0.3.0) fixed.
+
+Ampoul3 0.3.0 (2017-12-10)
+==========================
+
+Changes
+-------
+
+  - Python 3 support.
+  - Pyflakes fixes.
+  - No more trailing whitespace :).
+  - Migrated to Git.
+  - (Hopefully temporary) package name change while I wait for Valentino to
+    give me access to PyPI...
+
+Ampoule 0.2.0 (2010-02-02)
+==========================
+
+Changes
+--------
+  - Fixed bug #317287: Twisted was required by setup.py due to import
+      of application code to get the version number. The setup.py now
+      tries to do the same thing but if it fails it uses a separate
+      hardcoded version.
+  - Fixed bug #317077: Ampoule didn't work on windows xp due to childFD
+      customization, now on windows ampoule uses the standard 0,1,2 fds.
+  - Added pyOpenSSL as an explicit dependency since Twisted doesn't
+    require it but AMP does.
+  - Greatly simplify setup.py and support plain distutils too.
+  - Bootstrap code now supports context managers
+  - Support for execution deadline on child calls
+  - Parametrize the timeout signal to send to the child
+  - Pass arguments directly from the ProcessPool object for the child
+    process creation.
+    
+
+Ampoule 0.1 (2008-11-15)
+==========================
+
+Changes
+--------
+
+  - Fixed bug #276841: Add timeout for subprocess calls.
+     The ProcessPool constructor now supports an additional timeout
+     argument that specifies a pool level timeout, in seconds, before
+     which every call ever made should return. Alternatively there is
+     also a per-call mechanism. Currently this second per-call system
+     is not available when using the remote pool service, so be sure
+     to set the timeout command line parameter at an high enough level
+     to satisfy all the possible commands. If a command doesn't require
+     an answer the timeout doesn't apply, of course.
+     
+     The error returned when a call is timedout is 'error.ProcessTerminated'.
+     On *nix systems the process is terminated with signal 9, on windows
+     ampoule uses SIGTERM and returns error code 255.
+
+Ampoule 0.0.5 (2008-11-12)
+==========================
+
+Changes
+--------
+ - Fixed bug #259264, this fix introduces a number of changes in the
+   architecture of the project:
+    1. Removed childReactor argument form the process pool and added
+       a starter argument.
+    2. Introduced the concept of a starter object whose role is to
+       start subprocesses with given parameters. This makes it easier
+       to specify particular parameters (eg. new env variables) to the
+       child processes without needing to override many methods in the
+       pool using closures.
+    3. main.py is completely changed and now provides the ProcessStarter
+       object which is a default implementation of IStarter.
+    4. IStarter interface currently documents only 2 methods:
+            startAMPProcess
+            startPythonProcess
+        in the future it's possible that we will add an additional:
+            startProcess
+        that starts whichever process we want without requiring python,
+        also this might end up with the separation of ProcessPool in at
+        least 2 logical levels: the ProcessPool and a dispatcher that
+        talks with the children, in this way it would be possible to
+        create custom ProcessPools without changing much code or requiring
+        any special requirement on the children.
+
+ - Introduced a callRemote method on the ProcessPool that is basically
+   the same as doWork. Introduced for symmetry between all the RPC libraries
+   in Twisted.
+
+ - reactor short name and ampoule child class are now passed as the 2
+   last arguments rather than the first 2. So if you have written any
+   custom bootstrap code be sure to change sys.argv[1] and sys.argv[2]
+   into sys.argv[-2] and sys.argv[-1] respectively.
+
+
+Ampoule 0.0.4 (2008-11-03)
+==========================
+
+Changes
+--------
+ - Ampoule parent process and child processes now talk using FDs 3 (in)
+   and 4 (out) in order to avoid problems with libraries that mistakenly
+   send error lines to stdout (yes, I'm looking at you gtk+)
+
+Ampoule 0.0.3 (2008-10-01)
+==========================
+
+Features
+--------
+ - Added a Twisted Matrix plugin to run a process pool service that
+   can be used over the network using an AMP client.
+ 
+ - Added ability to change the reactor used to run the children
+
+Changes
+-------
+ - If you wrote your own bootstrap code for the pool you should change
+   the way it works because now it takes 2 arguments, sys.argv[1] is
+   the reactor short name while sys.argv[2] is still the AMPChild path.
+   If you don't use startAMPProcess you probably have nothing to worry
+   about.
+ 
+Fixes
+-----
+ - Now the process pool doesn't raise an error when you use a command
+   that doesn't require an answer.
+
+Ampoule 0.0.2 (2008-09-26)
+==========================
+
+Features
+--------
+ - Support process recycling after predefined number of calls.
+
+Changes
+-------
+ - ProcessPool argument max_idle is now maxIdle to comply with Twisted
+   style guidelines.
+
+ - ProcessPool.startAWorker is now a synchronous call
+
+ - removed ampoule.runner module because it was essentially useless,
+   if you want to change subprocess startup behavior pass it as an
+   argument by overriding the processFactory with a closure like this:
+       
+       from ampoule.main import startAMPProcess
+       from ampoule.pool import ProcessPool
+       pp = ProcessPool()
+       def myProcessFactory(*args, **kwargs):
+           kwargs['bootstrap'] = myBootstrapCode
+           return startAMPProcess(*args, **kwargs)
+       pp.processFactory = staticmethod(myProcessFactory)

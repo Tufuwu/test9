@@ -1,9 +1,4 @@
-.venv/
-.idea/
-.vscode/
-__pycache__/
-
-.env
-.python-version
-*.sqlite3
-*.bak
+*.egg-info
+/build
+*.pyc
+.tox
