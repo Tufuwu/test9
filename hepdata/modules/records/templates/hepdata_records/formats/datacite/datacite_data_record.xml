@@ -1,0 +1,99 @@
+<resource xmlns="http://datacite.org/schema/kernel-3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://datacite.org/schema/kernel-3 http://schema.datacite.org/meta/kernel-3/metadata.xsd">
+    <identifier identifierType="DOI">{{ doi }}</identifier>
+    <creators>
+        {% if publication_info.authors %}
+            {% for author in publication_info.authors %}
+                <creator>
+                    <creatorName>{{ author.full_name }}</creatorName>
+                    <affiliation>{{ author.affiliation }}</affiliation>
+                </creator>
+            {% endfor %}
+        {% else %}
+            <creator>
+                <creatorName>No Author Available</creatorName>
+                <affiliation>None</affiliation>
+            </creator>
+        {% endif %}
+    </creators>
+    <dates>
+        <date dateType="Updated">{{ overall_submission.last_updated }}</date>
+    </dates>
+    <titles>
+        <title>{{ table_name }}</title>
+        <title xml:lang="en-us" titleType="Subtitle">{{ publication_info.title }}</title>
+    </titles>
+    <publisher>HEPData</publisher>
+    <publicationYear>{{ overall_submission.last_updated.year }}</publicationYear>
+    <subjects>
+        {% for keyword in data_submission.keywords %}
+            <subject subjectScheme="{{ keyword.name }}">{{ keyword.value }}</subject>
+        {% endfor %}
+    </subjects>
+    <language>eng</language>
+    <resourceType resourceTypeGeneral="Dataset">Dataset</resourceType>
+    <version>{{ data_submission.version }}</version>
+    <descriptions>
+        <description descriptionType="Abstract">
+            {{ overall_submission.data_abstract }}
+        </description>
+
+        <description descriptionType="Other">
+            {{ table_description }}
+        </description>
+    </descriptions>
+
+    {% if license %}
+        <rightsList>
+            <rights rightsURI="{{ license.url }}">
+                {{ license.name }}
+            </rights>
+        </rightsList>
+    {% endif %}
+
+    <alternateIdentifiers>
+        <alternateIdentifier alternateIdentifierType="HEPDataRecord">
+            {{ site_url }}/record/ins{{ publication_info.inspire_id }}
+        </alternateIdentifier>
+
+        <alternateIdentifier alternateIdentifierType="HEPDataRecordAlt">
+            {{ site_url }}/record/{{ data_submission.publication_recid }}
+        </alternateIdentifier>
+
+        <alternateIdentifier alternateIdentifierType="ROOTDownload">
+            {{ site_url }}/download/table/{{ data_submission.id }}/root
+        </alternateIdentifier>
+
+        <alternateIdentifier alternateIdentifierType="YAMLDownload">
+            {{ site_url }}/download/table/{{ data_submission.id }}/yaml
+        </alternateIdentifier>
+
+        <alternateIdentifier alternateIdentifierType="CSVDownload">
+            {{ site_url }}/download/table/{{ data_submission.id }}/csv
+        </alternateIdentifier>
+
+        <alternateIdentifier alternateIdentifierType="YODADownload">
+            {{ site_url }}/download/table/{{ data_submission.id }}/yoda
+        </alternateIdentifier>
+    </alternateIdentifiers>
+
+
+    <relatedIdentifiers>
+        {% if publication_info.inspire_id %}
+            <relatedIdentifier relatedIdentifierType="URL" relationType="IsSupplementTo">
+                https://inspirehep.net/literature/{{ publication_info.inspire_id }}
+            </relatedIdentifier>
+        {% endif %}
+
+        {% if publication_info.doi %}
+            <relatedIdentifier relatedIdentifierType="DOI" relationType="IsSupplementTo">
+                {{ publication_info.doi }}
+            </relatedIdentifier>
+        {% endif %}
+
+        <relatedIdentifier relatedIdentifierType="DOI" relationType="IsPartOf">
+            {{ overall_submission.doi }}
+        </relatedIdentifier>
+
+    </relatedIdentifiers>
+</resource>

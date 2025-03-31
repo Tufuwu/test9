@@ -1,0 +1,167 @@
+<div id="table-list-section" class="col-lg-2 col-md-2">
+    <div align="center">
+
+        {% if ctx.show_upload_widget and ctx.status != 'finished' %}
+
+            {% if not ctx.reviewers_notified and ctx.mode != 'sandbox' %}
+                <button type="button" class="btn btn-warning btn-md" data-toggle="modal" style="width: 100%"
+                        id="notify-reviewer-btn" data-target="#notifyReviewer"><span
+                        class="fa fa-bell"></span> Notify Reviewer
+                </button>
+            {% endif %}
+
+            {% if ctx.is_submission_coordinator_or_admin or ctx.mode != 'sandbox' %}
+                <button type="button" class="btn btn-success btn-md" data-toggle="modal" style="width: 100%"
+                        data-target="#uploadDialog"><span
+                        class="fa fa-upload"></span> Upload New Files
+                </button>
+            {% endif %}
+
+        {% endif %}
+
+
+        {% if ctx.status == 'finished' and (ctx.is_submission_coordinator_or_admin or ctx.show_upload_widget) %}
+            <button type="button" class="btn btn-danger btn-md" data-toggle="modal" style="width: 100%"
+                    data-target="#uploadDialog"><span
+                    class="fa fa-upload"></span> Revise Submission
+            </button>
+        {% endif %}
+
+        <div class="dropdown">
+            <button id="dLabel" type="button"
+                    class="btn btn-md btn-primary"
+                    data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                <i class="fa fa-download"></i> Download All
+                <span class="caret"></span>
+            </button>
+            {% if ctx.status != 'finished' %}
+                {% set download_base_url = "/download/submission/" + ctx.recid|string + "/" + ctx.version|string %}
+            {% else %}
+                {% set download_base_url = "/download/submission/ins" + ctx.record.inspire_id|string + "/" + ctx.version|string %}
+            {% endif %}
+            <ul class="dropdown-menu" aria-labelledby="dLabel"
+                style="height: auto;">
+
+                <li><a href="{{ download_base_url }}/yaml"
+                       id="download_yaml">YAML</a></li>
+                <li><a href="{{ download_base_url }}/yoda"
+                       id="download_yoda">YODA</a></li>
+                <li><a href="{{ download_base_url }}/root"
+                       id="download_root">ROOT</a></li>
+                <li><a href="{{ download_base_url }}/csv"
+                       id="download_csv">CSV</a></li>
+            </ul>
+        </div>
+
+        {% if ctx.record.analyses | length > 0 %}
+            <div class="dropdown">
+                <button id="dLabel" type="button"
+                        class="btn btn-md btn-inverse"
+                        data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false" style="width: 100%">
+                    <i class="fa fa-line-chart"></i> View Analyses
+                    <span class="caret"></span>
+                </button>
+
+                <ul class="dropdown-menu" aria-labelledby="dLabel"
+                    style="height: auto;">
+
+                    {% for analysis in ctx.record.analyses %}
+                        <li style="text-transform: capitalize">
+                            <a href="{{ analysis.analysis }}" target="_new"><span
+                                    class="fa fa-line-chart"></span> {{ analysis.type }}</a>
+                        </li>
+                    {% endfor %}
+
+                </ul>
+            </div>
+        {% endif %}
+
+
+        {% if ctx.version_count and ctx.version_count > 1 %}
+
+            <div class="dropdown">
+                <button id="dLabel" type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false" style="width: 100%">
+                    Version {{ ctx.version }}
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dLabel"
+                    style="height: auto; overflow: auto;padding: 5px; font-size: 1em;">
+                    {% for version in range(1,ctx.version_count+1) %}
+                        <li>
+                            <a href="/record/{% if ctx.mode == 'sandbox' %}sandbox/{% endif %}{{ ctx.recid }}?version={{ version }}"
+                               id="version_{{ version }}">Version
+                                {{ version }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        {% endif %}
+    </div>
+
+
+    <input id="table-filter"
+           placeholder="Filter {{ ctx.data_tables|length }} data tables"
+           name="data-table-filter"
+           onkeyup="HEPDATA.filter_content('#table-filter','#table-list')">
+
+    <ul id="table-list" class="scrollable">
+        {% for table in ctx.data_tables %}
+
+            <li id="{{ table.id }}" itemprop="dataset" itemscope itemtype="http://schema.org/Dataset"
+                class="{{ table.processed_name }} {% if loop.index == 1 %}active{% endif %}"
+                onclick="HEPDATA.switch_table('#table-list', '{{ table.id }}', '{{ table.name | replace("\\","\\\\") }}', '{{ ctx.status }}')">
+                <div class="content">
+                    <h4 itemprop="name">{{ table.name }}</h4>
+
+                    {% if table.location %}
+                        <p>{{ table.location }}</p>
+                    {% endif %}
+                    {% if ctx.mode != 'sandbox' %}
+                        <p>{{ table.doi }}</p>
+                    {% endif %}
+
+                    {% if table.description != '.' %}
+                        <p itemprop="description">{{ table.description|safe }}</p>
+                    {% endif %}
+                    <span class="hidden" itemscope itemprop="distribution"
+                          itemtype="http://schema.org/DataDownload"><span
+                            itemprop="contentUrl">{{ ctx.site_url }}/record/data/{{ table.id }}</span><span
+                            itemprop="encodingFormat">yaml</span></span>
+                <span class="hidden" itemscope itemprop="distribution" itemtype="http://schema.org/DataDownload"><span
+                        itemprop="contentUrl">{{ ctx.site_url }}/record/data/{{ table.id }}/csv</span><span
+                        itemprop="encodingFormat">csv</span></span>
+
+                    {% if ctx.mode != 'sandbox' %}
+                        {% if ctx.show_review_widget or ctx.show_upload_widget or ctx.submission_coordinator_or_admin %}
+                            <p>
+
+                                {% if ctx.version >= ctx.version_count and ctx.status != 'finished' %}
+
+                                    <span id="{{ table.id }}-status" class="review-status {{ table.review_flag }}">
+                                <span id="icon"
+                                      class="fa fa-{% if table.review_flag == 'attention' %}exclamation-triangle {% elif table.review_flag == 'passed' %}check-circle{% else %}exclamation-triangle{% endif %}"></span>
+                                    <span class="text">{{ table.review_status }}</span>
+                                </span>
+
+                                <span id="table-{{ table.id }}-messages"
+                                      class="messages {% if not table.messages %} hidden{% endif %}">
+                                    <span class="fa fa-comment"></span>
+                                </span>
+
+                                {% endif %}
+
+                            </p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <div class="arrow">
+                    <span class="fa fa-chevron-right"></span>
+                </div>
+                <div class="clearfix"></div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>

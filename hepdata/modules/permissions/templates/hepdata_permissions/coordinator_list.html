@@ -1,0 +1,70 @@
+{% extends "hepdata_theme/page.html" %}
+
+{% block page_body %}
+
+    {%- assets "hepdata_info_page_css" %}
+        <link href="{{ ASSET_URL }}" rel="stylesheet">
+    {%- endassets %}
+
+    <div class="row" style="margin: 0; padding: 6em 10% 1% 5%">
+
+        <div class="col-md-12">
+            <div align="center">
+                <div class="hep_logo_home"></div>
+                <h2>Coordinators</h2>
+                <p>Please contact the appropriate Coordinator for your experiment/group to initiate a submission.</p>
+                <p>Prospective Coordinators should select "Request Coordinator Privileges" from the
+                    <a href="/dashboard">Dashboard</a>.</p>
+            </div>
+
+            <br/>
+
+            <div class="filter" align="center">
+                <input id="coordinator-filter"
+                       placeholder="Filter {{ coordinators |length }} coordinator{% if coordinators |length > 1 %}s{% endif %}"
+                       name="coordinator-filter"
+                       onkeyup="HEPDATA.filter_content('#coordinator-filter','#coordinators')">
+            </div>
+
+            <div class="container-fluid">
+                <ul id="coordinators" class="filter-list">
+                    {% for coordinator in coordinators %}
+                        <li id="coordinator-{{ coordinator.recid }}" class="coordinator-item">
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-7 col-xs-7">
+                                    <span class="label label-info"
+                                          style="font-size: 1em;">{{ coordinator.collaboration }}</span>
+                                </div>
+                                <div class="col-md-6 col-sm-5 col-xs-5">
+                                    {{ coordinator.user.email }}
+                                </div>
+
+                            </div>
+                        </li>
+
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+
+{%- block javascript %}
+
+
+
+    {%- assets "hepdata_vis_js" %}
+        <script src="{{ ASSET_URL }}"></script>
+    {%- endassets %}
+
+    {%- assets "hepdata_bootstrap_js" %}
+        <script src="{{ ASSET_URL }}"></script>
+    {%- endassets %}
+
+
+{% endblock %}
+

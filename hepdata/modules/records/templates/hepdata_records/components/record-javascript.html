@@ -1,0 +1,173 @@
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.5/clipboard.min.js"></script>
+
+{%- assets "hepdata_vis_js" %}
+    <script src="{{ ASSET_URL }}"></script>
+{%- endassets %}
+
+{%- assets "hepdata_bootstrap_js" %}
+    <script src="{{ ASSET_URL }}"></script>
+{%- endassets %}
+
+{%- assets "hepdata_record_js" %}
+    <script src="{{ ASSET_URL }}"></script>
+{%- endassets %}
+
+
+
+<script>
+
+    $(document).ready(function () {
+
+        HEPDATA.upload_max_size = {{ config['UPLOAD_MAX_SIZE']|default(52000000) }};
+        HEPDATA.upload_timeout = {{ config['NGINX_TIMEOUT']|default(298) }};
+
+        hepdata_record.initialise();
+        hepdata_resources.initialise({{ ctx.recid|default(0) }}, {{ ctx.version|default(0) }});
+
+        HEPDATA.render_loader("#hepdata-loading", [
+                    {x: 26, y: 30, color: "#955BA5"},
+                    {x: -60, y: 55, color: "#2C3E50"},
+                    {x: 37, y: -10, color: "#955BA5"},
+                    {x: -60, y: 10, color: "#955BA5"},
+                    {x: -27, y: -30, color: "#955BA5"},
+                    {x: 60, y: -55, color: "#2C3E50"}],
+                {"width": 200, "height": 200}
+        );
+
+        {% if ctx.show_upload_area %}
+            $("#root_file_upload").filestyle({
+                iconName: "fa fa-upload",
+                buttonName: "btn-primary"
+            });
+
+        {% elif ctx.data_tables | length != 0 %}
+
+            {% if ctx.record.inspire_id %}
+                HEPDATA.current_inspire_id = {{ctx.record.inspire_id | safe}};
+            {% endif %}
+
+            HEPDATA.site_url = "{{ ctx.site_url }}";
+            HEPDATA.current_record_id = {{ctx.recid | safe}};
+            HEPDATA.current_table_version = {{ctx.version | safe}};
+            var table_to_show = "{{ctx.table_to_show | replace("\\","\\\\")}}";  // escape backslashes
+            var table_name = undefined;
+
+            // If table_to_show is an integer, replace with table name.
+            if (table_to_show.match(/^\d+$/)) {
+              {% for table in ctx.data_tables if table_to_show == table.id %}
+                  table_name = table.name;  // avoids using jQuery
+              {% endfor %}
+              if (!table_name) {
+                table_name = $('#' + table_to_show + " h4").text();  // fallback using jQuery
+              }
+              if (table_name) {
+                table_to_show = table_name;
+              }
+            }
+
+            // If table_to_show is the table name, replace with table id.
+            if (!table_to_show.match(/^\d+$/)) {
+
+              table_name = table_to_show;
+
+              // Remove whitespace from table name and escape special characters.
+              table_to_show = table_to_show.replace(/\s/g, "");
+              table_to_show = CSS.escape(table_to_show);
+
+              // Find table_id from table name.
+              var table_id = undefined;
+              if (table_to_show) {
+                table_id = $("." + table_to_show).attr("id");
+              }
+
+              if (table_id == undefined) {
+                // Just return first table.
+                table_to_show = {{ ctx.data_tables[0].id }};
+                table_name = "{{ ctx.data_tables[0].name | replace("\\","\\\\") }}";
+              } else {
+                table_to_show = table_id;
+              }
+
+            }
+
+            var status = "{{ ctx.status }}";
+
+            // Pass table name before it gets mangled by MathJax if it contains LaTeX encoding.
+            HEPDATA.switch_table('#table-list', table_to_show, table_name, status);
+
+            if (window.location.href.indexOf("table=") > -1) {
+                $('#table-list').animate({
+                    scrollTop: $("#" + table_to_show).offset().top
+                }, 2000);
+            }
+        {%else %}
+            // only load this code if we have a record to display (not always the case, e.g. when in the
+            // main sandbox page.)
+            {% if ctx.recid %}
+                // as a final try, we try to get html for a submission, in the case that it's a resource'
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    url: '/record/resources/{{ctx.recid | safe}}/{{ ctx.version | safe}}',
+                    success: function (data) {
+                        for (var resource in data) {
+                            if (data[resource]['file_type'] == 'html') {
+                                $("#hepdata_table_detail").load('/record/resource/' + data[resource]['id'], function () {
+                                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                                });
+                            }
+                        }
+                    }
+                });
+            {% endif %}
+        {%endif %}
+
+    });
+
+    $('.hide-publication-info').click(function () {
+        $(".detailed-record-info").animate({
+            left: "-=520"
+        }, 400);
+
+        $("#table-list-section").css('margin-left', "32px");
+        $(".detailed-record-info").css('position', 'fixed').delay(400);
+        $("#hepdata_table_detail").animate({
+            'margin-left': '20px'
+        });
+
+        $("#show-publication-info").animate({
+            left: "+=40"
+        }, 400);
+    });
+
+
+    $('#show-publication-info').click(function () {
+        $(".detailed-record-info").css('position', 'relative');
+
+        $(".detailed-record-info").animate({
+            left: "+=520"
+        }, 400);
+
+        $("#show-publication-info").animate({
+            left: "-=40"
+        }, 400);
+
+        $("#hepdata_table_detail").css({'width': '', 'margin-left':0});
+
+        $("#table-list-section").css('margin-left', "0px");
+    });
+
+    $('#watch_btn').click(function () {
+        var action = $("#watch_btn span").text().indexOf("Unwatch") === -1 ? "subscribe" : "unsubscribe";
+        var url = "/subscriptions/" + action + "/";
+        $.post(url + '{{ ctx.recid | safe}}').done(function (data) {
+            $("#watch_btn span").text(action === "subscribe" ? "Unwatch record" : "Watch record");
+        }).fail(function (data) {
+            alert("Unable to watch this record. An error occurred.");
+        })
+    });
+
+
+</script>

@@ -1,0 +1,242 @@
+{% extends "hepdata_theme/page.html" %}
+
+{%- set html_css_classes=['home-page'] %}
+{%- set body_css_classes=['home-page'] %}
+{%- set messages = get_flashed_messages(with_categories=true) -%}
+
+{%- block body %}
+
+    {%- block browserupgrade %}
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+    {%- endblock browserupgrade %}
+
+    <div class="site-wrapper">
+
+        {% block page_body %}
+
+            <div class="home-top">
+                <div class="top-bar" id="home_top_bar">
+
+                    <div class="content">
+                        <div class="pull-right menu">
+                            <ul>
+                                {%- if current_user.is_authenticated %}
+                                    {% if user_is_coordinator_or_admin %}
+                                        <li>
+                                            <a href="/submit">
+                                                <span class="fa fa-arrow-up"></span>
+                                                Submit</a>
+                                        </li>
+                                    {% endif %}
+                                    <li><a href="/record/sandbox"><span
+                                            class="fa fa-cube"></span> Sandbox</a>
+                                    </li>
+                                {%- endif %}
+
+                                <li><a href="/about"><span
+                                        class="fa fa-info-circle"></span> About</a>
+                                </li>
+
+                                <li><a href="/submission"><span
+                                        class="fa fa-life-ring"></span> Submission Help</a>
+                                </li>
+                                {%- if not current_user.is_authenticated %}
+                                    <li>
+                                        <a class=""
+                                           href="{{ url_for_security('login') }}">
+                                            <i class="fa fa-sign-in"></i> Sign in
+                                        </a>
+                                    </li>
+                                {%- else %}
+                                    <li>
+                                        <a href="/dashboard">
+                                            <i class="fa fa-dashboard"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ url_for_security('logout') }}"><span
+                                                class="fa fa-power-off"></span> Log
+                                            out</a>
+                                    </li>
+                                {%- endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {%- if messages %}
+                    {%- for category, message in messages %}
+                      <div class="alert alert-{{category}}">{{ message }}</div>
+                    {%- endfor %}
+                {%- endif %}
+
+                <div class="hep_logo_home"></div>
+                <h4>Repository for publication-related High-Energy Physics data</h4>
+
+            </div>
+
+            <div class="disclaimer-area">
+                <p class="disclaimer">This new site replaces
+                    the old site at <a href="http://hepdata.cedar.ac.uk" target="_blank">http://hepdata.cedar.ac.uk</a>.
+                </p>
+            </div>
+
+            <div class="search-area">
+
+                <div id="record_stats"></div>
+
+                <form class="main-search-form" action="/search">
+                    <input type="text" name="q" placeholder="Search for a paper, author, experiment, reaction">
+                    <button type="submit" class="submit">Search</button>
+                    <a class="btn btn-link btn-lg" data-toggle="modal" data-target="#searchHelpWidget">Advanced</a>
+                </form>
+
+                <p class="search-examples">e.g.
+                    <a href='/search?q=reactions:"P P --> LQ LQ X"'><span class="text-muted">reaction</span> P P --> LQ
+                        LQ X</a>,
+                    <a href='/search?q=title:"photon collisions"'><span class="text-muted">title has</span> "photon
+                        collisions"</a>,
+                    <a href="/search?q=collaborations:LHCf OR collaborations:D0"><span class="text-muted">collaboration is</span>
+                        LHCf or D0</a>.
+                </p>
+            </div>
+
+            <div class="lhc_experiments">
+                <h4>Data from the LHC</h4>
+                <div class="row">
+
+                    {% set experiments = ["ATLAS", "ALICE", "CMS", "LHCb"] %}
+
+                    {% for experiment in experiments %}
+                        <div class="col-md-3 col-sm-3 col-xs-6 align-center experiment">
+                            <img src="/static/img/home/cern_lhc_icon_{{ experiment }}.svg"
+                                 width="90px">
+
+                            <h4>{{ experiment }}</h4>
+                            <a href="/search?q=&collaboration={{ experiment }}" class="btn btn-sm btn-primary">View
+                                Data</a>
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+            </div>
+
+            <div id="latest_records_section">
+
+                <h4>Recently Updated Submissions - <a href="search/?q=&sort_order=&sort_by=latest">View all</a></h4>
+
+                <div id="latest_records" class="row scrollable">
+                    <!--populated automatically-->
+                </div>
+
+            </div>
+
+            <div class="twitter-area">
+                <a class="twitter-timeline" data-width="800" data-height="200" data-dnt="true"
+                   href="https://twitter.com/HEPData?ref_src=twsrc%5Etfw">
+                    Tweets by HEPData
+                </a>
+                <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+            </div>
+
+            {% include "hepdata_theme/footer.html" %}
+
+
+
+            <div class="clearfix"></div>
+
+        {% endblock page_body %}
+
+        {% include "hepdata_search/modals/search_help.html" %}
+
+    </div>
+    {%- block javascript %}
+
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script type="text/javascript"
+                src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+        {%- assets "hepdata_bootstrap_js" %}
+            <script src="{{ ASSET_URL }}"></script>
+        {%- endassets %}
+
+        <script>
+            $.ajax({
+                url: '/record/latest?n=3',
+                method: 'GET',
+                success: function (data) {
+                    data = data['latest'];
+                    for (var record in data) {
+
+                        var record_html_block = '<div class="latest-record col-md-4 col-xs-12" id="ins' + data[record]['inspire_id'] + '">';
+
+                        if (data[record]['version'] > 1) {
+                            record_html_block += ' <div class="version"><i class="fa fa-code-fork"></i> Version ' + data[record]['version'] + '</div>';
+                        }
+                        record_html_block += '<a href="/record/ins' + data[record]['inspire_id'] + '" class="title">' + data[record]['title'] + '</a><br/><br/>';
+
+
+                        if (data[record]['collaborations'].length > 0) {
+                            record_html_block += 'The ';
+                            for (var collaboration in data[record]['collaborations']) {
+                                if (collaboration > 0) {
+                                  record_html_block += '&';
+                                }
+                                record_html_block += ' <a href="/search?q=&collaboration=' + data[record]['collaborations'][collaboration] + '" class="collaboration">' + data[record]['collaborations'][collaboration] + '</a> ';
+                            }
+                            record_html_block += 'collaboration' + (data[record]['collaborations'].length > 1 ? 's' : '');
+                        } else if (data[record]['first_author']) {
+
+                            record_html_block += '<a href="/search/?q=&author=' + data[record]['first_author']['full_name'] + '" class="author">' + data[record]['first_author']['full_name'];
+                            if (data[record]['author_count'] > 1) {
+                                record_html_block += ' <i>et al</i>';
+                            }
+                            record_html_block += ' </a>';
+                        }
+
+
+                        record_html_block += '<br/>';
+
+                        record_html_block += "<br/>";
+
+                        if (data[record]['journal_info'])
+                            record_html_block += '<span class="journal"> ' + data[record]['journal_info'] + '</span><br/>';
+
+                        record_html_block += "<br/>";
+
+                        record_html_block += '<div class="date"><i class="fa fa-clock-o"></i>  Updated ' + data[record]['last_updated'] + '</div>';
+
+                        if (data[record]['creation_date'] != null) {
+                            record_html_block += '<div class="date"><i class="fa fa-bookmark-o"></i> Published on ' + data[record]['creation_date'] + '</div>';
+                        }
+
+                        record_html_block += '</div>';
+
+                        $("#latest_records").append(record_html_block);
+                    }
+
+                    MathJax.Hub.Config({
+                        tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+                    });
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                }
+            });
+
+            $.ajax({
+                url: '/record/count',
+                method: 'GET',
+                success: function (data) {
+                    $("#record_stats").html('<a href="/search">Search on <span style="font-weight: bolder">' + data["publications"] + '</span> publications and <span style="font-weight: bolder">' + data["data"] + '</span> data tables.</a>')
+                }
+            });
+
+        </script>
+    {% endblock %}
+    {%- block trackingcode %}
+        {% include "hepdata_theme/trackingcode.html" %}
+    {% endblock %}
+{%- endblock body %}
