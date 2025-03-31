@@ -7,61 +7,14 @@
 # software in any capacity.
 # ======================================================================================
 
-# Project
-/.coverage
-/.tox/
-/build/
-/dist/
-/site/
-/htmlcov/
-.dmypy.json
+from __future__ import annotations
 
-# Objects and packages
-*.7z
-*.bz2
-*.class
-*.com
-*.dll
-*.dmg
-*.egg
-*.egg-info/
-*.exe
-*.gz
-*.iso
-*.jar
-*.o
-*.py[cdo]
-*.rar
-*.so
-*.tar
-*.xz
-*.zip
-.mypy_cache/
-.pytest_cache/
-/.cache/
-/.eggs/
-__pycache__/
-dropin.cache
-node_modules/
+from dyce import H
+from dyce.viz import plot_burst
 
-# Logs, databases, etc.
-*.err
-*.log
-*.log.[0-9]*
-*.out
-*.pid
-*.sqlite
-nohup.out
 
-# OS/app generated entities
-.DS_Store
-.DS_Store?
-.Spotlight-V100/
-.Trashes/
-._*
-.~*
-Thumbs.db
-desktop.ini
-ehthumbs.db
-
-# Exceptions
+def do_it(style: str) -> None:
+    text_color = "white" if style == "dark" else "black"
+    df_4 = 4 @ H((-1, 0, 1))
+    d6_2 = 2 @ H(6)
+    plot_burst(df_4, d6_2, alpha=0.9, text_color=text_color)

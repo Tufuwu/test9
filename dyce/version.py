@@ -7,61 +7,16 @@
 # software in any capacity.
 # ======================================================================================
 
-# Project
-/.coverage
-/.tox/
-/build/
-/dist/
-/site/
-/htmlcov/
-.dmypy.json
+from __future__ import annotations
 
-# Objects and packages
-*.7z
-*.bz2
-*.class
-*.com
-*.dll
-*.dmg
-*.egg
-*.egg-info/
-*.exe
-*.gz
-*.iso
-*.jar
-*.o
-*.py[cdo]
-*.rar
-*.so
-*.tar
-*.xz
-*.zip
-.mypy_cache/
-.pytest_cache/
-/.cache/
-/.eggs/
-__pycache__/
-dropin.cache
-node_modules/
+from typing import Tuple
 
-# Logs, databases, etc.
-*.err
-*.log
-*.log.[0-9]*
-*.out
-*.pid
-*.sqlite
-nohup.out
+__all__ = ()
 
-# OS/app generated entities
-.DS_Store
-.DS_Store?
-.Spotlight-V100/
-.Trashes/
-._*
-.~*
-Thumbs.db
-desktop.ini
-ehthumbs.db
 
-# Exceptions
+# ---- Data ----------------------------------------------------------------------------
+
+
+__version__: Tuple[int, int, int] = (0, 0, 0)
+__vers_str__ = ".".join(str(_) for _ in __version__)
+__release__ = "v" + __vers_str__

@@ -7,61 +7,15 @@
 # software in any capacity.
 # ======================================================================================
 
-# Project
-/.coverage
-/.tox/
-/build/
-/dist/
-/site/
-/htmlcov/
-.dmypy.json
+from __future__ import annotations
 
-# Objects and packages
-*.7z
-*.bz2
-*.class
-*.com
-*.dll
-*.dmg
-*.egg
-*.egg-info/
-*.exe
-*.gz
-*.iso
-*.jar
-*.o
-*.py[cdo]
-*.rar
-*.so
-*.tar
-*.xz
-*.zip
-.mypy_cache/
-.pytest_cache/
-/.cache/
-/.eggs/
-__pycache__/
-dropin.cache
-node_modules/
+from dyce import H
 
-# Logs, databases, etc.
-*.err
-*.log
-*.log.[0-9]*
-*.out
-*.pid
-*.sqlite
-nohup.out
 
-# OS/app generated entities
-.DS_Store
-.DS_Store?
-.Spotlight-V100/
-.Trashes/
-._*
-.~*
-Thumbs.db
-desktop.ini
-ehthumbs.db
+def do_it(_: str) -> None:
+    import matplotlib.pyplot
 
-# Exceptions
+    outcomes, probabilities = (2 @ H(6)).distribution_xy()
+    matplotlib.pyplot.bar([str(v) for v in outcomes], probabilities)
+    # Should match the corresponding img[alt] text
+    matplotlib.pyplot.title(r"Distribution for 2d6")

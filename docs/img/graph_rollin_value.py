@@ -7,61 +7,16 @@
 # software in any capacity.
 # ======================================================================================
 
-# Project
-/.coverage
-/.tox/
-/build/
-/dist/
-/site/
-/htmlcov/
-.dmypy.json
+from __future__ import annotations
 
-# Objects and packages
-*.7z
-*.bz2
-*.class
-*.com
-*.dll
-*.dmg
-*.egg
-*.egg-info/
-*.exe
-*.gz
-*.iso
-*.jar
-*.o
-*.py[cdo]
-*.rar
-*.so
-*.tar
-*.xz
-*.zip
-.mypy_cache/
-.pytest_cache/
-/.cache/
-/.eggs/
-__pycache__/
-dropin.cache
-node_modules/
+from graph import Dot, digraph, graphviz_walk
 
-# Logs, databases, etc.
-*.err
-*.log
-*.log.[0-9]*
-*.out
-*.pid
-*.sqlite
-nohup.out
+from dyce.r import ValueRoller
 
-# OS/app generated entities
-.DS_Store
-.DS_Store?
-.Spotlight-V100/
-.Trashes/
-._*
-.~*
-Thumbs.db
-desktop.ini
-ehthumbs.db
 
-# Exceptions
+def do_it(style: str) -> Dot:
+    g = digraph(style)
+    r_1 = ValueRoller(1)
+    graphviz_walk(g, r_1.roll())
+
+    return g

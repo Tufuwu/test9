@@ -7,61 +7,22 @@
 # software in any capacity.
 # ======================================================================================
 
-# Project
-/.coverage
-/.tox/
-/build/
-/dist/
-/site/
-/htmlcov/
-.dmypy.json
+from __future__ import annotations
 
-# Objects and packages
-*.7z
-*.bz2
-*.class
-*.com
-*.dll
-*.dmg
-*.egg
-*.egg-info/
-*.exe
-*.gz
-*.iso
-*.jar
-*.o
-*.py[cdo]
-*.rar
-*.so
-*.tar
-*.xz
-*.zip
-.mypy_cache/
-.pytest_cache/
-/.cache/
-/.eggs/
-__pycache__/
-dropin.cache
-node_modules/
+from dyce import H, P
 
-# Logs, databases, etc.
-*.err
-*.log
-*.log.[0-9]*
-*.out
-*.pid
-*.sqlite
-nohup.out
 
-# OS/app generated entities
-.DS_Store
-.DS_Store?
-.Spotlight-V100/
-.Trashes/
-._*
-.~*
-Thumbs.db
-desktop.ini
-ehthumbs.db
+def do_it(_: str) -> None:
+    import matplotlib.pyplot
 
-# Exceptions
+    for depth in range(6):
+        res = (10 @ P(H(10).explode(max_depth=depth))).h(slice(-3, None))
+        matplotlib.pyplot.plot(
+            *res.distribution_xy(),
+            marker=".",
+            label=f"{depth} rerolls",
+        )
+
+    matplotlib.pyplot.legend()
+    # Should match the corresponding img[alt] text
+    matplotlib.pyplot.title(r"Modeling taking the three highest of ten exploding d10s")
