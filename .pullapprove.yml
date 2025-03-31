@@ -1,0 +1,139 @@
+version: 3
+
+# These conditions are processed in order and the first match (if any) will determine the status on the pull request.
+# Changes that don't match these overrides will be processed by the group conditions below.
+overrides:
+- if: "any(['release' in labels, 'hotfix' in labels])"
+  status: success
+  explanation: "Releases and hotfixes do not require review."
+- if: "not any([base.ref == 'staging', '[Snyk]' in title])"
+  status: failure
+  explanation: "PRs for review must target 'staging'. Unless they are from Snyk or are labeled with 'release' or 'hotfix'."
+- if: "'on hold' in labels"
+  status: pending
+  explanation: "PR review is on hold"
+- if: "'linting' not in check_runs.success"
+  status: failure
+  explanation: "Schema must be Linted before review starts"
+- if:  "'tests' not in check_runs.success"
+  status: failure
+  explanation: "Schema must pass Tests before review starts"
+
+notifications:
+- when: pull_request.opened
+  if: "author_association == 'CONTRIBUTOR'" # Only contributing authors get this message
+  comment: |
+    Hey @{{ author }}, thanks for the PR! The review will start once
+    the tests and CI checks have passed.
+- when: pullapprove.approved
+  if: "author_association == 'CONTRIBUTOR'" # Only contributing authors get this message
+  comment: "The review is completed. Thanks @{{ author }}!"
+
+groups:
+  snyk-security-patches:
+    conditions:
+    - "'[Snyk]' in title"
+    - "'Security' not in labels"
+    reviewers:
+      users:
+      - ESapenaVentura
+      - amnonkhen
+      - MightyAx
+    reviews:
+      required: 1
+      request_order: shuffle
+      
+  azul:
+    conditions:
+    - "base.ref == 'master'"
+    - "'content' in labels"
+    reviewers:
+      users:
+      - hannes-ucsc
+    reviews:
+      required: 1
+      request: 1
+      request_order: shuffle
+
+  browser:
+    conditions:
+      - "base.ref == 'master'"
+      - "'content' in labels"
+    reviewers:
+      users:
+        - NoopDog
+    reviews:
+      required: 1
+      request: 1
+      request_order: shuffle
+  
+  data_import:
+    conditions:
+    - "base.ref == 'master'"
+    - "'content' in labels"
+    reviewers:
+      users:
+      - aherbst-broad
+      - JeffKorte
+      - danicham
+    reviews:
+      required: 1
+      request: 1
+      request_order: shuffle
+    
+  tdr:
+    conditions:
+    - "base.ref == 'master'"
+    - "'content' in labels"
+    reviewers:
+      users:
+      - ruchim
+    reviews:
+      required: 1
+      request: 1
+      request_order: shuffle
+      
+  ingest-devs:
+    conditions:
+    - "base.ref == 'master'"
+    - "'content' in labels"
+    reviewers:
+      users:
+      - amnonkhen
+      - MightyAx
+    reviews:
+      required: 1
+      request: 1
+      request_order: shuffle
+
+  metadata-updates:  # group name
+    conditions:  # the group is activated when all of these statements are true
+    - "base.ref == 'staging'"
+    - "any(['major' in body, 'minor' in body, 'patch' in body])" # major, minor or patch change is indicated in body of PR
+    - "'content' in labels"
+    reviewers:  # people who can approve for this group
+      users:
+      - ESapenaVentura
+      - amnonkhen
+      - ruchim
+      - aherbst-broad
+      - hannes-ucsc
+      - NoopDog
+    reviews:  # settings for approval and reviewer selection
+      request: -1 # review requests will be sent every reviewer in the group
+      required: -1 # all users in the group will be required to approve the PR
+      request_order: shuffle  # reviewers will be chosen in a random order
+
+  code-review:
+    conditions:
+    - "base.ref == 'develop'"
+    - "'*.py' in files or '*.js' in files or '*.yml' in files"
+    reviewers:
+      users:
+      - ESapenaVentura
+      - ami-day
+      - Wkt8
+      - idazucchi
+    reviews:
+      required: 1
+      request_order: shuffle
