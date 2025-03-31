@@ -1,304 +1,537 @@
-# pypistats
+# What is Flask-Static-Digest? ![CI](https://github.com/nickjj/flask-static-digest/workflows/CI/badge.svg?branch=master)
 
-[![PyPI version](https://img.shields.io/pypi/v/pypistats.svg?logo=pypi&logoColor=FFE873)](https://pypi.org/project/pypistats/)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/pypistats.svg?logo=python&logoColor=FFE873)](https://pypi.org/project/pypistats/)
-[![PyPI downloads](https://img.shields.io/pypi/dm/pypistats.svg)](https://pypistats.org/packages/pypistats)
-[![Travis CI status](https://img.shields.io/travis/hugovk/pypistats/master?label=Travis%20CI&logo=travis)](https://travis-ci.org/hugovk/pypistats)
-[![Azure Pipelines status](https://dev.azure.com/hugovk/hugovk/_apis/build/status/hugovk.pypistats?branchName=master)](https://dev.azure.com/hugovk/hugovk/_build?definitionId=1)
-[![GitHub Actions status](https://github.com/hugovk/pypistats/workflows/Test/badge.svg)](https://github.com/hugovk/pypistats/actions)
-[![codecov](https://codecov.io/gh/hugovk/pypistats/branch/master/graph/badge.svg)](https://codecov.io/gh/hugovk/pypistats)
-[![GitHub](https://img.shields.io/github/license/hugovk/pypistats.svg)](LICENSE.txt)
-[![DOI](https://zenodo.org/badge/149862343.svg)](https://zenodo.org/badge/latestdoi/149862343)
-[![Code style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+It is a Flask extension that will help make your static files production ready
+with very minimal effort on your part. It does this by md5 tagging and gzipping
+your static files after running a `flask digest compile` command that this
+extension adds to your Flask app. It should be the last thing you do to your
+static files before uploading them to your server or CDN.
 
-Python 3.6+ interface to [PyPI Stats API](https://pypistats.org/api) to get aggregate
-download statistics on Python packages on the Python Package Index without having to
-execute queries directly against Google BigQuery.
+Other web frameworks like Django, Ruby on Rails and Phoenix all have this
+feature built into their framework, and now with this extension Flask does too.
 
-Data is available for the [last 180 days](https://pypistats.org/about#data). (For longer
-time periods, [pypinfo](https://github.com/ofek/pypinfo) can help, you'll need an API
-key and get free quota.)
+**This extension will work if you're not using any asset build tools but at the
+same time it also works with Webpack, Grunt, Gulp or any other build tool you
+can think of. This tool does not depend on or compete with existing asset build
+tools.**
+
+If you're already using Webpack or a similar tool, that's great. Webpack takes
+care of bundling your assets and helps convert things like SASS to CSS and ES6+
+JS to browser compatible JS. That is solving a completely different problem
+than what this extension solves. This extension will further optimize your
+static files after your build tool produces its output files.
+
+This extension does things that Webpack alone cannot do because in order for
+things like md5 tagging to work Flask needs to be aware of how to map those
+hashed file names back to regular file names you would reference in your Jinja
+2 templates.
+
+## How does it work?
+
+There's 3 pieces to this extension:
+
+1. It adds a custom Flask CLI command to your project. When you run this
+   command it looks at your static files and then generates an md5 tagged
+   version of each file along with optionally gzipping them too.
+
+2. When the above command finishes it creates a `cache_manifest.json` file in
+   your static folder which maps the regular file names, such as
+   `images/flask.png` to `images/flask-f86b271a51b3cfad5faa9299dacd987f.png`.
+
+3. It adds a new template helper called `static_url_for` which uses Flask's
+   `url_for` under the hood but is aware of the `cache_manifest.json` file so
+   it knows how to resolve `images/flask.png` to the md5 tagged file name.
+
+### Demo video
+
+This 25 minute video goes over using this extension but it also spends a lot
+of time on the "why" where we cover topics like cache busting and why IMO you
+might want to use this extension in all of your Flask projects.
+
+If you prefer reading instead of video, this README file covers installing,
+configuring and using this extension too.
+
+[![Demo
+Video](https://img.youtube.com/vi/-Xd84hlIjkI/0.jpg)](https://www.youtube.com/watch?v=-Xd84hlIjkI)
+
+#### Changes since this video
+
+- `FLASK_STATIC_DIGEST_HOST_URL` has been added to configure an optional external host, aka. CDN ([explained here](#configuring-this-extension))
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Using the newly added Flask CLI command](#using-the-newly-added-flask-cli-command)
+- [Going over the Flask CLI commands](#going-over-the-flask-cli-commands)
+- [Configuring this extension](#configuring-this-extension)
+- [Modifying your templates to use static_url_for instead of url_for](#modifying-your-templates-to-use-static_url_for-instead-of-url_for)
+- [Potentially updating your .gitignore file](#potentially-updating-your-gitignore-file)
+- [FAQ](#faq)
+  - [What about development vs production and performance implications?](#what-about-development-vs-production-and-performance-implications)
+  - [Why bother gzipping your static files here instead of with nginx?](#why-bother-gzipping-your-static-files-here-instead-of-with-nginx)
+  - [How do you use this extension with Webpack or another build tool?](#how-do-you-use-this-extension-with-webpack-or-another-build-tool)
+  - [Migrating from Flask-Webpack](#migrating-from-flask-webpack)
+  - [How do you use this extension with Docker?](#how-do-you-use-this-extension-with-docker)
+  - [What about user uploaded files?](#what-about-user-uploaded-files)
+- [About the author](#about-the-author)
 
 ## Installation
 
-### From PyPI
+*You'll need to be running Python 3.5+ and using Flask 1.0 or greater.*
 
-```bash
-pip install --upgrade pypistats
+`pip install Flask-Static-Digest`
+
+### Example directory structure for a 'hello' app
+
+```
+├── hello
+│   ├── __init__.py
+│   ├── app.py
+│   └── static
+│       └── css
+│           ├── app.css
+└── requirements.txt
 ```
 
-### From source
+### Flask app factory example using this extension
 
-```bash
-git clone https://github.com/hugovk/pypistats
-cd pypistats
-pip install .
+```py
+from flask import Flask
+from flask_static_digest import FlaskStaticDigest
+
+flask_static_digest = FlaskStaticDigest()
+
+
+def create_app():
+    app = Flask(__name__)
+
+    flask_static_digest.init_app(app)
+
+    @app.route("/")
+    def index():
+        return "Hello, World!"
+
+    return app
 ```
 
-## Example command-line use
+*A more complete example app can be found in the [tests/
+directory](https://github.com/nickjj/flask-static-digest/tree/master/tests/example_app).*
 
-Run `pypistats` with a subcommand (corresponding to
-[PyPI Stats endpoints](https://pypistats.org/api/#endpoints)), then options for that
-subcommand.
+## Using the newly added Flask CLI command
 
-Top-level help:
-
-```console
-$ pypistats --help
-usage: pypistats [-h] [-V]
-                 {recent,overall,python_major,python_minor,system} ...
-
-positional arguments:
-  {recent,overall,python_major,python_minor,system}
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -V, --version         show program's version number and exit
-```
-
-Help for a subcommand:
-
-```console
-$ pypistats recent --help
-usage: pypistats recent [-h] [-p {day,week,month}]
-                        [-f {json,markdown,rst,html}] [-j] [-v]
-                        package
-
-Retrieve the aggregate download quantities for the last day/week/month
-
-positional arguments:
-  package
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -p {day,week,month}, --period {day,week,month}
-  -f {json,markdown,rst,html}, --format {json,markdown,rst,html}
-                        The format of output (default: markdown)
-  -j, --json            Shortcut for "-f json" (default: False)
-  -v, --verbose         Print debug messages to stderr (default: False)
-```
-
-Get recent downloads:
-
-```console
-$ pypistats recent pillow
-| last_day | last_month | last_week |
-|---------:|-----------:|----------:|
-|  280,842 |  7,065,928 | 1,709,689 |
-```
-
-Help for another subcommand:
-
-```console
-$ pypistats python_minor --help
-usage: pypistats python_minor [-h] [-V VERSION] [-f {json,markdown,rst,html}]
-                              [-j] [-sd yyyy-mm[-dd]|name]
-                              [-ed yyyy-mm[-dd]|name] [-m yyyy-mm|name] [-l]
-                              [-t] [-d] [--monthly] [-v]
-                              package
-
-Retrieve the aggregate daily download time series by Python minor version
-number
-
-positional arguments:
-  package
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -V VERSION, --version VERSION
-                        eg. 2.7 or 3.6 (default: None)
-  -f {json,markdown,rst,html}, --format {json,markdown,rst,html}
-                        The format of output (default: markdown)
-  -j, --json            Shortcut for "-f json" (default: False)
-  -sd yyyy-mm[-dd]|name, --start-date yyyy-mm[-dd]|name
-                        Start date (default: None)
-  -ed yyyy-mm[-dd]|name, --end-date yyyy-mm[-dd]|name
-                        End date (default: None)
-  -m yyyy-mm|name, --month yyyy-mm|name
-                        Shortcut for -sd & -ed for a single month (default:
-                        None)
-  -l, --last-month      Shortcut for -sd & -ed for last month (default: False)
-  -t, --this-month      Shortcut for -sd for this month (default: False)
-  -d, --daily           Show daily downloads (default: False)
-  --monthly             Show monthly downloads (default: False)
-  -v, --verbose         Print debug messages to stderr (default: False)
-```
-
-Get version downloads:
-
-```console
-$ pypistats python_minor pillow --last-month
-| category | percent | downloads |
-|----------|--------:|----------:|
-| 2.7      |  35.94% | 2,189,327 |
-| 3.6      |  31.83% | 1,938,870 |
-| 3.7      |  18.71% | 1,139,642 |
-| 3.5      |  11.29% |   687,782 |
-| 3.4      |   1.23% |    74,673 |
-| null     |   0.94% |    57,476 |
-| 3.8      |   0.04% |     2,147 |
-| 2.6      |   0.01% |       826 |
-| 3.3      |   0.00% |       212 |
-| 3.2      |   0.00% |        28 |
-| 2.4      |   0.00% |         6 |
-| 3.9      |   0.00% |         5 |
-| 2.8      |   0.00% |         1 |
-| Total    |         | 6,090,995 |
-```
-
-The table is Markdown, ready for pasting in GitHub issues and PRs:
-
-| category | percent | downloads |
-| -------- | ------: | --------: |
-| 2.7      |  35.94% | 2,189,327 |
-| 3.6      |  31.83% | 1,938,870 |
-| 3.7      |  18.71% | 1,139,642 |
-| 3.5      |  11.29% |   687,782 |
-| 3.4      |   1.23% |    74,673 |
-| null     |   0.94% |    57,476 |
-| 3.8      |   0.04% |     2,147 |
-| 2.6      |   0.01% |       826 |
-| 3.3      |   0.00% |       212 |
-| 3.2      |   0.00% |        28 |
-| 2.4      |   0.00% |         6 |
-| 3.9      |   0.00% |         5 |
-| 2.8      |   0.00% |         1 |
-| Total    |         | 6,090,995 |
-
-These are equivalent (in May 2019):
+You'll want to make sure to at least set the `FLASK_APP` environment variable:
 
 ```sh
-pypistats python_major pip --last-month
-pypistats python_major pip --month april
-pypistats python_major pip --month apr
-pypistats python_major pip --month 2019-04
+export FLASK_APP=hello.app
+export FLASK_ENV=development
 ```
 
-And:
+Then run the `flask` binary to see its help menu:
 
 ```sh
-pypistats python_major pip --start-date december --end-date january
-pypistats python_major pip --start-date dec      --end-date jan
-pypistats python_major pip --start-date 2018-12  --end-date 2019-01
+Usage: flask [OPTIONS] COMMAND [ARGS]...
+
+  ...
+
+Options:
+  --version  Show the flask version
+  --help     Show this message and exit.
+
+Commands:
+  digest  md5 tag and gzip static files.
+  routes  Show the routes for the app.
+  run     Run a development server.
+  shell   Run a shell in the app context.
 ```
 
-## Example programmatic use
+If all went as planned you should see the new `digest` command added to the
+list of commands.
 
-Return values are from the JSON responses documented in the API:
-https://pypistats.org/api/
+## Going over the Flask CLI commands
 
-```python
-import pypistats
-from pprint import pprint
+Running `flask digest` will produce this help menu:
 
-# Call the API
-print(pypistats.recent("pillow"))
-print(pypistats.recent("pillow", "day", format="markdown"))
-print(pypistats.recent("pillow", "week", format="rst"))
-print(pypistats.recent("pillow", "month", format="html"))
-pprint(pypistats.recent("pillow", "week", format="json"))
-print(pypistats.recent("pillow", "day"))
+```sh
+Usage: flask digest [OPTIONS] COMMAND [ARGS]...
 
-print(pypistats.overall("pillow"))
-print(pypistats.overall("pillow", mirrors=True, format="markdown"))
-print(pypistats.overall("pillow", mirrors=False, format="rst"))
-print(pypistats.overall("pillow", mirrors=True, format="html"))
-pprint(pypistats.overall("pillow", mirrors=False, format="json"))
+  md5 tag and gzip static files.
 
-print(pypistats.python_major("pillow"))
-print(pypistats.python_major("pillow", version=2, format="markdown"))
-print(pypistats.python_major("pillow", version=3, format="rst"))
-print(pypistats.python_major("pillow", version="2", format="html"))
-pprint(pypistats.python_major("pillow", version="3", format="json"))
+Options:
+  --help  Show this message and exit.
 
-print(pypistats.python_minor("pillow"))
-print(pypistats.python_minor("pillow", version=2.7, format="markdown"))
-print(pypistats.python_minor("pillow", version="2.7", format="rst"))
-print(pypistats.python_minor("pillow", version=3.7, format="html"))
-pprint(pypistats.python_minor("pillow", version="3.7", format="json"))
-
-print(pypistats.system("pillow"))
-print(pypistats.system("pillow", os="darwin", format="markdown"))
-print(pypistats.system("pillow", os="linux", format="rst"))
-print(pypistats.system("pillow", os="darwin", format="html"))
-pprint(pypistats.system("pillow", os="linux", format="json"))
+Commands:
+  clean    Remove generated static files and cache manifest.
+  compile  Generate optimized static files and a cache manifest.
 ```
 
-### NumPy and pandas
+Each command is labeled, but here's a bit more information on what they do.
 
-To use with either NumPy or pandas, make sure they are first installed, or:
+### compile
 
-```bash
-pip install --upgrade "pypistats[numpy]"
-pip install --upgrade "pypistats[pandas]"
-pip install --upgrade "pypistats[numpy,pandas]"
+Inspects your Flask app's `static_folder` and uses that as both the input and
+output path of where to look for and create the newly digested and compressed
+files.
+
+At a high level it recursively loops over all of the files it finds in that
+directory and then generates the md5 tagged and gzipped versions of each file.
+It also creates a `cache_manifest.json` file in the root of your
+`static_folder`.
+
+That manifest file is machine generated meaning you should not edit it unless
+you really know what you're doing.
+
+This file maps the human readable file name of let's say `images/flask.png` to
+the digested file name. It's a simple key / value set up. It's basically a
+Python dictionary in JSON format.
+
+In the end it means if your static folder looked like this originally:
+
+- `css/app.css`
+- `js/app.js`
+- `images/flask.png`
+
+And you decided to run the compile command, it would now look like this:
+
+- `css/app.css`
+- `css/app.css.gz`
+- `css/app-5d41402abc4b2a76b9719d911017c592.css`
+- `css/app-5d41402abc4b2a76b9719d911017c592.css.gz`
+- `js/app.js`
+- `js/app.js.gz`
+- `js/app-098f6bcd4621d373cade4e832627b4f6.js`
+- `js/app-098f6bcd4621d373cade4e832627b4f6.js.gz`
+- `images/flask.png`
+- `images/flask.png.gz`
+- `images/flask-f86b271a51b3cfad5faa9299dacd987f.png`
+- `images/flask-f86b271a51b3cfad5faa9299dacd987f.png.gz`
+- `cache_manifest.json`
+
+*Your md5 hashes will be different because it depends on what the contents of
+the file are.*
+
+### clean
+
+Inspects your Flask app's `static_folder` and uses that as the input path of
+where to look for digested and compressed files.
+
+It will recursively delete files that have a file extension of `.gz` and also
+deletes files that have been digested. It determines if a file has been
+digested based on its file name. In other words, it will delete files that
+match this regexp `r"-[a-f\d]{32}"`.
+
+In the end that means if you had these 4 files in your static folder:
+
+- `images/flask.png`
+- `images/flask.png.gz`
+- `images/flask-f86b271a51b3cfad5faa9299dacd987f.png`
+- `images/flask-f86b271a51b3cfad5faa9299dacd987f.png.gz`
+
+And you decided to run the clean command, the last 3 files would be deleted
+leaving you with the original `images/flask.png`.
+
+## Configuring this extension
+
+By default this extension will md5 tag all files it finds in your configured
+`static_folder`. It will also create gzipped versions of each file and it won't
+prefix your static files with an external host.
+
+If you don't like any of this behavior, you can optionally configure:
+
+```py
+FLASK_STATIC_DIGEST_BLACKLIST_FILTER = []
+# If you want specific extensions to not get md5 tagged you can add them to
+# the list, such as: [".htm", ".html", ".txt"]. Make sure to include the ".".
+
+FLASK_STATIC_DIGEST_GZIP_FILES = True
+# When set to False then gzipped files will not be created but static files
+# will still get md5 tagged.
+
+FLASK_STATIC_DIGEST_HOST_URL = None
+# When set to a value such as https://cdn.example.com and you use static_url_for
+# it will prefix your static path with this URL. This would be useful if you
+# host your files from a CDN. Make sure to include the protocol (aka. https://).
 ```
 
-Return data in a NumPy array for further processing:
+You can override these defaults in your Flask app's config file.
 
-```python
-import pypistats
-numpy_array = pypistats.overall("pyvista", total=True, format="numpy")
-print(type(numpy_array))
-# <class 'numpy.ndarray'>
-print(numpy_array)
-# [['with_mirrors' '2019-09-20' '2.23%' 1204]
-#  ['without_mirrors' '2019-09-20' '2.08%' 1122]
-#  ['with_mirrors' '2019-09-19' '0.92%' 496]
-#  ...
-#  ['with_mirrors' '2019-10-26' '0.02%' 13]
-#  ['without_mirrors' '2019-10-26' '0.02%' 12]
-#  ['Total' None None 54041]]
+## Modifying your templates to use static_url_for instead of url_for
+
+We're all familiar with this code right?
+
+```html
+<img src="{{ url_for('static', filename='images/flask.png') }}"
+     width="480" height="188" alt="Flask logo" />
 ```
 
-Or in a pandas DataFrame:
+When you put the above code into a Flask powered Jinja 2 template, it turns
+into this:
 
-```python
-import pypistats
-pandas_dataframe = pypistats.overall("pyvista", total=True, format="pandas")
-print(type(pandas_dataframe))
-# <class 'pandas.core.frame.DataFrame'>
-print(pandas_dataframe)
-#             category        date percent  downloads
-# 0       with_mirrors  2019-09-20   2.23%       1204
-# 1    without_mirrors  2019-09-20   2.08%       1122
-# 2       with_mirrors  2019-09-19   0.92%        496
-# 3       with_mirrors  2019-08-22   0.90%        489
-# 4    without_mirrors  2019-09-19   0.86%        466
-# ..               ...         ...     ...        ...
-# 354  without_mirrors  2019-11-03   0.03%         15
-# 355  without_mirrors  2019-11-16   0.03%         15
-# 356     with_mirrors  2019-10-26   0.02%         13
-# 357  without_mirrors  2019-10-26   0.02%         12
-# 358            Total        None    None      54041
-#
-# [359 rows x 4 columns]
+```html
+<img src="images/flask.png"
+     width="480" height="188" alt="Flask logo" />
 ```
 
-For example, create charts with pandas:
+The path might vary depending on how you configured your Flask app's
+`static_folder` but you get the idea.
 
-```python
-# Show overall downloads over time, excluding mirrors
-import pypistats
-data = pypistats.overall("pillow", total=True, format="pandas")
-data = data.groupby("category").get_group("without_mirrors").sort_values("date")
+#### Using static_url_for instead of url_for
 
-chart = data.plot(x="date", y="downloads", figsize=(10, 2))
-chart.figure.show()
-chart.figure.savefig("overall.png")  # alternatively
+Let's use the same example as above:
+
+```html
+<img src="{{ static_url_for('static', filename='images/flask.png') }}"
+     width="480" height="188" alt="Flask logo" />
 ```
 
-![overall.png](example/overall.png)
+But now take a look at the output this produces:
 
-```python
-# Show Python 3 downloads over time
-import pypistats
-data = pypistats.python_major("pillow", total=True, format="pandas")
-data = data.groupby("category").get_group(3).sort_values("date")
-
-chart = data.plot(x="date", y="downloads", figsize=(10, 2))
-chart.figure.show()
-chart.figure.savefig("python3.png")  # alternatively
+```html
+<img src="/images/flask-f86b271a51b3cfad5faa9299dacd987f.png"
+     width="480" height="188" alt="Flask logo" />
 ```
 
-![python3.png](example/python3.png)
+Or if you set `FLASK_STATIC_DIGEST_HOST_URL = "https://cdn.example.com"` it
+would produce:
+
+```html
+<img src="https://cdn.example.com/images/flask-f86b271a51b3cfad5faa9299dacd987f.png"
+     width="480" height="188" alt="Flask logo" />
+```
+
+Instead of using `url_for` you would use `static_url_for`. This uses Flask's
+`url_for` under the hood so things like `_external=True` and everything else
+`url_for` supports is available to use with `static_url_for`.
+
+That means to use this extension you don't have to do anything other than
+install it, optionally run the CLI command to generate the manifest and then
+rename your static file references to use `static_url_for` instead of
+`url_for`.
+
+If your editor supports performing a find / replace across multiple files you
+can quickly make the change by finding `url_for('static'` and replacing that
+with `static_url_for('static'`. If you happen to use double quotes instead of
+single quotes you'll want to adjust for that too.
+
+## Potentially updating your .gitignore file
+
+If you're using something like Webpack then chances are you're already git
+ignoring the static files it produces as output. It's a common pattern to
+commit your Webpack source static files but ignore the compiled static files
+it produces.
+
+But if you're not using Webpack or another asset build tool then the static
+files that are a part of your project might have the same source and
+destination directory. If that's the case, chances are you'll want to git
+ignore the md5 tagged files as well as the gzipped and `cache_manifest.json`
+files from version control.
+
+For clarity, you want to ignore them because you'll be generating them on your
+server at deploy time or within a Docker image if you're using Docker.  They
+don't need to be tracked in version control.
+
+Add this to your `.gitignore` file to ignore certain files this extension
+creates:
+
+```
+*-[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].*
+*.gz
+cache_manifest.json
+```
+
+This allows your original static files but ignores everything else this
+extension creates. I am aware at how ridiculous that ignore rule is for the md5
+hash but using `[0-9a-f]{32}` does not work. If you know of a better way,
+please open a PR!
+
+## FAQ
+
+### What about development vs production and performance implications?
+
+You would typically only run the CLI command to prepare your static files for
+production. Running `flask digest compile` would become a part of your build
+process -- typically after you pip install your dependencies.
+
+In development when the `cache_manifest.json` likely doesn't exist
+`static_url_for` calls `url_for` directly. This allows the `static_url_for`
+helper to work in both development and production without any fuss.
+
+It's also worth pointing out the CLI command is expected to be run before you
+even start your Flask server (or gunicorn / etc.), so there's no perceivable
+run time performance hit. It only involves doing 1 extra dictionary lookup at
+run time which is many orders of magnitude faster than even the most simple
+database query.
+
+**In other words, this extension is not going to negatively impact the
+performance of your web application. If anything it's going to speed it up and
+save you money on hosting**.
+
+That's because gzipped files can be upwards of 5-10x smaller so there's less
+bytes to transfer over the network.
+
+Also with md5 tagging each file it means you can configure your web server such
+as nginx to cache each file forever. That means if a user visits your site a
+second time in the future, nginx will be smart enough to load it from their
+local browser's cache without even contacting your server. It's a 100% local
+look up.
+
+This is as efficient as it gets. You can't do this normally without md5 tagging
+each file because if the file changes in the future, nginx will continue
+serving the old file until the cache expires so users will never see your
+updates. But due to how md5 hashing works, if the contents of a file changes it
+will get generated with a new name and nginx will serve the uncached new file.
+
+This tactic is commonly referred to as "cache busting" and it's a very good
+idea to do this in production. You can even go 1 step further and serve your
+static files using a CDN. Using this cache busting strategy makes configuring
+your CDN a piece of cake since you don't need to worry about ever expiring your
+cache manually.
+
+### Why bother gzipping your static files here instead of with nginx?
+
+You would still be using nginx's gzip features, but now instead of nginx having
+to gzip your files on the fly at run time you can configure nginx to use the
+pre-made gzipped files that this extension creates.
+
+This way you can benefit from having maximum compression without having nginx
+waste precious CPU cycles gzipping files on the fly. This gives you the best of
+both worlds -- the highest compression ratio with no noticeable run time
+performance penalty.
+
+### How do you use this extension with Webpack or another build tool?
+
+It works out of the box with no extra configuration or plugins needed for
+Webpack or your build tool of choice.
+
+Typically the Webpack (or another build tool) work flow would look like this:
+
+- You configure Webpack with your source static files directory
+- You configure Webpack with your destination static files directory
+- Webpack processes your files in the source directory and copies them to the destination directory
+- Flask is configured to serve static files from that destination directory
+
+For example, your source directory might be `assets/` inside of your project
+and the destination might be `myapp/static`.
+
+This extension will look at your Flask configuration for the `static_folder`
+and determine it's set to `myapp/static` so it will md5 tag and gzip those
+files. Your Webpack source files will not get digested and compressed.
+
+### Migrating from Flask-Webpack
+
+[Flask-Webpack](https://github.com/nickjj/flask-webpack) is another extension I
+wrote a long time ago which was specific to Webpack but had a similar idea to
+this extension. Flask-Webpack is now deprecated in favor of
+Flask-Static-Digest. Migrating is fairly painless. There are a number of
+changes but on the bright side you get to delete more code than you add!
+
+#### Dependency / Flask app changes
+
+- Remove `Flask-Webpack` from `requirements.txt`
+- Remove all references to Flask-Webpack from your Flask app and config
+- Remove `manifest-revision-webpack-plugin` from `package.json`
+- Remove all references to this webpack plugin from your webpack config
+- Add `Flask-Static-Digest` to `requirements.txt`
+- Add the Flask-Static-Digest extension to your Flask app
+
+#### Jinja 2 template changes
+
+- Replace `stylesheet_tag('main_css') | safe` with `static_url_for('static', filename='css/main.css')`
+- Replace `javascript_tag('main_js') | safe` with `static_url_for('static', filename='js/main.js')`
+- Replace any occurrences of `asset_url_for('foo.png')` with `static_url_for('static', filename='images/foo.png')`
+
+### How do you use this extension with Docker?
+
+It's really no different than without Docker, but instead of running `flask
+digest compile` on your server directly at deploy time you would run it inside
+of your Docker image at build time. This way your static files are already set
+up and ready to go by the time you pull and use your Docker image in
+production.
+
+You can see a fully working example of this in the open source version of my
+[Build a SAAS App with
+Flask](https://github.com/nickjj/build-a-saas-app-with-flask) course. It
+leverages Docker's build arguments to only compile the static files when
+`FLASK_ENV` is set to `production`. The key files to look at are the
+`Dockerfile`, `docker-compose.yml` and `.env` files. That wires up the build
+arguments and env variables to make it work.
+
+### What about user uploaded files?
+
+Let's say that besides having static files like your logo and CSS / JavaScript
+bundles you also have files uploaded by users. This could be things like a user
+avatar, blog post images or anything else.
+
+**You would still want to md5 tag and gzip these files but now we've run into a
+situation**. The `flask digest compile` command is meant to be run at deploy
+time and it could potentially be run from your dev box, inside of a Docker
+image, on a CI server or your production server. In these cases you wouldn't
+have access to the user uploaded files.
+
+But at the same time you have users uploading files at run time. They are
+changing all the time.
+
+**Needless to say you can't use the `flask digest compile` command to digest
+user uploaded files**. The `cache_manifest.json` file should be reserved for
+files that exist in your code repo (such as your CSS / JS bundles, maybe a
+logo, fonts, etc.).
+
+The above files do not change at run time and align well with running the
+`flask digest compile` command at deploy time.
+
+For user uploaded content you wouldn't ever write these entries to the manifest
+JSON file. Instead, you would typically upload your files to disk, S3 or
+somewhere else and then save the file name of the file you uploaded into your
+local database.
+
+So now when you reference a user uploaded file (let's say an avatar), you would
+loop over your users from the database and reference the file name from the DB.
+
+There's no need for a manifest file to store the user uploaded files because
+the database has a reference to the real name and then you are dynamically
+referencing that in your template helper (`static_url_for`), so it's never a
+hard coded thing that changes at the template level.
+
+What's cool about this is you already did the database query to retrieve the
+record(s) from the database, so there's no extra database work to do. All you
+have to do is reference the file name field that's a part of your model.
+
+But that doesn't fully solve the problem. You'll still want to md5 tag and gzip
+your user uploaded content at run time and you would want to do this before you
+save the uploaded file into its final destination (local file system, S3,
+etc.).
+
+This can be done completely separate from this extension and it's really going
+to vary depending on where you host your user uploaded content. For example
+some CDNs will automatically create gzipped files for you and they use things
+like an ETag header in the response to include a unique file name (and this is
+what you can store in your DB).
+
+So maybe md5 hashing and maybe gzipping your user uploaded content becomes an
+app specific responsibility, although I'm not opposed to maybe creating helper
+functions you can use but that would need to be thought out carefully.
+
+However the implementation is not bad. It's really only about 5 lines of code
+to do both things. Feel free to `CTRL + F` around the [code
+base](https://github.com/nickjj/flask-static-digest/blob/master/flask_static_digest/digester.py)
+for `hashlib` and `gzip` and you'll find the related code.
+
+**So with that said, here's a work flow you can do to deal with this today:**
+
+- User uploads file
+- Your Flask app potentially md5 tags / gzips the file if necessary
+- Your Flask app saves the file name + gzipped file to its final destination (local file system, S3, etc.)
+- Your Flask app saves the final unique file name to your database
+
+That final unique file name would be the md5 tagged version of the file that
+you created or the unique file name that your CDN returned back to you. I hope
+that clears up how to deal with user uploaded files and efficiently serving
+them!
+
+## About the author
+
+- Nick Janetakis | <https://nickjanetakis.com> | [@nickjanetakis](https://twitter.com/nickjanetakis)
+
+If you're interested in learning Flask I have a 17+ hour video course called
+[Build a SAAS App with
+Flask](https://buildasaasappwithflask.com/?utm_source=github&utm_medium=staticdigest&utm_campaign=readme).
+It's a course where we build a real world SAAS app. Everything about the course
+and demo videos of what we build is on the site linked above.
