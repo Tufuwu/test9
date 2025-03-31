@@ -1,0 +1,20 @@
+version: "3.4"
+services:
+  document-merge-service:
+    image: adfinissygroup/document-merge-service:dev
+    build:
+      context: .
+      args:
+        - REQUIREMENTS=requirements-dev.txt
+        - UID=$UID
+    user: "${UID:?Set UID env variable to your user id}"
+    volumes:
+      - ./:/app
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "./manage.py migrate && ./manage.py runserver 0.0.0.0:8000",
+      ]
+    environment:
+      - ENV=dev

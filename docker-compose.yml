@@ -1,0 +1,20 @@
+version: "3.4"
+services:
+  document-merge-service:
+    image: adfinissygroup/document-merge-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - dbdata:/var/lib/document-merge-service/data
+      - templatefiles:/var/lib/document-merge-service/media
+    environment: []
+      # Following options are a must to configure on production system:
+      # https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-SECRET_KEY
+      # - SECRET_KEY=
+      # https://docs.djangoproject.com/en/2.1/ref/settings/#allowed-hosts
+      # - ALLOWED_HOSTS=
+
+
+volumes:
+  dbdata:
+  templatefiles:

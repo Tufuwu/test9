@@ -1,31 +1,15 @@
-Django<3.0,>=2.2
-babel
-mysqlclient
-django-clearcache
-django-compressor
-django-extensions
-django-honeypot
-django-link-shortener
-django-log-request-id
-mezzanine-sync-pages
-packaging
-pygments
-pylibmc
-python-logstash-async
-pymdown-extensions
-pytz
-uwsgi
-
-
-# for development
-django-debug-toolbar
-
-# Mezzanine from GIT
-# https://github.com/stephenmcd/mezzanine/pull/1956
-git+https://github.com/fermorltd/filebrowser-safe.git@2.2-compat#egg=filebrowser-safe
-git+https://github.com/fermorltd/grappelli-safe.git@2.2-compat#egg=grappelli-safe
-git+https://github.com/fermorltd/mezzanine.git@2.2-compat#egg=mezzanine
-
-# mezzanine-pagedown from GIT with Django >= 2.1 fix
-# https://github.com/akhayyat/mezzanine-pagedown/pull/1
-git+https://github.com/eht16/mezzanine-pagedown.git@django-2.1#egg=mezzanine-pagedown
+babel==2.8.0
+django==2.2.16
+django_cors_headers==3.5.0
+django-environ==0.4.5
+django-filter==2.4.0
+djangorestframework==3.12.1
+docx-mailmerge==0.5.0
+docxtpl==0.11.0
+jsonpath==0.82
+mysqlclient==2.0.1
+psycopg2-binary==2.8.6
+python-dateutil==2.8.1
+python-memcached==1.59
+requests==2.24.0
+uwsgi==2.0.19.1

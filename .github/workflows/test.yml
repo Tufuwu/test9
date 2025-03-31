@@ -1,53 +1,64 @@
-# LICENCE: This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-name: CI Linting
+name: Tests
 
 on:
   push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
+  schedule:
+    - cron:  '0 0 * * 0'
 
 jobs:
-  build:
-    name: Python ${{ matrix.python }}
+  standard-tests:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python: ["3.9", "3.10"]
-      fail-fast: false
-
     steps:
       - uses: actions/checkout@v2
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Install dependencies
+      - name: Build the project
         run: |
-          sudo apt-get update
-          sudo apt-get install --assume-yes --no-install-recommends \
-            default-libmysqlclient-dev \
-            libmemcached-dev
-          pip install --upgrade pip setuptools
-
-      - name: Install Tox
-        run: pip install tox
-
-      - name: Lint
-        run: tox -e py
+          echo "UID=$(id --user)" > .env
+          docker-compose up -d --build
+      - name: Lint the code
+        run: |
+          docker-compose exec -T document-merge-service ./manage.py makemigrations --check --dry-run --no-input
+      - name: Run pytest
+        run: docker-compose exec -T document-merge-service pytest --no-cov-on-fail --cov --create-db -vv
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.9'
+      - name: Install black
+        run: pip install $(grep black requirements-dev.txt)
+      - name: Run black
+        run: black
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.9'
+      - name: Install flake8
+        run: pip install $(grep flake8 requirements-dev.txt)
+      - name: Run flake8
+        run: flake8
+  gitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.9'
+      - name: Install gitlint
+        run: pip install gitlint
+      - name: Run gitlint
+        run: gitlint --contrib contrib-title-conventional-commits
