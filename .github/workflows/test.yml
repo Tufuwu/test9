@@ -1,56 +1,67 @@
-name: ci
+---
+name: CI
 
 on:
-  push:
-    branches:
-      - main_qgis3
-    tags-ignore:
-      - 'debian/*'
-      - '*-start'
   pull_request:
     branches:
-      - '*'
+      - dev
+  push:
+    branches:
+      - main
 
 jobs:
-
   test:
-
     runs-on: ubuntu-latest
     strategy:
-        matrix:
-            qgis: [ 'main' ]
-            python: ["3.9", "3.10"]
-    env:
-      # Make apt non-interactive by default, and not showing progress
-      APT: "apt-get -o Dpkg::Progress=0 -o Dpkg::Use-Pty=0"
-      IMAGE: 'elpaso/qgis-testing-environment'
-      QGIS_VERSION_TAG: ${{ matrix.qgis }}
-      PLUGIN_NAME: "linz-data-importer"
-      LDI_LINZ_KEY: ${{ secrets.LDI_LINZ_KEY }}
-      LDI_MFE_KEY: ${{ secrets.LDI_MFE_KEY }}
-      LDI_NZDF_KEY: ${{ secrets.LDI_NZDF_KEY }}
-      LDI_BASEMAPS_KEY: ${{ secrets.LDI_BASEMAPS_KEY }}
+      matrix:
+        python-version: ["3.9", "3.10"]
     steps:
-    - uses: actions/checkout@v2
-    - name: Pull docker image
-      run: |
-        docker pull ${IMAGE}:${QGIS_VERSION_TAG}
-    - name: Setup docker container
-      run: |
-        docker run -d --name qgis-testing-environment \
-          -v ${PWD}:/tests_directory \
-          -e LDI_LINZ_KEY \
-          -e LDI_MFE_KEY \
-          -e LDI_NZDF_KEY \
-          -e LDI_BASEMAPS_KEY \
-          -e DISPLAY=:99 \
-          ${IMAGE}:${QGIS_VERSION_TAG}
-        sleep 10
-        docker exec qgis-testing-environment \
-          sh -c "qgis_setup.sh ${PLUGIN_NAME}"
-        docker exec qgis-testing-environment \
-          sh -c "ln -s /tests_directory /root/.local/share/QGIS/QGIS3/profiles/default/${PLUGIN_NAME}"
-    - name: Run test in container
-      run: |
-        docker exec -t qgis-testing-environment \
-          sh -c "qgis_testrunner.sh ${PLUGIN_NAME}.tests.run_tests.run_test_modules"
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: pytest
+        run: |
+          pip install poetry
+          poetry install
+          poetry run py.test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.x"
+          architecture: x64
+      - name: setup
+        run: |
+          pip install poetry
+          poetry install
+      - name: lint
+        run: |
+          poetry run black --check --fast pyiqvia
+          poetry run flake8 pyiqvia
+          poetry run pydocstyle pyiqvia
+          poetry run pylint pyiqvia
+      - name: typing
+        run: |
+          poetry run mypy --ignore-missing-imports pyiqvia
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.x"
+          architecture: x64
+      - run: |
+          pip install poetry
+          poetry install
+      - run: |
+          poetry run py.test -s --verbose --cov-report term-missing --cov-report xml --cov=pyiqvia tests
+      - uses: codecov/codecov-action@v1.0.3
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
