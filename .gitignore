@@ -1,16 +1,18 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*$py.class
 
 # C extensions
 *.so
+*.o
+a.out
 
 # Distribution / packaging
 .Python
 env/
+venv/
+.venv/
 build/
-prog/
 develop-eggs/
 dist/
 downloads/
@@ -44,7 +46,6 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *,cover
-.hypothesis/
 
 # Translations
 *.mo
@@ -52,14 +53,6 @@ coverage.xml
 
 # Django stuff:
 *.log
-local_settings.py
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
 
 # Sphinx documentation
 docs/_build/
@@ -67,24 +60,24 @@ docs/_build/
 # PyBuilder
 target/
 
-# IPython Notebook
-.ipynb_checkpoints
+# Vim IDE
+*~
+*.swp
+*.swo
 
-# pyenv
-.python-version
+# IntelliJ IDEA
+.idea/
 
-# celery beat schedule file
-celerybeat-schedule
+# CANdb++
+/tests/files/*.ini
 
-# dotenv
-.env
+# Example outputs
+examples/dbc_io/dbc_output.dbc
 
-# virtualenv
-venv/
-ENV/
-
-# Spyder project settings
-.spyderproject
-
-# Rope project settings
-.ropeproject
+cantools-database-cache/
+test_command_line_convert.dbc
+test_command_line_convert.kcd
+/*.[hc]
+/*fuzzer*
+/main
+/main_bit_fields
