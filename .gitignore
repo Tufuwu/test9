@@ -43,7 +43,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*.cover
+*,cover
 .hypothesis/
 
 # Translations
@@ -76,29 +76,34 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
-# SageMath parsed files
-*.sage.py
-
 # dotenv
 .env
 
 # virtualenv
-.venv
+.venv/
 venv/
 ENV/
+venv3/
 
 # Spyder project settings
 .spyderproject
-.spyproject
 
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
+# ------------------
+# PyCharm stuff
+.idea/*
 
-# mypy
-.mypy_cache/
+# OSX stuff
+.DS_Store
 
-# vim
-*~
+# rendered docs
+
+# viz renders
+/*/viz/*.html
+venv38
+venv*
+transform_scratch.py
+
+_skbuild
