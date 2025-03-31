@@ -1,297 +1,126 @@
-# Panoptes CLI
+# simple-pid
 
-A command-line interface for [Panoptes](https://github.com/zooniverse/Panoptes),
-the API behind [the Zooniverse](https://www.zooniverse.org/).
+[![Tests](https://github.com/m-lundberg/simple-pid/actions/workflows/run-tests.yml/badge.svg)](https://github.com/m-lundberg/simple-pid/actions?query=workflow%3Atests)
+[![PyPI](https://img.shields.io/pypi/v/simple-pid.svg)](https://pypi.org/project/simple-pid/)
+[![Read the Docs](https://img.shields.io/readthedocs/simple-pid.svg)](https://simple-pid.readthedocs.io/)
+[![License](https://img.shields.io/github/license/m-lundberg/simple-pid.svg)](https://github.com/m-lundberg/simple-pid/blob/master/LICENSE.md)
+[![Downloads](https://pepy.tech/badge/simple-pid)](https://pepy.tech/project/simple-pid)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+A simple and easy to use PID controller in Python. If you want a PID controller without external dependencies that just works, this is for you! The PID was designed to be robust with help from [Brett Beauregards guide](http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-introduction/).
+
+Usage is very simple:
+
+```python
+from simple_pid import PID
+pid = PID(1, 0.1, 0.05, setpoint=1)
+
+# Assume we have a system we want to control in controlled_system
+v = controlled_system.update(0)
+
+while True:
+    # Compute new output from the PID according to the systems current value
+    control = pid(v)
+    
+    # Feed the PID output to the system and get its current value
+    v = controlled_system.update(control)
+```
+
+Complete API documentation can be found [here](https://simple-pid.readthedocs.io/en/latest/simple_pid.html#module-simple_pid.PID).
 
 ## Installation
-
-The Panoptes CLI is written in Python, so in order to install it you will need
-to install either Python 2 or Python 3, along with `pip`. macOS and Linux
-already come with Python installed, so run this to see if you already have
-everything you need:
-
+To install, run:
 ```
-$ python --version && pip --version
+pip install simple-pid
 ```
 
-If you see an error like `python: command not found` or `pip: command not found`
-then you will need to install this:
-
-- [Python installation](https://wiki.python.org/moin/BeginnersGuide/Download)
-- [Pip installation](https://pip.pypa.io/en/stable/installing/)
-
-Once these are installed you can just use `pip` to install the latest release of
-the CLI:
-
-```
-$ pip install panoptescli
+## Usage
+The `PID` class implements `__call__()`, which means that to compute a new output value, you simply call the object like this:
+```python
+output = pid(current_value)
 ```
 
-Alternatively, if you want to preview the next release you can install HEAD
-directly from GitHub (though be aware that this may contain
-bugs/untested/incomplete features):
+### The basics
+The PID works best when it is updated at regular intervals. To achieve this, set `sample_time` to the amount of time there should be between each update and then call the PID every time in the program loop. A new output will only be calculated when `sample_time` seconds has passed:
+```python
+pid.sample_time = 0.01  # Update every 0.01 seconds
 
-```
-$ pip install -U git+git://github.com/zooniverse/panoptes-cli.git
-```
-
-To upgrade an existing installation to the latest version:
-
-```
-pip install -U panoptescli
+while True:
+    output = pid(current_value)
 ```
 
-## Built-in help
-
-Every command comes with a built in `--help` option, which explains how to use
-it.
-
-```
-$ panoptes --help
-Usage: panoptes [OPTIONS] COMMAND [ARGS]...
-
-Options:
-  -e, --endpoint TEXT  Overides the default API endpoint
-  -a, --admin          Enables admin mode. Ignored if you're not logged in as
-                       an administrator.
-  --version            Show the version and exit.
-  --help               Show this message and exit.
-
-Commands:
-  configure    Sets default values for configuration options.
-  info         Displays version and environment information for debugging.
-  project      Contains commands for managing projects.
-  subject      Contains commands for retrieving information about subjects.
-  subject-set  Contains commands for managing subject sets.
-  user         Contains commands for retrieving information about users.
-  workflow     Contains commands for managing workflows.
+To set the setpoint, ie. the value that the PID is trying to achieve, simply set it like this:
+```python
+pid.setpoint = 10
 ```
 
-```
-$ panoptes project --help
-Usage: panoptes project [OPTIONS] COMMAND [ARGS]...
-
-  Contains commands for managing projects.
-
-Options:
-  --help  Show this message and exit.
-
-Commands:
-  create    Creates a new project.
-  delete
-  download  Downloads project-level data exports.
-  info
-  ls        Lists project IDs and names.
-  modify    Changes the attributes of an existing project..
+The tunings can be changed any time when the PID is running. They can either be set individually or all at once:
+```python
+pid.Ki = 1.0
+pid.tunings = (1.0, 0.2, 0.4)
 ```
 
-```
-$ panoptes subject-set upload-subjects --help
-Usage: panoptes subject-set upload-subjects [OPTIONS] SUBJECT_SET_ID
-                                            MANIFEST_FILES...
+To use the PID in [reverse mode](http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-direction/), meaning that an increase in the input leads to a decrease in the output (like when cooling for example), you can set the tunings to negative values:
 
-  Uploads subjects from each of the given MANIFEST_FILES.
-
-  Example with only local files:
-
-  $ panoptes subject-set upload-subjects 4667 manifest.csv
-
-  Local filenames will be automatically detected in the manifest and
-  uploaded, or filename columns can be specified with --file-column.
-
-  If you are hosting your media yourself, you can put the URLs in the
-  manifest and specify the column number(s):
-
-  $ panoptes subject-set upload-subjects -r 1 4667 manifest.csv
-
-  $ panoptes subject-set upload-subjects -r 1 -r 2 4667 manifest.csv
-
-  Any local files will still be detected and uploaded.
-
-Options:
-  -M, --allow-missing            Do not abort when creating subjects with no
-                                 media files.
-  -r, --remote-location INTEGER  Specify a field (by column number) in the
-                                 manifest which contains a URL to a remote
-                                 media location. Can be used more than once.
-  -m, --mime-type TEXT           MIME type for remote media. Defaults to
-                                 image/png. Can be used more than once, in
-                                 which case types are mapped one to one with
-                                 remote locations in the order they are given.
-                                 Has no effect without --remote-location.
-  -f, --file-column INTEGER      Specify a field (by column number) in the
-                                 manifest which contains a local file to be
-                                 uploaded. Can be used more than once.
-                                 Disables auto-detection of filename columns.
-  --help                         Show this message and exit.
+```python
+pid.tunings = (-1.0, -0.1, 0)
 ```
 
-## Uploading non-image media types
+Note that all the tunings should have the same sign.
 
-If you wish to upload subjects with non-image media (e.g. audio or video),
-you will need to make sure you have the `libmagic` library installed. If you
-don't already have `libmagic`, please see the [dependency information for
-python-magic](https://github.com/ahupp/python-magic#dependencies) for more
-details.
-
-To check if `libmagic` is installed, run this command:
-
-```
-$ panoptes info
+In order to get output values in a certain range, and also to avoid [integral windup](https://en.wikipedia.org/wiki/Integral_windup) (since the integral term will never be allowed to grow outside of these limits), the output can be limited to a range:
+```python
+pid.output_limits = (0, 10)    # Output value will be between 0 and 10
+pid.output_limits = (0, None)  # Output will always be above 0, but with no upper bound
 ```
 
-If you see `libmagic: False` in the output then it isn't installed.
-
-## Command Line Examples
-
-This readme does not list everything that the CLI can do. For a full list of
-commands and their options, use the built in help as described above.
-
-### Log in and optionally set the API endpoint
-
+### Other features
+#### Auto mode
+To disable the PID so that no new values are computed, set auto mode to False:
+```python
+pid.auto_mode = False  # No new values will be computed when pid is called
+pid.auto_mode = True   # pid is enabled again
 ```
-$ panoptes configure
-username []:
-password:
+When disabling the PID and controlling a system manually, it might be useful to tell the PID controller where to start from when giving back control to it. This can be done by enabling auto mode like this:
+```python
+pid.set_auto_mode(True, last_output=8.0)
 ```
+This will set the I-term to the value given to `last_output`, meaning that if the system that is being controlled was stable at that output value the PID will keep the system stable if started from that point, without any big bumps in the output when turning the PID back on.
 
-Press enter without typing anything to keep the current value (shown in
-brackets). You probably don't need to change the endpoint, unless you're running
-your own copy of the Panoptes API.
-
-### Create a new project
-
-```
-$ panoptes project create "My Project" "This is a description of my project"
-*2797 zooniverse/my-project My Project
+#### Observing separate components
+When tuning the PID, it can be useful to see how each of the components contribute to the output. They can be seen like this:
+```python
+p, i, d = pid.components  # The separate terms are now in p, i, d
 ```
 
-The `*` before the project ID indicates that the project is private.
-
-### Create a subject set in your new project
-
-```
-$ panoptes subject-set create 2797 "My first subject set"
-4667 My first subject set
+#### Proportional on measurement
+To eliminate overshoot in certain types of systems, you can calculate the [proportional term directly on the measurement](http://brettbeauregard.com/blog/2017/06/introducing-proportional-on-measurement/) instead of the error. This can be enabled like this:
+```python
+pid.proportional_on_measurement = True
 ```
 
-### Make your project public
+#### Error mapping
+To transform the error value to another domain before doing any computations on it, you can supply an `error_map` callback function to the PID. The callback function should take one argument which is the error from the setpoint. This can be used e.g. to get a degree value error in a yaw angle control with values between [-pi, pi):
+```python
+import math
 
-```
-$ panoptes project modify --public 2797
-2797 zooniverse/my-project My Project
-```
+def pi_clip(angle):
+    if angle > 0:
+        if angle > math.pi:
+            return angle - 2*math.pi
+    else:
+        if angle < -math.pi:
+            return angle + 2*math.pi
+    return angle
 
-### Upload subjects
-
-```
-$ panoptes subject-set upload-subjects 4667 manifest.csv
-```
-
-Local filenames will be automatically detected in the manifest and uploaded. If
-you are hosting your media yourself, you can put the URLs in the manifest and
-specify the column number(s) and optionally set the file type if you're not
-uploading PNG images:
-
-```
-$ panoptes subject-set upload-subjects -m image/jpeg -r 1 4667 manifest.csv
-$ panoptes subject-set upload-subjects -r 1 -r 2 4667 manifest.csv
+pid.error_map = pi_clip
 ```
 
-A manifest is a CSV file which contains the names of local media files to upload (one per column) or remote URLs (matching the `-r` option)
-and any other column is recorded as subject metadata, where the column name is the key and the row/column entry is the value, for example:
-
-file_name_1 | file_name_2 | metadata | !metadata_hidden_from_classification | #metadata_hidden_from_all
--- | -- | -- | -- | --
-local_image_file_1.jpeg | local_image_file_2.jpeg | image_01 | giraffe | kenya_site_1
-
-### Resuming a failed upload
-
-If an upload fails for any reason, the CLI should detect the failure and give you the option of resuming the upload at a later time:
-
+## Tests
+Use the following to run tests:
 ```
-$ panoptes subject-set upload-subjects -m image/jpeg -r 1 4667 manifest.csv
-Uploading subjects  [------------------------------------]    0%  00:41:05
-Error: Upload failed.
-Would you like to save the upload state to resume the upload later? [Y/n]: y
-Enter filename to save to [panoptes-upload-4667.yaml]:
+tox
 ```
 
-This will save a new manifest file which you can use to resume the upload. The new manifest file will be in YAML format rather than CSV, and the YAML file contains all the information about the original upload (including any command-line options you specified) along with a list of the subjects which have not yet been uploaded.
-
-To resume the upload, simply run the `upload-subjects` command specifying the same subject set ID with the new manifest file. Note that you do not need to include any other options that you originally specified (such as `-r`, `-m`, and so on):
-
-```
-$ panoptes subject-set upload-subjects 4667 panoptes-upload-4667.yaml
-```
-
-### Generate and download a classifications export
-
-```
-$ panoptes project download --generate 2797 classifications.csv
-```
-
-### Generate and download a talk comments export
-
-```
-$ panoptes project download --generate --data-type talk_comments 2797 classifications.csv
-```
-
-### List workflows in your project
-
-```
-$ panoptes workflow ls -p 2797
-1579 Example workflow 1
-2251 Example workflow 2
-```
-
-### Add a subject set to a workflow
-
-```
-$ panoptes workflow add-subject-sets 1579 4667
-```
-
-### List subject sets in a workflow
-
-```
-$ panoptes subject-set ls -w 1579
-4667 My first subject set
-```
-
-### List subject sets in a project
-
-```
-$ panoptes subject-set ls -p 2797
-```
-
-### Verify that subject set 4667 is in project 2797
-
-```
-$ panoptes subject-set ls -p 2797 4667
-```
-
-### Add known subjects to a subject set
-
-```
-# for known subjects with ids 3, 2, 1 and subject set with id 999
-$ panoptes subject-set add-subjects 999 3 2 1
-```
-
-## Debugging
-
-To view the various requests as sent to the Panoptes API as well as other info,
-include the env var `PANOPTES_DEBUG=true` before your command, like so:
-
-`PANOPTES_DEBUG=true panoptes workflow ls -p 1234`
-
-### Usage
-
-1. Run `docker-compose build` to build the containers. Note there are mulitple containers for different envs, see docker-compose.yml for more details
-
-2. Create and run all the containers with `docker-compose up`
-
-### Testing
-
-1. Use docker to run a testing environment bash shell and run test commands .
-    1. Run `docker-compose run --rm dev sh` to start an interactive shell in the container
-    1. Run `python -m unittest discover` to run the full test suite
+## License
+Licensed under the [MIT License](https://github.com/m-lundberg/simple-pid/blob/master/LICENSE.md).

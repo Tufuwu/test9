@@ -1,113 +1,101 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## Unreleased
 
-- New: support `%` in manifest column headings for indexed subject sets. Manifest headers with the `%` prefix will automatically be added to the subject set configuration `'indexFields'` list.
+## [1.0.1] - 2021-04-11
 
-## 1.1.3 (2020-12-10)
+### Fixed
 
-- Update panoptes-client requirement to >=1.3
+- Added type information for public instance variables to typing stub
 
-## 1.1.2 (2020-05-07)
+## [1.0.0] - 2021-03-20
 
-- Bump pyyaml to <5.4
-- Bump humanize to <1.1
+### Added
 
-## 1.1.1 (2019-11-29)
+- Function to map the error value to a different domain
 
-- Fix: Bump pyyaml requirement to >=5.1 to fix AttributeError
+- Typing information through a stub file so that users of the library can use e.g.
+  [mypy](https://github.com/python/mypy) to type check their code
 
-## 1.1 (2019-10-25)
+- This project now uses the [Black code style](https://github.com/psf/black)
 
-- New: Use multithreaded subject uploads
-- New: Add option to resume subject uploads on failure
-- New: Add ID file option to subject set add/remove
-- New: Add `--file-column` option to subject uploads
-- New: Add `info` commands for all objects
-- New: Add `delete` commands for all objects
-- New: Allow multiple remote MIME types
-- New: Add `user token` command
-- Fix: Do not connect to API during `configure`
-- Fix: Use `yaml.full_load` instead of `yaml.load`
-- Fix: Use `os.path.isfile` instead of `exists`
-- Add help text to `workflow download-classifications`
-- Abort uploads if manifest doesn't contain any rows
-- Don't show password in configure command
-- Validate endpoint config
-- Validate file sizes before uploading
-- Update pyyaml requirement to >=3.12,<5.2
-- Update click requirement to >=6.7,<7.1
+- The PID class now has a `__repr__()` method, meaning that objects of this type can be printed
+  directly for use during development
+  
+- MANIFEST.in file to ensure all necessary files are included in the source distribution
 
-## 1.0.2 (2019-02-20)
+### Fixed
 
-- Update pyyaml requirement to >=3.12,<4.2
+- Formatting errors in the documentation due to poorly formatted docstrings
 
-## 1.0.1 (2018-04-27)
+## [0.2.4] - 2019-10-08
 
-- Fix: Modifying projects makes them private
+### Added
 
-## 1.0 (2017-11-16)
+- Added optional argument to manually set dt (useful e.g. when running in a simulation)
 
-- New: Add --version option
-- New: Add info command
-- New: Add help text for all commands
-- New: Add progress bars for data export downloads
-- Fix: Modifying project public/private status
-- Remove non-functional `--project-id` option from `subject-set modify`
-- Rename `workflow download` to `workflow download-classifications`
-- Rely on API to validate file types
+## [0.2.3] - 2019-08-26
 
-## 0.8 (2017-08-04)
+### Added
 
-- New: Set default endpoint to www.zooniverse.org
-- New: Standardise options and arguments
-- Fix: Fix remote media in Python 3
-- Remove default download timeouts
+- A reset method to reset the internal state of the PID controller
 
-## 0.7 (2017-06-20)
+## [0.2.2] - 2019-07-04
 
-- New: Add 'quiet' option to ls commands
-- New: Allow listing multiple subjects by ID
-- New: Add short option for subject set id in subject ls
-- Fix: Use next(reader) rather than reader.next()
+### Changed
 
-## 0.6 (2017-05-11)
+- Don't limit the proportional term to the output bounds when using `proportional_on_measurement`
 
-- New: Add support for remote subject media locations
+## [0.2.1] - 2019-03-01
 
-## 0.5 (2017-03-22)
+### Fixed
 
-- New: Make `project ls` perform a full-text search
-- New: Allow listing subjects in a subject set
-- New: Subject to subject set linking
-- New: Add commands to activate/deactivate workflows
-- New: Add command to download workflow classifications exports
-- Fix: Use os.path.expanduser to find config directory
+- `ZeroDivisionError` on systems with limited precision time.
 
-## 0.4 (2017-03-13)
+## [0.2.0] - 2019-02-26
 
-- New: Listing subject sets by project ID and workflow ID
-- New: Listing workflows
-- New: Adding and removing subject sets to and from workflows
-- New: Allow uploading multiple manifests at once (changes arguments for
-  `subject_set upload_subjects`)
-- Increase default timeout for exports to 1 hour
+### Added
 
-## 0.3 (2016-11-21)
+- Allow the proportional term to be monitored properly through the components-property when
+  _proportional on measurement_ is enabled.
 
-- New: Add all data exports
-- New: Add --allow-missing option to upload_subjects
-- Fix: JPEG uploading
-- Fix: Open manifest file with universal newline mode
-- Fix: Don't create subjects with no images
+### Fixed
 
-## 0.2 (2016-09-02)
+- Bump in output when re-enabling _auto mode_ after running in _manual mode_.
 
-- New: Project classification exports
-- New: Subject retirement
-- New: Add --launch-approved option to project ls
-- Fix: Update `SubjectSet.add_subjects` -> `SubjectSet.add`
+## [0.1.5] - 2019-01-31
 
-## 0.1 (2016-06-17)
+### Added
 
-- Initial release
-- Allows creating and modifying projects and subject sets
-- Allows uploading subjects to subject sets
+- The ability to see the contributions of the separate terms in the PID
+
+### Fixed
+
+- D term not being divided by delta time, leading to wrong output values
+
+## [0.1.4] - 2018-10-03
+
+### Fixed
+
+- Use monotonic time to prevent errors that may be difficult to diagnose when the system time is
+  modified. Thanks [@deniz195](https://github.com/m-lundberg/simple-pid/issues/1)
+
+### Added
+
+- Initial implementation
+
+[Unreleased]: https://github.com/m-lundberg/simple-pid/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/m-lundberg/simple-pid/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/m-lundberg/simple-pid/compare/v0.2.4...v1.0.0
+[0.2.4]: https://github.com/m-lundberg/simple-pid/compare/v0.2.3...v0.2.4
+[0.2.3]: https://github.com/m-lundberg/simple-pid/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/m-lundberg/simple-pid/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/m-lundberg/simple-pid/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/m-lundberg/simple-pid/compare/v0.1.5...v0.2.0
+[0.1.5]: https://github.com/m-lundberg/simple-pid/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/m-lundberg/simple-pid/releases/tag/v0.1.4

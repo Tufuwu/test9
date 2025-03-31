@@ -1,25 +1,40 @@
 from setuptools import setup, find_packages
 
+from codecs import open
+from os import path
+
+here = path.abspath(path.dirname(__file__))
+
+# Get the long description from the README file
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 setup(
-    name='panoptescli',
-    version='1.1.3',
-    url='https://github.com/zooniverse/panoptes-cli',
-    author='Adam McMaster',
-    author_email='adam@zooniverse.org',
-    description=(
-        'A command-line client for Panoptes, the API behind the Zooniverse'
-    ),
-    packages=find_packages(),
-    include_package_data=True,
-    install_requires=[
-        'Click>=6.7,<7.1',
-        'PyYAML>=5.1,<5.5',
-        'panoptes-client>=1.3,<2.0',
-        'humanize>=0.5.1,<1.1',
-        'pathvalidate>=0.29.0,<0.30',
+    name='simple-pid',
+    version='1.0.1',
+    description='A simple, easy to use PID controller',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    url='https://github.com/m-lundberg/simple-pid',
+    author='Martin Lundberg',
+    license='MIT',
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
     ],
-    entry_points='''
-        [console_scripts]
-        panoptes=panoptes_cli.scripts.panoptes:cli
-    ''',
+    keywords='pid controller control',
+    packages=find_packages(exclude=['tests']),
+    package_data={
+        'simple_pid': ['*.pyi', 'py.typed'],
+    },
+    include_package_data=True,
+    zip_safe=False,
+    extras_require={
+        'docs': ['m2r', 'sphinx-rtd-theme'],
+    },
+    project_urls={
+        'Documentation': 'https://simple-pid.readthedocs.io/',
+    },
 )
