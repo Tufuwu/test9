@@ -1,139 +1,136 @@
-<img src="/docs/waterbutler.png?raw=true" width="25%" style="float:left;">
+# OpenCage Geocoding Module for Python
 
-# WaterButler
+A Python module to access the [OpenCage Geocoding API](https://opencagedata.com/).
 
-[![Documentation Status](https://readthedocs.org/projects/waterbutler/badge/?version=latest)](http://waterbutler.readthedocs.org/en/latest/?badge=latest)
-[![Code Climate](https://codeclimate.com/github/CenterForOpenScience/waterbutler/badges/gpa.svg)](https://codeclimate.com/github/CenterForOpenScience/waterbutler)
+## Build Status / Code Quality / etc
 
-`master` Build Status: [![Build Status](https://github.com/CenterForOpenScience/waterbutler/actions/workflows/test-build.yml/badge.svg?branch=master)](https://github.com/CenterForOpenScience/waterbutler/actions)[![Coverage Status](https://coveralls.io/repos/github/CenterForOpenScience/waterbutler/badge.svg?branch=master)](https://coveralls.io/github/CenterForOpenScience/waterbutler?branch=master)
+[![PyPI version](https://badge.fury.io/py/opencage.svg)](https://badge.fury.io/py/opencage)
+[![Downloads](https://pepy.tech/badge/opencage/month)](https://pepy.tech/project/opencage)
+[![Versions](https://img.shields.io/pypi/pyversions/opencage)](https://pypi.org/project/opencage/)
+![GitHub contributors](https://img.shields.io/github/contributors/opencagedata/python-opencage-geocoder)
+[![Build Status](https://github.com/OpenCageData/python-opencage-geocoder/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/OpenCageData/python-opencage-geocoder/actions/workflows/build.yml)
+![Mastodon Follow](https://img.shields.io/mastodon/follow/109287663468501769?domain=https%3A%2F%2Fen.osm.town%2F&style=social)
 
-`develop` Build Status: [![Build Status](https://github.com/CenterForOpenScience/waterbutler/actions/workflows/test-build.yml/badge.svg?branch=develop)](https://github.com/CenterForOpenScience/waterbutler/actions)[![Coverage Status](https://coveralls.io/repos/github/CenterForOpenScience/waterbutler/badge.svg?branch=develop)](https://coveralls.io/github/CenterForOpenScience/waterbutler?branch=develop)
+## Tutorial
 
-### Compatibility
+You can find a [comprehensive tutorial for using this module on the OpenCage site](https://opencagedata.com/tutorials/geocode-in-python).
 
-WaterButler is compatible with Python 3.6.
+## Usage
 
-### Documentation
+Supports Python 3.7 or newer. Use the older opencage 1.x releases if you need Python 2.7 support.
 
-Documentation available at https://waterbutler.readthedocs.io/en/latest/
-
-### Setting up
-
-In order to run WaterButler, you must create a Python 3.6-based virtualenv for it.
-
-For MacOSX, you can install the latest version of Python3 using:
+Install the module:
 
 ```bash
-brew install python3
+pip install opencage
 ```
 
-For Ubuntu users:
+Load the module:
 
-```bash
-apt-get install python3.6
+```python
+from opencage.geocoder import OpenCageGeocode
 ```
 
-After completing the installation of Python 3.6, you must create a virtual environment. This can be done with the following commands:
+Create an instance of the geocoder module, passing a valid OpenCage Data Geocoder API key
+as a parameter to the geocoder modules's constructor:
 
-```bash
-pip install virtualenv
-pip install virtualenvwrapper
-mkvirtualenv --python=python3.6 waterbutler
-
-pip install setuptools=37.0.0
-pip install invoke==0.13.0
-
-invoke install
-invoke server
+```python
+key = 'your-api-key-here'
+geocoder = OpenCageGeocode(key)
 ```
 
-The above code will get the virtualenv up and running for the first time.  After the initial setup, you can run waterbutler by running:
+Pass a string containing the query or address to be geocoded to the modules' `geocode` method:
 
-```bash
-workon waterbutler
-invoke server
+```python
+query = '82 Clerkenwell Road, London'
+results = geocoder.geocode(query)
 ```
 
-Some tasks also require a running celery worker.  You will need to install `rabbitmq` and run a server:
+You can add [additional parameters](https://opencagedata.com/api#forward-opt):
 
-```bash
-brew install rabbitmq
-# on Ubuntu:
-# apt-get install rabbitmq-server
-rabbitmq-server
+```python
+results = geocoder.geocode('London', no_annotations=1, language='es')
 ```
 
-Then in your WaterButler virtualenv:
+For example you can use the proximity parameter to provide the geocoder with a hint:
 
-```bash
-invoke celery
+```python
+results = geocoder.geocode('London', proximity='42.828576, -81.406643')
+print(results[0]['formatted'])
+# u'London, ON N6A 3M8, Canada'
 ```
 
-### Configuring
+### Reverse geocoding
 
-WaterButler configuration is done through a JSON file (`waterbutler-test.json`) that lives in the `.cos` directory of your home directory.  If this is your first time setting up WaterButler or its sister project, [MFR](https://github.com/CenterForOpenScience/modular-file-renderer/), you probably do not have this directory and will need to create it:
+Turn a lat/long into an address with the `reverse_geocode` method:
 
-```bash
-mkdir ~/.cos
+```python
+result = geocoder.reverse_geocode(51.51024, -0.10303)
 ```
 
-The data in `waterbutler-test.json` is used by the many Django-style `settings.py` files sprinkled about.  Most of these files define a top-level key that its specific configuration should be listed under.  For instance, if you wanted your local WaterButler server to listen on port 8989 instead of the default 7777, you would check the settings file for `waterbutler.server`.  That file looks for `HOST` and `DOMAIN` configuration keys under the `SERVER_CONFIG` top-level key.  Your configuration file would need to be updated to look like this:
+### Sessions
 
-```json
-{
-  "SERVER_CONFIG": {
-    "PORT": 8989,
-    "DOMAIN": "http://localhost:8989"
-  }
-}
+You can reuse your HTTP connection for multiple requests by
+using a `with` block. This can help performance when making
+a lot of requests:
+
+```python
+queries = ['82 Clerkenwell Road, London', ...]
+with OpenCageGeocode(key) as geocoder:
+    # Queries reuse the same HTTP connection
+    results = [geocoder.geocode(query) for query in queries]
 ```
 
-If you then wanted to update the GitHub commit message WaterButler submits when deleting files, you would look in `waterbutler.providers.github.settings`. The `DELETE_FILE_MESSAGE` parameter should come under the `GITHUB_PROVIDER_CONFIG` key:
+### Asyncronous requests
 
-```json
-{
-  "SERVER_CONFIG": {
-    "PORT": 8989,
-    "DOMAIN": "http://localhost:8989"
-  },
-  "GITHUB_PROVIDER_CONFIG": {
-    "DELETE_FILE_MESSAGE": "WaterButler deleted this. You're welcome."
-  }
-}
+You can run requests in parallel with the `geocode_async` and `reverse_geocode_async`
+method which have the same parameters and response as their synronous counterparts.
+You will need at least Python 3.7 and the `asyncio` and `aiohttp` packages installed.
+
+```python
+async with OpenCageGeocode(key) as geocoder:
+    results = await geocoder.geocode_async(address)
 ```
 
-### Testing
+For a more complete example and links to futher tutorials on asyncronous IO see
+`batch.py` in the `examples` directory.
 
-Before running the tests, you will need to install some additional requirements. In your checkout, run:
+### Non-SSL API use
 
-```bash
-workon waterbutler
-invoke install --develop
-invoke test
+If you have trouble accesing the OpenCage API with https, e.g. issues with OpenSSL
+libraries in your enviroment, then you can set the 'http' protocol instead. Please
+understand that the connection to the OpenCage API will no longer be encrypted.
+
+```python
+geocoder = OpenCageGeocode('your-api-key', 'http')
 ```
 
-### Known issues
+### Command-line batch geocoding
 
-- **Updated, 2018-01-02:** *WB has been updated to work with setuptools==37.0.0, as of WB release v0.37. The following issue should not happen for new installs, but may occur if you downgrade to an older version.*  Running `invoke install -d` with setuptools v31 or greater can break WaterButler.  The symptom error message is: `"AttributeError: module 'waterbutler' has no attribute '__version__'"`.  If you encounter this, you will need to remove the file `waterbutler-nspkg.pth` from your virtualenv directory, run `pip install setuptools==30.4.0`, then re-run `invoke install -d`.
+See `examples/batch.py` for an example to geocode a CSV file.
 
-- `invoke $command` results in `'$command' did not receive all required positional arguments!`: this error message occurs when trying to run WB v0.30.0+ with `invoke<0.13.0`.  Run `pip install invoke==0.13.0`, then retry your command.
+<img src="batch-progress.gif"/>
 
-### License
+### Exceptions
 
-Copyright 2013-2018 Center for Open Science
+If anything goes wrong, then an exception will be raised:
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+- `InvalidInputError` for non-unicode query strings
+- `NotAuthorizedError` if API key is missing, invalid syntax or disabled
+- `ForbiddenError` API key is blocked or suspended
+- `RateLimitExceededError` if you go past your rate limit
+- `UnknownError` if there's some problem with the API (bad results, 500 status code, etc)
 
-    http://www.apache.org/licenses/LICENSE-2.0
+## Copyright & License
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+This software is copyright OpenCage GmbH.
+Please see `LICENSE.txt`
 
-### COS is hiring!
+### Who is OpenCage GmbH?
 
-Want to help save science? Want to get paid to develop free, open source software? [Check out our openings!](https://cos.io/our-communities/jobs/)
+<a href="https://opencagedata.com"><img src="opencage_logo_300_150.png"/></a>
+
+We run a worldwide [geocoding API](https://opencagedata.com/api) and [geosearch](https://opencagedata.com/geosearch) service based on open data.
+Learn more [about us](https://opencagedata.com/about).
+
+We also run [Geomob](https://thegeomob.com), a series of regular meetups for location based service creators, where we do our best to highlight geoinnovation. If you like geo stuff, you will probably enjoy [the Geomob podcast](https://thegeomob.com/podcast/).

@@ -1,63 +1,69 @@
+#/usr/bin/env python
+
+import os
+import sys
 from setuptools import setup, find_packages
 
+# if you are not using vagrant, just delete os.link directly,
+# The hard link only saves a little disk space, so you should not care
+if os.environ.get('USER', '') == 'vagrant':
+    del os.link
 
-def parse_requirements(requirements):
-    with open(requirements) as f:
-        return [l.strip('\n') for l in f if l.strip('\n') and not l.startswith('#')]
 
+ROOT_DIR = os.path.dirname(__file__)
+SOURCE_DIR = os.path.join(ROOT_DIR)
 
-requirements = parse_requirements('requirements.txt')
+if sys.version_info < (3, 6):
+    raise RuntimeError(
+        "opencage requires Python 3.7 or newer"
+        "Use older opencage 1.x for Python 2.7 or 3.6"
+    )
 
-# Taken from option 3 of https://packaging.python.org/guides/single-sourcing-package-version/
-version = {}
-with open('waterbutler/version.py') as fp:
-    exec(fp.read(), version)
+# try for testing
+try:
+    with open(os.path.join(SOURCE_DIR, 'README.md'), encoding="utf-8") as f:
+        LONG_DESCRIPTION = f.read()
+except FileNotFoundError:
+    LONG_DESCRIPTION = ""
 
 setup(
-    name='waterbutler',
-    version=version['__version__'],
-    namespace_packages=['waterbutler', 'waterbutler.auth', 'waterbutler.providers'],
-    description='WaterButler Storage Server',
-    author='Center for Open Science',
-    author_email='contact@cos.io',
-    url='https://github.com/CenterForOpenScience/waterbutler',
-    packages=find_packages(exclude=("tests*", )),
-    package_dir={'waterbutler': 'waterbutler'},
+    name="opencage",
+    version="2.2.0",
+    description="Wrapper module for the OpenCage Geocoder API",
+    long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/markdown',
+    author="OpenCage GmbH",
+    author_email="info@opencagedata.com",
+    url="https://github.com/OpenCageData/python-opencage-geocoder/",
+    download_url="https://github.com/OpenCageData/python-opencage-geocoder/tarball/2.1.0",
+    license="BSD",
+    packages=find_packages(),
     include_package_data=True,
-    # install_requires=requirements,
     zip_safe=False,
+    keywords=['geocoding', 'geocoder'],
     classifiers=[
-        'Natural Language :: English',
+        'Environment :: Web Environment',
+        "Development Status :: 5 - Production/Stable",
         'Intended Audience :: Developers',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Development Status :: 5 - Production/Stable',
-        'License :: OSI Approved :: Apache Software License',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+        "Programming Language :: Python :: 3 :: Only",
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Topic :: Scientific/Engineering :: GIS',
+        'Topic :: Utilities'
     ],
-    provides=[
-        'waterbutler.auth',
-        'waterbutler.providers',
+    install_requires=[
+        'Requests>=2.26.0',
+        'backoff>=1.10.0'
     ],
-    entry_points={
-        'waterbutler.auth': [
-            'osf = waterbutler.auth.osf:OsfAuthHandler',
-        ],
-        'waterbutler.providers': [
-            'cloudfiles = waterbutler.providers.cloudfiles:CloudFilesProvider',
-            'dropbox = waterbutler.providers.dropbox:DropboxProvider',
-            'figshare = waterbutler.providers.figshare:FigshareProvider',
-            'filesystem = waterbutler.providers.filesystem:FileSystemProvider',
-            'github = waterbutler.providers.github:GitHubProvider',
-            'gitlab = waterbutler.providers.gitlab:GitLabProvider',
-            'bitbucket = waterbutler.providers.bitbucket:BitbucketProvider',
-            'osfstorage = waterbutler.providers.osfstorage:OSFStorageProvider',
-            'owncloud = waterbutler.providers.owncloud:OwnCloudProvider',
-            's3 = waterbutler.providers.s3:S3Provider',
-            'dataverse = waterbutler.providers.dataverse:DataverseProvider',
-            'box = waterbutler.providers.box:BoxProvider',
-            'googledrive = waterbutler.providers.googledrive:GoogleDriveProvider',
-            'onedrive = waterbutler.providers.onedrive:OneDriveProvider',
-            'googlecloud = waterbutler.providers.googlecloud:GoogleCloudProvider',
-        ],
-    },
+    test_suite='pytest',
+    tests_require=[
+        'httpretty>=0.9.6',
+        'pylint==2.15.9',
+        'pytest>=6.0'
+    ],
 )

@@ -1,22 +1,52 @@
-# Created by .gitignore support plugin (hsz.mobi)
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
 
-.autoenv
-.env
-.git
-.idea
-.python-version
-**/*.ipynb*
-**/*.pyc
-**/__pycache__
-local.py
-.coverage
-*.egg-info/
-docs/_build
+# C extensions
+*.so
 
-src/
+# Distribution / packaging
+.Python
 env/
-dist/
 build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
 .cache
-.mypy_cache
-newrelic.ini
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+.*.swp
+.vagrant
+.pypirc
+.eggs/
+
+# VS Code
+.vscode/
