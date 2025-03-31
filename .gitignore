@@ -1,8 +1,27 @@
-.idea
-*.iml
+# Byte-compiled
+__pycache__/
+*.py[cod]
 
-__pycache__
-.cache
+# Packaging
+.eggs/
+*.egg-info/
+build/
+dist/
+ChangeLog
+AUTHORS
+
+# Tests
 .coverage
+.pytest_cache/
+.tox/
+cover/
+htmlcov/
+junit-*.xml
 
-.DS_Store
+# Virtual environments
+venv/
+
+# Let's encrypt
+*.bin
+.letsencrypt/
+tests_integration/

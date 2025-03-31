@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # kasserver - Manage domains hosted on All-Inkl.com through the KAS server API
 # Copyright (c) 2018 Christian Fetzer
 #
@@ -18,3 +20,9 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+"""Manage DNS records for All-Inkl.com domains through the KAS server"""
+
+from kasserver.kasserver_dns import cli
+
+cli()  # pylint: disable=no-value-for-parameter
