@@ -1,0 +1,9 @@
+*isotxs*
+*gamiso*
+*pmatrx*
+*dlayxs*
+*.out
+*.sum
+*.flux_ufg
+*.flux_bg
+*.nucdata

@@ -1,40 +1,25 @@
-name: CI
+name: ARMI unit tests
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-  release:
+on: [push, pull_request]
 
 jobs:
-  tox:
-    env:
-      PIP_INDEX_URL: https://pypi.python.org/simple
+  build:
+
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        make_target:
-          - run-pre-commit
-          - test-external
-          - itest-external
-          - itest_bionic-external
+        python: ["3.9", "3.10"]
+
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
         with:
-          python-version: 3.9
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - uses: actions/setup-go@v2
-        with:
-          go-version: '1.17.3'
-      - uses: azure/setup-kubectl@v1
-        with:
-          version: v1.22.0
-      # GHA won't setup tox for us and we use tox-pip-extensions for venv-update
-      - run: pip install tox==3.8.6 tox-pip-extensions==1.6.0
-      - run: go install sigs.k8s.io/kind@v0.11.1
-      - run: make ${{ matrix.make_target }}
+          python-version: ${{ matrix.python }}
+      - name: Install mpi libs
+        run: sudo apt-get -y install libopenmpi-dev
+      - name: Install Tox and any other packages
+        run: pip install tox
+      - name: Run Tox
+        # Run tox using the version of Python in `PATH`
+        run: tox -e py
