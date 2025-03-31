@@ -1,85 +1,45 @@
-name: Test CI
+name: black
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  - push
+  - pull_request
 
 jobs:
-  build:
-
+  black:
+    name: Style check with Black
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
+      fail-fast: false
       matrix:
+        python-version: ["3.9", "3.10"]
         include:
-
-          - python-version: 3.9
-            django-version: Django>=3.0,<3.1
-
-          - python-version: 3.9
-            django-version: Django>=3.1,<3.2
-
-          - python-version: 3.9
-            django-version: Django>=3.2,<3.3
-
-          - python-version: 3.9
-            django-version: Django>=3.0,<3.1
-
-          - python-version: 3.9
-            django-version: Django>=3.1,<3.2
-
-          - python-version: 3.9
-            django-version: Django>=3.2,<3.3
-
-          - python-version: 3.9
-            django-version: Django>=3.0,<3.1
-
-          - python-version: 3.9
-            django-version: Django>=3.1,<3.2
-
-          - python-version: 3.9
-            django-version: Django>=3.2,<3.3
-
-          - python-version: 3.9
-            django-version: Django>=4.0,<4.1
-
-          - python-version: 3.9
-            django-version: Django>=3.0,<3.1
-
-          - python-version: 3.9
-            django-version: Django>=3.1,<3.2
-
-          - python-version: 3.9
-            django-version: Django>=3.2,<3.3
-
-          - python-version: 3.9
-            django-version: Django>=4.0,<4.1
-
           - python-version: "3.9"
-            django-version: Django>=3.2,<3.3
-
+            py-version: "py36"
           - python-version: "3.9"
-            django-version: Django>=4.0,<4.1
-
+            py-version: "py37"
+          - python-version: "3.9"
+            py-version: "py38"
+    env:
+      PYTHON: python${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v1
+      - name: Cache pip requirements
+        uses: actions/cache@v4
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-          cache-dependency-path: '**/requirements_test.txt'
-
-      - name: Install Dependencies
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-${{ env.PYTHON }}-pip-${{ hashfiles('.ci/**/requirements/*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.PYTHON }}-pip-
+      - name: Set up Python ${{ matrix.python-version }}
         run: |
-          pip install -r requirements.txt
-          pip install -r requirements_test.txt
-          pip install "${{ matrix.django-version }}"
-
-      - name: Run Tests
-        env:
-          DJANGO_SETTINGS_MODULE: tests.settings
+          sudo add-apt-repository --yes ppa:deadsnakes/ppa
+          sudo apt install --yes $PYTHON $PYTHON-dev python3-pip build-essential
+      - name: Install requirements
         run: |
-          python manage.py test
+          $PYTHON -m pip install -U pip setuptools wheel
+          $PYTHON -m pip install --user -Ur .ci/requirements/style.txt
+      - name: Style check with Black
+        run: |
+          DIRS=$( cat .ci/${{ matrix.py-version }}/black_file_list.txt )
+          echo $PYTHON -m black --check --diff --target-version ${{ matrix.py-version }} $DIRS
+          $PYTHON -m black --check --diff --target-version ${{ matrix.py-version }} $DIRS
