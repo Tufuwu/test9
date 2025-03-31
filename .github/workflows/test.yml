@@ -1,92 +1,59 @@
-name: Linux
+name: Tests
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * 0' # weekly
 
 jobs:
-  TestLinux:
-    name: Python ${{ matrix.python }} (GEOS ${{ matrix.geos }}, numpy ${{ matrix.numpy || 'latest' }})
-    # runs-on: ubuntu-latest
+  tests:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # 2015
-          - python: 3.9
-            geos: 3.5.2
-            numpy: 1.10.4
-          # 2017
-          - python: 3.9
-            geos: 3.6.4
-            numpy: 1.13.3
-          # 2018
-          - python: 3.9
-            geos: 3.7.3
-            numpy: 1.15.4
-          # 2019
-          - python: 3.9
-            geos: 3.8.1
-            numpy: 1.17.5
-          # 2020
-          - python: 3.9
-            geos: 3.8.1
-            numpy: 1.19.4
-          # dev
-          - python: 3.9
-            geos: main
-
-    env:
-      GEOS_VERSION: ${{ matrix.geos }}
-      GEOS_INSTALL: ${{ github.workspace }}/geosinstall/geos-${{ matrix.geos }}
+    services:
+      postgres:
+        image: postgres:10
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        env:
+          POSTGRES_PASSWORD: postgres
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python }}
+          python-version: 3.3.9
 
-      - name: Cache GEOS and pip packages
-        uses: actions/cache@v4
-        with:
-          key: ${{ runner.os }}-geos-${{ matrix.geos }}
-          path: |
-            ~/.cache/pip
-            ${{ github.workspace }}/geosinstall
+#      uses: actions/cache@v4
+#        with:
+#          path: ~/.cache/pip
+#          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/dev.txt') }}
+#          restore-keys: |
+#            ${{ runner.os }}-pip-
 
-      - name: Install GEOS
-        shell: bash
+      - name: Test
+        env:
+          SALESFORCE_USERNAME: ${{ secrets.SALESFORCE_USERNAME }}
+          SALESFORCE_PWD: ${{ secrets.SALESFORCE_PWD }}
+          SALESFORCE_TOKEN: ${{ secrets.SALESFORCE_TOKEN }}
+          EVENTBRITE_API_KEY: ${{ secrets.EVENTBRITE_KEY }}
+          EVENTBRITE_API_SECRET: ${{ secrets.EVENTBRITE_SECRET }}
+          EVENTBRITE_API_PRIVATE_TOKEN: ${{ secrets.EVENTBRITE_TOKEN }}
+          EVENTBRITE_API_PUBLIC_TOKEN: ${{ secrets.EVENTBRITE_PUBLIC_TOKEN }}
+          SOCIAL_AUTH_OPENSTAX_KEY: ${{ secrets.SOCIAL_AUTH_KEY }}
+          SOCIAL_AUTH_OPENSTAX_SECRET: ${{ secrets.SOCIAL_AUTH_TOKEN }}
+          ACCESS_TOKEN_URL: ${{ secrets.ACCESS_TOKEN_URL }}
+          USERS_QUERY: ${{ secrets.USERS_QUERY }}
+          AUTHORIZATION_URL: ${{ secrets.AUTHORIZATION_URL }}
         run: |
-          ./ci/install_geos.sh
-          cd ${{ github.workspace }}
-
-      - name: Install python dependencies
-        shell: bash
-        run: |
-          pip install --disable-pip-version-check --upgrade pip
-          pip install --upgrade wheel
-          if [ "$GEOS_VERSION" = "main" ]; then
-            pip install --upgrade --pre Cython numpy pytest;
-          else
-            pip install --upgrade Cython numpy==${{ matrix.numpy }} pytest;
-          fi
-          pip list
-
-      - name: Set environment variables
-        shell: bash
-        run: |
-          echo "LD_LIBRARY_PATH=$GEOS_INSTALL/lib" >> $GITHUB_ENV
-          echo $GEOS_INSTALL/bin >> $GITHUB_PATH
-
-      - name: Build PyGEOS
-        shell: bash
-        run: |
-          python setup.py build_ext --inplace
-          pip install --no-deps -e .
-
-      - name: Run tests
-        shell: bash
-        continue-on-error: ${{ matrix.geos == 'main' }}
-        run: |
-          pytest --doctest-modules
+          pip install --upgrade pip wheel pip-tools
+          pip-sync requirements/dev.txt
+          python manage.py test --verbosity=2 --settings=openstax.settings.test
