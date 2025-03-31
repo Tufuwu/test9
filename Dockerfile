@@ -1,78 +1,34 @@
-FROM python:3.7-slim-buster
+# Based on https://softwarejourneyman.com/docker-python-install-wheels.html
 
-RUN groupadd -r reload && useradd -r -g reload reload
+#########################################
+# Image WITH C compiler, building wheels for next stage
+FROM python:3.6-alpine as bigimage
 
-ENV PIP_NO_CACHE_DIR off
-ENV PIP_DISABLE_PIP_VERSION_CHECK on
+ENV LANG C.UTF-8
 
-# grab gosu for easy step-down from root
-# grab tini for signal processing and zombie killing
-RUN set -x \
-    && export GOSU_VERSION=1.11 \
-    && export TINI_VERSION=0.18.0 \
-    \
-     && fetchDeps=" \
-        dirmngr \
-        gnupg \
-        wget \
-    " \
-    && apt-get update && apt-get install -y --no-install-recommends $fetchDeps && rm -rf /var/lib/apt/lists/* \
-    \
-    && wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
-    && wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
-    && export GNUPGHOME="$(mktemp -d)" \
-     && for key in \
-      B42F6819007F00F88E364FD4036A9C25BF357DD4 \
-    ; do \
-      gpg --batch --keyserver hkps://mattrobenolt-keyserver.global.ssl.fastly.net:443 --recv-keys "$key" ; \
-    done \
-    && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
-    && rm /usr/local/bin/gosu.asc \
-    && chmod +x /usr/local/bin/gosu \
-    && gosu nobody true \
-    \
-    && wget -O /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/v$TINI_VERSION/tini" \
-    && wget -O /usr/local/bin/tini.asc "https://github.com/krallin/tini/releases/download/v$TINI_VERSION/tini.asc" \
-    && export GNUPGHOME="$(mktemp -d)" \
-    && for key in \
-      595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 \
-    ; do \
-      gpg --batch --keyserver hkps://mattrobenolt-keyserver.global.ssl.fastly.net:443 --recv-keys "$key" ; \
-    done \
-    && gpg --batch --verify /usr/local/bin/tini.asc /usr/local/bin/tini \
-    && gpgconf --kill all \
-    && rm /usr/local/bin/tini.asc \
-    && chmod +x /usr/local/bin/tini \
-    && tini -h \
-    \
-    && rm -r "$GNUPGHOME" \
-    && apt-get purge -y --auto-remove wget
+# Copy project files
+COPY . /src/smartglass-core
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        libmaxminddb-dev \
-    && rm -rf /var/lib/apt/lists/*
+# install the C compiler
+RUN apk add --no-cache jq gcc musl-dev libffi-dev openssl-dev
 
-RUN mkdir -p /usr/src/reload
-WORKDIR /usr/src/reload
+# instead of installing, create a wheel
+RUN pip wheel --wheel-dir=/root/wheels /src/smartglass-core
 
-COPY requirements.txt /usr/src/reload
+#########################################
+# Image WITHOUT C compiler, installing the component from wheel
+FROM python:3.6-alpine as smallimage
 
-RUN set -ex \
-    \
-    && buildDeps=' \
-        gcc \
-        libc6-dev \
-    ' \
-    && apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/* \
-    \
-    && pip install --no-cache-dir -r requirements.txt \
-    \
-    && apt-get purge -y --auto-remove $buildDeps
+RUN apk add --no-cache openssl
 
-COPY reload_app /usr/src/reload/reload_app
-COPY docker-entrypoint.sh /usr/src/reload
+COPY --from=bigimage /root/wheels /root/wheels
 
-EXPOSE 8000
+# Ignore the Python package index
+# and look for archives in
+# /root/wheels directory
+RUN pip install \
+      --no-index \
+      --find-links=/root/wheels \
+      xbox-smartglass-core
 
-ENTRYPOINT ["/usr/src/reload/docker-entrypoint.sh"]
-CMD [ "mywsgi", "reload_app.wsgi:application", "0.0.0.0:8000" ]
+CMD [ "xbox-rest-server" ]
