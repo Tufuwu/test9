@@ -1,18 +1,22 @@
-name: Tests
-
-on: [push]
-
+name: Build and test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 jobs:
-  tests:
-    runs-on: windows-latest
+  test:
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
-  
+    env:
+      ASTTOKENS_SLOW_TESTS: 1
+      COVERALLS_PARALLEL: true
+
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -21,9 +25,56 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --user --upgrade pip setuptools
-          python -m pip install --user -e .[dev]
+          pip install --upgrade coveralls pytest setuptools setuptools_scm pep517
+          pip install .[test]
 
-      - name: Run unit tests
+      - name: Mypy testing
         run: |
-          python -m pytest tests
+          pip install types-six mypy==0.910
+          python -m mypy asttokens        
+        # fromJson because https://github.community/t/passing-an-array-literal-to-contains-function-causes-syntax-error/17213/3
+        if: ${{ !contains(fromJson('["2.7", "pypy2", "pypy3"]'), matrix.python-version) }}
+        # pypy3 will work when 3.8 comes out. See https://github.com/python/typed_ast/issues/111#issuecomment-872093943
+        # 2.7 is tested separately in mypy-py2, as we need to run mypy under Python 3.x
+
+      - name: Test with pytest
+        run: |
+          coverage run --branch --include='asttokens/*' -m pytest --junitxml=./rspec.xml
+          coverage report -m
+
+      - name: Collect coverage results
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pip3 install --upgrade coveralls
+          python3 -m coveralls --service=github
+
+  # Can't run mypy on Python 2.7, but can run it in Python 2 mode
+  mypy-py2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade setuptools setuptools_scm pep517
+          pip install .[test]
+          pip install types-six mypy[python2]==0.910
+
+      - name: Mypy testing for Python 2
+        run: |
+          python -m mypy --py2 asttokens  
+
+  finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: AndreMiras/coveralls-python-action@v20201129
+        with:
+          parallel-finished: true
