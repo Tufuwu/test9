@@ -1,114 +1,92 @@
-# Required secrets:
-# - DOCKER_USERNAME (for publish)
-# - DOCKER_PASSWORD (for publish)
+name: Python tests
 
-name: CI/CD (validate)
-
-env:
-  DOCKER_REPO: casualgaming/studlan
-  PYTHON_VERSION: "2.7"
-
-on:
-  push:
-    branches: ["**"]
-  pull_request:
-    branches: ["**"]
-  release:
-    types: [published]
-  workflow_dispatch: {}
+on: [push, pull_request]
 
 jobs:
-  validate:
-    name: Validate
+  pre_job:
+    name: Path match check
     runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      # - name: Cache dependencies
-      #   TODO
-      - name: Setup python environment
-        uses: actions/setup-python@v2
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@main
         with:
-          python-version: '${{ env.PYTHON_VERSION }}'
-      - name: Install requirements
-        run: |
-          sudo apt-get update
-          sudo apt-get install gettext
-          python -m pip install --upgrade pip virtualenv setuptools wheel
-          python -m pip install -r requirements/test.txt
-      - name: Validate Django project
-        run: manage/ci/django-validate.sh
-      - name: Test
-        run: manage/ci/django-test.sh
-      - name: Lint
-        run: flake8
-      - name: Validate Docker image
-        run: manage/ci/docker-validate.sh
-
-  publish-bleeding:
-    name: Publish (bleeding)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: validate
-    runs-on: ubuntu-latest
+          github_token: ${{ github.token }}
+          paths: '["**.py", ".github/workflows/pythontest.yml"]'
+  unit_test:
+    name: Python unit tests
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 5
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        python-version: ["3.9", "3.10"]
+        include:
+        - os: ubuntu-latest
+          pippath: ~/.cache/pip
+        - os: macos-latest
+          pippath: ~/Library/Caches/pip
+        - os: windows-latest
+          pippath: ~\AppData\Local\pip\Cache
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Get version
-        run: echo "version=$(echo 0.0.0-SNAPSHOT+$(TZ=Etc/GMT date "+%Y-%m-%dT%H:%M:%SZ"))" | tee -a $GITHUB_ENV
-      - name: Create version file
-        run: echo "${{ env.version }}" > VERSION
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          tags: |
-            ${{ env.DOCKER_REPO }}:latest
-            ${{ env.DOCKER_REPO }}:bleeding
-          push: true
-
-  publish-stable:
-    name: Publish (stable)
-    if: github.event_name == 'release' && github.event.action == 'published' && startsWith(github.ref, 'refs/tags/v')
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Get version
-        run: |
-          # Get version from git tag
-          VERSION="$(echo ${GITHUB_REF#refs/tags/v})"
-          echo "version=$VERSION" | tee -a $GITHUB_ENV
-          # Check if semantic version (3 numbers, ignore pre-release and metadata)
-          echo $VERSION | grep -Po '^\d+\.\d+\.\d+'
-          # Extract other version representations
-          echo "version_major=$(echo $VERSION | grep -Po '^\d+')" | tee -a $GITHUB_ENV
-          echo "version_minor=$(echo $VERSION | grep -Po '^\d+\.\d+')" | tee -a $GITHUB_ENV
-          echo "version_patch=$(echo $VERSION | grep -Po '^\d+\.\d+\.\d+')" | tee -a $GITHUB_ENV
-      - name: Create version file
-        run: echo "${{ env.version }}" > VERSION
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          tags: |
-            ${{ env.DOCKER_REPO }}:latest
-            ${{ env.DOCKER_REPO }}:${{ env.version_major }}
-            ${{ env.DOCKER_REPO }}:${{ env.version_minor }}
-            ${{ env.DOCKER_REPO }}:${{ env.version_patch }}
-            ${{ env.DOCKER_REPO }}:stable
-          push: true
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Ubuntu dependencies
+      run: |
+        sudo apt-get -y -qq update
+        sudo apt-get install -y ffmpeg
+        sudo apt-get install -y poppler-utils
+      if: matrix.os == 'ubuntu-latest'
+    - name: Cache Mac dependencies
+      uses: actions/cache@v4
+      if: matrix.os == 'macos-latest'
+      with:
+        path: ~/Library/Caches/Homebrew
+        key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/pythontest.yml') }}
+    - name: Install Mac dependencies
+      run: brew install ffmpeg poppler
+      if: matrix.os == 'macos-latest'
+    - name: Windows dependencies cache
+      id: windowscache
+      if: matrix.os == 'windows-latest'
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}\tools
+        key: ${{ runner.os }}-tools-${{ hashFiles('.github/workflows/pythontest.yml') }}
+    - name: Download and unpack Windows dependencies
+      if: steps.cache.windowscache.cache-hit != 'true' && matrix.os == 'windows-latest'
+      run: |
+        curl --output ffmpeg.zip https://web.archive.org/web/20200916110500if_/https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-20200831-4a11a6f-win64-static.zip
+        curl --output poppler.7z http://blog.alivate.com.au/wp-content/uploads/2018/10/poppler-0.68.0_x86.7z
+        7z x ffmpeg.zip -otools -y
+        7z x poppler.7z -otools -y
+    - name: Set paths to Windows dependencies
+      if: matrix.os == 'windows-latest'
+      run: |
+        echo "$pwd\tools\ffmpeg-20200831-4a11a6f-win64-static\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        echo "$pwd\tools\poppler-0.68.0\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+    - name: Cache pip
+      if: ${{ !startsWith(runner.os, 'windows') }}
+      uses: actions/cache@v4
+      with:
+        path: ${{ matrix.pippath }}
+        key: ${{ runner.os }}-pip-py${{ matrix.python-version }}-${{ hashFiles('setup.py') }}
+    - name: Install tox
+      run: |
+        python -m pip install --upgrade pip
+        pip install tox
+    - name: tox env cache
+      if: ${{ !startsWith(runner.os, 'windows') }}
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/.tox/py${{ matrix.python-version }}
+        key: ${{ runner.os }}-tox-py${{ matrix.python-version }}-${{ hashFiles('setup.py') }}
+    - name: Test with tox
+      run: tox -e py${{ matrix.python-version }}

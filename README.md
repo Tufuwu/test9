@@ -1,40 +1,58 @@
-# studlan
+ricecooker
+==========
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/ricecooker.svg)](https://pypi.python.org/pypi/ricecooker/)
+[![build](https://github.com/learningequality/ricecooker/actions/workflows/pythontest.yml/badge.svg?branch=master)](https://github.com/learningequality/ricecooker/actions)
+[![docs](https://readthedocs.org/projects/ricecooker/badge/?version=latest&style=flat)](https://ricecooker.readthedocs.io/) 
 
-[![GitHub release](https://img.shields.io/github/release/CasualGaming/studlan.svg)](https://github.com/CasualGaming/studlan/releases)
-[![Build status](https://github.com/CasualGaming/studlan/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/CasualGaming/studlan/actions/workflows/ci-cd.yml)
-[![Quality Gate status](https://sonarcloud.io/api/project_badges/measure?branch=master&project=CasualGaming_studlan&metric=alert_status)](https://sonarcloud.io/dashboard?id=CasualGaming_studlan)
 
-LAN-party event management system.
+The `ricecooker` library is a framework for automating the conversion of educational content into
+Kolibri content channels and uploading them to [Kolibri Studio](https://studio.learningequality.org/), 
+which is the central content server for [Kolibri](http://learningequality.org/kolibri/).
 
-* [Demo](https://studlan.casualgaming.dev)
-* [Docker Hub](https://hub.docker.com/r/casualgaming/studlan)
-* [SonarCloud](https://sonarcloud.io/dashboard?id=CasualGaming_studlan)
 
-## Docs
+## [📚 Ricecooker docs](https://ricecooker.readthedocs.io/)
 
-* [Development](docs/development.md)
-* [Releasing](docs/releasing.md)
-* [Deployment](docs/deployment.md)
-* [Docker Image](docs/docker-image.md)
+Visit the documentation site at [📚 ricecooker.readthedocs.io](https://ricecooker.readthedocs.io/)
+for the full details about [installation](https://ricecooker.readthedocs.io/en/latest/installation.html),
+[getting started](https://ricecooker.readthedocs.io/en/latest/tutorial/gettingstarted.html),
+[API reference](https://ricecooker.readthedocs.io/en/latest/index_api_reference.html),
+and [code examples](https://ricecooker.readthedocs.io/en/latest/examples/index.html).
 
-## Features
 
-* News
-* Activites
-	* Used for having several competitions under the same activity (usually a game).
-* Competitions
-	* Single User or Team participation
-	* Lotteries with automated drawing
-* Teams
-	* Team Leader
-		* Can invite members
-		* Can sign the team up for competitions or leave them.
-	* Members
-		* Can decline or accept invitations and leave teams
-* Tickets and seating
-	* Online payment supported through Stripe
-	* Participants with pre purchased tickets can reserve seats
-		* Seating arrangements are fully customizable through SVG layouts.
-	* Export details of participants per event
 
-(This list may be slightly outdated.)
+## Overview of Kolibri content
+
+`ricecooker` is used to take openly licensed educational content available on the
+web and convert it into an offline-friendly package that can be imported into Kolibri.
+
+The basic process of getting new content into Kolibri is as follows:
+
+ - **UPLOAD** your content to Kolibri Studio either manually through the Kolibri Studio
+   web interface or programmatically using a `ricecooker`-based content integration script.
+ - **PUBLISH** the channel on Kolibri Studio to make it accessible for use in Kolibri.
+ - **IMPORT** the the channel into Kolibri using the channel token displayed in
+   Kolibri Studio after the PUBLISH step is done.
+
+The diagram below illustrates how content flows within the Kolibri ecosystem
+and highlights the part which is covered by the `ricecooker` framework (bottom left).
+
+![Overview of steps for integrating external content sources for use in the Kolibri Learning Platform](docs/figures/content_pipeline_diagram_with_highlight.png)  
+*External content sources (left) are first uploaded to [Kolibri Studio](https://studio.learningequality.org/) (middle), so they can be used in the [Kolibri Learning Platform](http://learningequality.org/kolibri/) (right).*
+
+
+
+
+##### Further reading
+The [Ricecooker docs](https://ricecooker.readthedocs.io/) website is the best
+place to learn about writing automated content integration scripts.
+
+Here are some links to other documents and guides you can read to learn about
+the other parts of the Kolibri content platform:
+  
+  - The [Kolibri Content Integration Guide](https://learningequality.org/r/integration-guide)
+    is a comprehensive guide to the decisions, processes, and tools for integrating
+    external content sources for use in the Kolibri Learning Platform.
+  - Read the [Kolibri Studio docs](http://kolibri-studio.readthedocs.io/en/latest/)
+    to learn more about the Kolibri Studio features
+  - Read the [Kolibri docs](http://kolibri.readthedocs.io/en/latest/) to learn
+    how to install Kolibri on your machine (useful for testing channels)
