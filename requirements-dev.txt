@@ -1,2 +1,0 @@
--e git+https://github.com/Pylons/deform.git@master#egg=deform
--e ".[testing]"

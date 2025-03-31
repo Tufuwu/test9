@@ -1,1 +1,0 @@
-Please see https://github.com/Pylons/deform/blob/master/contributing.md

@@ -1,97 +1,78 @@
-##############################################################################
-#
-# Copyright (c) 2011 Agendaless Consulting and Contributors.
-# All Rights Reserved.
-#
-# This software is subject to the provisions of the BSD-like license at
-# http://www.repoze.org/LICENSE.txt.  A copy of the license should accompany
-# this distribution.  THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL
-# EXPRESS OR IMPLIED WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO,
-# THE IMPLIED WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND
-# FITNESS FOR A PARTICULAR PURPOSE
-#
-##############################################################################
-import sys
+#!/usr/bin/env python3
 
-from setuptools import find_packages
-from setuptools import setup
+############################################################################
+# Copyright (c) 2018 Noskova Ekaterina
+# All Rights Reserved
+# See the LICENSE file for details
+############################################################################
+
+try:
+    from setuptools import setup, find_packages
+except ImportError:
+    from ez_setup import use_setuptools
+    use_setuptools()
+    from setuptools import setup, find_packages
 
 
-def readfile(name):
-    with open(name) as f:
-        return f.read()
+import os, sys
 
 
-README = readfile("README.rst")
-CHANGES = readfile("CHANGES.txt")
-VERSION = '3.0.0.dev0'
+NAME = 'gadma'
 
-PY37MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 7
+VERSION = '2.0.0rc5'
+SUPPORTED_PYTHON_VERSIONS = ['3.6', '3.7']
 
-requires = [
-    "Babel",
-    "deform >= 2.0.14.dev0",  # .dev0 allows pre-releases. Use only on master.
-    "pyramid >= 1.5a1",  # route_name argument to resource_url
-    "pyramid_chameleon",
-    "pygments",
-    "six",
-    "waitress",
-]
 
-lint_extras = [
-    "black",
-    "check-manifest",
-    "flake8",
-    "flake8-bugbear",
-    "flake8-builtins",
-    "isort",
-    "readme_renderer",
-]
+# Check python version
+if sys.version[0:3] not in SUPPORTED_PYTHON_VERSIONS:
+    sys.stderr.write("Python version " + sys.version[0:3] + " is not supported!\n" +
+          "Supported versions are " + ", ".join(SUPPORTED_PYTHON_VERSIONS) + "\n")
+    sys.stderr.flush()
+    sys.exit(1)
 
-testing_extras = ["flaky", "pytest"]
 
-# Selenium 4.0 does not work on Python 3.6.
-if PY37MIN:
-    testing_extras.extend(["selenium >= 4.0a"])
-else:
-    testing_extras.extend(["selenium >= 3.0, < 4.0"])
+# Create a simple version.py module; less trouble than hard-coding the version
+with open(os.path.join('gadma', 'version.py'), 'w') as f:
+    f.write('__version__ = %r\nversion = __version__\n' % VERSION)
+    f.write('\n# This is a new line that ends the file.\n')
+
+
+# Load up the description from README.rst
+with open('README.md') as f:
+    DESCRIPTION = f.read()
+
+requirements = ['numpy', 'scipy', 'matplotlib',
+                'Pillow', 'Cython', 'mpmath', 'nlopt', 'ruamel.yaml',
+                'dadi']
 
 setup(
-    name="deformdemo",
+    name=NAME,
     version=VERSION,
-    description="Demonstration application for Deform form library",
-    long_description=README + "\n\n" + CHANGES,
+    author='Ekaterina Noskova',
+    author_email='ekaterina.e.noskova@gmail.com',
+    url='https://github.com/ctlab/GADMA',
+    description='Genetic Algorithm for Demographic Inference',
+    long_description=DESCRIPTION,
+    long_description_content_type='text/markdown',
     classifiers=[
-        "Development Status :: 6 - Mature",
-        "Environment :: Web Environment",
-        "Intended Audience :: Developers",
-        "License :: Repoze Public License",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: Implementation :: CPython",
-        "Programming Language :: Python :: Implementation :: PyPy",
-        "Topic :: Internet :: WWW/HTTP",
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Topic :: Software Development',
     ],
-    keywords="web forms form generation schema validation deform",
-    author="Chris McDonough, Agendaless Consulting",
-    author_email="pylons-discuss@googlegroups.com",
-    url="https://pylonsproject.org",
-    license="BSD-derived (http://www.repoze.org/LICENSE.txt)",
-    packages=find_packages(),
+    packages=find_packages(exclude=['examples', 'tests']),
     include_package_data=True,
-    zip_safe=False,
-    install_requires=requires,
-    extras_require={"lint": lint_extras, "testing": testing_extras},
-    entry_points="""\
-    [paste.app_factory]
-    demo = deformdemo:main
-    mini = deformdemo.mini:main
-    """,
-    message_extractors={
-        ".": [("**.py", "lingua_python", None), ("**.pt", "lingua_xml", None)]
+    package_data={
+        'gadma.cli': ['*.py',  'params_template', 'extra_params_template', 'test_settings']
+    },
+    data_files=[["gadma", ["gadma/test.fs"]], ("", ["LICENSE"])],
+    install_requires=requirements,
+    entry_points={
+        'console_scripts': ['gadma = gadma.core:main',
+            'gadma-run_ls_on_boot_data = gadma.run_ls_on_boot_data:main',
+            'gadma-get_confidence_intervals = gadma.get_confidence_intervals:main']
     },
 )
