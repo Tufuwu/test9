@@ -1,0 +1,43 @@
+2.0.0
+-----
+
+- Complete backwards-incompatible refactoring, support the new CSV format
+- Requires ofxstatement >= 0.7.2
+- Any transactions with a fee will generate an additional fee transaction where the payee is "Revolut"
+
+1.6.0
+-----
+
+- Since version 0.6.5 ofxstatement requires a statement line to have either id, refnum or check_no. To avoid failing
+  the conversion, there's now a unique MD5 hashed ID computed from the date, payee, amount and balance.
+
+1.5.0
+-----
+
+- Improved the parser by making the column header verification less strict.
+
+1.4.0
+-----
+
+- Support September 2019 iOS CSV format
+
+1.3.0
+-----
+
+- Date format is now configurable in the settings
+- "Payment from " is now also counted as a deposit
+
+1.2.0
+-----
+
+- Support May 2018 CSV format
+
+1.1.0
+-----
+
+- Support April 2018 CSV format
+
+1.0.0
+-----
+
+- First release
