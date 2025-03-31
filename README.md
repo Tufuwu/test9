@@ -1,151 +1,119 @@
-# Face Recognition
+# Yellowbrick
 
-Detect facial landmarks from Python using the world's most accurate face alignment network, capable of detecting points in both 2D and 3D coordinates.
+[![Build Status](https://travis-ci.com/DistrictDataLabs/yellowbrick.svg?branch=develop)](https://travis-ci.com/DistrictDataLabs/yellowbrick)
+[![Build status](https://ci.appveyor.com/api/projects/status/11abg00ollbdf4oy?svg=true)](https://ci.appveyor.com/project/districtdatalabs/yellowbrick)
+[![Coverage Status](https://coveralls.io/repos/github/DistrictDataLabs/yellowbrick/badge.svg?branch=master)](https://coveralls.io/github/DistrictDataLabs/yellowbrick?branch=master)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/DistrictDataLabs/yellowbrick.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/DistrictDataLabs/yellowbrick/alerts/)
+[![Language Grade: Python](https://img.shields.io/lgtm/grade/python/g/DistrictDataLabs/yellowbrick.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/DistrictDataLabs/yellowbrick/context:python)
+[![PyPI version](https://badge.fury.io/py/yellowbrick.svg)](https://badge.fury.io/py/yellowbrick)
+[![Documentation Status](https://readthedocs.org/projects/yellowbrick/badge/?version=latest)](http://yellowbrick.readthedocs.io/en/latest/?badge=latest)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1206239.svg)](https://doi.org/10.5281/zenodo.1206239)
+[![JOSS](http://joss.theoj.org/papers/10.21105/joss.01075/status.svg)](https://doi.org/10.21105/joss.01075)
+[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/DistrictDataLabs/yellowbrick/develop?filepath=examples%2Fexamples.ipynb)
 
-Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning based face alignment method. 
 
-<p align="center"><img src="docs/images/face-alignment-adrian.gif" /></p>
+**Visual analysis and diagnostic tools to facilitate machine learning model selection.**
 
-**Note:** The lua version is available [here](https://github.com/1adrianb/2D-and-3D-face-alignment).
+[![Banner](docs/images/readme/banner.png)](https://www.scikit-yb.org/en/latest/gallery.html)
 
-For numerical evaluations it is highly recommended to use the lua version which uses indentical models with the ones evaluated in the paper. More models will be added soon.
+## What is Yellowbrick?
 
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  [![Build Status](https://travis-ci.com/1adrianb/face-alignment.svg?branch=master)](https://travis-ci.com/1adrianb/face-alignment) [![Anaconda-Server Badge](https://anaconda.org/1adrianb/face_alignment/badges/version.svg)](https://anaconda.org/1adrianb/face_alignment)
-[![PyPI version](https://badge.fury.io/py/face-alignment.svg)](https://pypi.org/project/face-alignment/)
+Yellowbrick is a suite of visual diagnostic tools called "Visualizers" that extend the scikit-learn API to allow human steering of the model selection process. In a nutshell, Yellowbrick combines scikit-learn with matplotlib in the best tradition of the scikit-learn documentation, but to produce visualizations for _your_ machine learning workflow!
 
-## Features
+For complete documentation on the Yellowbrick API, a gallery of available visualizers, the contributor's guide, tutorials and teaching resources, frequently asked questions, and more, please visit our documentation at [www.scikit-yb.org](https://www.scikit-yb.org/).
 
-#### Detect 2D facial landmarks in pictures
+## Installing Yellowbrick
 
-<p align='center'>
-<img src='docs/images/2dlandmarks.png' title='3D-FAN-Full example' style='max-width:600px'></img>
-</p>
+Yellowbrick is compatible with Python 3.4 or later and also depends on scikit-learn and matplotlib. The simplest way to install Yellowbrick and its dependencies is from PyPI with pip, Python's preferred package installer.
 
-```python
-import face_alignment
-from skimage import io
+    $ pip install yellowbrick
 
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
+Note that Yellowbrick is an active project and routinely publishes new releases with more visualizers and updates. In order to upgrade Yellowbrick to the latest version, use pip as follows.
 
-input = io.imread('../test/assets/aflw-test.jpg')
-preds = fa.get_landmarks(input)
-```
+    $ pip install -U yellowbrick
 
-#### Detect 3D facial landmarks in pictures
+You can also use the `-U` flag to update scikit-learn, matplotlib, or any other third party utilities that work well with Yellowbrick to their latest versions.
 
-<p align='center'>
-<img src='https://www.adrianbulat.com/images/image-z-examples.png' title='3D-FAN-Full example' style='max-width:600px'></img>
-</p>
+If you're using Anaconda (recommended for Windows users), you can take advantage of the conda utility to install Yellowbrick:
 
-```python
-import face_alignment
-from skimage import io
+    conda install -c districtdatalabs yellowbrick
 
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, flip_input=False)
+## Using Yellowbrick
 
-input = io.imread('../test/assets/aflw-test.jpg')
-preds = fa.get_landmarks(input)
-```
+The Yellowbrick API is specifically designed to play nicely with scikit-learn. Here is an example of a typical workflow sequence with scikit-learn and Yellowbrick:
 
-#### Process an entire directory in one go
+### Feature Visualization
+
+In this example, we see how Rank2D performs pairwise comparisons of each feature in the data set with a specific metric or algorithm and then returns them ranked as a lower left triangle diagram.
 
 ```python
-import face_alignment
-from skimage import io
+from yellowbrick.features import Rank2D
 
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
-
-preds = fa.get_landmarks_from_directory('../test/assets/')
+visualizer = Rank2D(
+    features=features, algorithm='covariance'
+)
+visualizer.fit(X, y)                # Fit the data to the visualizer
+visualizer.transform(X)             # Transform the data
+visualizer.show()                   # Finalize and render the figure
 ```
 
-#### Detect the landmarks using a specific face detector.
+### Model Visualization
 
-By default the package will use the SFD face detector. However the users can alternatively use dlib, BlazeFace, or pre-existing ground truth bounding boxes.
+In this example, we instantiate a scikit-learn classifier and then use Yellowbrick's ROCAUC class to visualize the tradeoff between the classifier's sensitivity and specificity.
 
 ```python
-import face_alignment
+from sklearn.svm import LinearSVC
+from yellowbrick.classifier import ROCAUC
 
-# sfd for SFD, dlib for Dlib and folder for existing bounding boxes.
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, face_detector='sfd')
+model = LinearSVC()
+visualizer = ROCAUC(model)
+visualizer.fit(X,y)
+visualizer.score(X,y)
+visualizer.show()
 ```
 
-#### Running on CPU/GPU
-In order to specify the device (GPU or CPU) on which the code will run one can explicitly pass the device flag:
+For additional information on getting started with Yellowbrick, view the [Quick Start Guide](https://www.scikit-yb.org/en/latest/quickstart.html) in the [documentation](https://www.scikit-yb.org/en/latest/) and check out our [examples notebook](https://github.com/DistrictDataLabs/yellowbrick/blob/develop/examples/examples.ipynb).
 
-```python
-import face_alignment
+## Contributing to Yellowbrick
 
-# cuda for CUDA
-fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, device='cpu')
-```
+Yellowbrick is an open source project that is supported by a community who will gratefully and humbly accept any contributions you might make to the project. Large or small, any contribution makes a big difference; and if you've never contributed to an open source project before, we hope you will start with Yellowbrick!
 
-Please also see the ``examples`` folder
+If you are interested in contributing, check out our [contributor's guide](https://www.scikit-yb.org/en/latest/contributing/index.html). Beyond creating visualizers, there are many ways to contribute:
 
-## Installation
+- Submit a bug report or feature request on [GitHub Issues](https://github.com/DistrictDataLabs/yellowbrick/issues).
+- Contribute a Jupyter notebook to our examples [gallery](https://github.com/DistrictDataLabs/yellowbrick/tree/develop/examples).
+- Assist us with [user testing](https://www.scikit-yb.org/en/latest/evaluation.html).
+- Add to the documentation or help with our website, [scikit-yb.org](https://www.scikit-yb.org).
+- Write [unit or integration tests](https://www.scikit-yb.org/en/latest/contributing/developing_visualizers.html#integration-tests) for our project.
+- Answer questions on our issues, mailing list, Stack Overflow, and elsewhere.
+- Translate our documentation into another language.
+- Write a blog post, tweet, or share our project with others.
+- [Teach](https://www.scikit-yb.org/en/latest/teaching.html) someone how to use Yellowbrick.
 
-### Requirements
+As you can see, there are lots of ways to get involved and we would be very happy for you to join us! The only thing we ask is that you abide by the principles of openness, respect, and consideration of others as described in the [Python Software Foundation Code of Conduct](https://www.python.org/psf/codeofconduct/).
 
-* Python 3.5+ (it may work with other versions too). Last version with support for python 2.7 was v1.1.1
-* Linux, Windows or macOS
-* pytorch (>=1.5)
+For more information, checkout the `CONTRIBUTING.md` file in the root of the repository or the detailed documentation at [Contributing to Yellowbrick](https://www.scikit-yb.org/en/latest/contributing/index.html)
 
-While not required, for optimal performance(especially for the detector) it is **highly** recommended to run the code using a CUDA enabled GPU.
+## Yellowbrick Datasets
 
-### Binaries
+Yellowbrick gives easy access to several datasets that are used for the examples in the documentation and testing. These datasets are hosted in our CDN and must be downloaded for use. Typically, when a user calls one of the data loader functions, e.g. `load_bikeshare()` the data is automatically downloaded if it's not already on the user's computer. However, for development and testing, or if you know you will be working without internet access, it might be easier to simply download all the data at once.
 
-The easiest way to install it is using either pip or conda:
+The data downloader script can be run as follows:
 
-| **Using pip**                | **Using conda**                            |
-|------------------------------|--------------------------------------------|
-| `pip install face-alignment` | `conda install -c 1adrianb face_alignment` |
-|                              |                                            |
+    $ python -m yellowbrick.download
 
-Alternatively, bellow, you can find instruction to build it from source.
+This will download the data to the fixtures directory inside of the Yellowbrick site packages. You can specify the location of the download either as an argument to the downloader script (use `--help` for more details) or by setting the `$YELLOWBRICK_DATA` environment variable. This is the preferred mechanism because this will also influence how data is loaded in Yellowbrick.
 
-### From source
+_Note: Developers who have downloaded data from Yellowbrick versions earlier than v1.0 may experience some problems with the older data format. If this occurs, you can clear out your data cache as follows:_
 
- Install pytorch and pytorch dependencies. Please check the [pytorch readme](https://github.com/pytorch/pytorch) for this.
+    $ python -m yellowbrick.download --cleanup
 
-#### Get the Face Alignment source code
-```bash
-git clone https://github.com/1adrianb/face-alignment
-```
-#### Install the Face Alignment lib
-```bash
-pip install -r requirements.txt
-python setup.py install
-```
+_This will remove old datasets and download the new ones. You can also use the `--no-download` flag to simply clear the cache without re-downloading data. Users who are having difficulty with datasets can also use this or they can uninstall and reinstall Yellowbrick using `pip`._
 
-### Docker image
+## Citing Yellowbrick
 
-A Dockerfile is provided to build images with cuda support and cudnn. For more instructions about running and building a docker image check the orginal Docker documentation.
-```
-docker build -t face-alignment .
-```
+We would be glad if you used Yellowbrick in your scientific publications! If you do, please cite us using the [citation guidelines](https://www.scikit-yb.org/en/latest/about.html#citing-yellowbrick).
 
-## How does it work?
+## Affiliations
 
-While here the work is presented as a black-box, if you want to know more about the intrisecs of the method please check the original paper either on arxiv or my [webpage](https://www.adrianbulat.com).
-
-## Contributions
-
-All contributions are welcomed. If you encounter any issue (including examples of images where it fails) feel free to open an issue. If you plan to add a new features please open an issue to discuss this prior to making a pull request.
-
-## Citation
-
-```
-@inproceedings{bulat2017far,
-  title={How far are we from solving the 2D \& 3D Face Alignment problem? (and a dataset of 230,000 3D facial landmarks)},
-  author={Bulat, Adrian and Tzimiropoulos, Georgios},
-  booktitle={International Conference on Computer Vision},
-  year={2017}
-}
-```
-
-For citing dlib, pytorch or any other packages used here please check the original page of their respective authors.
-
-## Acknowledgements
-
-* To the [pytorch](http://pytorch.org/) team for providing such an awesome deeplearning framework
-* To [my supervisor](http://www.cs.nott.ac.uk/~pszyt/) for his patience and suggestions.
-* To all other python developers that made available the rest of the packages used in this repository.
+[![District Data Labs](docs/images/readme/affiliates_ddl.png)](https://districtdatalabs.com/) [![NumFOCUS Affiliated Project](docs/images/readme/affiliates_numfocus.png)](https://numfocus.org)
