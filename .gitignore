@@ -1,23 +1,6 @@
-*.coverage
-*test_net_cached.pb
-*.class
-*.log
 *.pyc
-python/.setup.sh
-build/*.jar
-
-docs/build
-
-# python
-*.pyc
-docs/_build/
+.pypirc
 build/
 dist/
-*.egg-info/
-
-
-# intellij
-.idea/
-
-# MacOS
 .DS_Store
+.idea
