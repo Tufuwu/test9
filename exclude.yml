@@ -1,0 +1,57 @@
+csa_t1:
+- sub-balgrist01  # Motion artifact
+- sub-beijingGE04  # Motion artifact
+- sub-mniS06  # Motion artifact
+- sub-mountSinai03  # T2w was re-acquired (subject repositioning)
+- sub-oxfordFmrib04  # T1w scan is not aligned with other contrasts (subject repositioning)
+- sub-pavia04  # Motion artifact
+- sub-perform06  # Motion artifact
+csa_t2:
+- beijingVerio  # Site did not respect parameters (TR=2, FA=180)
+- sub-oxfordFmrib04  # T1w scan is not aligned with other contrasts (subject repositioning)
+- sub-pavia04  # Motion artifact
+- sub-mountSinai03  # T2w was re-acquired (subject repositioning)
+csa_gm:
+- sub-amu03  # Motion artifact
+- sub-fslAchieva04  # Motion artifact
+- sub-vuiisIngenia04  # Motion artifact
+- sub-vuiisIngenia05  # Motion artifact
+mtr:
+- stanford  # Used different TR
+- fslAchieva  # Used different TR and inconsistent within site
+- sub-beijingPrisma04  # different coil, shim value and FOV placement between MTon and MToff
+- sub-geneva02  # FOV positioning changed between MTon and MToff
+- sub-oxfordFmrib04  # T1w scan is not aligned with other contrasts (subject repositioning)
+mtsat:
+- fslAchieva  # Used different TR and inconsistent within site
+- sub-fslAchieva03  # Poor data quality
+- sub-fslAchieva04  # Poor data quality
+- sub-fslAchieva05  # Poor data quality
+- sub-fslAchieva06  # Poor data quality
+- sub-beijingPrisma04  # different coil, shim value and FOV placement between MTon and MToff
+- sub-geneva02  # FOV positioning changed between MTon and MToff
+- sub-oxfordFmrib04  # T1w scan is not aligned with other contrasts (subject repositioning)
+t1:
+- fslAchieva  # Used different TR and inconsistent within site
+- sub-fslAchieva03  # Poor data quality
+- sub-fslAchieva04  # Poor data quality
+- sub-fslAchieva05  # Poor data quality
+- sub-fslAchieva06  # Poor data quality
+- sub-beijingPrisma04  # different coil, shim value and FOV placement between MTon and MToff
+- sub-geneva02  # FOV positioning changed between MTon and MToff
+- sub-oxfordFmrib04  # T1w scan is not aligned with other contrasts (subject repositioning)
+dti_fa:
+- sub-beijingPrisma03  # wrong FOV placement
+- sub-mountSinai03  # T2w was re-acquired (hence wrong T2w -> DWI registration)
+- sub-oxfordFmrib04  # T1w scan is not aligned with other contrasts (subject repositioning)
+- sub-oxfordFmrib01  # registration issue (segmentation OK)
+dti_md:
+- sub-beijingPrisma03  # wrong FOV placement
+- sub-mountSinai03  # T2w was re-acquired (hence wrong T2w -> DWI registration)
+- sub-oxfordFmrib04  # T1w scan is not aligned with other contrasts (subject repositioning)
+- sub-oxfordFmrib01  # registration issue (segmentation OK)
+dti_rd:
+- sub-beijingPrisma03  # wrong FOV placement
+- sub-mountSinai03  # T2w was re-acquired (hence wrong T2w -> DWI registration)
+- sub-oxfordFmrib04  # T1w scan is not aligned with other contrasts (subject repositioning)
+- sub-oxfordFmrib01  # registration issue (segmentation OK)

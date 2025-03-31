@@ -1,48 +1,42 @@
-# CMS for EUTH Project
+# Spine Generic Public Database (Multi-Subject)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4299140.svg)](https://doi.org/10.5281/zenodo.4299140)
+![BIDS Validator](https://github.com/spine-generic/data-multi-subject/workflows/BIDS%20Validator/badge.svg)
+## About this dataset
 
-![Build Status](https://github.com/liqd/a4-opin/actions/workflows/django.yml/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/liqd/a4-opin/badge.svg?branch=master)](https://coveralls.io/github/liqd/a4-opin?branch=master)
+This dataset was acquired using the [spine-generic protocol](http://spinalcordmri.org/protocols)
+on multiple subjects, multiple sites and multiple MRI vendors and models. The list of subjects
+is available in [participants.tsv](./participants.tsv).
 
-## Requires
+This dataset follows the [BIDS](https://bids.neuroimaging.io/) convention.
+The contributors have the necessary ethics & permissions to share the data publicly.
 
- * nodejs (+ npm)
- * python 3.x (+ virtualenv + pip)
- * libmagic
- * libjpeg
- * libpq (only if postgres should be used)
+The dataset does not include any identifiable personal health information, including names,
+zip codes, dates of birth, facial features on structural scans.
 
-## Setup and development
+The entire dataset is about **10GB**.
 
-Use the provided Makefile to start development. It comes with a help command
-`make help` . The initials steps to get the software running should be:
+## Download
+
+We are using a tool to manage large datasets called `git-annex`. To download this dataset, you need to have `git` installed, and also [install `git-annex`](https://git-annex.branchable.com/install/) *at version 8*. Then run:
+
+~~~
+git clone https://github.com/spine-generic/data-multi-subject && \
+cd data-multi-subject && \
+git annex init && \
+git annex get
+~~~
+
+You may **substitute** `git annex get` with more specific commands if you are only interested in certain subjects. For example:
 
 ```
-git clone https://github.com/liqd/a4-opin.git  # clone repository
-cd a4-opin # change to cloned repo
-make install
-make fixtures
-make watch
+git annex get sub-nwu01/ sub-nwu03/ sub-nwu04/ sub-oxfordFmrib04/ sub-tokyoSkyra*/
 ```
 
-## django-allauth setup
 
-Visit the Django Admin and follow these steps:
+## Analysis
 
-1. Add a `Site` for your domain, matching `settings.SITE_ID`.
-2. For each OAuth based provider, add a *Social application* (part of the *Social accounts* app).
-3. Fill in the site and the OAuth app credentials obtained from the provider.
+The instructions to process this dataset are available in the [spine-generic documentation](https://spine-generic.readthedocs.io/en/latest/analysis-pipeline.html).
 
-See [django-allauth providers documentation](https://django-allauth.readthedocs.io/en/latest/providers.html)
-for more information on how to configure every provider.
+## Contributing
 
-There are no OAuth based providers activated for development. You have to add
-them manually to `INSTALLED_APPS` to use them locally.
-
-GitHub example:
-
-```python
-INSTALLED_APPS = [
-    # Other apps
-    'allauth.socialaccount.providers.github',
-]
-```
+If you wish to contribute to this dataset please see [the wiki](https://github.com/spine-generic/spine-generic/wiki/git-annex). Thank you for your contribution 🎉 
