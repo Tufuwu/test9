@@ -1,5 +1,0 @@
--e .
-
-lxml
-coverage
-codecov

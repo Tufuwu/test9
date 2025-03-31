@@ -1,64 +1,63 @@
-#!/usr/bin/env python
-# coding: utf-8
-#
-# This file is part of Supysonic.
-# Supysonic is a Python implementation of the Subsonic server API.
-#
-# Copyright (C) 2013-2019 Alban 'spl0k' Féron
-#                    2017 Óscar García Amor
-#
-# Distributed under terms of the GNU AGPLv3 license.
+import sys
+import os
 
-import supysonic as project
+import setuptools  # may monkeypatch distutils in some versions. # noqa
+from distutils.command.sdist import sdist
+from distutils.core import setup
 
-from setuptools import setup
-from setuptools import find_packages
+from numpydoc import __version__ as version
 
-reqs = [
-    "flask>=0.11",
-    "pony>=0.7.6",
-    "Pillow",
-    "requests>=1.0.0",
-    "mediafile",
-    "watchdog>=0.8.0",
-    "zipstream",
-]
+if sys.version_info < (3, 5):
+    raise RuntimeError("Python version >= 3.5 required.")
+
+
+def read(fname):
+    """Utility function to get README.rst into long_description.
+
+    ``long_description`` is what ends up on the PyPI front page.
+    """
+    with open(os.path.join(os.path.dirname(__file__), fname)) as f:
+        contents = f.read()
+
+    return contents
+
 
 setup(
-    name=project.NAME,
-    version=project.VERSION,
-    description=project.DESCRIPTION,
-    keywords=project.KEYWORDS,
-    long_description=project.LONG_DESCRIPTION,
-    author=project.AUTHOR_NAME,
-    author_email=project.AUTHOR_EMAIL,
-    url=project.URL,
-    license=project.LICENSE,
-    packages=find_packages(exclude=["tests*"]),
-    install_requires=reqs,
-    entry_points={
-        "console_scripts": [
-            "supysonic-cli=supysonic.cli:main",
-            "supysonic-daemon=supysonic.daemon:main",
-        ]
+    name="numpydoc",
+    packages=["numpydoc"],
+    version=version,
+    description="Sphinx extension to support docstrings in Numpy format",
+    long_description=read('README.rst'),
+    # classifiers from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+    classifiers=["Development Status :: 4 - Beta",
+                 "Environment :: Plugins",
+                 "License :: OSI Approved :: BSD License",
+                 "Topic :: Documentation",
+                 "Programming Language :: Python",
+                 "Programming Language :: Python :: 3",
+                 "Programming Language :: Python :: 3.5",
+                 "Programming Language :: Python :: 3.6",
+                 "Programming Language :: Python :: 3.7",
+                 ],
+    keywords="sphinx numpy",
+    author="Pauli Virtanen and others",
+    author_email="pav@iki.fi",
+    url="https://numpydoc.readthedocs.io",
+    license="BSD",
+    install_requires=["sphinx >= 1.6.5", 'Jinja2>=2.3'],
+    python_requires=">=3.5",
+    extras_require={
+        "testing": [
+            req for req in read('test_requirements.txt').split('\n')
+            if not req.startswith('#')
+        ],
     },
-    zip_safe=False,
-    include_package_data=True,
-    test_suite="tests.suite",
-    tests_require=["lxml"],
-    classifiers=[
-        "Development Status :: 3 - Alpha",
-        "Environment :: Console",
-        "Environment :: Web Environment",
-        "Framework :: Flask",
-        "Intended Audience :: End Users/Desktop",
-        "Intended Audience :: System Administrators",
-        "License :: OSI Approved :: GNU Affero General Public License v3",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Topic :: Multimedia :: Sound/Audio",
-    ],
+    package_data={'numpydoc': [
+        'tests/test_*.py',
+        'tests/tinybuild/Makefile',
+        'tests/tinybuild/index.rst',
+        'tests/tinybuild/*.py',
+        'templates/*.rst',
+        ]},
+    cmdclass={"sdist": sdist},
 )

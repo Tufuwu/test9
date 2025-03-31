@@ -1,31 +1,63 @@
-# Inspired by python-package
+name: numpydoc tests
 
-name: Package
 on:
-  - push
-  - pull_request
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
+        os: [Ubuntu]
         python-version: ["3.9", "3.10"]
+        sphinx-version: ["sphinx==1.6.5", "sphinx==2.1", "sphinx>3.0"]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
+    - uses: actions/checkout@v2
+    
+    - name: Python setup
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+
+    - name: Setup environment
       run: |
-        python -m pip install --upgrade pip
-        pip install -r ci-requirements.txt
-    - name: Run tests
+        python -m venv venv
+        source venv/bin/activate
+
+    - name: Install
       run: |
-        coverage run setup.py test
-        coverage run -a setup.py test --test-suite tests.with_net
-    - name: Upload coverage
-      uses: codecov/codecov-action@v1.0.15
-      if: ${{ always() }}
+        python -m pip install --upgrade pip wheel setuptools
+        python -m pip install -r test_requirements.txt -r doc/requirements.txt
+        python -m pip install codecov
+        python -m pip install ${{ matrix.sphinx-version }}
+        python -m pip install .
+        pip list
+
+    - name: Run test suite
+      run: |
+        pytest -v --pyargs .
+
+    - name: Test coverage
+      run: |
+        codecov
+
+    - name: Make sure CLI works
+      run: |
+        python -m numpydoc numpydoc.tests.test_main._capture_stdout
+        echo '! python -m numpydoc numpydoc.tests.test_main._invalid_docstring' | bash
+        python -m numpydoc --validate numpydoc.tests.test_main._capture_stdout
+        echo '! python -m numpydoc --validate numpydoc.tests.test_main._docstring_with_errors' | bash
+
+    - name: Setup for doc build
+      run: |
+        # Get scipy-sphinx-theme
+        git submodule update --init
+        sudo apt install texlive texlive-latex-extra latexmk dvipng
+
+    - name: Build documentation
+      run: |
+        make -C doc html SPHINXOPTS="-nT"
+        make -C doc latexpdf SPHINXOPTS="-nT"

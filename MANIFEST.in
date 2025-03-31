@@ -1,6 +1,14 @@
-include cgi-bin/*
-include config.sample
-include README.md
-recursive-include supysonic/schema *
-recursive-include supysonic/templates *
-recursive-include supysonic/static *
+include MANIFEST.in
+recursive-include numpydoc *
+include *.txt
+include *.rst
+recursive-include doc *
+
+# Exclude what we don't want to include
+prune */__pycache__
+exclude .circleci/config.yml
+exclude .coveragerc
+exclude codecov.yml
+exclude doc/scipy-sphinx-theme/.git
+exclude .gitmodules
+global-exclude *.pyc *~ *.bak *.swp *.pyo
