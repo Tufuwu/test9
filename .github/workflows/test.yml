@@ -1,55 +1,32 @@
-name: Python CI
+name: Run Tests
 
-on: 
+on:
   push:
-  pull_request:
-  schedule:
-    - cron: '0 0 * * 0' # weekly
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      - name: Install Dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Type Checking
+        run: python -m pytype --jobs auto
+      - name: Test
+        run: python -m pytest
+      - name: Lint
+        run: python -m pylint comment_parser
+      - name: Formatting
+        run: python -m yapf -drp comment_parser
+
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false # Allow one of the matrix builds to fail without failing others
-      matrix:
-        python-version: ["3.9", "3.10"]
-        
-    # The job
-    name: Python ${{ matrix.python-version }}
-    
-    # The steps in the job. Each step either RUNS code, or USES an action
+    needs:
+      - test
     steps:
-    
-      - name: Checkout
-        uses: actions/checkout@v2
-        
-      - name: Setup python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: x64
-          
-      - name: Run tests and linting
-        run: |
-          pip install pep8 flake8 black mypy pytest twine setuptools wheel --upgrade --quiet
-          flake8 --show-source --ignore=F811,W293,W391,W292,W291,E252,W503,E203 --max-line-length=120 --exclude='conf.py,__init__.py';
-          black . --check -l 120;
-          mypy efficient_apriori/*.py --ignore-missing-imports --show-error-context;
-          pip install -r requirements.txt
-          pip install -e .
-          pytest --doctest-modules -v efficient_apriori
-
-# ======================= BUILD WHEELS AND UPLOAD TO PYPI ==================================
-
-      - name: Build wheels ${{ matrix.python-version }} on ${{ matrix.os }}
-        run: |
-          python setup.py sdist bdist_wheel;
-
-      - name: Publish Python distribution to PyPI
-        if: github.ref == 'refs/heads/main'
-        uses: pypa/gh-action-pypi-publish@main
-        with:
-          skip_existing: true
-          user: __token__
-          password: ${{ secrets.pypi_password }}
-          
+      - uses: actions/checkout@v4
+      - name: Build
+        run: python setup.py sdist

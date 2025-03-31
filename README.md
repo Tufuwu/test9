@@ -1,106 +1,170 @@
-# Efficient-Apriori ![Build Status](https://github.com/tommyod/Efficient-Apriori/workflows/Python%20CI/badge.svg?branch=master) [![PyPI version](https://badge.fury.io/py/efficient-apriori.svg)](https://pypi.org/project/efficient-apriori/) [![Documentation Status](https://readthedocs.org/projects/efficient-apriori/badge/?version=latest)](https://efficient-apriori.readthedocs.io/en/latest/?badge=latest) [![Downloads](https://pepy.tech/badge/efficient-apriori)](https://pepy.tech/project/efficient-apriori) [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+# Comment Parser
 
-An efficient pure Python implementation of the Apriori algorithm. Works with Python 3.6+.
+[![Run Tests](https://github.com/jeanralphaviles/comment_parser/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/jeanralphaviles/comment_parser/actions/workflows/test.yml)
+[![PyPI status](https://img.shields.io/pypi/status/comment_parser.svg)](https://pypi.python.org/pypi/comment_parser/)
+[![PyPI version shields.io](https://img.shields.io/pypi/v/comment_parser.svg)](https://pypi.python.org/pypi/comment_parser/)
+[![PyPI license](https://img.shields.io/pypi/l/comment_parser.svg)](https://pypi.python.org/pypi/comment_parser/)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/comment_parser.svg)](https://pypi.python.org/pypi/comment_parser/)
 
-The apriori algorithm uncovers hidden structures in categorical data.
-The classical example is a database containing purchases from a supermarket.
-Every purchase has a number of items associated with it.
-We would like to uncover association rules such as `{bread, eggs} -> {bacon}` from the data.
-This is the goal of [association rule learning](https://en.wikipedia.org/wiki/Association_rule_learning), and the [Apriori algorithm](https://en.wikipedia.org/wiki/Apriori_algorithm) is arguably the most famous algorithm for this problem.
-This repository contains an efficient, well-tested implementation of the apriori algorithm as described in the [original paper](https://www.macs.hw.ac.uk/~dwcorne/Teaching/agrawal94fast.pdf) by Agrawal et al, published in 1994.
-
-**The code is stable and in widespread use.** It's cited in the book "*Mastering Machine Learning Algorithms*" by Bonaccorso.
-
-
-## Example
-
-Here's a minimal working example.
-Notice that in every transaction with `eggs` present, `bacon` is present too.
-Therefore, the rule `{eggs} -> {bacon}` is returned with 100 % confidence.
-
-```python
-from efficient_apriori import apriori
-transactions = [('eggs', 'bacon', 'soup'),
-                ('eggs', 'bacon', 'apple'),
-                ('soup', 'bacon', 'banana')]
-itemsets, rules = apriori(transactions, min_support=0.5, min_confidence=1)
-print(rules)  # [{eggs} -> {bacon}, {soup} -> {bacon}]
-```
-If your data is in a pandas DataFrame, you must [convert it to a list of tuples](https://github.com/tommyod/Efficient-Apriori/issues/12).
-Do you have **missing values**, or does the algorithm **run for a long time**? See [this comment](https://github.com/tommyod/Efficient-Apriori/issues/30#issuecomment-626129085).
-**More examples are included below.**
+Python module used to extract comments from source code files of various types.
 
 ## Installation
 
-The software is available through GitHub, and through [PyPI](https://pypi.org/project/efficient-apriori/).
-You may install the software using `pip`.
+### Prerequisites
 
-```bash
-pip install efficient-apriori
+* libmagic
+
+### Linux/Unix
+
+```shell
+sudo pip3 install comment_parser
 ```
 
-## Contributing
+### OSX and Windows
 
-You are very welcome to scrutinize the code and make pull requests if you have suggestions and improvements.
-Your submitted code must be PEP8 compliant, and all tests must pass.
-Contributors: [CRJFisher](https://github.com/CRJFisher)
+Additionally, complete the special installation requirements for
+[python-magic](https://github.com/ahupp/python-magic).
 
-## More examples
+## Usage
 
-### Filtering and sorting association rules
-
-It's possible to filter and sort the returned list of association rules.
+To use, simply run:
 
 ```python
-from efficient_apriori import apriori
-transactions = [('eggs', 'bacon', 'soup'),
-                ('eggs', 'bacon', 'apple'),
-                ('soup', 'bacon', 'banana')]
-itemsets, rules = apriori(transactions, min_support=0.2, min_confidence=1)
-
-# Print out every rule with 2 items on the left hand side,
-# 1 item on the right hand side, sorted by lift
-rules_rhs = filter(lambda rule: len(rule.lhs) == 2 and len(rule.rhs) == 1, rules)
-for rule in sorted(rules_rhs, key=lambda rule: rule.lift):
-  print(rule)  # Prints the rule and its confidence, support, lift, ...
+>>> from comment_parser import comment_parser
+>>> # Returns a list of comment_parser.parsers.common.Comments
+>>> comment_parser.extract_comments('/path/to/source_file')
+>>> # Or
+>>> comment_parser.extract_comments_from_str('...')
 ```
 
-### Working with large datasets
-
-If you have **data that is too large to fit in memory**, you may pass a function returning a generator instead of a list.
-The `min_support` will most likely have to be a large value, or the algorithm will take very long before it terminates.
-If you have massive amounts of data, this Python implementation is likely not fast enough, and you should consult more specialized implementations.
+### extract_comments signatures
 
 ```python
-def data_generator(filename):
-  """
-  Data generator, needs to return a generator to be called several times.
-  Use this approach if data is too large to fit in memory. If not use a list.
-  """
-  def data_gen():
-    with open(filename) as file:
-      for line in file:
-        yield tuple(k.strip() for k in line.split(','))      
+def extract_comments(filename, mime=None):
+    """Extracts and returns the comments from the given source file.
 
-  return data_gen
+    Args:
+        filename: String name of the file to extract comments from.
+        mime: Optional MIME type for file (str). Note some MIME types accepted
+            don't comply with RFC2045. If not given, an attempt to deduce the
+            MIME type will occur.
+    Returns:
+        Python list of parsers.common.Comment in the order that they appear in
+            the source file.
+    Raises:
+        UnsupportedError: If filename is of an unsupported MIME type.
+    """
+    pass
 
-transactions = data_generator('dataset.csv')
-itemsets, rules = apriori(transactions, min_support=0.9, min_confidence=0.6)
+
+def extract_comments_from_str(code, mime=None):
+    """Extracts and returns comments from the given source string.
+
+    Args:
+        code: String containing code to extract comments from.
+        mime: Optional MIME type for code (str). Note some MIME types accepted
+            don't comply with RFC2045. If not given, an attempt to deduce the
+            MIME type will occur.
+    Returns:
+        Python list of parsers.common.Comment in the order that they appear in
+            the source code.
+    Raises:
+        UnsupportedError: If code is of an unsupported MIME type.
+    """
+    pass
 ```
 
-### Transactions with IDs
-
-If you need to know which transactions occurred in the frequent itemsets, set the `output_transaction_ids` parameter to `True`.
-This changes the output to contain `ItemsetCount` objects for each itemset.
-The objects have a `members` property containing is the set of ids of frequent transactions as well as a `count` property. 
-The ids are the enumeration of the transactions in the order they appear.    
+### Comments Interface
 
 ```python
-from efficient_apriori import apriori
-transactions = [('eggs', 'bacon', 'soup'),
-                ('eggs', 'bacon', 'apple'),
-                ('soup', 'bacon', 'banana')]
-itemsets, rules = apriori(transactions, output_transaction_ids=True)
-print(itemsets)
-# {1: {('bacon',): ItemsetCount(itemset_count=3, members={0, 1, 2}), ...
+class Comment(object):
+    """Represents comments found in source files."""
+    def text(self):
+        """Returns the comment's text.
+        Returns:
+            String
+        """
+        pass
+
+    def line_number(self):
+        """Returns the line number the comment was found on.
+        Returns:
+            Int
+        """
+        pass
+
+    def is_multiline(self):
+        """Returns whether this comment was a multiline comment.
+        Returns:
+            True if comment was a multiline comment, False if not.
+        """
+       pass
+
+    def __str__(self):
+        pass
+
+    def __eq__(self, other):
+        pass
 ```
+
+## Development
+
+### Install Dependencies
+
+```shell
+pip install -r requirements.txt -r requirements-dev.txt
+```
+
+### Running locally
+
+Start python in the base of repository.
+
+```python
+from comment_parser import comment_parser
+comment_parser.extract_comments('foo.c', mime='text/x-c')
+```
+
+### Running tests
+
+```shell
+python -m pytest
+```
+
+### Running pylint
+
+```shell
+pylint comment_parser
+```
+
+### Running formatter
+
+```shell
+yapf -rip .
+```
+
+### Deploying to PyPi
+
+```shell
+python setup.py sdist
+twine upload dist/*
+```
+
+## Supported Programming Languages
+
+| Language    | Mime String              |
+|------------ |------------------------- |
+| C           | text/x-c                 |
+| C++/C#      | text/x-c++               |
+| Go          | text/x-go                |
+| HTML        | text/html                |
+| Java        | text/x-java-source       |
+| Javascript  | application/javascript   |
+| Python      | text/x-python            |
+| Python      | text/x-script.python     |
+| Ruby        | text/x-ruby              |
+| Shell       | text/x-shellscript       |
+| XML         | text/xml                 |
+
+And more to come!
+
+*Check comment_parser.py for corresponding MIME types.*
