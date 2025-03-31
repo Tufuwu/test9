@@ -1,30 +1,56 @@
-
 import os
-from setuptools import setup, find_packages
-project_root = os.path.dirname(os.path.realpath(__file__))
+
+from setuptools import find_packages, setup
+
+
+def read(fname):
+    with open(os.path.join(os.path.dirname(__file__), fname)) as f:
+        return f.read()
+
 
 setup(
-    name = "p4runtime-shell",
-    version = "0.0.2",
-    packages = find_packages("."),
-    install_requires = [
-        "ipaddr==2.2.0",
-        "jedi==0.17.2",
-        "ipython==7.19.0",
-        "protobuf==3.14.0",
-        "grpcio==1.35.0",
-        "p4runtime==1.3.0",
+    name='airavata-django-portal',
+    version='0.1',
+    url='https://github.com/apache/airavata-django-portal',
+    author='Apache Software Foundation',
+    author_email='dev@airavata.apache.org',
+    description=('The Airavata Django Portal is a web interface to the '
+                 'Apache Airavata API implemented using the Django web '
+                 'framework.'),
+    long_description=read('README.md'),
+    license='Apache License 2.0',
+    packages=find_packages(),
+    install_requires=[
+            'Django',
+            'djangorestframework',
+            'requests',
+            'requests-oauthlib',
+            'thrift',
+            'thrift_connector',
+            'wagtail',
+            'wagtailfontawesome',
+            'jupyter',
+            'papermill',
+            "airavata-django-portal-sdk",
     ],
-    author = "P4 API Working Group",
-    author_email = "p4-api@lists.p4.org",
-    classifiers = [
+    extras_require={
+        'dev': [
+            'flake8',
+            'flake8-isort'
+        ],
+        'mysql': [
+            'mysqlclient'
+        ]
+    },
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Web Environment',
+        'Framework :: Django',
+        'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-    ],
-    description = "The P4Runtime shell",
-    long_description = open(project_root + "/README.md").read(),
-    long_description_content_type = "text/markdown",
-    license = "Apache-2.0",
-    url = "https://github.com/p4lang/p4runtime-shell"
+        'Natural Language :: English',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Internet :: WWW/HTTP',
+        'Topic :: Internet :: WWW/HTTP :: WSGI :: Application'
+    ]
 )
