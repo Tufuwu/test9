@@ -1,59 +1,37 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+import s3path
+from setuptools import setup
 
-from distutils.core import setup
-from setuptools.command.sdist import sdist
-from obswebsocket import VERSION
-
-# Convert README from Markdown to reStructuredText
-description = "Please take a look at README.md"
-try:
-    description = open('README.md', 'rt').read()
-    import pypandoc
-    description = pypandoc.convert_text(description, 'rst', 'gfm')
-except ImportError:
-    # If not possible, leave it in Markdown...
-    print("Cannot find pypandoc, not generating README!")
-
-requirements = open('requirements.txt', 'rt').readlines()
-requirements = [x.strip() for x in requirements if x]
-
-
-# Generate classes
-class UpdateClasses(sdist):
-    def run(self):
-        from os.path import dirname
-        from sys import path
-        path.append(dirname(__file__))
-        from generate_classes import generate_classes
-        generate_classes()
-        sdist.run(self)
-
-
+with open("README.rst", "r") as fh:
+    long_description = fh.read()
 setup(
-    name='obs-websocket-py',
-    packages=['obswebsocket'],
-    # cmdclass={'sdist': UpdateClasses},
-    license='MIT',
-    version=VERSION,
-    description='Python library to communicate with an obs-websocket server.',
-    long_description=description,
-    author='Guillaume "Elektordi" Genty',
-    author_email='elektordi@elektordi.net',
-    url='https://github.com/Elektordi/obs-websocket-py',
-    keywords=['obs', 'obs-studio', 'websocket'],
+    name=s3path.__name__,
+    version=s3path.__version__,
+    url='https://github.com/liormizr/s3path',
+    author='Lior Mizrahi',
+    author_email='li.mizr@gmail.com',
+    py_modules=['s3path'],
+    install_requires=[
+        'boto3>=1.16.35',
+        'smart-open',
+    ],
+    license='Apache 2.0',
+    long_description=long_description,
+    long_description_content_type='text/x-rst',
+    python_requires='>= 3.4',
+    include_package_data=True,
     classifiers=[
-        'License :: OSI Approved :: MIT License',
-        'Environment :: Plugins',
-        'Intended Audience :: Developers',
-        'Topic :: Software Development :: Libraries',
-
         'Development Status :: 4 - Beta',
-
-        'Programming Language :: Python :: 3',
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
+        'License :: OSI Approved :: Apache Software License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
     ],
-    install_requires=requirements,
 )

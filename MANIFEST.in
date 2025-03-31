@@ -1,7 +1,4 @@
-include README.md
-include LICENSE
-include requirements.txt
-include setup.cfg
+include s3path.py
 include setup.py
-recursive-include obswebsocket *.py
-recursive-include samples *.py
+include README.rst
+include LICENSE
