@@ -1,35 +1,9 @@
-~*
-
-# vim swap-files:
-*.swp
-
-# MacOSX temp-files
-*.DS_Store
-
-# Python byte code
-*.pyc
-
-# Configfiles
-settings.ini
-
-# Databases
-*.db
-*.db-journal
-
-#PyCharm IDE/Intellij
-.idea/*
-*.iml
-
-# Static files
-static
-
-# Other files
-*.patch
-*.log
-*.orig
-.cache
-.coverage
-*.bak
-
-# Vagrant stuff
-deployment/vagrant/.vagrant
+tags
+*.py[co]
+MANIFEST
+dist/*
+agithub.egg-info/
+build/
+dist/
+.tox
+.eggs
