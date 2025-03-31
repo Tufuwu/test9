@@ -1,20 +1,38 @@
-*.egg-info
-*.pyc
-*.pyo
+*.py[cod]
+
+# C extensions
 *.so
-*.swp
-__pycache__
-.coverage
-.coverage.*
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+.eggs
+*.cache
+parts
+bin
+var
+sdist
+develop-eggs
 .installed.cfg
+lib
+lib64
+__pycache__
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
 nosetests.xml
-coverage.xml
-.eggs/
-.tox/
-bin/
-build/
-eggs/
-develop-eggs/
-docs/_build/
-parts/
-htmlcov/
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
