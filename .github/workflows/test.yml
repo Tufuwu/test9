@@ -1,98 +1,95 @@
-name: Build
+---
+name: CI
 
-on:
-  push:
-    branches: [main, dev]
-    tags: ['v*']
-  pull_request:
-    branches: [main, dev]
-  workflow_dispatch:
+on: [push, pull_request]
 
 jobs:
+
   test:
-    runs-on: ubuntu-latest
+    name: Unit tests
     strategy:
       matrix:
         python-version: ["3.9", "3.10"]
+        os: [macos-latest, ubuntu-latest, windows-latest]
 
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - name: set up Python
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-
-      # Cache packages per python version, and reuse until setup.py changes
-      - name: Cache pip packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}
-          restore-keys: ${{ runner.os }}-pip-${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: pip install '.[dev]'
-      - name: Run CLI smoke test
+      - name: install python dependencies
         run: |
-          naturtag -cdo 45524803
-          naturtag -cdt 48978
-      - name: Run unit tests
-        run: pytest ./test
-
-  analyze:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      - name: Cache pip packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-3.8-${{ hashFiles('setup.py') }}
-          restore-keys: ${{ runner.os }}-pip-3.8
-
-      - name: Install dependencies
-        run: pip install '.[dev]' '.[build]'
-      - name: Run style checks
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r dev-requirements.txt
+      - name: run tests
+        run: python -m pytest --cov=. tests/
+      - name: run test coverage
+        if: ${{ matrix.python-version == 3.7 }}
         run: |
-          black --check --diff .
-          isort --check --diff .
-      - name: Run linter
-        run: flake8 naturtag
-      # TODO
-      # - name: Run type checks
-      #   run: mypy .
-      - name: Generate code coverage report
-        run: pytest --cov --cov-report=term --cov-report=html ./test
-#      - name: Send code coverage report to Coveralls
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: coveralls
-      - name: Test Sphinx documentation build
-        run: make -C docs all
-      - name: Test package build
-        run: |
-          python setup.py sdist bdist_wheel
-          twine check dist/*
-
-  # Deploy pre-release builds from dev branch, and stable builds on tags only
-  release:
-    needs: [test, analyze]
-    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/dev'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-
-      - name: Install dependencies
-        run: pip install -U '.[build]'
-      - name: Build wheel
-        run: python setup.py sdist bdist_wheel
-      - name: Deploy to pypi
+          coverage report
+          coveralls
         env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: twine upload dist/*
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    name: Deploy to GitHub and PyPI
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.repository_owner == 'ladybug-tools'
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: set up node  # we need node for for semantic release
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: 14.2.0
+      - name: install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r dev-requirements.txt
+      - name: install semantic-release
+        run:
+          npm install @semantic-release/exec
+      - name: run semantic release
+        run:
+          npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+
+  docs:
+    name: Generate docs
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.repository_owner == 'ladybug-tools'
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: install dependencies
+        run: |
+          pip install -U .
+          pip install -r dev-requirements.txt
+          sphinx-apidoc -f -e -d 4 -o ./docs ./ladybug_comfort
+          sphinx-build -b html ./docs ./docs/_build/docs
+
+      - name: deploy to github pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          # this will use ladybugbot token
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: docs/_build/
+          force_orphan: true
+          keep_files: false
+          full_commit_message: 'deploy: update docs'

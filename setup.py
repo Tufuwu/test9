@@ -1,65 +1,31 @@
-from itertools import chain
-from setuptools import find_packages, setup
+import setuptools
 
-from naturtag import __version__
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-extras_require = {  # noqa
-    'app': ['kivy>=1.11', 'kivymd~=0.104.1', 'kivy-garden.contextmenu', 'pygments'],
-    'build': ['coveralls', 'twine', 'wheel'],
-    'dev': [
-        'black==20.8b1',
-        'flake8',
-        'isort',
-        'mypy',
-        'pre-commit',
-        'pytest>=5.0',
-        'pytest-cov',
-        'kivy_examples',
-        'memory_profiler',
-        'prettyprinter',
-        'Sphinx~=3.2.1',
-        'sphinx-rtd-theme',
-        'sphinxcontrib-apidoc',
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
+setuptools.setup(
+    name="ladybug-comfort",
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
+    author="Ladybug Tools",
+    author_email="info@ladybug.tools",
+    description="Ladybug comfort is a Python library that adds thermal comfort "
+    "functionalities to Ladybug.",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/ladybug-tools/ladybug-comfort",
+    packages=setuptools.find_packages(exclude=['tests']),
+    include_package_data=True,
+    install_requires=requirements,
+    classifiers=[
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "License :: OSI Approved :: GNU Affero General Public License v3",
+        "Operating System :: OS Independent"
     ],
-}
-extras_require['all'] = list(chain.from_iterable(extras_require.values()))
-extras_require['app-win'] = [
-    'pypiwin32',
-    'kivy_deps.sdl2',
-    'kivy_deps.gstreamer',
-    'kivy_deps.angle',
-]
-extras_require['all-win'] = extras_require['all'] + extras_require['app-win']
-
-# To install kivy dev version on python 3.8:
-# pip install kivy[base] kivy_examples --pre --extra-index-url https://kivy.org/downloads/simple/
-
-setup(
-    name='naturtag',
-    version=__version__,
-    packages=find_packages(),
-    install_requires=[
-        'appdirs',
-        'attrs',
-        'Click>=7.0',
-        'click-help-colors',
-        'pillow>=7.0',
-        'pyexiv2>=2.3.2',
-        'python-dateutil',
-        'pyinaturalist==0.12.0.dev68',
-        'pyyaml',
-        'requests',
-        'requests-cache',
-        'xmltodict',
-    ],
-    extras_require=extras_require,
-    entry_points={
-        'console_scripts': [
-            'naturtag=naturtag.cli:main',
-            'nt=naturtag.cli:main',
-        ],
-        'gui_scripts': [
-            'naturtag-app=naturtag.app.app:main',
-        ],
-    },
+    license="AGPL-3.0"
 )

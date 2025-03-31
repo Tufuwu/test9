@@ -1,17 +1,22 @@
-Naturtag: an iNaturalist Image Tagger
-=====================================
+Welcome to Ladybug Comfort's documentation!
+===================================
 
-This is the python package documentation for `naturtag <https://github.com/JWCook/naturtag>`_.
-For general usage information see the `README <https://github.com/JWCook/naturtag/blob/main/README.md>`_.
+.. image:: http://www.ladybug.tools/assets/img/ladybug.png
+
+Ladybug-comfort is a Python library that adds thermal comfort functionalities to
+`ladybug-core <https://github.com/ladybug-tools/ladybug/>`_.
+
+Installation
+============
+
+``pip install -U ladybug-comfort``
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   modules/naturtag
-   modules/naturtag.models
-   modules/naturtag.ui
-
+.. include:: modules.rst
 
 
 Indices and tables
