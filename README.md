@@ -1,55 +1,62 @@
-# Linode OpenAPI 3
+# wemake-django-template
 
-[![Build Status](https://travis-ci.com/linode/linode-api-docs.svg?branch=master)](https://travis-ci.com/linode/linode-api-docs)
+[![wemake.services](https://img.shields.io/badge/%20-wemake.services-green.svg?label=%20&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC%2FxhBQAAAAFzUkdCAK7OHOkAAAAbUExURQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP%2F%2F%2F5TvxDIAAAAIdFJOUwAjRA8xXANAL%2Bv0SAAAADNJREFUGNNjYCAIOJjRBdBFWMkVQeGzcHAwksJnAPPZGOGAASzPzAEHEGVsLExQwE7YswCb7AFZSF3bbAAAAABJRU5ErkJggg%3D%3D)](https://wemake.services) 
+[![Awesome](https://awesome.re/badge-flat2.svg)](https://awesomestacks.dev/production-ready-django-docker) 
+![Build status](https://github.com/wemake-services/wemake-django-template/workflows/test/badge.svg?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/wemake-django-template/badge/?version=latest)](http://wemake-django-template.readthedocs.io/en/latest/?badge=latest) 
+[![Dependencies Status](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg)](https://github.com/wemake-services/wemake-django-template/pulls?utf8=%E2%9C%93&q=is%3Apr%20author%3Aapp%2Fdependabot) 
+[![wemake-python-styleguide](https://img.shields.io/badge/style-wemake-000000.svg)](https://github.com/wemake-services/wemake-python-styleguide)
 
-This is the Linode API OpenAPI 3 Schema
 
-## Requirements
 
-The linter used for the OpenAPI spec is written in python3.
-A virtualenv is recommended for local work.
+Bleeding edge `django2.2` template focused on code quality and security.
 
+---
+
+## Purpose
+
+This project is used to scaffold a `django` project structure.
+Just like `django-admin.py startproject` but better.
+
+
+## Features
+
+- Always [`up-to-date`](https://github.com/wemake-services/wemake-django-template/pulls?utf8=%E2%9C%93&q=is%3Apr%20author%3Aapp%2Fdependabot) with the help of [`@dependabot`](https://dependabot.com/)
+- Supports latest `python3.7+`
+- [`poetry`](https://github.com/python-poetry/poetry) for managing dependencies
+- [`mypy`](https://mypy.readthedocs.io) and [`django-stubs`](https://github.com/typeddjango/django-stubs) for static typing
+- [`pytest`](https://pytest.org/) and [`hypothesis`](https://github.com/HypothesisWorks/hypothesis) for unit tests
+- [`flake8`](http://flake8.pycqa.org/en/latest/) and [`wemake-python-styleguide`](https://wemake-python-styleguide.readthedocs.io/en/latest/) for linting
+- [`docker`](https://www.docker.com/) for development, testing, and production
+- [`sphinx`](http://www.sphinx-doc.org/en/master/) for documentation
+- [`Gitlab CI`](https://about.gitlab.com/gitlab-ci/) with full `build`, `test`, and `deploy` pipeline configured by default
+- [`Caddy`](https://caddyserver.com/) with [`https`](https://caddyserver.com/docs/automatic-https) and `http/2` turned on by default
+
+
+## Installation
+
+Firstly, you will need to install [dependencies](https://cookiecutter.readthedocs.io/en/latest/):
+
+```bash
+pip install cookiecutter jinja2-git
 ```
-virtualenv -p python3 venv
-source venv/bin/activate
-pip install -r requirements.txt
+
+Then, create a project itself:
+
+```bash
+cookiecutter gh:wemake-services/wemake-django-template
 ```
 
-## Development
 
-The spec can be linted using the `openapi3` module.
+## Who are using this template?
 
-```
-python -m openapi3 openapi.yaml
-```
+If you use our template, please add yourself or your company [in the list](https://github.com/wemake-services/wemake-django-template/wiki/Who-is-using-this-template).
 
-### Versioning
+We offer free email support for anyone who is using this.
+If you have any problems or questions, drop us a line at [`contact@wemake.services`](mailto:contact@wemake.services).
+And we will try to help you.
 
-When making a new release you **must** tag the release with the correct semantic versioning-compliant version string so that all versions are populated appropriately.
-There is a `./bin/deploy` helper which will help with this process.
 
-```
-./bin/deploy 0.1.0
-```
+## License
 
-## Spec Extensions
-
-The OpenAPI specification supports vendor-specific extensions prefixed with an
-`x-` in the attribute name.  The following extensions are created by Linode for
-use in our spec:
-
-Attribute | Location | Type | Supported By | Explanation
----|---|---|---|---
-`x-linode-filterable` | schema properties | boolean | | If `true`, indicates that this property may be included in an X-Filter header
-`x-linode-grant` | method | string | | The level of access a user must have in order to call this endpoint.
-`x-linode-cli-display` | schema properties | integer | linode-cli | If truthy, this property will be displayed in the Linode CLI.  The numeric value determines the ordering of the displayed columns, left to right.
-`x-linode-cli-color` | schema properties | object | linode-cli | A mapping of possible property values to color codes understood by python's [colorclass module](https://pypi.python.org/pypi/colorclass).  Must include a `default_`, used for any value that doesn't match one of the keys.
-`x-linode-cli-format` | schema properties | string | linode-cli |  Overrides the value of the "format" field for this property, but for the CLI only.  Valid values are `file` and `json`.
-`x-linode-cli-command` | path | string | linode-cli | The command group the methods of this path fall into when generating commands in the `linode-cli <command> <action>` format.
-`x-linode-cli-action` | method | string | linode-cli | The action this method will be mapped to when generating commands in the `linode-cli <command> <action>` format.
-`x-linode-cli-skip` | method | boolean | linode-cli | If true, the CLI will not expose this action.
-`x-linode-redoc-load-ids`| operation | boolean | If true, ReDoc will load this path and print a bulleted list of IDs.  This only works on public collections.
-`x-linode-ref-name`| keyword | string | [Linode Developer's Site](https://github.com/linode/developers) | Provides a mechanism by which the Developer's site can generate a dropdown menu with an Object's name when using the `oneOf` keyword with a `discriminator`. **Note**: This front end functionality is currently being developed.
-`x-linode-cli-rows`| media type | array | linode-cli | A list of JSON paths where the CLI can find the value it should treat as table rows.  Only needed for irregular endpoints.
-`x-linode-cli-use-schema` | media type | schema or $ref | linode-cli | The schema the CLI should use when showing a row for this response.  Use with `x-linode-cli-rows`.
-`x-linode-cli-nested-list` | media type | string | linode-cli | The name of the property defined by this response body's schema that is a nested list.  Items in the list will be broken out into rows in the CLI's output.
+MIT. See [LICENSE](https://github.com/wemake-services/wemake-django-template/blob/master/LICENSE) for more details.
