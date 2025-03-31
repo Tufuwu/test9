@@ -1,5 +1,4 @@
-black==21.7b0
-mypy==0.910
-pytest
-pytest-timeout
-py-algorand-sdk
+pylint >= 2.2.2
+sphinx-rtd-theme >= 0.4.2
+sphinx-argparse >= 0.2.5
+coveralls >= 1.8.1
