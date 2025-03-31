@@ -1,30 +1,44 @@
-import setuptools
+from setuptools import setup, find_packages
+import client
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+VERSION = client.__version__
 
-import versioneer
+setup(
+    name='okpy',
+    version=VERSION,
+    author='John Denero, Soumya Basu, Stephen Martinis, Sharad Vikram, Albert Wu',
+    # author_email='',
+    description=('ok.py supports programming projects by running tests, '
+                'tracking progress, and assisting in debugging.'),
+    # long_description=long_description,
+    url='https://github.com/okpy/ok-client',
+    # download_url='https://github.com/okpy/ok/releases/download/v{}/ok'.format(VERSION),
 
-setuptools.setup(
-    name="removestar",
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
-    author="Aaron Meurer",
-    author_email="asmeurer@gmail.com",
-    description="A tool to automatically replace 'import *' imports with explicit imports in files",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://www.asmeurer.com/removestar/",
-    packages=setuptools.find_packages(),
+    license='Apache License, Version 2.0',
+    keywords=['education', 'autograding'],
+    packages=find_packages(include=[
+        'client',
+        'client.*',
+    ]),
+    package_data={
+        'client': ['config.ok'],
+    },
+    # install_requires=[],
+    entry_points={
+        'console_scripts': [
+            'ok=client.cli.ok:main',
+            'ok-publish=client.cli.publish:main',
+            'ok-lock=client.cli.lock:main',
+            'ok-test=client.cli.test:main',
+        ],
+    },
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
-    entry_points={'console_scripts': [ 'removestar = removestar.__main__:main']},
-    python_requires= '>=3.6',
     install_requires=[
-        'pyflakes'
+        'requests==2.12.4',
+        'coverage==4.4'
     ],
-    license='MIT',
 )
