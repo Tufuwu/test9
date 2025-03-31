@@ -1,48 +1,56 @@
-# (c) Copyright [2018-2020] Micro Focus or one of its affiliates.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# You may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Copyright 2017-2021 Lawrence Livermore National Security, LLC and other
+# Hatchet Project Developers. See the top-level LICENSE file for details.
 #
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: MIT
 
-#!/usr/bin/env python
-import collections
-from setuptools import setup, find_packages
+from setuptools import setup
+from setuptools import Extension
+from codecs import open
+from os import path
+
+here = path.abspath(path.dirname(__file__))
+
+# Get the long description from the README file
+with open(path.join(here, "README.md"), encoding="utf-8") as f:
+    long_description = f.read()
+
+# Get the version in a safe way which does not refrence hatchet `__init__` file
+# per python docs: https://packaging.python.org/guides/single-sourcing-package-version/
+version = {}
+with open("./hatchet/version.py") as fp:
+    exec(fp.read(), version)
 
 
-ReqOpts = collections.namedtuple('ReqOpts', ['skip_requirements_regex', 'default_vcs'])
-
-opts = ReqOpts(None, 'git')
 setup(
-    name='VerticaPy',
-    version='0.4.0',
-    description='A Python library that exposes sci-kit like functionality to conduct data science projects on data stored in Vertica.',
-    author='Badr Ouali',
-    author_email='badr.ouali@vertica.com',
-    url='https://github.com/vertica/VerticaPy',
-    keywords="machine-learning database vertica",
-    packages=find_packages(),
-    license="Apache License 2.0",
-    install_requires=[
-    ],
+    name="hatchet",
+    version=version["__version__"],
+    description="A Python library for analyzing hierarchical performance data",
+    url="https://github.com/hatchet/hatchet",
+    author="Abhinav Bhatele",
+    author_email="bhatele@cs.umd.edu",
+    license="MIT",
     classifiers=[
-        "Development Status :: 2 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Topic :: Data Science",
-        "Topic :: Machine Learning",
-        "Topic :: Database",
-        "Topic :: Database :: Database Engines/Servers",
-        "Operating System :: OS Independent"
-    ]
+        "Development Status :: 5 - Production/Stable",
+        "License :: OSI Approved :: MIT License",
+    ],
+    keywords="",
+    packages=[
+        "hatchet",
+        "hatchet.readers",
+        "hatchet.util",
+        "hatchet.external",
+        "hatchet.tests",
+        "hatchet.cython_modules.libs",
+    ],
+    install_requires=["pydot", "PyYAML", "matplotlib", "numpy", "pandas"],
+    ext_modules=[
+        Extension(
+            "hatchet.cython_modules.libs.reader_modules",
+            ["hatchet/cython_modules/reader_modules.c"],
+        ),
+        Extension(
+            "hatchet.cython_modules.libs.graphframe_modules",
+            ["hatchet/cython_modules/graphframe_modules.c"],
+        ),
+    ],
 )
