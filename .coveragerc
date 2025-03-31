@@ -1,14 +1,8 @@
+# .coveragerc to control coverage.py
 [run]
-branch = True
-source = ni
-
-[report]
-exclude_lines =
-    if self.debug:
-    pragma: no cover
-    raise NotImplementedError
-    if __name__ == .__main__.:
-    @abc.abstract*
-ignore_errors = True
+source = luma.emulator
 omit =
-    ni/test/*
+    luma/__init__.py
+    setup.py
+    .tox/*
+    doc/*
