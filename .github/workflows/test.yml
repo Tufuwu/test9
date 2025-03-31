@@ -1,108 +1,105 @@
----
-name: CI
+# Copyright 2019 David Corbett
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-on: [push, pull_request]
-
+name: Test
+on: push
+env:
+  FONTFORGE_COMMIT: aa062f4cbd1db21e27b2620f16993ebe4c540ab6
+  HARFBUZZ_VERSION: 2.5.2
+  PYTHON_VERSION: 3.9
 jobs:
-
   test:
-    name: Unit tests
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+        requirements:
+          - frozen
+          - oldest
+          - newest
     steps:
       - uses: actions/checkout@v2
-      - name: set up Python
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
-          python-version: 3.9
-      - name: install python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r dev-requirements.txt
-      - name: run tests
-        run: python -m pytest --cov=. tests/
-      - name: run test coverage
-        run: |
-          coverage report
-          coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  deploy:
-    name: Deploy to GitHub and PyPI
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main' && github.repository_owner == 'ladybug-tools'
-    steps:
-      - uses: actions/checkout@v2
-      - name: set up Python
-        uses: actions/setup-python@v2
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Cache FontForge
+        id: cache-fontforge
+        uses: actions/cache@v4
         with:
-          python-version: 3.9
-      - name: set up node  # we need node for for semantic release
-        uses: actions/setup-node@v2.1.2
-        with:
-          node-version: 14.2.0
-      - name: install python dependencies
+          key: ${{ runner.os }}-fontforge-${{ env.FONTFORGE_COMMIT }}-python-${{ env.PYTHON_VERSION }}
+          path: fontforge
+      - name: Install FontForge
+        if: steps.cache-fontforge.outputs.cache-hit != 'true'
         run: |
-          python -m pip install --upgrade pip
-          pip install -U .
-          pip install -r dev-requirements.txt
-      - name: install semantic-release
-        run:
-          npm install @semantic-release/exec
-      - name: generate docs for assets deployment
-        run: |
-          python docs.py $(echo $VERSION | sed 's/v//')
-        env:
-          VERSION: ${{ github.event.client_payload.version }}
-      - name: run semantic release
-        run:
-          npx semantic-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-
-  docs:
-    name: Generate docs
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main' && github.repository_owner == 'ladybug-tools'
-    steps:
-      - uses: actions/checkout@v2
-      - name: set up Python
-        uses: actions/setup-python@v2
+          sudo apt-get -qy --no-install-recommends install \
+            build-essential \
+            cmake \
+            ninja-build \
+            packaging-dev \
+            pkg-config \
+            python${{ env.PYTHON_VERSION }}-dev \
+          ;
+          curl -Lo fontforge.zip https://github.com/fontforge/fontforge/archive/${{ env.FONTFORGE_COMMIT }}.zip
+          unzip fontforge.zip
+          mv fontforge-${{ env.FONTFORGE_COMMIT }} fontforge
+          cd fontforge
+          curl -O https://patch-diff.githubusercontent.com/raw/fontforge/fontforge/pull/4232.patch
+          patch -p1 <4232.patch
+          mkdir build
+          cd build
+          cmake -G Ninja \
+            -D CMAKE_INSTALL_PREFIX="$PWD/target" \
+            -D ENABLE_DOCS=OFF \
+            -D ENABLE_GUI=OFF \
+            -D ENABLE_LIBGIF=OFF \
+            -D ENABLE_LIBJPEG=OFF \
+            -D ENABLE_LIBPNG=OFF \
+            -D ENABLE_LIBREADLINE=OFF \
+            -D ENABLE_LIBSPIRO=OFF \
+            -D ENABLE_LIBTIFF=OFF \
+            -D ENABLE_LIBUNINAMESLIST=OFF \
+            -D ENABLE_PYTHON_EXTENSION=ON \
+            -D ENABLE_NATIVE_SCRIPTING=OFF \
+            -D ENABLE_WOFF2=OFF \
+            .. \
+          ;
+          ninja
+          sudo ninja install
+      - name: Add site-packages to default search path
+        run: echo "PYTHONPATH=$PWD/fontforge/build/target/lib/python${{ env.PYTHON_VERSION }}/site-packages:$PYTHONPATH" >>"$GITHUB_ENV"
+      - name: Cache HarfBuzz
+        id: cache-harfbuzz
+        uses: actions/cache@v4
         with:
-          python-version: 3.9
-      - name: set up node  # we need node for for redocly
-        uses: actions/setup-node@v2.1.2
-        with:
-          node-version: 14.2.0
-      - name: install semantic-release
-        run:
-          npm install -g redoc-cli
-      - name: install python dependencies
+          key: ${{ runner.os }}-harfbuzz-${{ env.HARFBUZZ_VERSION }}
+          path: .hb/harfbuzz-${{ env.HARFBUZZ_VERSION }}
+      - name: Install HarfBuzz
+        if: steps.cache-harfbuzz.outputs.cache-hit != 'true'
+        run: make HB_VERSION=${{ env.HARFBUZZ_VERSION }} hb-shape
+      - name: Add HarfBuzz to path
+        run: echo "$PWD/.hb/harfbuzz-${{ env.HARFBUZZ_VERSION }}/util" >>"$GITHUB_PATH"
+      - name: Prepare oldest requirements
+        if: matrix.requirements == 'oldest'
         run: |
-          pip install -U .
-          pip install -r dev-requirements.txt
-      - name: generate docs
-        run: |
-          python docs.py $(echo $VERSION | sed 's/v//')
-          redoc-cli bundle ./docs/model_redoc.json -o ./docs/model.html
-        env:
-          VERSION: ${{ github.event.client_payload.version }}
-
-      - name: deploy to github pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          # this will use ladybugbot token
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: docs/
-          force_orphan: true
-          keep_files: false
-          full_commit_message: 'deploy: update docs'
+          pip install packaging
+          ./get-old-requirements.py --input requirements-to-freeze.txt --output requirements.txt
+      - name: Prepare newest requirements
+        if: matrix.requirements == 'newest'
+        run: cp requirements-to-freeze.txt requirements.txt
+      - name: Install requirements
+        run: pip install --upgrade --upgrade-strategy eager -r requirements.txt
+      - name: Build
+        run: make
+      - name: Test
+        run: make check

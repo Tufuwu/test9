@@ -1,68 +1,29 @@
-[![Build Status](https://travis-ci.com/ladybug-tools/honeybee-schema.svg?branch=master)](https://travis-ci.com/ladybug-tools/honeybee-schema)
-[![Coverage Status](https://coveralls.io/repos/github/ladybug-tools/honeybee-schema/badge.svg?branch=master)](https://coveralls.io/github/ladybug-tools/honeybee-schema)
+<!--
+Copyright 2020 Google LLC
 
-[![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/)
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-# honeybee-schema
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Honeybee Data-Model Objects
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
 
-This code was partially developed under the [Wells Fargo Innovation Incubator grant](https://newsroom.wf.com/press-release/community/five-clean-tech-startups-added-wells-fargo-innovation-incubator) with help from the
-[OpenStudio Team](https://github.com/NREL/OpenStudio) at [NREL](https://www.nrel.gov/).
+# Duployan font
 
-## Installation
+A Unicode font for Duployan.
 
-```console
-pip install honeybee-schema
-```
+This is a project to improve support of Unicode Duployan.
+Currently, that means creating Noto Sans Duployan.
+After that, it will involve researching all Duployan variants and creating a
+font supporting them all, ultimately leading to a Unicode proposal to expand
+its Duployan repertoire.
 
-## QuickStart
+Notes on various systems are in the notes directory.
+Those are not part of the Noto Sans Duployan project.
 
-```python
-import honeybee_schema
-
-```
-
-## API Documentation
-
-[Model Schema](https://ladybug-tools.github.io/honeybee-schema/model.html)
-
-[Energy Simulation Parameter Schema](https://ladybug-tools.github.io/honeybee-schema/simulation-parameter.html)
-
-## Local Development
-
-1. Clone this repo locally
-
-```console
-git clone git@github.com:ladybug-tools/honeybee-schema
-
-# or
-
-git clone https://github.com/ladybug-tools/honeybee-schema
-```
-
-2. Install dependencies:
-
-```console
-cd honeybee-schema
-pip install -r dev-requirements.txt
-pip install -r requirements.txt
-```
-
-3. Run Tests:
-
-```console
-python -m pytest tests/
-```
-
-4. Generate Documentation:
-
-```python
-python ./docs.py
-```
-
-5. Generate Sample Files:
-
-```python
-python ./scripts/export_samples.py
-```

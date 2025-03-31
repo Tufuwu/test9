@@ -1,5 +1,5 @@
 # Copyright 2018-2019 David Corbett
-# Copyright 2019-2020 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,4 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-fonttools==4.17.0
+E000 202F 1BC48 E000::[uniE000.bound@0,0|uni2009.thin_space@160,0|u1BC48.ie@600,-235|uniE000.bound@720,0|_@795,0]

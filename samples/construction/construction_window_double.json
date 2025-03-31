@@ -1,9 +1,0 @@
-{
-    "type": "WindowConstructionAbridged",
-    "identifier": "Generic Double Pane",
-    "layers": [
-        "Generic Low-e Glass",
-        "Generic Window Air Gap",
-        "Generic Clear Glass"
-    ]
-}
