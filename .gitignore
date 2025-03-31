@@ -1,23 +1,14 @@
-# Addon input files
-addons.txt
-installed.ini
-addons-classic.txt
-addons-retail.txt
-addons-test.txt
-config-classic.ini
-config-retail.ini
-config-test.ini
-installed-classic.ini
-installed-test.ini
-
-# Settings for IntelliJ
+*.pyc
+*.egg-info
+build/
+dist/
 .idea/
-
-# Compiled pyc files
-__pycache__/
-.vscode/
-desktop.ini
-
-\.coverage
-
-*.log
+.tox/
+.cache/
+.coverage*
+coverage.xml
+.pytest_cache
+.venv/
+docs/_build
+docs/_static
+docs/_templates
