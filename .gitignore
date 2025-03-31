@@ -1,9 +1,6 @@
-act/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*$py.class
 
 # C extensions
 *.so
@@ -16,13 +13,11 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-.eggs/
 lib/
 lib64/
 parts/
 sdist/
 var/
-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -32,6 +27,7 @@ wheels/
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+MANIFEST
 
 # Installer logs
 pip-log.txt
@@ -41,13 +37,9 @@ pip-delete-this-directory.txt
 htmlcov/
 .tox/
 .coverage
-.coverage.*
 .cache
 nosetests.xml
 coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
 
 # Translations
 *.mo
@@ -55,59 +47,25 @@ coverage.xml
 
 # Django stuff:
 *.log
-local_settings.py
 
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
+# shell stuff
+#*.sh
 
 # Sphinx documentation
 docs/_build/
-# sphinx-autobuild
-docs/Repocloupdocs_build/
-# sphinx-autoapi
-docs/autoapi
 
 # PyBuilder
-target/
+.idea/
 
-# Jupyter Notebook
+# ignore all .ipynb_checkpoints
 .ipynb_checkpoints
 
-# pyenv
-.python-version
-
-# celery beat schedule file
-celerybeat-schedule
-
-# SageMath parsed files
-*.sage.py
-
-# dotenv
-.env
-
-# virtualenv
-.venv
-venv/
-ENV/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-
-# IDE settings
+# Visual Studio Code
 .vscode/
-.idea/
+
+# Ignore mypy cache
+.mypy_cache
+
+# Autotest artifacts
+autotest/bin
+autotest/temp

@@ -1,42 +1,28 @@
-#!/usr/bin/env python
+import sys
+from setuptools import setup
 
-"""The setup script."""
+__version__ = "0.1.0"
+__name__ = "amipy"
+__author__ = "Martijn Russcher"
 
-from setuptools import setup, find_packages
+# ensure minimum version of Python is running
+if sys.version_info[0:2] < (3, 6):
+    raise RuntimeError("amipy requires Python >= 3.6")
 
-with open('README.rst') as readme_file:
-    readme = readme_file.read()
-
-with open('CHANGELOG.rst') as history_file:
-    history = history_file.read()
 
 setup(
-    # Name, author, description and other info
-    name='cloup',
-    version='0.4.2',
-    author="Gianluca Gippetto",
-    author_email='gianluca.gippetto@gmail.com',
-    description="Option groups and subcommand help sections for pallets/click",
-    long_description=readme + '\n\n' + history,
-    long_description_content_type='text/x-rst',
-    url='https://github.com/janLuke/cloup',
-    license="MIT license",
-    keywords='cloup click option',
-    classifiers=[
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-    ],
-    packages=find_packages(include=['cloup', 'cloup.*']),
-    zip_safe=False,
+    name=__name__,
+    description="amipy is a extension to the pybmi Python package .",
+    long_description="amipy is a extension to the pybmi Python package "
+    + "for MODFLOW 6 and other codes.",
+    author=__author__,
+    author_email="Martijn.Russcher@deltares.nl",
+    url="https://github.com/mjr-deltares/modflow6-bmipy.git",
+    license="CC0",
+    platforms="Windows, Mac OS-X, Linux",
+    install_requires=["bmipy", "numpy"],
+    packages=[__name__],
     include_package_data=True,
-    python_requires='>=3.6',
-    install_requires=[
-        'click>=7.0,<9.0'
-    ],
+    version=__version__,
+    classifiers=["Topic :: Scientific/Engineering :: Hydrology"],
 )
