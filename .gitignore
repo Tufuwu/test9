@@ -1,10 +1,39 @@
-*.pyc
-*.egg-info
-.coverage
-.eggs
-.tox
-.python-version
-dist
+*.py[cod]
+__pycache__
 
-# Managed by setuptools_scm.
-vint/__version__.py
+# PyCharm stuffs
+.idea/
+.cache/
+
+# coverage stuffs
+.coverage
+cover
+
+# Notebook stuffs
+examples/*checkpoints
+.ipynb_checkpoints
+
+# Tests stuffs
+salem/tests/result_images
+result_images
+sandbox*.py
+
+# Packages
+*.egg
+*.egg-info
+eggs
+
+# specific
+salem/tests/tmp*
+*.html
+build/
+docs/*-gen.rst
+docs/_build
+docs/_build_html
+docs/generated
+docs/_sources
+docs/_images
+docs/.doctrees
+docs/auto_examples
+docs/modules
+salem/version.py

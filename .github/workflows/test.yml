@@ -1,37 +1,72 @@
-name: CI
+name: Test
 
-on: [push, pull_request]
-
-env:
-  PYTEST_ADDOPTS: "--cov-report=xml --color=yes"
-  TOX_TESTENV_PASSENV: 'TERM'
-
-permissions:
-  contents: read
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
+    name: ${{ matrix.test-env }}
     strategy:
+      fail-fast: false
       matrix:
-        python: ["3.9", "3.10"]
+        test-env:
+          - py36-all
+          - py37-all
+          - py38-all
+          - py38-xarray-dev
+          - py38-all-rc
+        use-mpl:
+          - "--mpl"
         include:
-          - python: '3.9'
-            toxenv: py310-cov
-          - python: '3.9'
-            toxenv: py39-cov
-          - python: '3.9'
-            toxenv: py38-cov
+          - test-env: py38-min
+            use-mpl: ""
+          - test-env: py38-xr
+            use-mpl: ""
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -leo pipefail {0}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: '${{ matrix.python }}'
-      - run: pip install tox
-      - run: tox
+          environment-file: ci/requirements-${{ matrix.test-env }}.yml
+          activate-environment: test_env
+          auto-activate-base: false
+          auto-update-conda: true
+      - name: Install Self
+        run: pip install -e .
+      - name: Test
+        run: |
+          coverage erase
+          coverage run --source=./salem --parallel-mode --module pytest ${{ matrix.use-mpl }} --verbose salem
+          coverage combine
+          coverage xml
+          coverage report --skip-covered
         env:
-          TOXENV: '${{ matrix.toxenv }}'
-          TERM: xterm
-      - uses: codecov/codecov-action@v3
-        with:
-          files: coverage.xml
+          MPLBACKEND: agg
+          COVERAGE_RCFILE: ${{ github.workspace }}/.coveragerc
+      - name: Upload Coverage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_PARALLEL: true
+        run: coveralls
+  finish-coveralls:
+    name: Coveralls Finished
+    needs: test
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+    - name: Coveralls Finished
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        pip3 install --upgrade coveralls &&
+        coveralls --finish

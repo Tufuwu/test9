@@ -1,1 +1,0 @@
-call function('s:Foo')
