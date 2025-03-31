@@ -1,65 +1,49 @@
-# This file is dual licensed under the terms of the Apache License, Version
-# 2.0, and the BSD License. See the LICENSE file in the root of this repository
-# for complete details.
-
-from __future__ import absolute_import, division, print_function
+import os
+import subprocess
+import tempfile
 
 import pytest
 
-from cryptography.hazmat.backends.openssl import backend as openssl_backend
 
-from .utils import (
-    check_backend_support,
-    load_wycheproof_tests,
-    skip_if_wycheproof_none,
-)
+@pytest.fixture
+def temp_dir():
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        yield os.path.realpath(tmpdirname)
 
 
-def pytest_report_header(config):
-    return "\n".join(
-        [
-            "OpenSSL: {}".format(openssl_backend.openssl_version_text()),
-            "FIPS Enabled: {}".format(openssl_backend._fips_enabled),
-        ]
-    )
+@pytest.fixture
+def git_env():
+    return {
+        "USERNAME": "synctogit_test",
+        "EMAIL": "none@none",
+    }
 
 
-def pytest_addoption(parser):
-    parser.addoption("--wycheproof-root", default=None)
+@pytest.fixture
+def call_git(git_env):
+    def _call_git(shell_command, *, cwd, space_trim=True):
+        # NOTE! That shell_command must be compatible with Windows.
+        # Have fun.
 
-
-def pytest_generate_tests(metafunc):
-    if "wycheproof" in metafunc.fixturenames:
-        wycheproof = metafunc.config.getoption("--wycheproof-root")
-        skip_if_wycheproof_none(wycheproof)
-
-        testcases = []
-        marker = metafunc.definition.get_closest_marker("wycheproof_tests")
-        for path in marker.args:
-            testcases.extend(load_wycheproof_tests(wycheproof, path))
-        metafunc.parametrize("wycheproof", testcases)
-
-
-def pytest_runtest_setup(item):
-    if openssl_backend._fips_enabled:
-        for marker in item.iter_markers(name="skip_fips"):
-            pytest.skip(marker.kwargs["reason"])
-
-
-@pytest.fixture()
-def backend(request):
-    required_interfaces = [
-        mark.kwargs["interface"]
-        for mark in request.node.iter_markers("requires_backend_interface")
-    ]
-    if not all(
-        isinstance(openssl_backend, iface) for iface in required_interfaces
-    ):
-        pytest.skip(
-            "OpenSSL doesn't implement required interfaces: {}".format(
-                required_interfaces
+        try:
+            p = subprocess.run(
+                shell_command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                cwd=cwd,
+                shell=True,
+                check=True,
+                env=git_env,
+                timeout=5,
             )
-        )
+            res = p.stdout.decode()
+            if space_trim:
+                res = res.strip()
+            else:
+                res = res.strip("\n")
+            return res
+        except subprocess.CalledProcessError as e:
+            print(e.stdout.decode())
+            raise
 
-    check_backend_support(openssl_backend, request)
-    return openssl_backend
+    return _call_git
