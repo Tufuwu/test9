@@ -1,61 +1,55 @@
-#!/usr/bin/env python
-import ast
-import codecs
-import os
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-import re
+import io
 from setuptools import find_packages, setup
 
-ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__)))
-init = os.path.join(ROOT, 'src', 'adminactions', '__init__.py')
+# This reads the __version__ variable from openfermioncirq/_version.py
+__version__ = None
+exec(open('openfermioncirq/_version.py').read())
 
+# Readme file as long_description:
+long_description = ('================\n' +
+                    'OpenFermion-Cirq\n' +
+                    '================\n')
+stream = io.open('README.rst', encoding='utf-8')
+stream.readline()
+long_description += stream.read()
+description = ('Quantum circuits for simulations ' +
+               'of quantum chemistry and materials.')
 
-def read(*parts):
-    with codecs.open(os.path.join(ROOT, 'src', 'requirements', *parts), 'r') as fp:
-        return fp.read()
+# Read in requirements.txt
+requirements = open('requirements.txt').readlines()
+requirements = [r.strip() for r in requirements]
 
+# install_requires should not be overly specific.
+# Change any == pinned deps to >=.
+# https://packaging.python.org/discussions/install-requires-vs-requirements/
+requirements = [r.replace('==', '>=') for r in requirements]
 
-_version_re = re.compile(r'__version__\s+=\s+(.*)')
-
-with open(init, 'rb') as f:
-    version = str(ast.literal_eval(_version_re.search(
-        f.read().decode('utf-8')).group(1)))
-
-requirements = read("install.pip")
-tests_require = read('testing.pip')
-dev_require = read('develop.pip')
+openfermioncirq_packages = ['openfermioncirq'] + [
+    'openfermioncirq.' + package
+    for package in find_packages(where='openfermioncirq')
+]
 
 setup(
-    name='django-adminactions',
-    version=version,
-    url='https://github.com/saxix/django-adminactions',
-    download_url='https://github.com/saxix/django-adminactions',
-    author='sax',
-    author_email='s.apostolico@gmail.com',
-    description="Collections of useful actions to use with django.contrib.admin.ModelAdmin",
-    license='MIT',
-    package_dir={'': 'src'},
-    packages=find_packages('src'),
-    include_package_data=True,
+    name='openfermioncirq',
+    version=__version__,
+    url='https://github.com/quantumlib/OpenFermion-Cirq',
+    author='The OpenFermion Developers',
+    author_email='openfermioncirq@googlegroups.com',
+    python_requires=('>=3.6.5'),
     install_requires=requirements,
-    tests_require=tests_require,
-    extras_require={
-        'test': requirements + tests_require,
-        'dev': dev_require + tests_require,
-    },
-    zip_safe=False,
-    platforms=['any'],
-    classifiers=[
-        'Environment :: Web Environment',
-        'Framework :: Django',
-        'Operating System :: OS Independent',
-        'Framework :: Django :: 2.2',
-        'Framework :: Django :: 3.0',
-        'Framework :: Django :: 3.1',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Intended Audience :: Developers'],
-    long_description=open('README.rst').read()
-)
+    license='Apache 2',
+    description=description,
+    long_description=long_description,
+    packages=openfermioncirq_packages)
