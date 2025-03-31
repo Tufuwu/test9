@@ -1,18 +1,26 @@
 {
-  "extends": "eslint-config-mitodl",
-  rules: {
-    "no-unused-vars": 0,
-    // module importing pattern have huge impact over performance, especially when it comes to lodash
-    // the below rule will restrict developers to do lodash global imports
-    // (i.e: "import { map } from 'lodash'" will be insisted to get replaced with "import map from 'lodash/map'")
-    // (refs: https://eslint.org/docs/2.0.0/rules/no-restricted-imports and https://www.blazemeter.com/blog/the-correct-way-to-import-lodash-libraries-a-benchmark)
-    "no-restricted-imports": [
-      "error",
-      {
-        "paths": [
-          "lodash"
-        ]
-      }
-    ]
-  }
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    }
+  },
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true,
+    "jquery": true
+  },
+  "extends": [
+    "standard",
+    "standard-jsx",
+    "plugin:jsx-a11y/recommended"
+  ],
+  "rules": {
+    "jsx-quotes": [2, "prefer-double"]
+  },
+  "plugins": [
+    "jsx-a11y"
+  ]
 }

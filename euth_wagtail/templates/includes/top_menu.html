@@ -1,0 +1,58 @@
+{% load i18n static url_translations wagtailcore_tags userindicator base_tags %}
+{% get_current_language as LANGUAGE_CODE %}
+{% load_site_menu "topmenu" as top_menu_items %}
+
+<nav class="navbar navbar-expand-sm navbar-light fixed-top main-menu">
+    <div class="container">
+
+      <div class="navbar__mobile">
+          <div class="navbar-brand">
+              <a href="/{{ LANGUAGE_CODE }}/">
+                  <img
+                      class="navbar-brand-logo"
+                      alt="Opin"
+                      src="{% static 'images/logo.svg' %}"
+                  >
+              </a>
+          </div>
+
+          <button
+            class="btn navbar-toggler ml-auto"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbar-collapse"
+            aria-controls="navbar-collapse"
+            aria-expanded="false"
+            aria-label="{% trans 'Toggle navigation' %}">
+            <i class="fas fa-bars"></i>
+          </button>
+
+      </div>
+
+        <div class="collapse navbar-collapse navbar-nav navbar-right ml-sm-auto" id="navbar-collapse">
+
+            <ul class="navbar-nav ml-sm-auto">
+              {% userindicator_menu %}
+
+              <li class="nav-item dropdown order-sm-2 px-3" id="language-selector"">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {{ LANGUAGE_CODE }}
+                    <i class="fa fa-caret-down pl-1" aria-hidden="true"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  {% get_available_languages as languages %}
+                  {% for lang_code, lang_name in languages %}
+                      {% if lang_code != LANGUAGE_CODE %}
+                          <a class="dropdown-item" href="{% translate_url lang_code %}">{{ lang_code }}</a>
+                      {% endif %}
+                  {% endfor %}
+                </div>
+              </li>
+              {% for menuitem in top_menu_items %}
+              <li class="nav-item"><a href="{{ menuitem.url }}" class="nav-link px-3 {% if request.path == menuitem.url %} is-active{% endif %}">{{ menuitem.translated_menu_title }}</a></li>
+              {% endfor %}
+            </ul>
+        </div>
+        </div>
+    </div>
+</nav>

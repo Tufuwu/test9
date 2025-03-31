@@ -1,13 +1,24 @@
 root = true
 
-[*.py]
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
 indent_style = space
 indent_size = 4
-trim_trailing_whitespace = true
-insert_final_newline = true
 
-[*.js]
-indent_style = space
+[*.{py,html,css,scss}]
+indent_size = 4
+
+[*.{js,jsx,json}]
 indent_size = 2
-trim_trailing_whitespace = true
-insert_final_newline = true
+
+[Makefile]
+indent_style = tab
+
+# isort configruation
+[*.py]
+skip=migrations
+known_first_party=adhocracy4, tests, euth, euth_wagtail
+force_single_line = true

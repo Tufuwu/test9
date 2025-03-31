@@ -1,0 +1,219 @@
+.idea-image {
+    width: 100%;
+    margin: 2*$spacer 0;
+}
+
+.idea-title {
+    h1 {
+        font-family: $font-family-sans-serif;
+        font-weight: bold;
+        font-size: 24px;
+        line-height: 1.3;
+        margin: 0 0 10px 0;
+        max-width: 70%;
+
+        @media (max-width: $screen-sm-min) {
+            max-width: none;
+        }
+    }
+}
+
+.idea-description {
+    margin: 2*$spacer 0;
+
+    p {
+        font-family: $font-family-sans-serif;
+        font-size: $font-size-medium;
+        line-height: 1.6;
+        color: $black;
+    }
+
+    @media (max-width: $screen-sm-min) {
+        margin-bottom: 30px;
+    }
+}
+
+.idea-body {
+    position: relative;
+}
+
+.idea-list {
+    padding-top: 82px;
+
+    h2 {
+        font-family: $font-family-sans-serif;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 24px;
+        color: $black;
+    }
+
+    .idea-list-description {
+        font-family: $font-family-sans-serif;
+        font-size: $font-size-medium;
+        line-height: 1.6;
+        text-align: justify;
+        color: $black;
+    }
+}
+
+.idea-list-tile {
+    @extend .tile-list;
+
+    clear: right;
+}
+
+.idea-list-controls {
+    position: relative;
+    margin-top: 10px;
+
+    @include clearfix;
+
+    .idea-list-filter {
+        float: left;
+        padding-bottom: 0;
+    }
+}
+
+.idea-tile-image-link {
+    @extend .tile-image-link;
+    background-color: $brand-brand1;
+    bottom: 0;
+    height: auto;
+
+    @media (max-width: $screen-sm-min) {
+        position: static;
+        display: block;
+        width: 100%;
+        height: 150px;
+    }
+}
+
+.idea-comments-count {
+    font-size: 14;
+    letter-spacing: -0.2px;
+    text-align: justify;
+    line-height: 1.8;
+}
+
+.idea-tile-body {
+    margin-left: $tile-list-thumbnail-size;
+    padding: 20px 40px 20px 20px;
+    border: none;
+
+    @media (max-width: $screen-sm-min) {
+        padding: 12px 24px;
+        margin: 0;
+    }
+
+    h3 {
+        font-size: $font-size-medium;
+        margin: 0;
+        padding: 0;
+        line-height: 1.3;
+
+        @media (max-width: $screen-sm-min) {
+            font-size: $font-size-medium;
+        }
+    }
+
+    a {
+        color: $black;
+        text-decoration: none;
+
+        &:hover,
+        &:focus {
+            color: $brand-brand1;
+        }
+    }
+}
+
+.idea-meta {
+    text-align: right;
+
+    @media (max-width: $screen-sm-min) {
+        display: flex;
+        flex: 0 0 auto;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    @media (min-width: $screen-sm-min) {
+        padding-right: 0;
+    }
+}
+
+.idea-meta-item {
+    margin-right: 15px;
+    white-space: nowrap;
+
+    &.idea-upvotes i {
+        color: $brand-success;
+    }
+
+    &.idea-downvotes i {
+        color: $brand-danger;
+    }
+
+    &:last-child {
+        margin-right: 0;
+    }
+
+    @media (max-width: $screen-sm-min) {
+        font-size: $font-size-small;
+        margin-right: 5px;
+    }
+}
+
+.idea-date {
+    font-weight: normal;
+    white-space: nowrap;
+    margin-left: 5px;
+}
+
+.idea-list-button {
+    @extend .idea-list-tile;
+    display: block;
+    font-size: $font-size-large;
+    margin-top: 50px;
+    line-height: $tile-list-thumbnail-size;
+    background: transparent;
+    padding: 0;
+    text-align: center;
+    text-transform: uppercase;
+    width: 100%;
+    color: $black;
+    font-weight: bold;
+    transition: color 0.2s;
+
+    @media (max-width: $screen-xs) {
+        font-size: $font-size-medium;
+    }
+
+    &:hover {
+        color: $brand-success;
+        text-decoration: none;
+    }
+
+    .idea-list-button-icon {
+        height: $tile-list-thumbnail-size;
+        width: $tile-list-thumbnail-size;
+        background: $brand-success;
+        color: $body-bg;
+        float: left;
+
+        @media (max-width: $screen-xs) {
+            // -2px border
+            width: $tile-list-thumbnail-size - 20px - 2px;
+        }
+
+        &:before {
+            font-size: 50px;
+            line-height: $tile-list-thumbnail-size;
+        }
+    }
+}
+
+.proposals-project {
+    margin-bottom: 30px;
+}

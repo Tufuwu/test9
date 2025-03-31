@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load i18n static contrib_tags %}
+
+{% block title %}{% trans 'Projects on Opin.me' %}{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <header class="container-narrow block page-intro" >
+            <h1 class="block-title">{% trans 'Take part in a project' %}</h1>
+        </header>
+
+        <ul class="nav nav-tabs tab-switch" role="tablist">
+            <li role="presentation" class="active">
+                <a href="{% url 'project-list' %}" class="tab-switch-active-link">{% trans 'Find a project' %}</a>
+            </li>
+            <li role="presentation">
+                <a href="{% url 'organisation-list' %}">{% trans 'Search for organisation' %}</a>
+            </li>
+        </ul>
+
+        <section class="page-body">
+            <div class="filter-bar flexbox-list">
+            {% for field in view.filter.form %}
+                {% if field.name != 'ordering' %}
+                <div class="filter hidden-xs projects-filter-{{ field.name }}">
+                    {{ field }}
+                </div>
+                {% else %}
+                <div class="ordering d-none d-sm-block projects-filter-{{ field.name }}">
+                    {{ field }}
+                </div>
+                {% endif %}
+                <div class="d-sm-none projects-filter-{{ field.name }}">
+                    {{ field }}
+                </div>
+            {% endfor %}
+            </div>
+
+            {% if project_list.count == 0 %}
+            <div class="no-results">
+            {% trans 'No projects found' %}
+            </div>
+            {% endif %}
+
+            {% if project_list.count > 0 %}
+            <div class="projects-grid">
+            {% for project in project_list %}
+            <div class="org-project-tile">
+                {% include "euth_projects/includes/project_tile.html" with project=project %}
+            </div>
+            {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if is_paginated %}
+            <div class="pagination-row">
+                <nav>
+                    <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                        {% combined_url_parameter request.GET page=page_obj.previous_page_number as url_par %}
+                        <a class="page-link" href="{{ url_par }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% limited_paginator page_obj as page_range %}
+                    {% for number in page_range %}
+                    {% combined_url_parameter request.GET page=number as url_par %}
+                    <li class="page-item">
+                        <a href="{{ url_par }}" class="page-link {% if page_obj.number == number %} page-current {% endif %}" >{{ number }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        {% combined_url_parameter request.GET page=page_obj.next_page_number as url_par %}
+                        <a class="page-link" href="{{ url_par }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+        </section>
+</div>
+{% endblock %}

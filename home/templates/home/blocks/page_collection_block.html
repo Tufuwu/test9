@@ -1,0 +1,25 @@
+{% load wagtailimages_tags wagtailcore_tags base_tags %}
+<div class="pagecollection">
+    <h2 class="h5 sans-serif"
+        id="{{ self.title|slugify }}">{{ self.title }}</h2>
+    <div class="row">
+        <div class="col-sm-3">
+            {% image self.image width-270 as image %}
+            <img src="{{ image.url }}" alt="" class="img-fluid">
+        </div>
+        <div class="col-sm-4">
+            <p>{{ self.intro_text }}</p>
+        </div>
+        <div class="col-sm-5">
+            <ul class="linklist">
+                {% for page in self.pages %}
+                    {% if page %}
+                        <li>
+                            <a href="{% pageurl page %}">{% get_page_name page %}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>

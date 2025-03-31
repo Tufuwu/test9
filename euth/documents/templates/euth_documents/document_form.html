@@ -1,0 +1,13 @@
+{% extends 'euth_projects/project_detail.html' %}
+{% load react_paragraphs i18n rules %}
+
+{% block phase_content %}
+<div>
+    {% has_perm 'euth_documents.create_document' request.user view.module as show_create_form %}
+    {% if show_create_form %}
+    {% react_paragraphs view.document view.module %}
+    {% else %}
+    {% trans 'Moderators are currently creating a document.' %}
+    {% endif %}
+</div>
+{% endblock %}

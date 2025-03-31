@@ -1,0 +1,62 @@
+.socialaccounts {
+    margin-top: -20px;
+}
+
+.socialaccount_providers {
+    padding: 10px 0 50px;
+    list-style: none;
+
+    .skinny-form & {
+        padding: 10px 50px 50px;
+    }
+
+    li {
+        display: inline-block;
+        margin-bottom: 0.3em;
+        max-width: 50%;
+    }
+}
+
+.socialaccount_provider {
+    background: $brand-brand1;
+    color: $body-bg;
+    font-size: 0.8em;
+
+    &:after {
+        font-family: "Font Awesome 5 Brands", sans-serif;
+        font-weight: 400; //for regular or brands
+        font-size: 1.4em;
+        vertical-align: middle;
+    }
+
+    &.github:after {
+        content: '\f09b'; //github
+    }
+
+    &.google {
+        background: $gplus;
+    }
+
+    &.google:after {
+        content: '\f1a0'; //google
+    }
+
+    &.facebook {
+        background-color: $facebook;
+    }
+
+    &.facebook:after {
+        content: '\f09a'; //facebook
+    }
+
+    &:hover,
+    &:focus,
+    &:active {
+        text-decoration: none;
+        color: $black;
+    }
+}
+
+.connections-form button {
+    margin-top: 10px;
+}

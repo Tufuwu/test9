@@ -6,34 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# Distribution / packaging
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-./lib/
-./lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
 # Unit test / coverage reports
 htmlcov/
 .tox/
@@ -42,65 +14,53 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*,cover
+*.cover
 .hypothesis/
-coverage/
-.nyc_output/
+.pytest_cache
 
 # Translations
 *.mo
 *.pot
 
-# Django stuff:
-*.log
-celerybeat-schedule.db
+# Environments
+venv/
+/pyvenv.cfg
+/pip-selfcheck.json
 
-# Sphinx documentation
-docs/_build/
+# Node
+node_modules/
+package-lock.json
+npm-debug.log*
+/webpack-stats.json
 
-# PyBuilder
-target/
-
-#Ipython/Jupyter Notebook
-.ipynb_checkpoints
-*.ipynb
-
-# Heroku/Foreman
-.env
-
-# webpack
-static/bundles
-node_modules
-
-# JS directories
-!static/js/lib
-
-# Editor stuff
-*.swp
-*.orig
-
-/nbproject
+# IDEs
 .idea/
-.redcar/
-codekit-config.json
-.pycharm_helpers/
 
-.project
-.pydevproject
+# Django databases
+*.sqlite3
+db.sqlite3*
 
-*.DS_Store
+# Local instance specific settings
+/euth_wagtail/settings/local.py
 
-# Django static
-staticfiles/
+# Generated static files
+/euth_wagtail/static/bundles
 
-.venv
-release-notes-checklist
+# Media
+media/
 
-# Webpack
-webpack-stats.json
+# setuptools
+/build
+/dist
+/*.egg-info
+/share
 
-# Celery Beat
-celerybeat-schedule
+# OS
+.DS_Store
 
-# Google API token file (for local testing)
-localdev/google.token
+# sass
+.sass-cache
+
+# Static
+/static/
+/euth_wagtail/static

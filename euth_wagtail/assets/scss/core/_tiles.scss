@@ -1,0 +1,60 @@
+%tile {
+    margin: 0 13px 13px 0;
+    box-shadow: 1px 1px 20px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    text-align: left;
+}
+
+%tile-title {
+    font-size: $font-size-medium;
+    margin: 0 0 10px;
+    line-height: 1.2;
+    text-align: left;
+}
+
+%tile-teaser-text {
+    font-size: $font-size-small;
+    line-height: 1.571428571;
+    margin-bottom: 0;
+}
+
+%tile-org {
+    font-size: $font-size-small;
+    margin: 25px 0 0;
+    font-weight: normal;
+
+    img.project-tile-org-avatar {
+        margin-right: 9px;
+        float: left;
+        width: auto;
+        height: 30px;
+    }
+}
+
+%tile-location {
+    margin-bottom: 10px;
+    font-size: $font-size-small;
+    display: block;
+    text-align: center;
+}
+
+$tile-list-thumbnail-size: 120px;
+
+.tile-list {
+    @extend %tile;
+    box-shadow: 1px 1px 10px 2px rgba(0, 0, 0, 0.1);
+    margin-right: 0;
+    min-height: $tile-list-thumbnail-size;
+    position: relative;
+}
+
+.tile-image-link {
+    height: $tile-list-thumbnail-size;
+    width: $tile-list-thumbnail-size;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    left: 0;
+    position: absolute;
+    top: 0;
+}

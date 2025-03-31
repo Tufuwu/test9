@@ -1,0 +1,56 @@
+.radio-action {
+    float: left;
+    margin-right: 20px;
+
+    input {
+        display: none;
+    }
+}
+
+.radio-label {
+    margin-bottom: 0;
+
+    &:before {
+        display: block;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        font-family: "Font Awesome 5 Free", sans-serif;
+        font-weight: 900;
+        line-height: 30px;
+        font-size: $font-size-base;
+        text-align: center;
+    }
+
+    &.accept:before {
+        content: '\f00c'; //check
+        border: 2px solid $brand-success;
+        color: $brand-success;
+    }
+
+    &.decline:before,
+    &.delete:before {
+        content: '\f00d'; //times
+        border: 2px solid $brand-danger;
+        color: $brand-danger;
+    }
+
+    &.delete:before {
+        content: '\f235'; //user-times
+    }
+
+    :checked + &.accept:before {
+        background-color: $brand-success;
+        color: $body-bg;
+    }
+
+    :checked + &.decline:before,
+    :checked + &.delete:before {
+        background-color: $brand-danger;
+        color: $body-bg;
+    }
+}
+
+.radio-text {
+    display: none;
+}

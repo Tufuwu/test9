@@ -1,0 +1,111 @@
+body {
+    padding-top: $navbar-height + $spacer;
+}
+
+.main-menu {
+    background: $body-bg;
+    min-height: 60px;
+
+    .navbar-brand {
+        height: 60px;
+        width: 32px;
+    }
+
+    .navbar-toggle {
+        margin: $spacer $spacer $spacer 0;
+        border: 0; //
+        padding: 0.5*$spacer; //
+    }
+
+    .navbar__mobile {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 2px solid $gray-lighter;
+    }
+
+    .navbar-collapse.show,
+    .navbar-collapse.collapsing {
+        width: 100%;
+        margin-left: -$spacer;
+        margin-right: -$spacer;
+    }
+
+    .navbar-collapse.show > .navbar-nav,
+    .navbar-collapse.collapsing > .navbar-nav {
+        width: 100%;
+        margin-left: -$spacer;
+        margin-right: -$spacer;
+    }
+
+    a,
+    button {
+        color: $gray-base;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .nav-link {
+        color: $black !important;
+    }
+
+    .dropdown-menu {
+        border-width: 0;
+        padding-bottom: 0;
+    }
+
+    .dropdown a,
+    .dropdown button {
+        font-weight: bold;
+    }
+
+    .logout-button-form button {
+        width: 100%;
+        border: 0;
+        text-align: left;
+        padding: 0.5*$spacer 0 0.5*$spacer $spacer;
+        background-color: transparent;
+
+        &:hover {
+            color: $brand-brand1;
+        }
+    }
+
+    .dropdown-menu.show a.dropdown-toggle,
+    .dropdown-menu.show a,
+    .dropdown-menu.show button {
+        &:hover,
+        &:focus,
+        &.is-active {
+            background-color: transparent;
+            color: $brand-brand1;
+        }
+    }
+
+    .dropdown-text {
+        padding-left: $spacer;
+    }
+
+    .logout-button-form {
+        background-color: $gray-lighter;
+    }
+
+    @media (min-width: $screen-sm-min) {
+        max-height: $navbar-height;
+
+        .navbar__mobile {
+            width: auto;
+            display: inline-block;
+            border-bottom: none;
+        }
+
+        .dropdown-menu {
+            border-width: 1px;
+        }
+
+        .navbar-brand {
+            font-size: $font-size-small;
+            width: 47px;
+        }
+    }
+}

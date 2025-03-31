@@ -1,21 +1,11 @@
 [run]
-branch = True
-source = .
-data_file=/tmp/coverage
+source =
+    euth
 omit =
-    mitxpro/wsgi.py
-    manage.py
-    ./.tox/*
     */migrations/*
-    *_test.py
-    *_tests.py
-
-[report]
-fail_under = 80.0
-exclude_lines =
-    pragma: no cover
-show_missing = True
-precision = 2
-
-[html]
-directory = htmlcov
+    */tests.py
+    */test_*.py
+    */autofixtures.py
+    */flashpoll/*
+    */offlinephases/*
+    */users/management/commands/import_a3_users.py
