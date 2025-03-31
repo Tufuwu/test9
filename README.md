@@ -1,69 +1,136 @@
-# Rank-BM25: A two line search engine
+# InfluxAlchemy
 
-![Build Status](https://github.com/dorianbrown/rank_bm25/workflows/pytest/badge.svg)
-[![PyPI version](https://badge.fury.io/py/rank-bm25.svg)](https://badge.fury.io/py/rank-bm25)
-[![DOI](https://zenodo.org/badge/166720547.svg)](https://zenodo.org/badge/latestdoi/166720547)
+[![pytest](https://github.com/amancevice/influxalchemy/workflows/pytest/badge.svg)](https://github.com/amancevice/influxalchemy/actions)
+[![PyPI Version](https://badge.fury.io/py/influxalchemy.svg)](https://badge.fury.io/py/influxalchemy)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/fd0e15a31b2ed8a0ccca/test_coverage)](https://codeclimate.com/github/amancevice/influxalchemy/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/fd0e15a31b2ed8a0ccca/maintainability)](https://codeclimate.com/github/amancevice/influxalchemy/maintainability)
 
-A collection of algorithms for querying a set of documents and returning the ones most relevant to the query. The most common use case for these algorithms is, as you might have guessed, to create search engines.
+Query InfluxDB using SQLAlchemy-style syntax
 
-So far the algorithms that have been implemented are:
-- [x] Okapi BM25
-- [x] BM25L
-- [x] BM25+
-- [ ] BM25-Adpt
-- [ ] BM25T 
-
-These algorithms were taken from [this paper](http://www.cs.otago.ac.nz/homepages/andrew/papers/2014-2.pdf), which gives a nice overview of each method, and also benchmarks them against each other. A nice inclusion is that they compare different kinds of preprocessing like stemming vs no-stemming, stopword removal or not, etc. Great read if you're new to the topic. 
 
 ## Installation
-The easiest way to install this package is through `pip`, using
+
 ```bash
-pip install rank_bm25
+pip install influxalchemy
 ```
-If you want to be sure you're getting the newest version, you can install it directly from github with
-```bash
-pip install git+ssh://git@github.com/dorianbrown/rank_bm25.git
-```
+
 
 ## Usage
-For this example we'll be using the `BM25Okapi` algorithm, but the others are used in pretty much the same way.
 
-### Initalizing
-
-First thing to do is create an instance of the BM25 class, which reads in a corpus of text and does some indexing on it:
 ```python
-from rank_bm25 import BM25Okapi
-
-corpus = [
-    "Hello there good man!",
-    "It is quite windy in London",
-    "How is the weather today?"
-]
-
-tokenized_corpus = [doc.split(" ") for doc in corpus]
-
-bm25 = BM25Okapi(tokenized_corpus)
-# <rank_bm25.BM25Okapi at 0x1047881d0>
+import influxdb
+import influxalchemy
 ```
-Note that this package doesn't do any text preprocessing. If you want to do things like lowercasing, stopword removal, stemming, etc, you need to do it yourself. 
 
-The only requirements is that the class receives a list of lists of strings, which are the document tokens.
 
-### Ranking of documents
+### Define InfluxAlchemy Measurements
 
-Now that we've created our document indexes, we can give it queries and see which documents are the most relevant:
 ```python
-query = "windy London"
-tokenized_query = query.split(" ")
+class Widgets(influxalchemy.Measurement):
+    __measurement__ = 'widgets'
 
-doc_scores = bm25.get_scores(tokenized_query)
-# array([0.        , 0.93729472, 0.        ])
+
+class Wombats(influxalchemy.Measurement):
+    __measurement__ = 'wombats'
 ```
-Good to note that we also need to tokenize our query, and apply the same preprocessing steps we did to the documents in order to have an apples-to-apples comparison
 
-Instead of getting the document scores, you can also just retrieve the best documents with
+The class-attribute `__measurement__` can be omitted and will default to the class name if absent.
+
+
+### Open InfluxAlchemy Connection
+
+
 ```python
-bm25.get_top_n(tokenized_query, corpus, n=1)
-# ['It is quite windy in London']
+db = influxdb.DataFrameClient(database="example")
+flux = influxalchemy.InfluxAlchemy(db)
 ```
-And that's pretty much it!
+
+
+## Query InfluxDB
+
+
+### Query Single Measurement
+
+```python
+# SELECT * FROM widgets;
+flux.query(Widgets)
+```
+
+
+### Query Ad Hoc Measurement
+
+```python
+# SELECT * from /.*/;
+flux.query(influxalchemy.Measurement.new("/.*/"))
+```
+
+
+### Select Fields of Measurement
+
+```python
+# SELECT tag1, field2 FROM widgets;
+flux.query(Widgets.tag1, Widgets.field2)
+```
+
+
+### Query Across Measurements
+
+```python
+# SELECT * FROM /widgets|wombats/;
+flux.query(Widgets | Wombats)
+```
+
+
+### Filter Tags
+
+```python
+# SELECT * FROM widgets WHERE tag1 = 'fizz';
+flux.query(Widgets).filter(Widgets.tag1 == "fizz")
+```
+
+
+### Filter Tags with 'like'
+
+```python
+# SELECT * FROM widgets WHERE tag1 =~ /z$/;
+flux.query(Widgets).filter(Widgets.tag1.like("/z$/"))
+```
+
+
+### Chain Filters
+
+```python
+clause1 = Widgets.tag1 == "fizz"
+clause2 = Widgets.tag2 == "buzz"
+
+# SELECT * FROM widgets WHERE tag1 = 'fizz' AND tag2 = 'buzz';
+flux.query(Widgets).filter(clause1 & clause2)
+
+# SELECT * FROM widgets WHERE tag1 = 'fizz' OR tag2 = 'buzz';
+flux.query(Widgets).filter(clause1 | clause2)
+```
+
+
+### Group By
+
+```python
+# SELECT * FROM widgets GROUP BY time(1d);
+flux.query(Widgets).group_by("time(1d)")
+
+# SELECT * FROM widgets GROUP BY tag1;
+flux.query(Widgets).group_by(Widgets.tag1)
+```
+
+
+### Time
+
+```python
+# SELECT * FROM widgets WHERE (time > now() - 7d);
+flux.query(Widgets).filter(Widgets.time > "now() - 7d")
+
+# SELECT * FROM widgets WHERE time >= '2016-01-01' AND time <= now() - 7d;
+d = date(2016, 1, 1)
+flux.query(Widgets).filter(Widgets.time.between(d, "now() - 7d"))
+```
+
+Note that naive datetime object will be assumed in UTC timezone.

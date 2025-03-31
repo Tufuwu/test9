@@ -1,32 +1,25 @@
+from setuptools import find_packages
 from setuptools import setup
-import io
-import os
 
-here = os.path.abspath(os.path.dirname(__file__))
-
-short_description = 'Various BM25 algorithms for document ranking'
-
-try:
-    with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
-        long_description = '\n' + f.read()
-except FileNotFoundError:
-    long_description = short_description
+with open('README.md', 'r') as readme:
+    long_description = readme.read()
 
 setup(
-    name='rank_bm25',
-    version='0.2.1',
-    description=short_description,
+    author='amancevice',
+    author_email='smallweirdnum@gmail.com',
+    description='Interact with InfluxDB using SQLAlchemy-style syntax',
+    install_requires=[
+        'influxdb >= 5.0',
+        'pytz >= 2018.3',
+        'requests >= 2.20',
+        'six >= 1.11',
+    ],
     long_description=long_description,
     long_description_content_type='text/markdown',
-    author='D. Brown',
-    author_email='dorianstuartbrown@gmail.com',
-    url="https://github.com/dorianbrown/rank_bm25",
-    license='Apache2.0',
-    py_modules=['rank_bm25'],
-    install_requires=['numpy'],
-    extras_require={
-        'dev': [
-            'pytest'
-        ]
-    }
+    name='influxalchemy',
+    packages=find_packages(exclude=['tests']),
+    python_requires='>= 3.5',
+    setup_requires=['setuptools_scm'],
+    url='https://github.com/amancevice/influxalchemy',
+    use_scm_version=True,
 )

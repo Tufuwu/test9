@@ -1,25 +1,42 @@
 name: pytest
 
-on: [push]
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "11 21 * * *"
 
 jobs:
-  build:
-
+  pytest:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10"]
+        python: ["3.9", "3.10"]
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Test with pytest
-      run: |
-        pytest
+
+      - uses: actions/checkout@v1
+
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Setup code climate
+        uses: amancevice/code-climate-action@v0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          command: before-build
+
+      - run: pip install . flake8 pytest pytest-cov
+      - run: flake8
+      - run: pytest
+
+      - name: Send coverage
+        uses: amancevice/code-climate-action@v0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          command: after-build
