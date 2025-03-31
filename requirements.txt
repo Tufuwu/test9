@@ -1,4 +1,0 @@
-requests
-mt-940
-sepaxml==2.1.*
-bleach

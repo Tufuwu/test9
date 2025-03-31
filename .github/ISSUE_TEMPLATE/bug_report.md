@@ -1,35 +1,36 @@
 ---
 name: Bug report
-about: General bug report
+about: Create a report to help us improve
 title: ''
-labels: ''
+labels: bug
 assignees: ''
 
 ---
 
-<!--
-Make sure to read
-https://python-fints.readthedocs.io/en/latest/trouble.html
-before you file a bug
--->
-
 **Describe the bug**
 A clear and concise description of what the bug is.
 
-**Bank I tested this with*
-Name of the bank:
-FinTS URL:
+**How to reproduce***
+
+Provide both code and a small JSON document that triggers the problem.
+
+```python
+JSON = b"""
+[1, 2, 3, 4]
+"""
+for o in ijson.items(JSON, 'item'):
+    raise ValueError('this failed')
+```
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Code required to reproduce**
-```
-Your sample code
-```
-
-**Log output / error message**
-<!-- Please make sure to remove all sensitive private information -->
+**Execution information:**
+ - Python version [e.g. 3.7]
+ - ijson version [e.g. 3.1.2]
+ - ijson backend (if applies) [e.g. yajl2_c]
+ - ijson installation method [e.g. package manager, pip, git sources, conda]
+ - OS [e.g. linux]
 
 **Additional context**
 Add any other context about the problem here.
