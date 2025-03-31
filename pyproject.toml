@@ -1,0 +1,75 @@
+[build-system]
+requires = [
+  "setuptools>=42",
+  "setuptools_scm[toml]>=3.4",
+  "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+# See link below for available options
+# https://github.com/pypa/setuptools_scm/#configuration-parameters
+
+write_to = "pystiche/_version.py"
+version_scheme = "guess-next-dev"
+local_scheme = "node-and-timestamp"
+
+[tool.isort]
+# See link below for available options
+# https://github.com/timothycrosley/isort/wiki/isort-Settings#full-reference-of-isort-settings
+
+skip = [
+  ".git",
+  ".github",
+  ".venv",
+  ".tox",
+  ".mypy_cache",
+  ".pytest_cache",
+  "__pycache__",
+  "hubconf.py",
+  "docs/build",
+  "docs/source/galleries",
+  "pystiche/__init__.py",
+  "pystiche/image/__init__.py",
+]
+line_length = 88
+use_parentheses = true
+multi_line_output = 3
+force_grid_wrap = 0
+include_trailing_comma = true
+
+known_standard_library = ["importlib_metadata", "typing_extensions"]
+known_third_party = [
+  "dill",
+  "matplotlib",
+  "numpy",
+  "PIL",
+  "pillow_affine",
+  "pyimagetest",
+  "pytest",
+  "requests",
+  "sphinx_gallery",
+]
+known_pytorch = ["torch", "torchvision"]
+known_first_party = ["pystiche"]
+sections= ["FUTURE", "STDLIB", "THIRDPARTY", "PYTORCH", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.black]
+# See link below for available options
+# https://github.com/psf/black#configuration-format
+
+line-length = 88
+target-version = ["py36"]
+exclude = '''
+/(
+    \.git
+  | \.github
+  | \.venv
+  | \.tox
+  | \.mypy_cache
+  | \.pytest_cache
+  | __pycache__
+  | docs/build
+  | docs/source/galleries
+)/
+'''
