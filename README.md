@@ -1,50 +1,59 @@
+SQLAlchemy Adapter for PyCasbin 
+====
 
-[![Runboat](https://img.shields.io/badge/runboat-Try%20me-875A7B.png)](https://runboat.odoo-community.org/builds?repo=OCA/connector-telephony&target_branch=14.0)
-[![Pre-commit Status](https://github.com/OCA/connector-telephony/actions/workflows/pre-commit.yml/badge.svg?branch=14.0)](https://github.com/OCA/connector-telephony/actions/workflows/pre-commit.yml?query=branch%3A14.0)
-[![Build Status](https://github.com/OCA/connector-telephony/actions/workflows/test.yml/badge.svg?branch=14.0)](https://github.com/OCA/connector-telephony/actions/workflows/test.yml?query=branch%3A14.0)
-[![codecov](https://codecov.io/gh/OCA/connector-telephony/branch/14.0/graph/badge.svg)](https://codecov.io/gh/OCA/connector-telephony)
-[![Translation Status](https://translation.odoo-community.org/widgets/connector-telephony-14-0/-/svg-badge.svg)](https://translation.odoo-community.org/engage/connector-telephony-14-0/?utm_source=widget)
+[![GitHub Actions](https://github.com/pycasbin/sqlalchemy-adapter/workflows/build/badge.svg?branch=master)](https://github.com/pycasbin/sqlalchemy-adapter/actions)
+[![Coverage Status](https://coveralls.io/repos/github/pycasbin/sqlalchemy-adapter/badge.svg)](https://coveralls.io/github/pycasbin/sqlalchemy-adapter)
+[![Version](https://img.shields.io/pypi/v/casbin_sqlalchemy_adapter.svg)](https://pypi.org/project/casbin_sqlalchemy_adapter/)
+[![PyPI - Wheel](https://img.shields.io/pypi/wheel/casbin_sqlalchemy_adapter.svg)](https://pypi.org/project/casbin_sqlalchemy_adapter/)
+[![Pyversions](https://img.shields.io/pypi/pyversions/casbin_sqlalchemy_adapter.svg)](https://pypi.org/project/casbin_sqlalchemy_adapter/)
+[![Download](https://img.shields.io/pypi/dm/casbin_sqlalchemy_adapter.svg)](https://pypi.org/project/casbin_sqlalchemy_adapter/)
+[![License](https://img.shields.io/pypi/l/casbin_sqlalchemy_adapter.svg)](https://pypi.org/project/casbin_sqlalchemy_adapter/)
 
-<!-- /!\ do not modify above this line -->
+SQLAlchemy Adapter is the [SQLAlchemy](https://www.sqlalchemy.org) adapter for [PyCasbin](https://github.com/casbin/pycasbin). With this library, Casbin can load policy from SQLAlchemy supported database or save policy to it.
 
-# connector-telephony
+Based on [Officially Supported Databases](http://www.sqlalchemy.org/), The current supported databases are:
 
-Tools for telephony services and phone number rendering
+- PostgreSQL
+- MySQL
+- SQLite
+- Oracle
+- Microsoft SQL Server
+- Firebird
+- Sybase
 
-<!-- /!\ do not modify below this line -->
+## Installation
 
-<!-- prettier-ignore-start -->
+```
+pip install casbin_sqlalchemy_adapter
+```
 
-[//]: # (addons)
+## Simple Example
 
-Available addons
-----------------
-addon | version | maintainers | summary
---- | --- | --- | ---
-[asterisk_click2dial](asterisk_click2dial/) | 14.0.1.0.0 | [![alexis-via](https://github.com/alexis-via.png?size=30px)](https://github.com/alexis-via) | Asterisk-Odoo connector
-[base_phone](base_phone/) | 14.0.1.0.0 | [![alexis-via](https://github.com/alexis-via.png?size=30px)](https://github.com/alexis-via) | Validate phone numbers
-[connector_voicent](connector_voicent/) | 14.0.1.0.0 | [![max3903](https://github.com/max3903.png?size=30px)](https://github.com/max3903) | Connect Odoo with Voicent
-[crm_phone](crm_phone/) | 14.0.1.1.0 | [![alexis-via](https://github.com/alexis-via.png?size=30px)](https://github.com/alexis-via) | Improve phone support in CRM
-[event_phone](event_phone/) | 14.0.1.0.0 | [![alexis-via](https://github.com/alexis-via.png?size=30px)](https://github.com/alexis-via) | Validate phone numbers in Events
-[hr_phone](hr_phone/) | 14.0.1.0.0 | [![alexis-via](https://github.com/alexis-via.png?size=30px)](https://github.com/alexis-via) | Validate phone numbers in HR
-[hr_recruitment_phone](hr_recruitment_phone/) | 14.0.1.0.0 | [![alexis-via](https://github.com/alexis-via.png?size=30px)](https://github.com/alexis-via) | Validate phone numbers in HR Recruitment
-[sms_no_alter_body](sms_no_alter_body/) | 14.0.1.0.0 |  | Avoid sms formatting between html and text
-[sms_no_automatic_delete](sms_no_automatic_delete/) | 14.0.1.1.0 |  | Avoid automatic delete of sended sms
-[sms_ovh_http](sms_ovh_http/) | 14.0.1.0.1 | [![sebastienbeau](https://github.com/sebastienbeau.png?size=30px)](https://github.com/sebastienbeau) | Send sms using ovh http API
+```python
+import casbin_sqlalchemy_adapter
+import casbin
 
-[//]: # (end addons)
+adapter = casbin_sqlalchemy_adapter.Adapter('sqlite:///test.db')
 
-<!-- prettier-ignore-end -->
+e = casbin.Enforcer('path/to/model.conf', adapter, True)
 
-## Licenses
+sub = "alice"  # the user that wants to access a resource.
+obj = "data1"  # the resource that is going to be accessed.
+act = "read"  # the operation that the user performs on the resource.
 
-This repository is licensed under [AGPL-3.0](LICENSE).
+if e.enforce(sub, obj, act):
+    # permit alice to read data1casbin_sqlalchemy_adapter
+    pass
+else:
+    # deny the request, show an error
+    pass
+```
 
-However, each module can have a totally different license, as long as they adhere to Odoo Community Association (OCA)
-policy. Consult each module's `__manifest__.py` file, which contains a `license` key
-that explains its license.
 
-----
-OCA, or the [Odoo Community Association](http://odoo-community.org/), is a nonprofit
-organization whose mission is to support the collaborative development of Odoo features
-and promote its widespread use.
+### Getting Help
+
+- [PyCasbin](https://github.com/casbin/pycasbin)
+
+### License
+
+This project is licensed under the [Apache 2.0 license](LICENSE).
