@@ -1,27 +1,22 @@
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-
+name: python-shaarli-client CI
+on: [push, pull_request]
 jobs:
-  build:
+  tox:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        prepared_statements: [true, false]
-    name: Python 3.9 / ${{ (matrix.prepared_statements && 'w/ prepared statements') || '' }}
-    env:
-      PREPARED_STATEMENTS: ${{ matrix.prepared_statements }}
+        python-version: ["3.9", "3.10"]
+    name: python
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - run: |
-        docker-compose --version
-        docker-compose --project-name django-multitenant up -d || { docker-compose logs && false ; }
-        docker-compose -f ./single-node-docker-compose.yml --project-name django-multitenant up -d
-        pip install tox
-        tox
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install requirements
+        run: pip install -r requirements/ci.txt
+      - name: Run tests
+        env:
+          TOXENV: py${{ matrix.python-version }}
+        run: tox

@@ -1,36 +1,62 @@
-from setuptools import setup, find_packages
-from os import path
-from io import open
+#!/usr/bin/env python3
+"""Setup script for shaarli-client"""
+import codecs
+import os
+import re
 
-# read the contents of your README file
-this_directory = path.dirname(path.abspath(__file__))
-
-with open(path.join(this_directory, "README.md")) as f:
-    long_description = f.read()
+from setuptools import find_packages, setup
 
 
-# Arguments marked as "Required" below must be included for upload to PyPI.
-# Fields marked as "Optional" may be commented out.
+def get_long_description():
+    """Reads the main README.rst to get the program's long description"""
+    with codecs.open('README.rst', 'r', 'utf-8') as f_readme:
+        return f_readme.read()
+
+
+def get_package_metadata(attribute):
+    """Reads metadata from the main package's __init__"""
+    with open(os.path.join('shaarli_client', '__init__.py'), 'r') as f_init:
+        return re.search(
+            r'^__{attr}__\s*=\s*[\'"]([^\'"]*)[\'"]'.format(attr=attribute),
+            f_init.read(), re.MULTILINE
+        ).group(1)
+
 
 setup(
-    name="django-multitenant",
-    version="3.0.0",  # Required
-    description="Django Library to Implement Multi-tenant databases",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/citusdata/django-multitenant",
-    author="Louise Grandjonc",
-    author_email="louise.grandjonc@microsoft.com",
-    # Classifiers help users find your project by categorizing it.
-    #
-    # For a list of valid classifiers, see https://pypi.org/classifiers/
-    classifiers=[
-        "Development Status :: 5 - Production/Stable ",
-        "Topic :: Database",
-        "License :: OSI Approved :: MIT License",
-        "Intended Audience :: Developers",
-        "Programming Language :: Python :: 3 :: Only",
+    name=get_package_metadata('title'),
+    version=get_package_metadata('version'),
+    description=get_package_metadata('brief'),
+    long_description=get_long_description(),
+    author=get_package_metadata('author'),
+    maintainer='VirtualTam',
+    maintainer_email='virtualtam@flibidi.net',
+    license='MIT',
+    url='https://github.com/shaarli/python-shaarli-client',
+    keywords='bookmark bookmarking shaarli social',
+    packages=find_packages(exclude=['tests.*', 'tests']),
+    entry_points={
+        'console_scripts': [
+            'shaarli = shaarli_client.main:main',
+        ],
+    },
+    install_requires=[
+        'requests >= 2.25',
+        'pyjwt == 2.0.1'
     ],
-    keywords=("citus django multi tenant" "django postgres multi-tenant"),
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: End Users/Desktop',
+        'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Topic :: Utilities',
+    ]
 )

@@ -1,6 +1,0 @@
-psycopg2
-tox
-pytest
-pytest-cov
-pytest-django
-exam
