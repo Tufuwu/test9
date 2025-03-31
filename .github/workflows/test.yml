@@ -1,49 +1,41 @@
-name: test
+name: ci
 
 on: [push, pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
-        django-version: [
-          'Django~=1.11.0',
-          'Django~=2.2.0',
-          'Django~=3.0.0',
-        ]
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
+      # Checkout Repository
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Install poetry
-      run: |
-        curl -sSL \
-          "https://raw.githubusercontent.com/python-poetry/poetry/main/get-poetry.py" | python
+      # Install Tools
+      - name: Install Tools
+        run: |
+          sudo apt-get install wget build-essential python3
+          pip3 install setuptools
+          pip3 install requests
 
-    - name: Set up cache
-      uses: actions/cache@v4
-      with:
-        path: .venv
-        key: venv-${{ matrix.python-version }}-${{ matrix.django-version }}-${{ hashFiles('poetry.lock') }}
-    - name: Install dependencies
-      run: |
-        source "$HOME/.poetry/env"
-        poetry config virtualenvs.in-project true
-        poetry install
-        pip install -U "${{ matrix.django-version }}"
+      # Install (n)Migen / LiteX / Cores
+      - name: Install LiteX
+        run: |
+          wget https://raw.githubusercontent.com/enjoy-digital/litex/main/litex_setup.py
+          python3 litex_setup.py init install --user
 
-    - name: "Run checks for python ${{ matrix.python-version }} and django ${{ matrix.django-version }}"
-      run: |
-        source "$HOME/.poetry/env"
-        make test
+      # Install RISC-V GCC
+      - name: Install RISC-V GCC
+        run: |
+          wget https://raw.githubusercontent.com/enjoy-digital/litex/main/litex_setup.py
+          python3 litex_setup.py gcc
+          ls $PWD/../riscv64-*/bin/
+          export PATH=$PATH:$(echo $PWD/../riscv64-*/bin/)
+          riscv64-unknown-elf-gcc --version
 
-    - name: Upload coverage to Codecov  
-      uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage.xml
+      # Install Project
+      - name: Install Project
+        run: python3 setup.py develop --user
+
+      # Test
+      - name: Run Tests
+        run: python3 setup.py test

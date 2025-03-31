@@ -1,284 +1,116 @@
-# django-test-migrations
+```
+                                 __   _ __      ___  ___  ___   __  ___
+                                / /  (_) /____ / _ \/ _ \/ _ | /  |/  /
+                               / /__/ / __/ -_) // / , _/ __ |/ /|_/ /
+                              /____/_/\__/\__/____/_/|_/_/ |_/_/  /_/
 
-[![wemake.services](https://img.shields.io/badge/%20-wemake.services-green.svg?label=%20&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC%2FxhBQAAAAFzUkdCAK7OHOkAAAAbUExURQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP%2F%2F%2F5TvxDIAAAAIdFJOUwAjRA8xXANAL%2Bv0SAAAADNJREFUGNNjYCAIOJjRBdBFWMkVQeGzcHAwksJnAPPZGOGAASzPzAEHEGVsLExQwE7YswCb7AFZSF3bbAAAAABJRU5ErkJggg%3D%3D)](https://wemake.services)
-[![Build status](https://github.com/wemake-services/django-test-migrations/workflows/test/badge.svg?branch=master&event=push)](https://github.com/wemake-services/django-test-migrations/actions?query=workflow%3Atest)
-[![codecov](https://codecov.io/gh/wemake-services/django-test-migrations/branch/master/graph/badge.svg)](https://codecov.io/gh/wemake-services/django-test-migrations)
-[![Python Version](https://img.shields.io/pypi/pyversions/django-test-migrations.svg)](https://pypi.org/project/django-test-migrations/)
-[![wemake-python-styleguide](https://img.shields.io/badge/style-wemake-000000.svg)](https://github.com/wemake-services/wemake-python-styleguide)
-
-
-## Features
-
-- Allows to test `django` schema and data migrations
-- Allows to test both forward and rollback migrations
-- Allows to test the migrations order
-- Allows to test migration names
-- Fully typed with annotations and checked with `mypy`, [PEP561 compatible](https://www.python.org/dev/peps/pep-0561/)
-- Easy to start: has lots of docs, tests, and tutorials
-
-Read the [announcing post](https://sobolevn.me/2019/10/testing-django-migrations).
-See real-world [usage example](https://github.com/wemake-services/wemake-django-template).
-
-
-## Installation
-
-```bash
-pip install django-test-migrations
+                                   Copyright 2015-2020 / EnjoyDigital
+                               A small footprint and configurable DRAM core
+                                        powered by Migen & LiteX
 ```
 
-We support several `django` versions:
-
-- `1.11`
-- `2.1`
-- `2.2`
-- `3.0`
-
-Other versions might work too, but they are not officially supported.
+[![](https://github.com/enjoy-digital/litedram/workflows/ci/badge.svg)](https://github.com/enjoy-digital/litedram/actions) ![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)
 
 
-## Testing django migrations
+[> Intro
+--------
+LiteDRAM provides a small footprint and configurable DRAM core.
 
-Testing migrations is not a frequent thing in `django` land.
-But, sometimes it is totally required. When?
+LiteDRAM is part of LiteX libraries whose aims are to lower entry level of
+complex FPGA cores by providing simple, elegant and efficient implementations
+of components used in today's SoC such as Ethernet, SATA, PCIe, SDRAM Controller...
 
-When we do complex schema or data changes
-and what to be sure that existing data won't be corrupted.
-We might also want to be sure that all migrations can be safely rolled back.
-And as a final touch we want to be sure that migrations
-are in the correct order and have correct dependencies.
+Using Migen to describe the HDL allows the core to be highly and easily configurable.
 
-### Testing forward migrations
+LiteDRAM can be used as LiteX library or can be integrated with your standard
+design flow by generating the verilog rtl that you will use as a standard core.
 
-To test all migrations we have a [`Migrator`](https://github.com/wemake-services/django-test-migrations/blob/master/django_test_migrations/migrator.py) class.
+[> Features
+-----------
+PHY:
+  - Generic SDRAM PHY (vendor agnostic, tested on Xilinx, Altera, Lattice)
+  - Spartan6 DDR/LPDDR/DDR2/DDR3 PHY (1:2 or 1:4 frequency ratio)
+  - Spartan7/Artix7/Kintex7/Virtex7 DDR2/DDR3 PHY (1:2 or 1:4 frequency ratio)
+  - Kintex/Virtex Ultrascale (Plus) DDR3/DDR4 PHY (1:4 frequency ratio)
+  - ECP5 DDR3 PHY (1:2 frequency ratio)
 
-It has three methods to work with:
+Core:
+  - Fully pipelined, high performance.
+  - Configurable commands depth on bankmachines.
+  - Auto-Precharge.
+  - Periodic refresh/ZQ short calibration (up to 8 postponed refreshes).
 
-- `.before()` which takes app and migration names to generate a state
-  before the actual migration happens.
-  It creates the `before state` by applying all migrations up to and including
-  the one passed as an argument.
+Frontend:
+  - Configurable crossbar (simply use crossbar.get_port() to add a new port!)
+  - Ports arbitration transparent to the user.
+  - Native, AXI-MM or Wishbone user interface.
+  - DMA reader/writer.
+  - BIST.
+  - ECC (Error-correcting code)
 
-- `.after()` which takes app and migration names to perform the actual migration
-- `.reset()` to clean everything up after we are done with testing
+[> FPGA Proven
+---------------
+LiteDRAM is already used in commercial and open-source designs:
+- HDMI2USB: http://hdmi2usb.tv/home/
+- NeTV2: https://www.crowdsupply.com/alphamax/netv2
+- USBSniffer: http://blog.lambdaconcept.com/doku.php?id=products:usb_sniffer
+- and others commercial designs...
 
-So, here's an example:
+[> Possible improvements
+------------------------
+- add Avalon-ST interface.
+- add support for Altera devices.
+- add more documentation
+- ... See below Support and consulting :)
 
-```python
-from django_test_migrations.migrator import Migrator
+If you want to support these features, please contact us at florent [AT]
+enjoy-digital.fr.
 
-migrator = Migrator(database='default')
+[> Getting started
+------------------
+1. Install Python 3.6+ and FPGA vendor's development tools.
+2. Install LiteX and the cores by following the LiteX's wiki [installation guide](https://github.com/enjoy-digital/litex/wiki/Installation).
+3. You can find examples of integration of the core with LiteX in LiteX-Boards and in the examples directory.
 
-# Initial migration, currently our model has only a single string field:
-# Note:
-# We are testing migration `0002_someitem_is_clean`, so we are specifying
-# the name of the previous migration (`0001_initial`) in the .before()
-# method in order to prepare a state of the database before applying
-# the migration we are going to test.
-#
-old_state = migrator.before(('main_app', '0001_initial'))
-SomeItem = old_state.apps.get_model('main_app', 'SomeItem')
-
-# Let's create a model with just a single field specified:
-SomeItem.objects.create(string_field='a')
-assert len(SomeItem._meta.get_fields()) == 2  # id + string_field
-
-# Now this migration will add `is_clean` field to the model:
-new_state = migrator.after(('main_app', '0002_someitem_is_clean'))
-SomeItem = new_state.apps.get_model('main_app', 'SomeItem')
-
-# We can now test how our migration worked, new field is there:
-assert SomeItem.objects.filter(is_clean=True).count() == 0
-assert len(SomeItem._meta.get_fields()) == 3  # id + string_field + is_clean
-
-# Cleanup:
-migrator.reset()
+[> Tests
+--------
+Unit tests are available in ./test/.
+To run all the unit tests:
+```sh
+$ ./setup.py test
 ```
 
-That was an example of a forward migration.
-
-### Backward migration
-
-The thing is that you can also test backward migrations.
-Nothing really changes except migration names that you pass and your logic:
-
-```python
-migrator = Migrator()
-
-# Currently our model has two field, but we need a rollback:
-old_state = migrator.before(('main_app', '0002_someitem_is_clean'))
-SomeItem = old_state.apps.get_model('main_app', 'SomeItem')
-
-# Create some data to illustrate your cases:
-# ...
-
-# Now this migration will drop `is_clean` field:
-new_state = migrator.after(('main_app', '0001_initial'))
-
-# Assert the results:
-# ...
-
-# Cleanup:
-migrator.reset()
+Tests can also be run individually:
+```sh
+$ python3 -m unittest test.test_name
 ```
 
-### Testing migrations ordering
+[> License
+----------
+LiteDRAM is released under the very permissive two-clause BSD license. Under
+the terms of this license, you are authorized to use LiteDRAM for closed-source
+proprietary designs.
+Even though we do not require you to do so, those things are awesome, so please
+do them if possible:
+ - tell us that you are using LiteDRAM
+ - cite LiteDRAM in publications related to research it has helped
+ - send us feedback and suggestions for improvements
+ - send us bug reports when something goes wrong
+ - send us the modifications and improvements you have done to LiteDRAM.
 
-Sometimes we also want to be sure that our migrations are in the correct order.
-And all our `dependecies = [...]` are correct.
+[> Support and consulting
+-------------------------
+We love open-source hardware and like sharing our designs with others.
 
-To achieve that we have [`plan.py`](https://github.com/wemake-services/django-test-migrations/blob/master/django_test_migrations/plan.py) module.
+LiteDRAM is developed and maintained by EnjoyDigital.
 
-That's how it can be used:
+If you would like to know more about LiteDRAM or if you are already a happy
+user and would like to extend it for your needs, EnjoyDigital can provide standard
+commercial support as well as consulting services.
 
-```python
-from django_test_migrations.plan import all_migrations, nodes_to_tuples
+So feel free to contact us, we'd love to work with you! (and eventually shorten
+the list of the possible improvements :)
 
-main_migrations = all_migrations('default', ['main_app', 'other_app'])
-assert nodes_to_tuples(main_migrations) == [
-    ('main_app', '0001_initial'),
-    ('main_app', '0002_someitem_is_clean'),
-    ('other_app', '0001_initial'),
-    ('main_app', '0003_update_is_clean'),
-    ('main_app', '0004_auto_20191119_2125'),
-    ('other_app', '0002_auto_20191120_2230'),
-]
-```
-
-This way you can be sure that migrations
-and apps that depend on each other will be executed in the correct order.
-
-
-## Test framework integrations 🐍
-
-We support several test frameworks as first-class citizens.
-That's a testing tool after all!
-
-### pytest
-
-We ship `django-test-migrations` with a `pytest` plugin
-that provides two convinient fixtures:
-
-- `migrator_factory` that gives you an opportunity
-  to create `Migrator` classes for any database
-- `migrator` instance for the `'default'` database
-
-That's how it can be used:
-
-```python
-import pytest
-
-@pytest.mark.django_db
-def test_pytest_plugin_initial(migrator):
-    """Ensures that the initial migration works."""
-    old_state = migrator.before(('main_app', None))
-
-    with pytest.raises(LookupError):
-        # Models does not yet exist:
-        old_state.apps.get_model('main_app', 'SomeItem')
-
-    new_state = migrator.after(('main_app', '0001_initial'))
-    # After the initial migration is done, we can use the model state:
-    SomeItem = new_state.apps.get_model('main_app', 'SomeItem')
-    assert SomeItem.objects.filter(string_field='').count() == 0
-```
-
-### unittest
-
-We also ship an integration with the built-in `unittest` framework.
-
-Here's how it can be used:
-
-```python
-from django_test_migrations.contrib.unittest_case import MigratorTestCase
-
-class TestDirectMigration(MigratorTestCase):
-    """This class is used to test direct migrations."""
-
-    migrate_from = ('main_app', '0002_someitem_is_clean')
-    migrate_to = ('main_app', '0003_update_is_clean')
-
-    def prepare(self):
-        """Prepare some data before the migration."""
-        SomeItem = self.old_state.apps.get_model('main_app', 'SomeItem')
-        SomeItem.objects.create(string_field='a')
-        SomeItem.objects.create(string_field='a b')
-
-    def test_migration_main0003(self):
-        """Run the test itself."""
-        SomeItem = self.new_state.apps.get_model('main_app', 'SomeItem')
-
-        assert SomeItem.objects.count() == 2
-        assert SomeItem.objects.filter(is_clean=True).count() == 1
-```
-
-
-## Testing migration names
-
-`django` generates migration names for you when you run `makemigrations`.
-And these names are bad ([read more](https://adamj.eu/tech/2020/02/24/how-to-disallow-auto-named-django-migrations/) about why it is bad)!
-Just look at this: `0004_auto_20191119_2125.py`
-
-What does this migration do? What changes does it have?
-
-One can also pass `--name` attribute when creating migrations, but it is easy to forget.
-
-We offer an automated solution: `django` check
-that produces a warning for each badly named migration.
-
-Add our check into your `INSTALLED_APPS`:
-
-```python
-INSTALLED_APPS = [
-    # ...
-
-    # Our custom check:
-    'django_test_migrations.contrib.django_checks.AutoNames',
-]
-```
-
-And then in your CI run:
-
-```bash
-python manage.py check --deploy --fail-level WARNING
-```
-
-This way you will be safe from wrong names in your migrations.
-
-Do you have a migrations that cannot be renamed? Add them to the ignore list:
-
-```python
-# settings.py
-
-DTM_IGNORED_MIGRATIONS = {
-    ('main_app', '0004_auto_20191119_2125'),
-    ('dependency_app', '0001_auto_20201110_2100'),
-}
-```
-
-And we won't complain about them.
-
-Or you can completely ignore entire app:
-
-```python
-# settings.py
-
-DTM_IGNORED_MIGRATIONS = {
-    ('dependency_app', '*'),
-    ('another_dependency_app', '*'),
-}
-```
-
-
-## Credits
-
-This project is based on work of other awesome people:
-
-- [@asfaltboy](https://gist.github.com/asfaltboy/b3e6f9b5d95af8ba2cc46f2ba6eae5e2)
-- [@blueyed](https://gist.github.com/blueyed/4fb0a807104551f103e6)
-- [@fernandogrd](https://gist.github.com/blueyed/4fb0a807104551f103e6#gistcomment-1546191)
-- [@adamchainz](https://adamj.eu/tech/2020/02/24/how-to-disallow-auto-named-django-migrations/)
-
-
-## License
-
-MIT.
+[> Contact
+----------
+E-mail: florent [AT] enjoy-digital.fr
