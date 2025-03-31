@@ -1,13 +1,19 @@
-dist
-build
-qubekit.egg-info
-VEHICLe
-.pytest_cache
-.idea
-*.pdb
-*.mol
-*.mol2
-*.z
-*.csv
-*.dat
-!QUBEKit/tests/files/*
+# Python things
+*.pyc
+__pycache__/
+venv/
+
+# Building things
+*.egg-info
+.tox/
+build/
+dist/
+
+# Django local development can create sqlite files
+db.sqlite3
+
+# isort
+isort.out
+
+# sphinx
+docs/_build/
