@@ -1,78 +1,39 @@
-name: Test
-
-on: [push, pull_request]
-
+name: Tests
+'on':
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 jobs:
-  python: ["3.9", "3.10"]
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
-      matrix:
-        python-version: ["3.9", "3.10"]
 
+  Build:
+    defaults:
+      run: 
+        shell: bash
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        # TODO enable wider more OS support
+        os: ["ubuntu-latest"]
+        python-version: ["3.9", "3.10"]
     steps:
     - uses: actions/checkout@v2
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+    - uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    - run: pip install -r ./ci/requirements.txt
+    - run: pip install -r ./python/requirements.txt
+    - if: runner.os == 'Windows' 
+      run: ./ci/install_windows.sh 
+    - if: runner.os == 'Linux' 
+      run: ./ci/install_linux.sh
+    - name: "PyTest"
+      run: ./ci/test.sh
+    - name: "Linting"
+      run: ./ci/lint.sh
+    - name: "E2E"
+      run: make local_run
 
-    - name: Get pip cache dir
-      id: pip-cache
-      run: |
-        echo "::set-output name=dir::$(pip cache dir)"
-
-    - name: Cache
-      uses: actions/cache@v4
-      with:
-        path: ${{ steps.pip-cache.outputs.dir }}
-        key:
-          ${{ matrix.python-version }}-v1-${{ hashFiles('**/setup.cfg') }}-${{ hashFiles('**/tox.ini') }}
-        restore-keys: |
-          ${{ matrix.python-version }}-v1-
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install tox tox-gh-actions
-
-    - name: Test
-      run: tox
-
-    - name: Upload coverage
-      uses: codecov/codecov-action@v1
-      with:
-        name: Python ${{ matrix.python-version }}
-
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-
-    - name: Get pip cache dir
-      id: pip-cache
-      run: |
-        echo "::set-output name=dir::$(pip cache dir)"
-
-    - name: Cache
-      uses: actions/cache@v4
-      with:
-        path: ${{ steps.pip-cache.outputs.dir }}
-        key:
-          ${{ matrix.python-version }}-v1-${{ hashFiles('**/setup.cfg') }}-${{ hashFiles('**/tox.ini') }}
-        restore-keys: |
-          ${{ matrix.python-version }}-v1-
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade tox
-    - name: Run flake8
-      run: tox -e lint

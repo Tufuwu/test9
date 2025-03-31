@@ -1,10 +1,7 @@
+# https://flake8.pycqa.org/en/latest/user/configuration.html#configuration-locations
+# +
+# https://github.com/psf/black/blob/master/docs/the_black_code_style.md#line-length
 [flake8]
-exclude = .git,*/__pycache__/*,*/migrations/*,settings*.py,docs/*,*.tox/*
-max-line-length = 100
-
-# E12x continuation line indentation
-# E251 no spaces around keyword / parameter equals
-# E261 at least two spaces before inline comment
-# E731 do not assign a lambda expression, use a def
-# W504 line break after binary operator
-ignore = E12,E251,E261,E731,W504
+# black wraps at 88
+max-line-length = 90
+extend-ignore = E203

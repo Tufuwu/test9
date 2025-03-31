@@ -1,0 +1,32 @@
+---
+name: Perforce
+description: Checks out a perforce repository instead of git.
+author: https://github.com/ca-johnson
+configuration:
+  properties:
+    client_options:
+      type: string
+    client_type:
+      type: string
+    p4port:
+      type: string
+    p4tickets:
+      type: string
+    p4trust:
+      type: string
+    p4user:
+      type: string
+    parallel:
+      type: string
+    share_workspace:
+      type: bool
+    stream:
+      type: string
+    stream_switching:
+      type: bool
+    sync:
+      type: array
+    fingerprint:
+      type: string
+    view:
+      type: string
