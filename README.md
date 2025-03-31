@@ -1,67 +1,129 @@
-[![build](https://github.com/plasticuproject/nvd_api/actions/workflows/tests.yml/badge.svg)](https://github.com/plasticuproject/nvd_api/actions/workflows/tests.yml)
-[![Python 3.8](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/release/python-380/)
-[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
-[![Coverage Status](https://coveralls.io/repos/github/plasticuproject/nvd_api/badge.svg?branch=master)](https://coveralls.io/github/plasticuproject/nvd_api?branch=master)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/plasticuproject/nvd_api.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/plasticuproject/nvd_api/context:python)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=plasticuproject_nvd_api&metric=alert_status)](https://sonarcloud.io/dashboard?id=plasticuproject_nvd_api)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=plasticuproject_nvd_api&metric=security_rating)](https://sonarcloud.io/dashboard?id=plasticuproject_nvd_api)
-# nvd_api
+# MF2: Multi-Fidelity-Functions
 
-An unofficial, RESTful API for NIST's NVD.
+| Package Info | Status                                                                                                                                                                                                                                           | Support                                                                 |
+|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
+| [![PyPI version](https://badge.fury.io/py/mf2.svg)](https://badge.fury.io/py/mf2) | [![tests status][tests-badge]][actions-page] | [![Documentation Status][docs-badge]][docs-url]                         |
+| [![Conda](https://img.shields.io/conda/v/conda-forge/mf2)](https://anaconda.org/conda-forge/mf2) | [![Coverage Status](https://coveralls.io/repos/github/sjvrijn/mf2/badge.svg?branch=master)](https://coveralls.io/github/sjvrijn/mf2?branch=master)                                                                                               | [![Gitter](https://badges.gitter.im/pymf2/community.svg)][gitter-badge] |
+| ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mf2) | [![Codacy Badge](https://api.codacy.com/project/badge/Grade/54144e7d406b4558a14996b06a89adf8)](https://www.codacy.com/manual/sjvrijn/mf2?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sjvrijn/mf2&amp;utm_campaign=Badge_Grade) |                                                                         |
+| [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) | [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)                                           |                                                                         |
+| [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4540752.svg)](https://doi.org/10.5281/zenodo.4540752) | [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4231/badge)](https://bestpractices.coreinfrastructure.org/projects/4231)                                                                                            |                                                                         |
+| [![status](https://joss.theoj.org/papers/2575e93fc693c5c3bfa8736c60c35398/status.svg)](https://joss.theoj.org/papers/2575e93fc693c5c3bfa8736c60c35398) |                                                                                                                                                                                                                                                  |                                                                         |
 
-## Endpoints with examples:
+## Introduction
 
-**Get results for a specific CVE-ID:** <br />
-*https://plasticuproject.pythonanywhere.com/nvd-api/v1/CVE-2010-4662* <br />
+The `mf2` package provides consistent, efficient and tested Python
+implementations of a variety of multi-fidelity benchmark functions. The goal is
+to simplify life for numerical optimization researchers by saving time otherwise
+spent reimplementing and debugging the same common functions, and enabling
+direct comparisons with other work using the same definitions, improving
+reproducibility in general.
 
-**Get results for all CVEs:** *(Not recommended, you should refine your search.)* <br />
-*https://plasticuproject.pythonanywhere.com/nvd-api/v1/all* <br />
+A multi-fidelity function usually reprensents an objective which should be
+optimized. The term 'multi-fidelity' refers to the fact that multiple versions
+of the objective function exist, which differ in the accuracy to describe the
+real objective. A typical real-world example would be the aerodynamic
+efficiency of an airfoil, e.g., its drag value for a given lift value. The
+different fidelity levels are given by the accuracy of the evaluation method
+used to estimate the efficiency. Lower-fidelity versions of the objective
+function refer to less accurate, but simpler approximations of the objective,
+such as computational fluid dynamic simulations on rather coarse meshes,
+whereas higher fidelity levels refer to more accurate but also much more
+demanding evaluations such as prototype tests in wind tunnels. The hope of
+multi-fildelity optimization approaches is that many of the not-so-accurate but
+simple low-fidelity evaluations can be used to achieve improved results on the
+realistic high-fidelity version of the objective where only very few
+evaluations can be performed.
 
-**Get results for all CVEs in a given year:** <br />
-*https://plasticuproject.pythonanywhere.com/nvd-api/v1/year/2020* <br />
+The only dependency of the mf2 package is the `numpy` package.
 
-**Get results for all recently added CVEs (last 8 days):** <br />
-*https://plasticuproject.pythonanywhere.com/nvd-api/v1/recent* <br />
+Documentation is available at [mf2.readthedocs.io][docs-url]
 
-**Get results for all recently modified and added CVEs (last 8 days):** <br />
-*https://plasticuproject.pythonanywhere.com/nvd-api/v1/modified* <br />
+## Installation
 
-**Get results for all CVEs matching provided CPE VERSION and CPE-ID:** <br />
-*https://plasticuproject.pythonanywhere.com/nvd-api/v1/cpe/23/arris* <br />
-
-**Return the database schema:** <br />
-*https://plasticuproject.pythonanywhere.com/nvd-api/v1/schema* <br />
-
-## Keyword Search 
-**For endpoints:** <br />
-*../all* <br />
-*../year/(YEAR)* <br />
-*../recent* <br />
-*../modified* <br />
-*../cpe/(CPE-Version)/(CPE-ID matcher)* <br />
-you can also add a keyword search parameter to return only CVEs with <br />
-that keyword found in the description, for example:  <br />
-*https://plasticuproject.pythonanywhere.com/nvd-api/v1/year/2019?keyword=sudo* <br />
-
-## Note:
-All endpoint GET requests will return JSON response data.  <br />
-Live API database will be updated once every 24 hours, with information from **nvd.nist.gov**.  <br />
-Feel free to submit an Issue or Pull Request (with issue reference number)  <br />
-if you have any problems. <br />
-
-## Example Python Client
-In the *example_clients* directory there is a simple python CLI client that lets you <br />
-search for CVEs and print their CVE-ID and Description to screen. This is just an example <br />
-of how you could write an application and interface this API. <br />
+The recommended way to install `mf2` is with Python's `pip`:
 ```
-user@ubuntu:~$ ./nvd_api/example_clients/cve_search.py --help
-
-Search CVE records by ID, YEAR and/or KEYWORD. Prints ID and description only.
-
-        USAGE:
-        ./cve_search.py <CVE-ID>
-        ./cve_serach.py <year> (keyword)
-        ./cve_search.py all (keyword)
-        ./cve_search.py recent (keyword)
-        ./cve_search.py modified (keyword)
+python3 -m pip install --user mf2
 ```
+or alternatively using `conda`:
+```
+conda install -c conda-forge mf2
+```
+
+For the latest version, you can install directly from source:
+```
+python3 -m pip install --user https://github.com/sjvrijn/mf2/archive/master.zip
+```
+
+To work in your own version locally, it is best to clone the repository first,
+and additionally install the dev-requirements:
+```
+git clone https://github.com/sjvrijn/mf2.git
+cd mf2
+python3 -m pip install --user -e .[dev]
+```
+
+## Example Usage
+
+```python
+import mf2
+import numpy as np
+
+# set numpy random seed for reproducibility
+np.random.seed(42)
+# generate 5 random samples in 2D as matrix
+X = np.random.random((5, 2))
+
+# print high fidelity function values
+print(mf2.branin.high(X))
+# Out: array([36.78994906 34.3332972  50.48149005 43.0569396  35.5268224 ])
+
+# print low fidelity function values
+print(mf2.branin.low(X))
+# Out: array([-5.8762639  -6.66852889  3.84944507 -1.56314141 -6.23242223])
+```
+
+For more usage examples, please refer to the full documentation on
+[readthedocs][docs-url].
+
+## Contributing
+
+Contributions to this project such as bug reports or benchmark function
+suggestions are more than welcome! Please [refer to ``CONTRIBUTING.md``] for more
+details.
+
+## Contact
+
+The [Gitter][gitter] channel is the preferred way to get in touch for any other
+questions, comments or discussions about this package.
+
+## Citation
+
+Was this package useful to you? Great! If this leads to a publication, we'd
+appreciate it if you would cite our [JOSS paper]:
+
+```
+@article{vanRijn2020,
+  doi = {10.21105/joss.02049},
+  url = {https://doi.org/10.21105/joss.02049},
+  year = {2020},
+  publisher = {The Open Journal},
+  volume = {5},
+  number = {52},
+  pages = {2049},
+  author = {Sander van Rijn and Sebastian Schmitt},
+  title = {MF2: A Collection of Multi-Fidelity Benchmark Functions in Python},
+  journal = {Journal of Open Source Software}
+}
+```
+
+[actions-page]:       https://github.com/sjvrijn/mf2/actions
+[tests-badge]:	      https://github.com/sjvrijn/mf2/workflows/tests/badge.svg
+[docs-url]:           https://mf2.readthedocs.io/en/latest/?badge=latest
+[docs-badge]:         https://readthedocs.org/projects/mf2/badge/?version=latest
+[gitter]:             https://gitter.im/pymf2/community
+[gitter-badge]:       https://gitter.im/pymf2/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+[new-issue]:          https://github.com/sjvrijn/mf2/issues/new
+[pytest-regressions]: https://github.com/ESSS/pytest-regressions
+[JOSS paper]:         https://joss.theoj.org/papers/10.21105/joss.02049
+[refer to ``CONTRIBUTING.md``]: https://github.com/sjvrijn/mf2/blob/master/CONTRIBUTING.md
+

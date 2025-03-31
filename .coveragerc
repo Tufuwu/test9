@@ -1,4 +1,9 @@
+[run]
+source =
+    mf2
+
 [report]
-omit =
-  */site-packages/*
-  */distutils/*
+exclude_lines =
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
