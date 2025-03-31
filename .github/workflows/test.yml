@@ -1,54 +1,54 @@
-name: Build
+name: Test
 
-on:
-  schedule:
-    - cron: "0 12 * * SUN"
-  pull_request:
-    branches:
-     -  '*'
-  push:
-    branches:
-      - "*"
+on: [push, pull_request, workflow_dispatch]
 
+env:
+  FORCE_COLOR: 1
 
 jobs:
-  build:
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          # Add new helper variables to existing jobs
+          - {python-version: "3.9", TOX_ENV: "py36"}
+          - {python-version: "3.9", TOX_ENV: "py37"}
+          - {python-version: "3.9", TOX_ENV: "py38"}
+          - {python-version: "3.9", TOX_ENV: "py39"}
+          - {python-version: "3.9-dev", TOX_ENV: "py3.9"}
+
     steps:
       - uses: actions/checkout@v2
-      - name: Decrypt large secret
-        run: ./.github/scripts/decrypt_secrets.sh
-        env:
-          SECRET_PASSPHRASE: ${{ secrets.SECRET_PASSPHRASE }}
 
-      - name: Copying Config.yml to random_word folder
-        run: cp $HOME/secrets/config.yml random_word/
-
-      - name: Print Directory Structure of random_word
-        run: ls -la random_word
-
-      - name: Setup Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-          architecture: x64
 
-      - name: Install packages
+      - name: Get pip cache dir
+        id: pip-cache
         run: |
-            pip install pipenv
-            pip install autopep8
-            pip install nose
-            pipenv install
-            pipenv run python setup.py install
-      
-      - name: Python Lint
-        run: |
-          make lint
+          echo "::set-output name=dir::$(pip cache dir)"
 
-      - name: Run tests
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key:
+            ${{ matrix.os }}-${{ matrix.python-version }}-v1-${{ hashFiles('**/tox.ini') }}
+          restore-keys: |
+            ${{ matrix.os }}-${{ matrix.python-version }}-v1-
+
+      - name: Install dependencies
         run: |
-          pipenv run nosetests
+          python -m pip install -U pip
+          python -m pip install -U wheel
+          python -m pip install -U tox
+
+      - name: Tox tests
+        run: |
+          tox -e ${{ matrix.TOX_ENV }}
