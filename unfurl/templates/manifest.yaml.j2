@@ -1,0 +1,26 @@
+apiVersion: unfurl/v1alpha1
+kind: Ensemble
+{%- if ensembleTemplate is defined %}
++include:
+  file: {{ensembleTemplate}}
+  repository: spec
+{%- endif %}
+{%- if ensembleUri is defined %}
+metadata:
+  uri: {{ ensembleUri }}
+{%- endif %}
+spec:
+  service_template:
+    {%- if serviceTemplate is defined %}
+    +include:
+      file: {{ serviceTemplate }}
+      repository: spec
+    {% endif %}
+    {%- if specRepoUrl is defined %}
+    repositories:
+    # Files that are shared across ensemble instances should be placed in this "spec" repository
+      spec:
+        url: {{ specRepoUrl }}
+    {% else %}
+    repositories: {}
+    {% endif %}

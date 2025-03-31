@@ -1,0 +1,62 @@
+apiVersion: unfurl/v1alpha1
+kind: Ensemble
+# the context will be merged with the corresponding context in the project config:
+context:
+  # local and secret are special cases that must be defined in the local config
+  local:
+   schema:
+     name1:
+       type: string
+  secret:
+   schema: # expected JSON schema for attributes
+     name1:
+       type: string
+  # environment:
+  # runtime:
+  external:
+    name: # manifest to represent as a resource
+      manifest:
+        file: .
+      instance: "*" # name or "*", default is "root"
+
+spec:
+  service_template:
+    topology_template:
+      node_templates:
+        aNodeTemplate:
+          type: tosca:Root
+    # tosca service template goes here
+status:
+  # inputs:
+  # outputs:
+  instances:
+    name: # root resource is always named "root"
+      template: aNodeTemplate
+      attributes:
+        .interfaces:
+          interfaceName: foo.bar.ClassName
+      priority: required
+      readyState:
+        local: ok
+        state: created
+      lastConfigChange: A1312XNB0001
+      lastStateChange: A1312XNB0001
+      created: true
+      instances:
+        child1:
+          template: aNodeTemplate
+          # ...
+lastJob:
+  changeId: A0920aMf0000
+  startTime: 2020-09-02-00-36-22-664763
+  changelog: jobs/job2020-09-02-00-36-22-664763.yaml
+  workflow: deploy
+  options:
+    force: true
+  summary: 1 tasks (1 changed, 1 ok, 0 failed, 0 unknown, 0 skipped)
+  startCommit: 628c2a4b633a26c1e8b1c116d3fdeef9bca89716
+  specDigest: 037815dc8b56254219a96f359fd996c65e7d0754
+  priority: required
+  readyState:
+    local: ok
+jobLog: jobs.tsv

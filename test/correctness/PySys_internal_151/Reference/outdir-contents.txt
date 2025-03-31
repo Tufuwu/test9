@@ -1,3 +1,0 @@
-__coverage_python.pysys-run-tests/
-__pysys_junit_xml/
-__pysys_performance/

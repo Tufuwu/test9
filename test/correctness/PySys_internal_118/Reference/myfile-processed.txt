@@ -1,3 +1,0 @@
-Error message BAD THING <timestamp>:
-   stack trace
-   here

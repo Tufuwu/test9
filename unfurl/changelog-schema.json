@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "job.yaml",
+  "description": "List of jobs ran with changes applied",
+  "type": "object",
+  "properties": {
+    "manifest": { "type": "string" },
+    "changes":  { "$ref": "./manifest-schema.json#/definitions/changes" }
+  }
+}
