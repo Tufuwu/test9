@@ -1,4 +1,0 @@
-packaging
-pytest
-pytest-cov
-requests
