@@ -1,57 +1,38 @@
-# This is a basic workflow to help you get started with Actions
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: CI
+name: Python package
 
-# Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the
-  # main branch
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
 jobs:
-  check:
-    runs-on: ubuntu-latest
+  build:
+
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest]
         python-version: ["3.9", "3.10"]
 
     steps:
-
-      # Checks out the repository under $GITHUB_WORKSPACE
-      - uses: actions/checkout@v2
-
-      - name: Install Debian dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python-setuptools pycodestyle python-wheel
-
-      - name: Install pip dependencies
-        run: |
-          pip install -r requirements-dev.txt
-
-      - name: Run unit tests
-        run: |
-          cd app
-          for dir in \
-            models/tests \
-            utils/tests \
-            utils/build/tests \
-            utils/bisect/tests \
-            handlers/common/tests \
-            handlers/tests \
-            utils/report/tests
-          do
-            echo Running tests in $dir
-            python -m unittest discover $dir || exit 1
-          done
-
-      - name: Run pycodestyle
-        run: |
-          cd app
-          pycodestyle .
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Tokenizer
+      run: |
+        python -m pip install --upgrade pip wheel setuptools
+        python -m pip install -e .
+    - name: Type check with mypy
+      run: |
+        if [ "${{ matrix.python-version }}" == "3.6" ]; then python -m pip install mypy; fi
+        if [ "${{ matrix.python-version }}" == "3.6" ]; then mypy --python-version=3.6 src/tokenizer; fi
+    - name: Test with pytest
+      run: |
+        python -m pip install pytest
+        pytest
