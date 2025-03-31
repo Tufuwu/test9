@@ -1,72 +1,67 @@
-import re
+import io
+import os
+from setuptools import setup
+from setuptools import find_packages
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
 
-with open("loguru/__init__.py", "r") as file:
-    regex_version = r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]'
-    version = re.search(regex_version, file.read(), re.MULTILINE).group(1)
+def read(rel_path: str) -> str:
+    here = os.path.abspath(os.path.dirname(__file__))
+    # intentionally *not* adding an encoding option to open, See:
+    #   https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
+    with open(os.path.join(here, rel_path)) as fp:
+        return fp.read()
 
-with open("README.rst", "rb") as file:
-    readme = file.read().decode("utf-8")
+
+def get_version(rel_path: str) -> str:
+    for line in read(rel_path).splitlines():
+        if line.startswith("__version__"):
+            # __version__ = "0.11.2"
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    raise RuntimeError("Unable to find version string.")
+
+
+version = get_version("deepxde/__about__.py")
+
+with io.open("README.md", "r", encoding="utf-8") as f:
+    long_description = f.read()
+
+with open("requirements.txt", "r") as f:
+    install_requires = [x.strip() for x in f.readlines()]
 
 setup(
-    name="loguru",
+    name="DeepXDE",
     version=version,
-    packages=["loguru"],
-    package_data={"loguru": ["__init__.pyi", "py.typed"]},
-    description="Python logging made (stupidly) simple",
-    long_description=readme,
-    long_description_content_type="text/x-rst",
-    author="Delgan",
-    author_email="delgan.py@gmail.com",
-    url="https://github.com/Delgan/loguru",
-    download_url="https://github.com/Delgan/loguru/archive/{}.tar.gz".format(version),
-    project_urls={
-        "Changelog": "https://github.com/Delgan/loguru/blob/master/CHANGELOG.rst",
-        "Documentation": "https://loguru.readthedocs.io/en/stable/index.html",
-    },
-    keywords=["loguru", "logging", "logger", "log"],
-    license="MIT license",
+    description="A library for scientific machine learning",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    author="Lu Lu",
+    author_email="lululxvi@gmail.com",
+    url="https://github.com/lululxvi/deepxde",
+    download_url="https://github.com/lululxvi/deepxde/tarball/v" + version,
+    license="LGPL-2.1",
+    install_requires=install_requires,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
-        "Topic :: System :: Logging",
-        "Intended Audience :: Developers",
-        "Natural Language :: English",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: Implementation :: PyPy",
-        "Programming Language :: Python :: Implementation :: CPython",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Scientific/Engineering :: Mathematics",
     ],
-    install_requires=[
-        "colorama>=0.3.4 ; sys_platform=='win32'",
-        "aiocontextvars>=0.2.0 ; python_version<'3.7'",
-        "win32-setctime>=1.0.0 ; sys_platform=='win32'",
+    keywords=[
+        "Scientific machine learning",
+        "Machine learning",
+        "Deep learning",
+        "Neural networks",
+        "Scientific computing",
+        "Differential equations",
+        "Physics-informed neural networks",
     ],
-    extras_require={
-        "dev": [
-            "black>=19.10b0 ; python_version>='3.6'",
-            "colorama>=0.3.4",
-            "docutils==0.16",
-            "flake8>=3.7.7",
-            "isort>=5.1.1 ; python_version>='3.6'",
-            "tox>=3.9.0",
-            "pytest>=4.6.2",
-            "pytest-cov>=2.7.1",
-            "Sphinx>=4.1.1 ; python_version>='3.6'",
-            "sphinx-autobuild>=0.7.1 ; python_version>='3.6'",
-            "sphinx-rtd-theme>=0.4.3 ; python_version>='3.6'",
-        ]
-    },
-    python_requires=">=3.5",
+    packages=find_packages(),
+    include_package_data=True,
 )

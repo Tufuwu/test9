@@ -11,24 +11,42 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-
+#
 import os
 import sys
 
+
+def read(rel_path: str) -> str:
+    here = os.path.abspath(os.path.dirname(__file__))
+    # intentionally *not* adding an encoding option to open, See:
+    #   https://github.com/pypa/virtualenv/issues/201#issuecomment-3145690
+    with open(os.path.join(here, rel_path)) as fp:
+        return fp.read()
+
+
+def get_version(rel_path: str) -> str:
+    for line in read(rel_path).splitlines():
+        if line.startswith("__version__"):
+            # __version__ = "0.11.2"
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    raise RuntimeError("Unable to find version string.")
+
+
 sys.path.insert(0, os.path.abspath(".."))
-sys.path.insert(0, os.path.abspath("_extensions"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = "loguru"
-copyright = "2018, Delgan"
-author = "Delgan"
+project = "DeepXDE"
+copyright = "2019, Lu Lu"
+author = "Lu Lu"
 
+file_with_version = os.path.join("..", "deepxde", "__about__.py")
 # The short X.Y version
-version = ""
+version = get_version(file_with_version)
 # The full version, including alpha/beta/rc tags
-release = ""
+release = version
 
 
 # -- General configuration ---------------------------------------------------
@@ -42,10 +60,9 @@ release = ""
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
-    "sphinx.ext.intersphinx",
-    "autodoc_stub_file",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -87,7 +104,7 @@ html_theme = "sphinx_rtd_theme"
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {}
+# html_theme_options = {}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -104,43 +121,41 @@ html_static_path = ["_static"]
 #
 # html_sidebars = {}
 
-# Try to fix formatting with Sphinx v2
-html4_writer = True
+# Exclude imports
+# autodoc_mock_imports = ["tensorflow"]
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "logurudoc"
+htmlhelp_basename = "DeepXDEdoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
-    #
     # 'papersize': 'letterpaper',
     # The font size ('10pt', '11pt' or '12pt').
-    #
     # 'pointsize': '10pt',
     # Additional stuff for the LaTeX preamble.
-    #
     # 'preamble': '',
     # Latex figure (float) alignment
-    #
     # 'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [(master_doc, "loguru.tex", "loguru Documentation", "Delgan", "manual")]
+latex_documents = [
+    (master_doc, "DeepXDE.tex", "DeepXDE Documentation", "Lu Lu", "manual")
+]
 
 
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "loguru", "loguru Documentation", [author], 1)]
+man_pages = [(master_doc, "deepxde", "DeepXDE Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -151,10 +166,10 @@ man_pages = [(master_doc, "loguru", "loguru Documentation", [author], 1)]
 texinfo_documents = [
     (
         master_doc,
-        "loguru",
-        "loguru Documentation",
+        "DeepXDE",
+        "DeepXDE Documentation",
         author,
-        "loguru",
+        "DeepXDE",
         "One line description of project.",
         "Miscellaneous",
     )
@@ -162,18 +177,3 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
-
-html_context = {"github_user": "delgan", "github_repo": "loguru"}
-
-add_module_names = False
-autodoc_member_order = "bysource"
-intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
-html_show_sourcelink = False
-html_show_copyright = False
-napoleon_use_rtype = False
-napoleon_use_ivar = True
-
-
-def setup(app):
-    app.add_css_file("css/loguru.css")
-    app.add_js_file("js/coppybutton.js")

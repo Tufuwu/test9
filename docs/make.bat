@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=loguru
+set SPHINXPROJ=DeepXDE
 
 if "%1" == "" goto help
 
