@@ -1,227 +1,152 @@
-![CI](https://github.com/kpetremann/mqtt-exporter/actions/workflows/ci.yml/badge.svg)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b1ca990b576342a48d771d472e64bc24)](https://www.codacy.com/app/kpetremann/mqtt-exporter?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kpetremann/mqtt-exporter&amp;utm_campaign=Badge_Grade)
-[![Maintainability](https://api.codeclimate.com/v1/badges/635c98a1b4701d1ab4cf/maintainability)](https://codeclimate.com/github/kpetremann/mqtt-exporter/maintainability)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+cabrillo [![Build Status](https://travis-ci.com/thxo/cabrillo.svg?branch=master)](https://travis-ci.com/thxo/cabrillo)
+---------------------
+A Python library to parse Cabrillo-format amateur radio contest logs, with no external dependencies.
 
-[![Build and publish docker images](https://github.com/kpetremann/mqtt-exporter/actions/workflows/release.yml/badge.svg)](https://hub.docker.com/r/kpetrem/mqtt-exporter)
+# Getting Started
 
-# MQTT-exporter
+## Basic Parsing
 
-## Description
-
-Simple and generic Prometheus exporter for MQTT.
-Tested with Mosquitto MQTT and Xiaomi sensors.
-
-It exposes metrics from MQTT message out of the box (you just need to specify the target if not on localhost).
-
-MQTT-exporter expects a topic and a flat JSON payload, the value must be numeric values.
-
-It also provides message counters for each MQTT topic (since PR #5):
-```
-mqtt_message_total{instance="mqtt-exporter:9000", job="mqtt-exporter", topic="zigbee2mqtt_0x00157d00032b1234"} 10
+```python
+>>> from cabrillo.parser import parse_log_file
+>>> cab = parse_log_file('tests/CQWPX.log')
+>>> cab.callsign
+'AA1ZZZ'
+>>> cab.qso
+[<cabrillo.qso.QSO object at 0x10cb09f28>, <cabrillo.qso.QSO object at 0x10cbc8860>]
+>>> cab.text()
+'START-OF-LOG: 3.0\nCREATED-BY: WriteLog V10.72C\nCALLSIGN: AA1ZZZ\n[...snip...]END-OF-LOG:\n'
 ```
 
-### Tested devices
+You can also write to a file:
 
-Note: This exporter aims to be as generic as possible. If the sensor you use is using the following format, it will work:
-```
-topic '<prefix>/<name>', payload '{"temperature":26.24,"humidity":45.37}'
-```
-
-Also, the Shelly format is supported:
-```
-topic '<prefix>/<name>/sensor/temperature' '20.00'
+```python
+with open('out.cbr', 'w') as o:
+    cab.write(o)
 ```
 
-The exporter is tested with:
-  * Aqara/Xiaomi sensors (WSDCGQ11LM and VOCKQJK11LM)
-  * SONOFF sensors (SNZB-02)
-  * Shelly sensors (H&T wifi)
-  * Shelly power sensors (3EM - only with `KEEP_FULL_TOPIC` enabled)
+The same works for text-file-like objects.
 
-### Metrics conversion example
-```
-topic 'zigbee2mqtt/0x00157d00032b1234', payload '{"temperature":26.24,"humidity":45.37}'
-```
-will be converted as:
-```
-mqtt_temperature{topic="zigbee2mqtt_0x00157d00032b1234"} 25.24
-mqtt_humidity{topic="zigbee2mqtt_0x00157d00032b1234"} 45.37
-```
+Finally, if you desire to parse Cabrillo data already present as a Python string,
+you can do so with, e.g.,
 
-### Zigbee2MQTT device availability support
+```python
+from cabrillo.parser import parse_log_text
 
-**Important notice: legacy availability payload is not supported and must disabled** - see [Device availability advanced](https://www.zigbee2mqtt.io/guide/configuration/device-availability.html#availability-payload)
+cabrillo_text = """START-OF-LOG: 3.0
+END-OF-LOG:
+"""
 
-When exposing device availability, Zigbee2MQTT add /availability suffix in the topic. So we end up with inconsistent metrics:
-
-```
-mqtt_state{topic="zigbee2mqtt_garage_availability"} 1.0
-mqtt_temperature{topic="zigbee2mqtt_garage"} 1.0
+cab = parse_log_text(cabrillo_text)
 ```
 
-To avoid having different topic for the same device, the exporter has a normalization feature disabled by default.
-It can be enabled by setting ZIGBEE2MQTT_AVAILABILITY varenv to "True".
+## Ignoring malorder
 
-It will remove the suffix from the topic, and change the metric name accordingly:
+Cabrillo logs must be time-sorted. If you want to read files that are
+not so sorted, but other than that are Cabrillo files, you can do so by
+adding a keyword argument `ignore_order=False` to either `parse_log_file`
+or `parse_log_text`. If you do that, the resulting Cabrillo object
+will refuse to generate (potentially non-)Cabrillo output.
 
-```
-mqtt_zigbee_availability{topic="zigbee2mqtt_garage"} 1.0
-mqtt_temperature{topic="zigbee2mqtt_garage"} 1.0
-```
+## Matching Two QSOs in Contest Scoring
 
-Note: the metric name mqtt_state  is not kept to reduce collision risks as it is too common.
-
-### Zwavejs2Mqtt
-
-This exporter also supports Zwavejs2Mqtt metrics, preferably using "named topics" (see [official documentation](https://zwave-js.github.io/zwavejs2mqtt/#/usage/setup?id=gateway)).
-
-To setup this, you need to specify the topic prefix used by Zwavejs2Mqtt in `ZWAVE_TOPIC_PREFIX` the environment variable (default being "zwave/").
-
-### Configuration
-
-Parameters are passed using environment variables.
-
-The list of parameters are:
-  * `KEEP_FULL_TOPIC`: Keep entire topic instead of the first two elements only. Usecase: Shelly 3EM (default: False)
-  * `LOG_LEVEL`: Logging level (default: INFO)
-  * `LOG_MQTT_MESSAGE`: Log MQTT original message, only if LOG_LEVEL is set to DEBUG (default: False)
-  * `MQTT_IGNORED_TOPICS`: Comma-separated lists of topics to ignore. Accepts wildcards. (default: None)
-  * `MQTT_ADDRESS`: IP or hostname of MQTT broker (default: 127.0.0.1)
-  * `MQTT_PORT`: TCP port of MQTT broker (default: 1883)
-  * `MQTT_TOPIC`: Topic path to subscribe to (default: #)
-  * `MQTT_KEEPALIVE`: Keep alive interval to maintain connection with MQTT broker (default: 60)
-  * `MQTT_USERNAME`: Username which should be used to authenticate against the MQTT broker (default: None)
-  * `MQTT_PASSWORD`: Password which should be used to authenticate against the MQTT broker (default: None)
-  * `MQTT_V5_PROTOCOL`: Force to use MQTT protocol v5 instead of 3.1.1
-  * `MQTT_CLIENT_ID`: Set client ID manually for MQTT connection
-  * `MQTT_EXPOSE_CLIENT_ID`: Expose the client ID as a label in Prometheus metrics
-  * `PROMETHEUS_PORT`: HTTP server PORT to expose Prometheus metrics (default: 9000)
-  * `PROMETHEUS_PREFIX`: Prefix added to the metric name, example: mqtt_temperature (default: mqtt_)
-  * `TOPIC_LABEL`: Define the Prometheus label for the topic, example temperature{topic="device1"} (default: topic)
-  * `ZIGBEE2MQTT_AVAILABILITY`: Normalize sensor name for device availability metric added by Zigbee2MQTT (default: False)
-  * `ZWAVE_TOPIC_PREFIX`: MQTT topic used for Zwavejs2Mqtt messages (default: zwave/)
-
-### Deployment
-
-#### Using Docker
-
-With an interactive shell:
-
-```shell
-docker run -it -p 9000:9000 -e "MQTT_ADDRESS=192.168.0.1" kpetrem/mqtt-exporter
+```python
+>>> # We start off with a pair with complementary data.
+>>> from cabrillo import QSO
+>>> from datetime import datetime
+>>> qso1 = QSO('14313', 'PH', datetime.strptime('May 30 2018 10:15PM', '%b %d %Y %I:%M%p'), 'KX0XXX', 'KX9XXX', de_exch=['59', '10', 'CO'], dx_exch=['44', '20', 'IN'], t=None)
+>>> qso2 = QSO('14313', 'PH', datetime.strptime('May 30 2018 10:10PM', '%b %d %Y %I:%M%p'), 'KX9XXX', 'KX0XXX', de_exch=['44', '20', 'IN'], dx_exch=['59', '10', 'CO'], t=None)
+>>> qso1.match_against(qso2)
+True
+>>> qso1.freq = '14000'  # Same band, still will match.
+>>> qso1.match_against(qso2)
+True
+>>> qso1.match_against(qso2, max_time_delta=1)  # Make time checking less lenient.
+False
+>>> # All flags.
+>>> qso1.match_against(qso2, max_time_delta=30, check_exch=True, check_band=True)
 ```
 
-If you need the container to start on system boot (e.g. on your server/Raspberry Pi):
+# Attributes
 
-```shell
-docker run -d -p 9000:9000 --restart unless-stopped --name mqtt-exporter  -e "MQTT_ADDRESS=192.168.0.1" kpetrem/mqtt-exporter
+Use these attributes to access and construct individual objects.
+
+```python
+class Cabrillo(builtins.object)
+ |  Cabrillo(check_categories=True, **d)
+ |  
+ |  Representation of a Cabrillo log file.
+ |  
+ |  Attributes:
+ |        version: The only supported version is '3.0'.
+ |        callsign: Call sign of station.
+ |        contest: Contest identification.
+ |        category_assisted: One of CATEGORY_ASSISTED.
+ |        category_band: One of CATEGORY_BAND.
+ |        category_mode: One of CATEGORY_MODE.
+ |        category_operator: One of CATEGORY_OPERATOR.
+ |        category_power: One of CATEGORY-POWER.
+ |        category_station: One of CATEGORY-STATION.
+ |        category_time: One of CATEGORY-TIME.
+ |        category_transmitter: One of CATEGORY-TRANSMITTER. Optional for
+ |          multi-op.
+ |        category_overlay: One of CATEGORY-OVERLAY.
+ |        certificate: If certificate by post. Boolean.
+ |        claimed_score: Claimed score in int.
+ |        club: Club represented.
+ |        created_by: Software responsible for creating this log file.
+ |          Optional, defaults to "cabrillo (Python)".
+ |        email: Email address of the submitter.
+ |        location: State/section/ID depending on contest.
+ |        name: Log submitter's name.
+ |        address: Mailing address, as a list, one entry per line.
+ |        address_city: Optional granular address info.
+ |        address_state_province: Optional granular address info.
+ |        address_postalcode: Optional granular address info.
+ |        address_country: Optional granular address info.
+ |        operators: List of operators' callsigns.
+ |        offtime: List containing two datetime objects denoting start and
+ |          end of off-time.
+ |        soapbox: List of lines of soapbox text.
+ |        qso: List of all QSO objects, including ignored QSOs.
+ |        valid_qso: List of all valid QSOs (excluding X-QSO) (read-only).
+ |        x_qso: List of QSO objects for ignored QSOs (X-QSO only) (read-only).
+ |        x_anything: An ordered mapping of ignored/unknown attributes of the Cabrillo file.
 ```
 
-#### Using Docker Compose
-
-```yaml
-version: "3"
-services:
-  mqtt-exporter:
-    image: kpetrem/mqtt-exporter
-    ports:
-      - 9000:9000
-    environment:
-      - MQTT_ADDRESS=192.168.0.1
-    restart: unless-stopped
+```python
+ class QSO(builtins.object)
+ |  QSO(freq, mo, date, de_call, dx_call, de_exch=[], dx_exch=[], t=None, valid=True)
+ |  
+ |  Representation of a single QSO.
+ |  
+ |  Attributes:
+ |      freq: Frequency in kHz in str representation.
+ |      mo: Transmission mode of QSO.
+ |      date: UTC time as datetime.datetime object.
+ |      de_call: Sent callsign.
+ |      de_exch: Sent exchange. List, first item is RST, second tends to be context exchange.
+ |      dx_call: Received callsign.
+ |      dx_exch: Received exchange. List, first item is RST, second tends to be context exchange.
+ |      t: Transmitter ID for multi-transmitter categories in int. 0/1.
+ |      valid: True for QSO that counts, False for an X-QSO.
 ```
 
-#### Using Python
+## Contributors
 
-```
-pip install -r requirements/base.txt
-MQTT_ADDRESS=192.168.0.1 python exporter.py
-```
+Pull requests are appreciated!
 
-#### Get the metrics on Prometheus
+The following instructions show how to obtain the sourcecode and execute the tests.
+They assume Python 3.3 or later: 
 
-See below an example of Prometheus configuration to scrape the metrics:
-
-```
-scrape_configs:
-  - job_name: mqtt-exporter
-    static_configs:
-      - targets: ["mqtt-exporter:9000"]
+```sh
+git clone https://github.com/thxo/cabrillo.git
+cd cabrillo
+python3 -m venv python-venv
+source python-venv/bin/activate
+pip install -r requirements_test.txt
+python -m pytest --cov-report term-missing --cov cabrillo -v
 ```
 
-#### Nicer metrics
-
-If you want nicer metrics, you can configure mqtt-exporter in your `docker-compose.yml` as followed:
-```
-version: "3"
-services:
-  mqtt-exporter:
-    image: kpetrem/mqtt-exporter
-    ports:
-      - 9000:9000
-    environment:
-      - MQTT_ADDRESS=192.168.0.1
-      - PROMETHEUS_PREFIX=sensor_
-      - TOPIC_LABEL=sensor
-    restart: unless-stopped
-```
-
-Result:
-```
-sensor_temperature{sensor="zigbee2mqtt_bedroom"} 22.3
-```
-
-And then remove `zigbee2mqtt_` prefix from `sensor` label via Prometheus configuration:
-
-```
-scrape_configs:
-  - job_name: mqtt-exporter
-    static_configs:
-      - targets: ["mqtt-exporter:9000"]
-    metric_relabel_configs:
-      - source_labels: [sensor]
-        regex: 'zigbee2mqtt_(.*)'
-        replacement: '$1'
-        target_label: sensor
-```
-
-Result:
-```
-sensor_temperature{sensor=bedroom"} 22.3
-```
-
-## Docker-compose full stack example
-
-This docker-compose aims to share a typical monitoring stack.
-
-If you need persistent metrics, I would advise using Thanos or Cortex. Of course there are other suitable persistent storage solution for Prometheus.
-
-[docker-compose.yaml](https://github.com/kpetremann/mqtt-exporter/blob/master/doc/example/docker-compose.yml)
-
-You can also add other cool software such as Home-Assistant.
-
-## Contribute
-
-### Dev environment
-
-You can install invoke package on your system and then use it to install environement, run an autoformat or just run the exporter:
-
-  * `invoke install`: to install virtualenv under .venv/ and install all dev requirements
-  * `invoke reformat`: reformat using black and isort
-  * `invoke start`: start the app
-
-### Coding style
-
-Please ensure you have run the following before pushing a commit:
-  * `black` and `isort` (or `invoke reformat`)
-  * `pylama` to run all linters
-
-Follow usual best practices:
-  * document your code (inline and docstrings)
-  * constant are in upper case
-  * use comprehensible variable name
-  * one function = one purpose
-  * function name should define perfectly its purpose
-  * please add/adapt unit and functional tests
+On a Windows machine, using `cmd.exe`, substitute
+`python-venv/Scripts/activate` for
+`source python-venv/bin/activate`.
