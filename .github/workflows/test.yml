@@ -1,41 +1,31 @@
-name: test
+name: Python package
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  - push
+  - pull_request
 
 jobs:
-
-  test:
-    runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }} - ${{ matrix.python }}
+  build:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
-        python: ["3.9", "3.10"]
-        include:
-          - os: ubuntu-latest
-            python: 3.9
-          - os: ubuntu-latest
-            python: 3.9
-          - os: ubuntu-latest
-            python: pypy3
-          - os: windows-latest
+        python-version: ["3.9", "3.10"]
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python }}
+
+    - uses: actions/checkout@v1
+
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python }}
-    - name: Install
-      # pyperformance must be installed:
-      # pyperformance/tests/test_compare.py imports it
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+        
+    - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip setuptools
-        python -m pip install -e .
-    - name: Display Python version
-      run: python -c "import sys; print(sys.version)"
-    - name: Run Tests
-      run: python runtests.py
+        python -m pip install --upgrade pip
+        pip install tox tox-gh-actions
+        pip install -r requirements.txt
+
+    - name: Test with tox
+      run: tox

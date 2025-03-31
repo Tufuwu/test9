@@ -1,116 +1,74 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-# FIXME:
-#
-# - REENABLE HG_STARTUP BENCHMARK.
-#
-# Update dependencies:
-#
-#  - python3 -m pip install --user --upgrade pip-tools
-#  - git clean -fdx  # remove all untracked files!
-#  - (cd pyperformance; pip-compile --upgrade requirements.in)
-#
-# Prepare a release:
-#
-#  - git pull --rebase
-#  - Remove untracked files/dirs: git clean -fdx
-#  - maybe update version in pyperformance/__init__.py and doc/conf.py
-#  - set release date in doc/changelog.rst
-#  - git commit -a -m "prepare release x.y"
-#  - run tests: tox --parallel auto
-#  - git push
-#  - check Travis CI status:
-#    https://travis-ci.com/github/python/pyperformance
-#  - check AppVeyor status:
-#    https://ci.appveyor.com/project/lazka/pyperformance-rdqv8
-#
-# Release a new version:
-#
-#  - git tag VERSION
-#  - git push --tags
-#  - Remove untracked files/dirs: git clean -fdx
-#  - python3 setup.py sdist bdist_wheel
-#  - twine upload dist/*
-#
-# After the release:
-#
-#  - set version to n+1: pyperformance/__init__.py and doc/conf.py
-#  - git commit -a -m "post-release"
-#  - git push
+from setuptools import find_packages, setup
 
-# Import just to get the version
-import pyperformance
+import os, sys
 
-VERSION = pyperformance.__version__
+exec(open('colorfield/version.py').read())
 
-DESCRIPTION = 'Python benchmark suite'
-CLASSIFIERS = [
-    'Development Status :: 5 - Production/Stable',
-    'Intended Audience :: Developers',
-    'License :: OSI Approved :: MIT License',
-    'Natural Language :: English',
-    'Operating System :: OS Independent',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python',
-]
+github_url = 'https://github.com/fabiocaccamo'
+package_name = 'django-colorfield'
+package_url = '{}/{}'.format(github_url, package_name)
+package_path = os.path.abspath(os.path.dirname(__file__))
+long_description_file_path = os.path.join(package_path, 'README.md')
+long_description_content_type = 'text/markdown'
+long_description = ''
+try:
+    long_description_file_options = {} if sys.version_info[0] < 3 else { 'encoding':'utf-8' }
+    with open(long_description_file_path, 'r', **long_description_file_options) as f:
+        long_description = f.read()
+except IOError:
+    pass
 
-
-# put most of the code inside main() to be able to import setup.py in
-# unit tests
-def main():
-    import io
-    import os.path
-    from setuptools import setup
-
-    with io.open('README.rst', encoding="utf8") as fp:
-        long_description = fp.read().strip()
-
-    packages = [
-        'pyperformance',
-        'pyperformance.benchmarks',
-        'pyperformance.benchmarks.data',
-        'pyperformance.benchmarks.data.2to3',
-        'pyperformance.tests',
-        'pyperformance.tests.data',
-    ]
-
-    data = {
-        'pyperformance': ['requirements.txt'],
-        'pyperformance.tests': ['data/*.json'],
-    }
-
-    # Search for all files in pyperformance/benchmarks/data/
-    data_dir = os.path.join('pyperformance', 'benchmarks', 'data')
-    benchmarks_data = []
-    for root, dirnames, filenames in os.walk(data_dir):
-        # Strip pyperformance/benchmarks/ prefix
-        root = os.path.normpath(root)
-        root = root.split(os.path.sep)
-        root = os.path.sep.join(root[2:])
-
-        for filename in filenames:
-            filename = os.path.join(root, filename)
-            benchmarks_data.append(filename)
-    data['pyperformance.benchmarks'] = benchmarks_data
-
-    options = {
-        'name': 'pyperformance',
-        'version': VERSION,
-        'author': 'Collin Winter and Jeffrey Yasskin',
-        'license': 'MIT license',
-        'description': DESCRIPTION,
-        'long_description': long_description,
-        'url': 'https://github.com/python/benchmarks',
-        'classifiers': CLASSIFIERS,
-        'packages': packages,
-        'package_data': data,
-        'entry_points': {
-            'console_scripts': ['pyperformance=pyperformance.cli:main']
-        },
-        'install_requires': ["pyperf"],
-    }
-    setup(**options)
-
-
-if __name__ == '__main__':
-    main()
+setup(
+    name=package_name,
+    packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+    include_package_data=True,
+    version=__version__,
+    description='simple color field for your models with a nice color-picker in the admin-interface.',
+    long_description=long_description,
+    long_description_content_type=long_description_content_type,
+    author='Jared Forsyth, Fabio Caccamo',
+    author_email='jared@jaredforsyth.com, fabio.caccamo@gmail.com',
+    url=package_url,
+    download_url='{}/archive/{}.tar.gz'.format(package_url, __version__),
+    keywords=['django', 'colorfield', 'colorpicker', 'color',
+              'field', 'picker', 'chooser', 'admin', 'python'],
+    requires=['django (>=1.7)'],
+    install_requires=[
+    ],
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Web Environment',
+        'Framework :: Django',
+        'Framework :: Django :: 1.7',
+        'Framework :: Django :: 1.8',
+        'Framework :: Django :: 1.9',
+        'Framework :: Django :: 1.10',
+        'Framework :: Django :: 1.11',
+        'Framework :: Django :: 2.0',
+        'Framework :: Django :: 2.1',
+        'Framework :: Django :: 2.2',
+        'Framework :: Django :: 3.0',
+        'Framework :: Django :: 3.1',
+        'Framework :: Django :: 3.2',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Topic :: Software Development :: Build Tools',
+    ],
+    license='MIT',
+    test_suite='runtests.runtests',
+)
