@@ -1,7 +1,2 @@
-# python 2/3 support
-future
-
-# testing
-pytest
-pylint
-flake8
+html5lib
+rdflib
