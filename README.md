@@ -1,204 +1,257 @@
-<h1 align="center">
-  <img src="https://raw.githubusercontent.com/manrajgrover/halo/master/art/halo.png" height="50px"/>
-  <br>
-  halo
-</h1>
+[![Build Status](https://www.travis-ci.com/pydot/pydot.svg?branch=master)](https://www.travis-ci.com/pydot/pydot)
+[![PyPI](https://img.shields.io/pypi/v/pydot.svg)](https://pypi.org/project/pydot/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-[![Build Status](https://travis-ci.com/manrajgrover/halo.svg?branch=master)](https://travis-ci.com/manrajgrover/halo) [![Build status](https://ci.appveyor.com/api/projects/status/wa6t414gltr403ff?svg=true)](https://ci.appveyor.com/project/manrajgrover/halo) [![Coverage Status](https://coveralls.io/repos/github/manrajgrover/halo/badge.svg?branch=master)](https://coveralls.io/github/manrajgrover/halo?branch=master)
- [![PyPI](https://img.shields.io/pypi/v/halo.svg)](https://github.com/manrajgrover/halo) ![awesome](https://img.shields.io/badge/awesome-yes-green.svg) [![Downloads](https://pepy.tech/badge/halo)](https://pepy.tech/project/halo) [![Downloads](https://pepy.tech/badge/halo/month)](https://pepy.tech/project/halo/month)
-> Beautiful spinners for terminal, IPython and Jupyter
 
-![halo](https://raw.github.com/manrajgrover/halo/master/art/doge_spin.svg?sanitize=true)
+About
+=====
 
-## Install
+`pydot`:
 
-```shell
-$ pip install halo
-```
+  - is an interface to [Graphviz][1]
+  - can parse and dump into the [DOT language][2] used by GraphViz,
+  - is written in pure Python,
 
-## Usage
+and [`networkx`][3] can convert its graphs to `pydot`.
 
-```py
-from halo import Halo
+Development occurs at [GitHub][11], where you can report issues and
+contribute code.
 
-spinner = Halo(text='Loading', spinner='dots')
-spinner.start()
 
-# Run time consuming work here
-# You can also change properties for spinner as and when you want
+Examples
+========
 
-spinner.stop()
-```
+The examples here will show you the most common input, editing and
+output methods.
 
-Alternatively, you can use halo with Python's `with` statement:
+Input
+-----
 
-```py
-from halo import Halo
+No matter what you want to do with `pydot`, it will need some input to
+start with. Here are 3 common options:
 
-with Halo(text='Loading', spinner='dots'):
-    # Run time consuming work here
-```
+1. Import a graph from an existing DOT-file.
 
-Finally, you can use halo as a decorator:
+    Use this method if you already have a DOT-file describing a graph,
+    for example as output of another program. Let's say you already
+    have this `example.dot` (based on an [example from Wikipedia][12]):
 
-```py
-from halo import Halo
+    ```dot
+    graph my_graph {
+       bgcolor="yellow";
+       a [label="Foo"];
+       b [shape=circle];
+       a -- b -- c [color=blue];
+    }
+    ```
 
-@Halo(text='Loading', spinner='dots')
-def long_running_function():
-    # Run time consuming work here
-    pass
+    Just read the graph from the DOT-file:
 
-long_running_function()
-```
+    ```python
+    import pydot
 
-## API
+    graphs = pydot.graph_from_dot_file("example.dot")
+    graph = graphs[0]
+    ```
 
-#### `Halo([text|text_color|spinner|animation|placement|color|interval|stream|enabled])`
+2. or: Parse a graph from an existing DOT-string.
 
-##### `text`
-*Type*: `str`
+    Use this method if you already have a DOT-string describing a
+    graph in a Python variable:
 
-Text shown along with spinner.
+    ```python
+    import pydot
 
-##### `text_color`
-*Type*: `str`
-*Values*: `grey`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`
+    dot_string = """graph my_graph {
+        bgcolor="yellow";
+        a [label="Foo"];
+        b [shape=circle];
+        a -- b -- c [color=blue];
+    }"""
 
-Color of the spinner text. Defaults to `None`.
+    graphs = pydot.graph_from_dot_data(dot_string)
+    graph = graphs[0]
+    ```
 
-##### `spinner`
-*Type*: `str|dict`
+3. or: Create a graph from scratch using pydot objects.
 
-If string, it should be one of the spinners listed in the given [json](https://github.com/sindresorhus/cli-spinners/blob/dac4fc6571059bb9e9bc204711e9dfe8f72e5c6f/spinners.json) file. If a dict is passed, it should define `interval` and `frames`. Something like:
+    Now this is where the cool stuff starts. Use this method if you
+    want to build new graphs from Python.
 
-```py
-{
-    'interval': 100,
-    'frames': ['-', '+', '*', '+', '-']
-}
-```
+    ```python
+    import pydot
 
-Defaults to `dots` spinner. For Windows users, it defaults to `line` spinner.
+    graph = pydot.Dot("my_graph", graph_type="graph", bgcolor="yellow")
 
-##### `animation`
-*Type*: `str`
-*Values*: `bounce`, `marquee`
+    # Add nodes
+    my_node = pydot.Node("a", label="Foo")
+    graph.add_node(my_node)
+    # Or, without using an intermediate variable:
+    graph.add_node(pydot.Node("b", shape="circle"))
 
-Animation to apply to the text if it's too large and doesn't fit in the terminal. If no animation is defined, the text will be ellipsed.
+    # Add edges
+    my_edge = pydot.Edge("a", "b", color="blue")
+    graph.add_edge(my_edge)
+    # Or, without using an intermediate variable:
+    graph.add_edge(pydot.Edge("b", "c", color="blue"))
+    ```
 
-##### `placement`
-*Type*: `str`
-*Values*: `left`, `right`
+    Imagine using these basic building blocks from your Python program
+    to dynamically generate a graph. For example, start out with a
+    basic `pydot.Dot` graph object, then loop through your data while
+    adding nodes and edges. Use values from your data as labels, to
+    determine shapes, edges and so forth. This way, you can easily
+    build visualizations of thousands of interconnected items.
 
-Which side of the text the spinner should be displayed. Defaults to `left`
+4. or: Convert a NetworkX graph to a pydot graph.
 
-##### `color`
-*Type*: `str`
-*Values*: `grey`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`
+    NetworkX has conversion methods for pydot graphs:
 
-Color of the spinner. Defaults to `cyan`.
+    ```python
+    import networkx
+    import pydot
 
-##### `interval`
-*Type*: `float`
+    # See NetworkX documentation on how to build a NetworkX graph.
 
-Interval between each frame. Defaults to spinner interval (recommended).
+    graph = networkx.drawing.nx_pydot.to_pydot(my_networkx_graph)
+    ```
 
-##### `stream`
-*Type*: `file`
+Edit
+----
 
-Stream to write the output. Defaults to `sys.stdout`.
+You can now further manipulate your graph using pydot methods:
 
-##### `enabled`
-*Type*: `bool`
+- Add further nodes and edges:
 
-Enable or disable the spinner. Defaults to `True`.
+  ```python
+  graph.add_edge(pydot.Edge("b", "d", style="dotted"))
+  ```
 
-### Methods
+- Edit attributes of graph, nodes and edges:
 
-Following are the methods available:
+  ```python
+  graph.set_bgcolor("lightyellow")
+  graph.get_node("b")[0].set_shape("box")
+  ```
 
-#### `spinner.start([text])`
+Output
+------
 
-Starts the spinner. If `text` is passed, it is set as spinner text. Returns the instance.
+Here are 3 different output options:
 
-#### `spinner.stop()`
+1. Generate an image.
 
-Stops and clears the spinner. Returns the instance.
+    To generate an image of the graph, use one of the `create_*()` or
+    `write_*()` methods.
 
-#### `spinner.clear()`
+    - If you need to further process the output in Python, the
+      `create_*` methods will get you a Python bytes object:
 
-Clears the spinner. Returns the instance.
+      ```python
+      output_graphviz_svg = graph.create_svg()
+      ```
 
-#### `spinner.render()`
+    - If instead you just want to save the image to a file, use one of
+      the `write_*` methods:
 
-Manually renders a new frame. Returns the instance.
+      ```python
+      graph.write_png("output.png")
+      ```
 
-#### `spinner.frame()`
+2. Retrieve the DOT string.
 
-Returns next frame to be rendered.
+    There are two different DOT strings you can retrieve:
 
-#### `spinner.succeed([text])`
-##### `text`: *Type*: `str`
+    - The "raw" pydot DOT: This is generated the fastest and will
+      usually still look quite similar to the DOT you put in. It is
+      generated by pydot itself, without calling Graphviz.
 
-Stops the spinner and changes symbol to `✔`. If text is provided, it is persisted else current text is persisted. Returns the instance.
+      ```python
+      # As a string:
+      output_raw_dot = graph.to_string()
+      # Or, save it as a DOT-file:
+      graph.write_raw("output_raw.dot")
+      ```
 
-#### `spinner.fail([text])`
-##### `text`: *Type*: `str`
+    - The Graphviz DOT: You can use it to check how Graphviz lays out
+      the graph before it produces an image. It is generated by
+      Graphviz.
 
-Stops the spinner and changes symbol to `✖`. If text is provided, it is persisted else current text is persisted. Returns the instance.
+      ```python
+      # As a bytes literal:
+      output_graphviz_dot = graph.create_dot()
+      # Or, save it as a DOT-file:
+      graph.write_dot("output_graphviz.dot")
+      ```
 
-#### `spinner.warn([text])`
-##### `text`: *Type*: `str`
+3. Convert to a NetworkX graph.
 
-Stops the spinner and changes symbol to `⚠`. If text is provided, it is persisted else current text is persisted. Returns the instance.
+    Here as well, NetworkX has a conversion method for pydot graphs:
 
-#### `spinner.info([text])`
-##### `text`: *Type*: `str`
+    ```python
+    my_networkx_graph = networkx.drawing.nx_pydot.from_pydot(graph)
+    ```
 
-Stops the spinner and changes symbol to `ℹ`. If text is provided, it is persisted else current text is persisted. Returns the instance.
+More help
+---------
 
-#### `spinner.stop_and_persist([symbol|text])`
-Stops the spinner and changes symbol and text. Returns the instance.
+For more help, see the docstrings of the various pydot objects and
+methods. For example, `help(pydot)`, `help(pydot.Graph)` and
+`help(pydot.Dot.write)`.
 
-##### `symbol`
-*Type*: `str`
+More [documentation contributions welcome][13].
 
-Symbol to replace the spinner with. Defaults to `' '`.
 
-##### `text`
-*Type*: `str`
+Installation
+============
 
-Text to be persisted. Defaults to instance text.
+From [PyPI][4] using [`pip`][5]:
 
-![Persist spin](https://raw.github.com/manrajgrover/halo/master/art/persist_spin.svg?sanitize=true)
+`pip install pydot`
 
-#### `spinner.text`
-Change the text of spinner.
+From source:
 
-#### `spinner.color`
-Change the color of spinner
+`python setup.py install`
 
-#### `spinner.spinner`
-Change the spinner itself.
 
-#### `spinner.enabled`
-Enable or disable the spinner.
+Dependencies
+============
 
-## How to contribute?
+- [`pyparsing`][6]: used only for *loading* DOT files,
+  installed automatically during `pydot` installation.
 
-Please see [Contributing guidelines](https://github.com/manrajgrover/halo/blob/master/.github/CONTRIBUTING.md) for more information.
+- GraphViz: used to render graphs as PDF, PNG, SVG, etc.
+  Should be installed separately, using your system's
+  [package manager][7], something similar (e.g., [MacPorts][8]),
+  or from [its source][9].
 
-## Like it?
 
-🌟 this repo to show support. Let me know you liked it on [Twitter](https://twitter.com/manrajsgrover).
-Also, share the [project](https://twitter.com/intent/tweet?url=https%3A%2F%2Fgithub.com%2Fmanrajgrover%2Fhalo&via=manrajsgrover&text=Checkout%20%23halo%20-%20a%20beautiful%20%23terminal%20%23spinners%20library%20for%20%23python&hashtags=github%2C%20pypi).
+License
+=======
 
-## Related
+Distributed under an [MIT license][10].
 
-* [py-spinners](https://github.com/manrajgrover/py-spinners) - Spinners in Python
-* [py-log-symbols](https://github.com/manrajgrover/py-log-symbols) - Log Symbols in Python
-* [ora](https://github.com/sindresorhus/ora) - Elegant terminal spinners in JavaScript (inspiration behind this project) 
 
-## License
-[MIT](https://github.com/manrajgrover/halo/blob/master/LICENSE) © Manraj Singh
+Contacts
+========
+
+Maintainers:
+- Sebastian Kalinowski <sebastian@kalinowski.eu> (GitHub: @prmtl)
+- Peter Nowee <peter@peternowee.com> (GitHub: @peternowee)
+
+Original author: Ero Carrera <ero.carrera@gmail.com>
+
+
+[1]: https://www.graphviz.org
+[2]: https://en.wikipedia.org/wiki/DOT_%28graph_description_language%29
+[3]: https://github.com/networkx/networkx
+[4]: https://pypi.python.org/pypi
+[5]: https://github.com/pypa/pip
+[6]: https://github.com/pyparsing/pyparsing
+[7]: https://en.wikipedia.org/wiki/Package_manager
+[8]: https://www.macports.org
+[9]: https://gitlab.com/graphviz/graphviz
+[10]: https://github.com/pydot/pydot/blob/master/LICENSE
+[11]: https://github.com/pydot/pydot
+[12]: https://en.wikipedia.org/w/index.php?title=DOT_(graph_description_language)&oldid=1003001464#Attributes
+[13]: https://github.com/pydot/pydot/issues/130
