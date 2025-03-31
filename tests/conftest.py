@@ -1,53 +1,43 @@
-"""
-Module with global fixtures
-"""
-import os
-import shutil
-import logging
-
 import pytest
 
-from sentinelhub import SHConfig
-
-pytest.register_assert_rewrite('sentinelhub.testing_utils')
-from sentinelhub.testing_utils import get_input_folder, get_output_folder
-
-INPUT_FOLDER = get_input_folder(__file__)
-OUTPUT_FOLDER = get_output_folder(__file__)
-
-
-def pytest_configure(config):
-    shconfig = SHConfig()
-    for param in shconfig.get_params():
-        env_variable = param.upper()
-        if os.environ.get(env_variable):
-            setattr(shconfig, param, os.environ.get(env_variable))
-    shconfig.save()
+from fuzz_lightyear.datastore import _ALL_POST_FUZZ_HOOKS_BY_OPERATION
+from fuzz_lightyear.datastore import _ALL_POST_FUZZ_HOOKS_BY_TAG
+from fuzz_lightyear.datastore import _RERUN_POST_FUZZ_HOOKS_BY_OPERATION
+from fuzz_lightyear.datastore import _RERUN_POST_FUZZ_HOOKS_BY_TAG
+from fuzz_lightyear.datastore import get_excluded_operations
+from fuzz_lightyear.datastore import get_included_tags
+from fuzz_lightyear.datastore import get_non_vulnerable_operations
+from fuzz_lightyear.datastore import get_user_defined_mapping
+from fuzz_lightyear.plugins import get_enabled_plugins
+from fuzz_lightyear.request import get_victim_session_factory
+from fuzz_lightyear.supplements.abstraction import get_abstraction
 
 
-@pytest.fixture(name='config')
-def config_fixture():
-    return SHConfig()
+@pytest.fixture(autouse=True)
+def clear_caches():
+    get_abstraction.cache_clear()
+    get_user_defined_mapping.cache_clear()
+    get_enabled_plugins.cache_clear()
+    get_victim_session_factory.cache_clear()
+    get_excluded_operations.cache_clear()
+    get_non_vulnerable_operations.cache_clear()
+    get_included_tags.cache_clear()
+
+    _ALL_POST_FUZZ_HOOKS_BY_OPERATION.clear()
+    _ALL_POST_FUZZ_HOOKS_BY_TAG.clear()
+    _RERUN_POST_FUZZ_HOOKS_BY_OPERATION.clear()
+    _RERUN_POST_FUZZ_HOOKS_BY_TAG.clear()
 
 
-@pytest.fixture(name='input_folder')
-def input_folder_fixture():
-    return INPUT_FOLDER
-
-
-@pytest.fixture(name='output_folder')
-def output_folder_fixture():
-    """ Creates the necessary folder and cleans up after test is done. """
-    if not os.path.exists(OUTPUT_FOLDER):
-        os.mkdir(OUTPUT_FOLDER)
-    yield OUTPUT_FOLDER
-    shutil.rmtree(OUTPUT_FOLDER, ignore_errors=True)
-
-
-@pytest.fixture(name='logger')
-def logger_fixture():
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)-15s %(module)s:%(lineno)d [%(levelname)s] %(funcName)s  %(message)s'
+@pytest.fixture(autouse=True)
+def ignore_hypothesis_non_interactive_example_warning():
+    """In theory we're not supposed to use hypothesis'
+    strategy.example(), but fuzz-lightyear isn't using
+    hypothesis in a normal way.
+    """
+    import warnings
+    from hypothesis.errors import NonInteractiveExampleWarning
+    warnings.filterwarnings(
+        'ignore',
+        category=NonInteractiveExampleWarning,
     )
-    return logging.getLogger(__name__)

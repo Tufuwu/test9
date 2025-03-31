@@ -1,22 +1,20 @@
-# Makefile for creating a new release of the package and uploading it to PyPI
-# This way is preferred to manual because it also resets config.json
+development:
+	tox -e venv
 
-PYTHON = python3
-CONFIG = sentinelhub.config
+.PHONY: test
+test:
+	tox
 
-help:
-	@echo "Use 'make upload' to reset config.json and upload the package to PyPi"
+.PHONY: clean
+clean:
+	find -name '*.pyc' -delete
+	find -name '__pycache__' -delete
 
-reset-config:
-	$(CONFIG) --reset
+.PHONY: purge
+purge:
+	find -name '.tox' | xargs --no-run-if-empty rm -r
+	find -name '*.egg-info' | xargs --no-run-if-empty rm -r
 
-upload: reset-config
-	rm -r dist | true
-	$(PYTHON) setup.py sdist
-	twine upload --skip-existing dist/*
-
-# For testing:
-test-upload: reset-config
-	rm -r dist | true
-	$(PYTHON) setup.py sdist
-	twine upload --repository testpypi --skip-existing dist/*
+.PHONY: vulnerable_app
+vulnerable_app:
+	FLASK_ENV='development' python -m testing.vulnerable_app
