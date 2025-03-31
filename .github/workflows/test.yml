@@ -1,59 +1,41 @@
-name: Py 3.7 3.8, 3.9 | Windows Mac Linux
+name: test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
-        python-version: ["3.9", "3.10"]
 
+  test:
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} - ${{ matrix.python }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python: ["3.9", "3.10"]
+        include:
+          - os: ubuntu-latest
+            python: 3.9
+          - os: ubuntu-latest
+            python: 3.9
+          - os: ubuntu-latest
+            python: pypy3
+          - os: windows-latest
     steps:
-    - uses: conda-incubator/setup-miniconda@v2
-    
-    - name: Set up Python ${{ matrix.python-version }}
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python }}
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
-        
-    - name: Set up Git repository
-      uses: actions/checkout@v2
-      
-    - name: Update and install packages
+        python-version: ${{ matrix.python }}
+    - name: Install
+      # pyperformance must be installed:
+      # pyperformance/tests/test_compare.py imports it
       run: |
-        python -m pip install --upgrade pip wheel
-        pip install h5pyd --upgrade
-        pip install nose
-        pip install coveralls
-        pip install .
-        
-    - name: Run nose
-      shell: bash -l {0}
-      run: |          
-        nosetests -v --with-coverage --cover-package=mhkit mhkit
-
-    - name: Upload coverage data to coveralls.io
-      run: coveralls --service=github
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COVERALLS_FLAG_NAME: ${{ matrix.python-version }}
-        COVERALLS_PARALLEL: true
-  coveralls:
-    name: Indicate completion to coveralls.io
-    needs: build
-    runs-on: ubuntu-latest
-    container: python:3-slim
-    steps:
-    - name: Finished
-      run: |
-        pip3 install --upgrade coveralls
-        coveralls --finish
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        python -m pip install --upgrade pip setuptools
+        python -m pip install -e .
+    - name: Display Python version
+      run: python -c "import sys; print(sys.version)"
+    - name: Run Tests
+      run: python runtests.py

@@ -1,33 +1,19 @@
-$ cat .gitignore
-
-# File Types
-*.asv
-*.m
-*.mat
+# Python cached bytecode files
 *.pyc
-*.py~
+*.pyo
+*.pyd
+
+# Temporary files, usually created by text editors (vim)
 *.swp
-*.tws
 *~
 
-# Directories
-**/__pycache__/
-**/_build/
-**/build/
-**/dist/
-**/mhkit.egg-info/
-**/.ipynb_checkpoints
-**/tests/*.png
-**/workspace/data_peetz/
-**/workspace/data_mooring/
-**/workspace/data_GE/
-**/.vscode/
+# Created by setup.py sdist
+build/
+dist/
+pyperformance.egg-info/
 
-.coverage
-.DS_Store
-.DS_Store?
-.gitignore
+# Created by the pyperformance script
+venv/
 
-# Exemptions
-!**/examples/data/wave/*.mat
-!**/tests/data/wave/*.mat
+# Created by the tox program
+.tox/
