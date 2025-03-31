@@ -1,28 +1,26 @@
-.. simplesat documentation master file, created by
-   sphinx-quickstart on Tue Mar  8 13:08:34 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
-Welcome to simplesat's documentation!
-=====================================
+.. _`the PolyglotDB wiki`: https://github.com/MontrealCorpusTools/PolyglotDB/wiki
 
-A library for SAT-based dependency handling. The ``simplesat`` library
-provides facilities for describing packages and their relationships, producing
-a set of CNF clauses, and producing a solution for the clauses, according to
-the notion of a "policy," which determines the order in which packages are
-tried.
+Welcome to PolyglotDB's documentation!
+======================================
 
 Contents:
 
 .. toctree::
-   getting_started
-   architecture
-   sat_solving
-   comparing_with_composer
-   api
-   glossary
-   references
    :maxdepth: 2
+
+   introduction.rst
+   getting_started.rst
+   tutorial.rst
+   usage.rst
+   import.rst
+   enrichment.rst
+   queries.rst
+   developer.rst
+   changelog.rst
+
+See `the PolyglotDB wiki`_ for the changelog.
+
 
 
 Indices and tables

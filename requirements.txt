@@ -1,2 +1,10 @@
-PyYAML
-enum34>=1.1.2
+neo4j
+librosa
+scipy ~= 1.12.0
+praatio ~= 5.0
+textgrid
+influxdb
+tqdm
+conch_sounds
+future
+requests

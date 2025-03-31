@@ -1,19 +1,31 @@
 [run]
-branch = True
-source = simplesat
+source = polyglotdb
+omit =
+    *_rc.py
+    *_ui.py
 
 [report]
-omit = *test*
-
-# Regexes for lines to exclude from consideration
 exclude_lines =
-    # Have to re-enable the standard pragma
     pragma: no cover
-
-    def __repr__
-
-    # Don't complain if non-runnable code isn't run:
+    if corpus_context.config.debug:
     if __name__ == .__main__.:
 
-    @abc.abstractmethod
-    @abstractmethod
+    raise AssertionError
+    raise NotImplementedError
+    pass
+
+    if sys\.platform
+    if hasattr\(sys, 'frozen'\):
+
+    except ImportError:
+
+    if call_back
+    if stop_check
+
+    def run\(self\):
+
+    def calc\(self\):
+
+    def setResults
+
+    if dialog\.exec_():
