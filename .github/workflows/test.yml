@@ -1,72 +1,82 @@
-name: Test
+# Try to get a short workflow name and a job name that start with Python
+# version to make it easier to check the status inside GitHub UI.
+name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ trunk ]
+    tags:
+      - incremental-*
   pull_request:
-    branches:
-      - main
+    branches: [ trunk ]
+
+
+defaults:
+  run:
+    shell: bash
+
+
 
 jobs:
-  test:
-    name: ${{ matrix.test-env }}
+  testing:
+    runs-on: ubuntu-latest
+    env:
+      TOXENV: "${{ matrix.tox-env }}"
+    name: ${{ matrix.python-version }}-${{ matrix.tox-env }}
     strategy:
       fail-fast: false
       matrix:
-        test-env:
-          - py36-all
-          - py37-all
-          - py38-all
-          - py38-xarray-dev
-          - py38-all-rc
-        use-mpl:
-          - "--mpl"
+        # Run on the minimum micro Python version that we can get on CI.
+        # When updating the minimum Python version here, also update the
+        # `python_requires` from `setup.cfg`.
+        # Run on latest minor release of each major python version.
+        python-version: ["3.9", "3.10"]
+        tox-env: ['tests']
+
         include:
-          - test-env: py38-min
-            use-mpl: ""
-          - test-env: py38-xr
-            use-mpl: ""
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -leo pipefail {0}
+          # Run non-python version specific jobs.
+          - python-version: 3.9
+            tox-env: mypy,apidocs
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup Conda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          environment-file: ci/requirements-${{ matrix.test-env }}.yml
-          activate-environment: test_env
-          auto-activate-base: false
-          auto-update-conda: true
-      - name: Install Self
-        run: pip install -e .
-      - name: Test
-        run: |
-          coverage erase
-          coverage run --source=./salem --parallel-mode --module pytest ${{ matrix.use-mpl }} --verbose salem
-          coverage combine
-          coverage xml
-          coverage report --skip-covered
-        env:
-          MPLBACKEND: agg
-          COVERAGE_RCFILE: ${{ github.workspace }}/.coveragerc
-      - name: Upload Coverage
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_PARALLEL: true
-        run: coveralls
-  finish-coveralls:
-    name: Coveralls Finished
-    needs: test
-    runs-on: ubuntu-latest
-    container: python:3-slim
-    steps:
-    - name: Coveralls Finished
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - uses: twisted/python-info-action@v1
+    - name: Install dependencies
       run: |
-        pip3 install --upgrade coveralls &&
-        coveralls --finish
+        python -m pip install --upgrade pip tox
+
+    - name: Run job via tox
+      run: |
+        # GitHub Actions VM have 2 CPUs.
+        tox --parallel 2
+
+    - name: Prepare GitHub Pages
+      if: contains(matrix['tox-env'], 'apidocs')
+      run: |
+        mkdir website
+        touch website/index.html
+        mv apidocs website/docs
+
+    - name: Publish documentation for push on trunk
+      # FIXME:
+      # Add push event condition before merge.
+      if: contains(matrix['tox-env'], 'apidocs') && github.event_name == 'push'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        commit_message: Publish docs for ${{ github.sha }}
+        publish_dir: ./website
+
+    - uses: codecov/codecov-action@v1
+      if: always() && matrix.tox-env == 'tests'
+      with:
+        files: coverage.xml
+        name: lnx-${{ matrix.python-version }}-${{ matrix.tox-env }}
+        fail_ci_if_error: true
+        functionalities: gcov,search
