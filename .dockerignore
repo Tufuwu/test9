@@ -1,44 +1,36 @@
-# python cache
-__pycache__/**/*
-__pycache__
-*.pyc
+**/*.git
+*~
+*.o
+*.tmp
+*.so
 
-# python distribution
-build/**/*
-build
-dist/**/*
-dist
-smriprep.egg-info/**/*
-smriprep.egg-info
-.eggs/**/*
-.eggs
-pip-wheel-metadata/**/*
-pip-wheel-metadata
+*/*/*wm-shell*
+*/*/*.egg-info/
+**/*.egg-info/
 
-# housekeeping tools
-get_version.py
-update_changes.sh
-tox.ini
 
-# pip installs
-src/**/*
-src/
+*.idea/*
+img/*
 
-# git
+.clang-format
+.clang-format
+.dockerignore
+.flake8
 .gitignore
-.git/**/*
-.git
-
-# other
-work/**/*
-work
-out/**/*
-out/
-
-# CI, etc.
-.circleci
-.circleci/**/*
-.zenodo.json
-.travis.yml
+.pre-commit-config.yaml
 .readthedocs.yml
+.renovaterc
+.tarignore
+.travis.yml
+
+CODE_OF_CONDUCT.md
 CONTRIBUTING.md
+
+dev-requirements.txt
+
+python_transport/build/*
+python_transport/dist/*
+python_transport/docs/source/api/*
+python_transport/docs/build/*
+
+container/common/wm_transport_service.yml

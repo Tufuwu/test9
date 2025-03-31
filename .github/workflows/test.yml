@@ -1,98 +1,95 @@
-name: Python package
+name: Generate sink service and Transport wheel
 
 on:
-  push:
-    branches: [ '*' ]
-    tags: [ '*' ]
-  pull_request:
-    branches: [ main, 'maint/*' ]
+  release:
+    types: [created]
 
 jobs:
   build:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
-        pip: ["pip>=20.3"]
-        
-    steps:
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - uses: actions/checkout@v2
-      with:
-        ssh-key: "${{ secrets.NIPREPS_DEPLOY }}"
-    - name: Fetch all tags (for versioneer to work)
-      if: "!startsWith(github.ref, 'refs/tags/')"
-      run: |
-        /usr/bin/git -c protocol.version=2 fetch --tags --prune --unshallow origin
-    - name: Build in confined, updated environment and interpolate version
-      run: |
-        python -m venv /tmp/buildenv
-        source /tmp/buildenv/bin/activate
-        python -m pip install -U setuptools pip wheel twine docutils
-        python setup.py sdist bdist_wheel
-        python -m twine check dist/smriprep*
-        # Interpolate version
-        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-          TAG=${GITHUB_REF##*/}
-        fi
-        THISVERSION=$( python get_version.py )
-        THISVERSION=${TAG:-$THISVERSION}
-        echo "Expected VERSION: \"${THISVERSION}\""
-        echo "THISVERSION=${THISVERSION}" >> ${GITHUB_ENV}
-    - name: Install in confined environment [sdist]
-      run: |
-        python -m venv /tmp/install_sdist
-        source /tmp/install_sdist/bin/activate
-        python -m pip install "${{ matrix.pip }}" setuptools
-        python -m pip install dist/smriprep*.tar.gz
-        INSTALLED_VERSION=$(python -c 'import smriprep; print(smriprep.__version__, end="")')
-        echo "VERSION: \"${THISVERSION}\""
-        echo "INSTALLED: \"${INSTALLED_VERSION}\""
-        test "${INSTALLED_VERSION}" = "${THISVERSION}"
-    - name: Install in confined environment [wheel]
-      run: |
-        python -m venv /tmp/install_wheel
-        source /tmp/install_wheel/bin/activate
-        python -m pip install "${{ matrix.pip }}" setuptools
-        python -m pip install dist/smriprep*.whl
-        INSTALLED_VERSION=$(python -c 'import smriprep; print(smriprep.__version__, end="")')
-        echo "INSTALLED: \"${INSTALLED_VERSION}\""
-        test "${INSTALLED_VERSION}" = "${THISVERSION}"
-    - name: Install in confined environment [setup.py - install]
-      run: |
-        python -m venv /tmp/setup_install
-        source /tmp/setup_install/bin/activate
-        python -m pip install "${{ matrix.pip }}" setuptools
-        python -m pip install numpy scipy "Cython >= 0.28.5" # sklearn needs this
-        python -m pip install scikit-learn  # otherwise it attempts to build it
-        python setup.py install
-        INSTALLED_VERSION=$(python -c 'import smriprep; print(smriprep.__version__, end="")')
-        echo "INSTALLED: \"${INSTALLED_VERSION}\""
-        test "${INSTALLED_VERSION}" = "${THISVERSION}"
-    - name: Install in confined environment [setup.py - develop]
-      run: |
-        python -m venv /tmp/setup_develop
-        source /tmp/setup_develop/bin/activate
-        python -m pip install "${{ matrix.pip }}" setuptools
-        # sklearn needs these dependencies
-        python -m pip install numpy scipy "Cython >= 0.28.5"
-        python -m pip install scikit-learn  # otherwise it attempts to build it
-        python setup.py develop
-        INSTALLED_VERSION=$(python -c 'import smriprep; print(smriprep.__version__, end="")')
-        echo "INSTALLED: \"${INSTALLED_VERSION}\""
-        test "${INSTALLED_VERSION}" = "${THISVERSION}"
-  flake8:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.9
-    - run: pip install flake8
-    - run: flake8 smriprep
+      - name: checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and extract sinkService
+        uses: docker/build-push-action@v2
+        with:
+            context: .
+            file: docker/sink_service/Dockerfile
+            platforms: linux/amd64, linux/arm
+            push: false
+            target: export
+            outputs: ./artifacts/sinkService/
+
+      - name: Build and extract transportService wheel
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: docker/transport_service/Dockerfile
+          platforms: linux/amd64, linux/arm
+          push: false
+          target: export
+          outputs: ./artifacts/transportService/
+
+      - name: Get wheel name
+        id: wheel_name
+        run: |
+          WHEEL_NAME=$(find ./artifacts/transportService/linux_arm_v7/ -maxdepth 1 -type f -name '*.tar.gz' -printf "%f")
+          echo "::set-output name=wheel_name::$WHEEL_NAME"
+
+      - name: Store artefacts localy
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: ./artifacts/
+
+      - name: Get release url
+        id: get_release
+        uses: bruceadams/get-release@v1.2.1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Upload Armv7 SinkService
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./artifacts/sinkService/linux_arm_v7/sinkService
+          asset_name: sinkService-${{ github.event.release.tag_name }}-arm
+          asset_content_type: application/octet-stream
+
+      - name: Upload amd64 SinkService
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./artifacts/sinkService/linux_amd64/sinkService
+          asset_name: sinkService-${{ github.event.release.tag_name }}-amd64
+          asset_content_type: application/octet-stream
+
+      - name: Upload tar.gz wheel
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./artifacts/transportService/linux_amd64/${{ steps.wheel_name.outputs.wheel_name }}
+          asset_name: ${{ steps.wheel_name.outputs.wheel_name }}
+          asset_content_type: application/octet-stream
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.4.1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_PWD }}
+          packages_dir: ./artifacts/transportService/linux_amd64/
