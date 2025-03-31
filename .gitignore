@@ -1,19 +1,16 @@
-# Python things
+# SPDX-FileCopyrightText: 2013 The glucometerutils Authors
+#
+# SPDX-License-Identifier: MIT
+
+*.egg-info/
 *.pyc
+*~
+.cache
+.mypy_cache/
+.vscode/
+/MANIFEST
+/dist/
 __pycache__/
-venv/
-
-# Building things
-*.egg-info
-.tox/
-build/
-dist/
-
-# Django local development can create sqlite files
-db.sqlite3
-
-# isort
-isort.out
-
-# sphinx
-docs/_build/
+build
+.idea/
+*venv/

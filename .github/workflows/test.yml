@@ -1,24 +1,32 @@
-name: Build
+# SPDX-FileCopyrightText: 2021 The glucometerutils Authors
+#
+# SPDX-License-Identifier: 0BSD
+
+name: pytest
 
 on:
-  - push
+  push:
+  pull_request:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  pytest:
+
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest]
         python-version: ["3.9", "3.10"]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install tox tox-gh-actions
-    - name: Test with tox
-      run: tox
+        sudo apt install libusb-1.0-0-dev libudev-dev
+        pip install .[all]
+    - name: Test with pytest
+      run: |
+        pytest -vvv --mypy
