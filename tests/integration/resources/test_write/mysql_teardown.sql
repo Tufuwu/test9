@@ -1,1 +1,0 @@
-DROP DATABASE sparkly_test;
