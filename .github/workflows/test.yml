@@ -1,38 +1,61 @@
-name: Python Package using Conda
+name: Test
 
-on: [push]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  build-linux:
+  # Checks relating to the linting of files
+  lint:
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Add conda to system path
-      run: |
-        # $CONDA is an environment variable pointing to the root of the miniconda directory
-        echo $CONDA/bin >> $GITHUB_PATH
-    - name: Install dependencies
-      run: |
-        conda env update --file environment.yml --name base
-    - name: Lint with flake8
-      run: |
-        conda install flake8
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        conda install numpy scipy scikit-learn pandas tensorflow joblib pytest
-        conda install imageio scikit-image
-        conda install -c conda-forge dlib
-        pip install markdown
-        pip install -e  .
-        pytest -sv
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: pip3 install flake8
+
+      - name: Check PEP8 compliance
+        run: find . -name "*.py" | xargs flake8 $1
+
+      - name: Check mdl compliance
+        uses: articulate/actions-markdownlint@v1.1.0
+        with:
+          config: .github/workflows/markdownlint-config.json
+          ignore: LICENSE
+
+      - name: Check .editorconfig compliance
+        uses: editorconfig-checker/action-editorconfig-checker@v1
+
+  # Checks relating to the database
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: pip3 install jsonschema
+
+      - name: Check database
+        run: |
+          python3 ./tests/schema.py
+          python3 ./tests/db_entry.py
+          python3 ./tests/icons_entry.py
+          python3 ./tests/ordered_db.py
+          python3 ./tests/icon_cache.py
+          python3 ./tests/duplicates.py

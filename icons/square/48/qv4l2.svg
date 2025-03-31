@@ -1,0 +1,21 @@
+<svg style="" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs style="">
+  <linearGradient id="linearGradient3764" gradientTransform="translate(-48 .002215)" gradientUnits="userSpaceOnUse" style="" x1="1" x2="47">
+   <stop offset="0" style="stop-color:#cfbcad"/>
+   <stop offset="1" style="stop-color:#d6c6b9"/>
+  </linearGradient>
+ </defs>
+ <path d="m 1 43 v .25 c 0 2.216 1.784 4 4 4 h 38 c 2.216 0 4 -1.784 4 -4 v -.25 c 0 2.216 -1.784 4 -4 4 h -38 c -2.216 0 -4 -1.784 -4 -4 z m 0 .5 v .5 c 0 2.216 1.784 4 4 4 h 38 c 2.216 0 4 -1.784 4 -4 v -.5 c 0 2.216 -1.784 4 -4 4 h -38 c -2.216 0 -4 -1.784 -4 -4 z" style="opacity:.02"/>
+ <path d="m 1 43.25 v .25 c 0 2.216 1.784 4 4 4 h 38 c 2.216 0 4 -1.784 4 -4 v -.25 c 0 2.216 -1.784 4 -4 4 h -38 c -2.216 0 -4 -1.784 -4 -4 z" style="opacity:.05"/>
+ <path d="m 1 43 v .25 c 0 2.216 1.784 4 4 4 h 38 c 2.216 0 4 -1.784 4 -4 v -.25 c 0 2.216 -1.784 4 -4 4 h -38 c -2.216 0 -4 -1.784 -4 -4 z" style="opacity:.1"/>
+ <rect height="46" rx="4" style="fill:url(#linearGradient3764)" transform="rotate(-90)" width="46" x="-47" y="1"/>
+ <g style="opacity:.1">
+  <path d="m 16 28 h 4 v 8 h -4" style=""/>
+  <path d="m 28 28 h 4 v 8 h -4" style=""/>
+  <path d="m 14.5523331 12.9153285 h 18.8928756 c .9035415 0 1.6370046 .7228332 1.6370046 1.6086582 v 14.9491827 c 0 .8893683 -.7334631 1.6086582 -1.6370046 1.6086582 h -18.8928756 c -.9035415 0 -1.6370046 -.7192899 -1.6370046 -1.6086582 v -14.9491827 c 0 -.885825 .7334631 -1.6086582 1.6370046 -1.6086582" style="stroke:#6f6751;stroke-width:1.8318861"/>
+ </g>
+ <path d="m 16 27 h 4 v 8 h -4" style="fill:#2d2d2d"/>
+ <path d="m 28 27 h 4 v 8 h -4" style="fill:#2d2d2d"/>
+ <path d="m 14.5523331 11.9153285 h 18.8928756 c .9035415 0 1.6370046 .7228332 1.6370046 1.6086582 v 14.9491827 c 0 .8893683 -.7334631 1.6086582 -1.6370046 1.6086582 h -18.8928756 c -.9035415 0 -1.6370046 -.7192899 -1.6370046 -1.6086582 v -14.9491827 c 0 -.885825 .7334631 -1.6086582 1.6370046 -1.6086582" style="fill:#d6cfb9;stroke:#6f6751;stroke-width:1.8318861"/>
+ <path d="m 1 39 v 4 c 0 2.216 1.784 4 4 4 h 38 c 2.216 0 4 -1.784 4 -4 v -4 c 0 2.216 -1.784 4 -4 4 h -38 c -2.216 0 -4 -1.784 -4 -4 z" style="opacity:.1"/>
+</svg>

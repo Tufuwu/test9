@@ -1,146 +1,31 @@
-[![DOI](https://joss.theoj.org/papers/10.21105/joss.00638/status.svg)](https://doi.org/10.21105/joss.00638)
-[![PyPI version](https://badge.fury.io/py/mlxtend.svg)](http://badge.fury.io/py/mlxtend)
-[![Anaconda-Server Badge](https://anaconda.org/conda-forge/mlxtend/badges/version.svg)](https://anaconda.org/conda-forge/mlxtend)
-[![Build statu  s](https://ci.appveyor.com/api/projects/status/7vx20e0h5dxcyla2/branch/master?svg=true)](https://ci.appveyor.com/project/rasbt/mlxtend/branch/master)
-[![Coverage Status](https://coveralls.io/repos/rasbt/mlxtend/badge.svg?branch=master&service=github)](https://coveralls.io/github/rasbt/mlxtend?branch=master)
-![Python 3](https://img.shields.io/badge/python-3-blue.svg)
-![License](https://img.shields.io/badge/license-BSD-blue.svg)
-[![Discuss](https://img.shields.io/badge/discuss-github-blue.svg)](https://github.com/rasbt/mlxtend/discussions)
+# Numix Core
 
-![](./docs/sources/img/logo.png)
+[![By The Numix Project](https://img.shields.io/badge/By-The%20Numix%20Project-f0544c.svg?style=flat-round)](https://numixproject.org/) &nbsp;[![Test](https://img.shields.io/github/workflow/status/numixproject/numix-core/Test?label=Build)](https://github.com/barelyhuman/numix-core/actions/workflows/test.yml)
 
-**Mlxtend (machine learning extensions) is a Python library of useful tools for the day-to-day data science tasks.**
+This repository powers the generation of the all the Numix app icon themes across all platforms. This new method is designed to make keeping themes on different platforms on feature parity easier as well as making it as simple as possible to add support for new platforms. Licensed under the GPL-3.0+ and maintained by [@foggalong](https://github.com/Foggalong) and [@palob](https://github.com/palob).
 
-<br>
+## Artwork
 
-Sebastian Raschka 2014-2021
+### Icon Requests
 
-<br>
+Please report icon requests in this repo, providing all the details required. For normal applications follow [this video tutorial](https://plus.google.com/+NumixprojectOrg/posts/DkRmhFZuWez), for Steam games follow [this one](https://www.youtube.com/watch?v=BuUy4CzCoXc) and for Chrome apps just post a link to the webstore page. When filing your request please be respectful, patient, and remember that development is done solely on the back of donations.
 
-## Links
+### Contributions
 
-- **Documentation:** [http://rasbt.github.io/mlxtend](http://rasbt.github.io/mlxtend)
-- PyPI: [https://pypi.python.org/pypi/mlxtend](https://pypi.python.org/pypi/mlxtend)
-- Changelog: [http://rasbt.github.io/mlxtend/CHANGELOG](http://rasbt.github.io/mlxtend/CHANGELOG)
-- Contributing: [http://rasbt.github.io/mlxtend/CONTRIBUTING](http://rasbt.github.io/mlxtend/CONTRIBUTING)
-- Questions? Check out the [GitHub Discussions board](https://github.com/rasbt/mlxtend/discussions)
+We accept contributions, read [this page](https://github.com/numixproject/numix-core/wiki/Contributing) for more info.
 
-<br>
-<br>
+### Hardcoded Icons
 
-## Installing mlxtend
+To deal with hardcoded application icons Numix uses the [hardcode-fixer](https://github.com/Foggalong/hardcode-fixer) script. A list of the applications supported by the script can be found [here](https://github.com/Foggalong/hardcode-fixer/wiki/App-Support).
 
-#### PyPI
+## Script
 
-To install mlxtend, just execute  
+### Dependencies
 
-```bash
-pip install mlxtend  
-```
+The script needs Python 3.x to run. While the script can build themes for many platforms, running it is only officially supported on Linux. The exporting-to-PNG part of the script currently uses [Cairo](https://cairographics.org/) or [Inkscape](https://inkscape.org/). The macOS packaging needs [libicns](http://icns.sourceforge.net/) for the `png2icns` command. More information can be found [in our wiki](https://github.com/numixproject/numix-core/wiki/Dependencies).
 
-Alternatively, you could download the package manually from the Python Package Index [https://pypi.python.org/pypi/mlxtend](https://pypi.python.org/pypi/mlxtend), unzip it, navigate into the package, and use the command:
+### How To Use
 
-```bash
-python setup.py install
-```
-
-#### Conda
-If you use conda, to install mlxtend just execute
-
-```bash
-conda install -c conda-forge mlxtend 
-```
-
-#### Dev Version
-
-The mlxtend version on PyPI may always be one step behind; you can install the latest development version from the GitHub repository by executing
-
-```bash
-pip install git+git://github.com/rasbt/mlxtend.git#egg=mlxtend
-```
-
-Or, you can fork the GitHub repository from https://github.com/rasbt/mlxtend and install mlxtend from your local drive via
-
-```bash
-python setup.py install
-```
-
-<br>
-<br>
-
-## Examples
-
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-import itertools
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier
-from mlxtend.classifier import EnsembleVoteClassifier
-from mlxtend.data import iris_data
-from mlxtend.plotting import plot_decision_regions
-
-# Initializing Classifiers
-clf1 = LogisticRegression(random_state=0)
-clf2 = RandomForestClassifier(random_state=0)
-clf3 = SVC(random_state=0, probability=True)
-eclf = EnsembleVoteClassifier(clfs=[clf1, clf2, clf3], weights=[2, 1, 1], voting='soft')
-
-# Loading some example data
-X, y = iris_data()
-X = X[:,[0, 2]]
-
-# Plotting Decision Regions
-gs = gridspec.GridSpec(2, 2)
-fig = plt.figure(figsize=(10, 8))
-
-for clf, lab, grd in zip([clf1, clf2, clf3, eclf],
-                         ['Logistic Regression', 'Random Forest', 'RBF kernel SVM', 'Ensemble'],
-                         itertools.product([0, 1], repeat=2)):
-    clf.fit(X, y)
-    ax = plt.subplot(gs[grd[0], grd[1]])
-    fig = plot_decision_regions(X=X, y=y, clf=clf, legend=2)
-    plt.title(lab)
-plt.show()
-```
-
-![](./docs/sources/img/ensemble_decision_regions_2d.png)
-
----
-
-If you use mlxtend as part of your workflow in a scientific publication, please consider citing the mlxtend repository with the following DOI:
-
-
-```
-@article{raschkas_2018_mlxtend,
-  author       = {Sebastian Raschka},
-  title        = {MLxtend: Providing machine learning and data science 
-                  utilities and extensions to Python’s  
-                  scientific computing stack},
-  journal      = {The Journal of Open Source Software},
-  volume       = {3},
-  number       = {24},
-  month        = apr,
-  year         = 2018,
-  publisher    = {The Open Journal},
-  doi          = {10.21105/joss.00638},
-  url          = {http://joss.theoj.org/papers/10.21105/joss.00638}
-}
-```
-
-- Raschka, Sebastian (2018) MLxtend: Providing machine learning and data science utilities and extensions to Python's scientific computing stack.
-J Open Source Softw 3(24).
-
----
-
-## License
-
-- This project is released under a permissive new BSD open source license ([LICENSE-BSD3.txt](https://github.com/rasbt/mlxtend/blob/master/LICENSE-BSD3.txt)) and commercially usable. There is no warranty; not even for merchantability or fitness for a particular purpose.
-- In addition, you may use, copy, modify and redistribute all artistic creative works (figures and images) included in this distribution under the directory
-according to the terms and conditions of the Creative Commons Attribution 4.0 International License.  See the file [LICENSE-CC-BY.txt](https://github.com/rasbt/mlxtend/blob/master/LICENSE-CC-BY.txt) for details. (Computer-generated graphics such as the plots produced by matplotlib fall under the BSD license mentioned above).
-
-## Contact
-
-The best way to ask questions is via the [GitHub Discussions channel](https://github.com/rasbt/mlxtend/discussions). In case you encounter usage bugs, please don't hesitate to use the [GitHub's issue tracker](https://github.com/rasbt/mlxtend/issues) directly. 
+1. Download the repo
+2. Run `gen.py --theme {square,circle} --platform {linux,osx,android}`
+3. Get your generated package

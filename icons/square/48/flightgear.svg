@@ -1,0 +1,43 @@
+<svg version="1.1" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <linearGradient id="bg" x2="0" y1="1" y2="47" gradientUnits="userSpaceOnUse">
+   <stop style="stop-color:#5c8fc6" offset="0"/>
+   <stop style="stop-color:#4d85c1" offset="1"/>
+  </linearGradient>
+ </defs>
+ <path d="m1 43v0.25c0 2.216 1.784 4 4 4h38c2.216 0 4-1.784 4-4v-0.25c0 2.216-1.784 4-4 4h-38c-2.216 0-4-1.784-4-4zm0 0.5v0.5c0 2.216 1.784 4 4 4h38c2.216 0 4-1.784 4-4v-0.5c0 2.216-1.784 4-4 4h-38c-2.216 0-4-1.784-4-4z" style="opacity:.02"/>
+ <path d="m1 43.25v0.25c0 2.216 1.784 4 4 4h38c2.216 0 4-1.784 4-4v-0.25c0 2.216-1.784 4-4 4h-38c-2.216 0-4-1.784-4-4z" style="opacity:.05"/>
+ <path d="m1 43v0.25c0 2.216 1.784 4 4 4h38c2.216 0 4-1.784 4-4v-0.25c0 2.216-1.784 4-4 4h-38c-2.216 0-4-1.784-4-4z" style="opacity:.1"/>
+ <rect x="1" y="1" width="46" height="46" rx="4" style="fill:url(#bg)"/>
+ <path d="m1 39v4c0 2.216 1.784 4 4 4h38c2.216 0 4-1.784 4-4v-4c0 2.216-1.784 4-4 4h-38c-2.216 0-4-1.784-4-4z" style="opacity:.1"/>
+ <path d="m15 12v24h4v-12h14v-4h-14v-4h14v-4h-18z" style="opacity:.1"/>
+ <rect x="15" y="11.001" width="4.0004" height="23.999" style="fill:#353535"/>
+ <rect transform="rotate(90)" x="11.001" y="-33" width="4.0004" height="18" style="fill:#353535"/>
+ <rect transform="rotate(90)" x="18.998" y="-33" width="4.0004" height="18" style="fill:#353535"/>
+ <rect x="15" y="11.001" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="15" y="15.002" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="19" y="11.001" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="23.001" y="11.001" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="27.001" y="11.001" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="31.002" y="11.001" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="29" y="13" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="25.017" y="13" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="21.002" y="13" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="17.002" y="13" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="17.002" y="17" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="15" y="18.998" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="17.002" y="21" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="19" y="18.998" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="23.001" y="18.998" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="27.001" y="18.998" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="31.002" y="18.998" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="29" y="21" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="25.017" y="21" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="21.002" y="21" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="15" y="22.999" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="15" y="26.999" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="17.002" y="25.001" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="17.002" y="29.001" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="15" y="30.996" width="1.9984" height="1.9984" style="fill:#fff754"/>
+ <rect x="17.002" y="33.002" width="1.9984" height="1.9984" style="fill:#fff754"/>
+</svg>
