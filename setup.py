@@ -1,32 +1,25 @@
-#!/usr/bin/env python
-"""Setup logic for pip."""
-
 from setuptools import setup
 
-
-def get_long_description():
-    with open('README.md', 'r') as readme_file:
-        return readme_file.read()
-
+with open('README.md') as f:
+    long_description = f.read()
 
 setup(
-    name='automata-lib',
-    version='5.0.0',
-    description='A Python library for simulating automata and Turing machines',
-    long_description=get_long_description(),
-    long_description_content_type='text/markdown',
-    url='https://github.com/caleb531/automata',
-    author='Caleb Evans',
-    author_email='caleb@calebevans.me',
-    license='MIT',
-    keywords='automata turing machine',
-    packages=[
-        'automata',
-        'automata.fa',
-        'automata.pda',
-        'automata.base',
-        'automata.tm'
+    name='django_urls',
+    version='1.1.3',
+    packages=['django_urls'],
+    url='https://github.com/isik-kaplan/django_urls',
+    description="URL decorator for django views",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    license='MIT LICENSE',
+    author='isik-kaplan',
+    author_email='',
+    python_requires=">=3.5",
+    install_requires=['django>=2.0'],
+    classifiers=[
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3',
+        'Framework :: Django',
+        'Development Status :: 5 - Production/Stable',
     ],
-    install_requires=['pydot'],
-    entry_points={}
 )
