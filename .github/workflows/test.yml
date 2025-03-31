@@ -1,45 +1,29 @@
-name: Build, test and publish Python 🐍 distributions 📦 to PyPI
-
-on: push
+name: Analyze
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
-  build-and-publish:
-    name: Build, test and publish Python 🐍 distributions 📦 to PyPI
-    runs-on: ubuntu-latest
+  run:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, windows-latest, macOS-latest]
+        python-version: ["3.9", "3.10"]
+    name: Python ${{ matrix.python-version }} Test on ${{ matrix.operating-system }}
     steps:
-      - name: Check out repository code
+      - name: Checkout
         uses: actions/checkout@v2
-
-      # Setup Python (faster than using Python container)
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.x"
-
-      - name: Install pipenv
-        run: |
-          python -m pip install --upgrade pipenv wheel
-      - id: cache-pipenv
-        uses: actions/cache@v4
-        with:
-          path: ~/.local/share/virtualenvs
-          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
-
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
       - name: Install dependencies
-        if: steps.cache-pipenv.outputs.cache-hit != 'true'
-        run: |
-          pipenv install --deploy --dev
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: python setup.py test
 
-      - name: Run tests with pytest
-        run: pipenv run coverage run --source pathfinding -m pytest 
-
-      - name: Show basic test coverage report
-        run: pipenv run coverage report
-
-      - name: Build a binary wheel and a source tarball
-        run: |
-          pipenv run pip wheel --wheel-dir=./dist .
-
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1.8
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
