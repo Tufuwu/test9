@@ -1,0 +1,1 @@
+.. mdinclude:: markdowns/INSTALL.md
