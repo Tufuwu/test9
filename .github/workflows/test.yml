@@ -1,46 +1,12 @@
+name: Lint
+
 on: [push, pull_request]
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                python-version: ["3.9", "3.10"]
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Git Checkout
-              uses: actions/checkout@v2
-              with:
-                  submodules: recursive
-
-            - name: Setup Python
-              uses: actions/setup-python@v2
-              with:
-                  python-version: ${{ matrix.python-version }}
-
-            - name: Build PICT
-              run: |
-                  pushd pict
-                  make libpict.so
-                  make pict
-                  echo "${PWD}" >> $GITHUB_PATH
-                  echo "LD_LIBRARY_PATH=${PWD}" >> $GITHUB_ENV
-                  popd
-
-            - name: Install dependencies
-              run: |
-                  pip install Cython
-
-            - name: Install PyPICT
-              run: |
-                  pip install -vvv .
-
-            - name: Show environment
-              run: |
-                  env
-                  python -V
-                  pip freeze
-
-            - name: Run tests
-              run: |
-                  python setup.py test
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: pre-commit/action@v2.0.0

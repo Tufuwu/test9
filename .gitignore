@@ -103,7 +103,10 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# Project-specific
-pypict/capi.cpp
-pypict/pict
-wheelhouse/
+# Exported Strava data
+activities.csv
+activities/
+export_*
+
+cookies.txt
+fit2gpx
