@@ -1,37 +1,44 @@
-name: CodeCov tests
-
-on: [push, pull_request]
-
+name: tests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  schedule:
+    - cron: '13 7 * * 0'  # run once a week on Sunday
+  # Allow to run this workflow manually from the Actions tab
+  workflow_dispatch:
 jobs:
-  unit-tests:
-    runs-on: ${{ matrix.os }}
+  build:
     strategy:
-      fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10"]
-        requirements-file: [
-            django-2.2.txt,
-            django-3.1.txt,
-            django-3.2.txt
-        ]
-        os: [
-          ubuntu-latest,
-        ]
+        config:
+        # [Python version, tox env]
+        - ["3.6",   "py36"]
+        - ["3.7",   "py37"]
+        - ["3.8",   "py38"]
+        - ["3.9",   "py39"]
+        - ["3.10",   "py310"]
+        - ["pypy3", "pypy3"]
 
+    runs-on: ubuntu-latest
+    name: ${{ matrix.config[1] }}
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python ${{ matrix.python-version }}
+    - uses: actions/checkout@v2
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.config["3.9", "3.10"] }}
+    - name: Pip cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.config[0] }}-${{ hashFiles('setup.*', 'tox.ini') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.config[0] }}-
+          ${{ runner.os }}-pip-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r tests/requirements/${{ matrix.requirements-file }}
-        python setup.py install
-
-    - name: Run coverage
-      run: coverage run setup.py test
-
-    - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v1
+        pip install tox
+    - name: Test
+      run: tox -e ${{ matrix.config[1] }}
