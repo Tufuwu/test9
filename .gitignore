@@ -1,4 +1,33 @@
+# python
+__pycache__
+.eggs/
+
+# Trying stuff
+MorphopsStuff.ipynb
+trying_stuff
+
+# Editors
+.vscode
+.idea/
+
+# Nb
+.ipynb_checkpoints
+
+# Compiled python modules.
 *.pyc
+
+# Setuptools distribution folder.
 /dist/
 /build/
+
+# Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
+
+# Sphinx
+docs/build
+
+# Tox
+.tox
+
+# pytest
+.coverage
