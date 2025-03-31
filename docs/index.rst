@@ -1,23 +1,36 @@
-Flake8-AAA documentation
-========================
+.. Copyright (c) 2020, Serge Guelton, Johan Mabille, and Mariana Meireles
 
-Overview
---------
+   Distributed under the terms of the BSD 3-Clause License.
 
-Flake8-AAA is a Flake8 plugin that checks Python tests follow the
-Arrange-Act-Assert pattern.
+   The full license is in the file LICENSE, distributed with this software.
 
-Please see the `README on GitHub <https://github.com/jamescooke/flake8-aaa>`_
-for a general introduction to this project and AAA.
 
-Continue here for more detail about using Flake8-AAA.
+Introduction
+------------
+
+Memestra checks code for places where deprecated functions are called.
+
+Memestra looks for decorators in your code that can be either specified by you or be the default ``@decorator.deprecated``.
+
+Licensing
+---------
+
+We use a shared copyright model that enables all contributors to maintain the
+copyright on their contributions.
+
+This software is licensed under the BSD-3-Clause license. See the LICENSE file for details.
+
 
 .. toctree::
-    :maxdepth: 2
-    :caption: Contents
+   :caption: Installation
+   :maxdepth: 2
 
-    compatibility
-    discovery
-    rules
-    commands
-    release_checklist
+   installation
+
+.. toctree::
+   :caption: Usage
+   :maxdepth: 2
+
+   memestra
+   memestra-cache
+   pyls-plugin

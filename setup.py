@@ -1,53 +1,49 @@
 import os
+from setuptools import setup
 
-from setuptools import find_packages, setup
+kw = {"test_suite": "tests"}
 
-basedir = os.path.dirname(__file__)
+dev_reqs = open("requirements-dev.txt").read().splitlines()
+extras_require = {"test": dev_reqs, "dev": dev_reqs}
 
-
-def readme():
-    with open(os.path.join(basedir, 'README.rst')) as f:
-        return f.read()
-
-
-about = {}
-with open(os.path.join(basedir, 'src', 'flake8_aaa', '__about__.py')) as f:
-    exec(f.read(), about)  # yapf: disable
+versionfile = os.path.join('memestra', 'version.py')
+exec(open(versionfile).read())
 
 setup(
-    # --- META ---
-    name=about['__iam__'],
-    version=about['__version__'],
-    description=about['__description__'],
-    license='MIT',
-    long_description=readme(),
-    author='James Cooke',
-    author_email='github@jamescooke.info',
-    url='https://github.com/jamescooke/flake8-aaa',
+    name="memestra",
+    version=__version__,
+    packages=["memestra"],
+    description=__descr__,
+    long_description="""
+A linter that tracks reference to deprecated functions.
 
-    # --- Python ---
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
-    python_requires='>=3.6, <4',
-    install_requires=[
-        'asttokens >= 2',
-    ],
-    entry_points={
-        'flake8.extension': [
-            'AAA = flake8_aaa:Checker',
-        ],
-    },
+Memestra walks through your code base and tracks reference to function marks
+with a given decorator.""",
+    author="serge-sans-paille",
+    author_email="serge.guelton@telecom-bretagne.eu",
+    url=__url__,
+    license="BSD 3-Clause",
+    install_requires=open("requirements.txt").read().splitlines(),
+    extras_require=extras_require,
+    entry_points={'console_scripts':
+                  ['memestra = memestra.memestra:run',
+                   'memestra-cache = memestra.caching:run'],
+                  'memestra.plugins':
+                  [".ipynb = memestra.nbmemestra:register", ],
+                  },
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'Framework :: Flake8',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python',
+        "Development Status :: 3 - Alpha",
+        "Environment :: Console",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: BSD License",
+        "Natural Language :: English",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
     ],
-    zip_safe=False,
+    python_requires=">=3.4",
+    **kw
 )
