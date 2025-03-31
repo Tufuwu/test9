@@ -1,32 +1,57 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
+# Temporary and binary files
+*~
 *.py[cod]
-
-# C extensions
-*.o
 *.so
-*.dylib
+*.cfg
+!.isort.cfg
+!setup.cfg
+*.orig
+*.log
+*.pot
+__pycache__/*
+.cache/*
+.*.swp
+*/.ipynb_checkpoints/*
+.DS_Store
 
-# Distribution/packaging
-build/
-dist/
+# Project files
+.ropeproject
+.project
+.pydevproject
+.settings
+.idea
+tags
+
+# Package files
+*.egg
+*.eggs/
+.installed.cfg
 *.egg-info
 
-# Input/output
-input/
-output/
-
-# Installer logs
-pip-log.txt
-
-# Unit test / coverage reports
-htmlcov/
+# Unittest and coverage
+htmlcov/*
 .coverage
-.coverage.*
+.tox
+junit.xml
+coverage.xml
+.pytest_cache/
 
-# Miscellaneous
-.DS_Store
-*.ini
-*.py~
-MSLP/*.nc
-*~
+# Build and docs folder/files
+build/*
+dist/*
+sdist/*
+../modelica-builder/docs/api/*
+../modelica-builder/docs/_rst/*
+../modelica-builder/docs/_build/*
+cover/*
+MANIFEST
+
+# Per-project virtualenvs
+.venv*/
+.python-version
+
+# Test outputs
+tests/output/
+
+# Antlr
+.antlr/

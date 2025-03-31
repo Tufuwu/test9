@@ -1,110 +1,133 @@
-The Tropical Cyclone Risk Model
-===============================
+===========================
+Modelica Builder (ModBuild)
+===========================
 
-The **Tropical Cyclone Risk Model** is a stochastic tropical cyclone
-model developed by `Geoscience Australia <http://www.ga.gov.au>`_ for estimating the wind hazard from tropical cyclones.
+*Note: this project is still in flux and the name/methods/namespaces may change*
 
-Due to the relatively short record of quality-controlled, consistent
-tropical cyclone observations, it is difficult to estimate average
-recurrence interval wind speeds ue to tropical cyclones. To overcome
-the restriction of observed data, TCRM uses an autoregressive model to
-generate thousands of years of events that are statistically similar
-to the historical record. To translate these events to estimated wind
-speeds, TCRM applies a parametric windfield and boundary layer model
-to each event. Finally an extreme value distribution is fitted to the
-aggregated windfields at each grid point in the model domain to
-provide ARI wind speed estimates.
+The Modelica Builder  project aims to make in-place modifcations to Modelica language files easier.
+The principal use case is to load, modify using higher level abstracted methods, and then save the
+resulting file. The user has access to the entire Abstract Syntax Tree of the entire Modelica grammar.
 
 
-Features
-========
-* **Multi-platform**: TCRM can run on desktop machines through to massively-parallel systems (tested on Windows XP/Vista/7, \*NIX);
-* **Multiple options for wind field & boundary layer models**: A number of radial profiles and simple boundary layer models have been included to allow users to test sensitivity to these options.
-* **Globally applicable**: Users can set up a domain in any TC basin in the globe. The model is not tuned to any one region of the globe. Rather, the model is designed to draw sufficient information from best-track archives;
-* **Evaluation metrics**: Offers capability to run objective evaluation of track model metrics (e.g. landfall rates);
-* **Single scenarios**: Users can run a single TC event (e.g. using a b-deck format track file) at high temporal resolution and extract time series data at chosen locations;
+.. code-block:: python
+
+    transformation = ReplaceComponentArgumentValueByType("ElectroMechanicalElement", "k", "8")
+    transformer = Transformer()
+    transformer.add(transformation)
+
+    result = transformer.execute('DCMotor.mo')
+
+    # new file (as a string) will be in the result variable
+    print(result)
 
 
-Changelog
-=========
+The Modelica Builder project does not:
 
-New features:
+* Compile nor check for syntax validity
+
+
+Setup
+-----
+
+.. code-block:: bash
+
+    # install
+    pip install -r requirements.txt
+
+Usage
+-----
+Transformations specify what nodes to change and how to change them. This is done by combining
+Selectors and Edits. Selectors specify how to select nodes in the AST, and edits are modifications
+(insert, replace, delete) to the text of selected nodes.
+
+A Transformer is a collection of Transformations, which can then be applied to a file.
+
+See the tests for more examples and information.
+
+
+Development
+-----------
+
+If you change the source grammar file you need to regenerate the parser and lexer.
+
+With docker installed, run these commands from this the repo's root directory
+
+.. code-block:: bash
+
+    # build Antlr container
+    docker build -t antlr4:latest -f antlr/Dockerfile .
+
+    # run parser generator for python
+    docker run -v "$(pwd)/modelica_builder/modelica_parser":/var/antlrResult \
+        antlr4:latest \
+        -Dlanguage=Python3 /var/antlrResult/modelica.g4
+
+    # commit results along with grammar file
+
+
+If not using Docker, Install antlr4 following `these instructions <https://github.com/antlr/antlr4/blob/master/doc/getting-started.md#installation>`_
+
+.. code-block:: bash
+
+    # in modelica_building/modelica_parser
+    antlr4 -Dlanguage=Python3 modelica.g4
+
+    # commit results along with grammar file
+
+Managed Tasks
 -------------
 
-* Added empirical ARI calculation
+Updating Licenses
+*****************
+
+To apply the copyright/license to all the files, run the following managed task. To update, then update the
+script, and then rerun the managed task.
+
+.. code-block:: bash
+
+    ./setup.py update_licenses
 
 
-Bug fixes:
-----------
+Testing
+*******
 
-* Correction in landfall decay model for unit conversions
+To run the tests, simply run the following:
 
-Dependencies
-============
+.. code-block:: python
 
-TCRM requires:
+    py.test
 
- * `Python 3.7 <https://www.python.org/>`_;
- * `numpy <http://www.numpy.org/>`_; 
- * `scipy <http://www.scipy.org/>`_;
- * `matplotlib <http://matplotlib.org/>`_; 
- * `Basemap <http://matplotlib.org/basemap/index.html>`_; 
- * `netcdf4-python <https://unidata.github.io/netcdf4-python/netCDF4/index.html>`_; 
- * `cftime <https://unidata.github.io/cftime/>`_;
- * `pandas <http://pandas.pydata.org/>`_; 
- * `Shapely <https://shapely.readthedocs.io/en/latest/manual.html>`_; 
- * `seaborn <https://seaborn.pydata.org/>`_;
- * `statsmodels <http://statsmodels.sourceforge.net>`_;
- * `GitPython <http://gitpython.readthedocs.io>`_;
- * `GDAL/OGR <https://pypi.org/project/GDAL/>`_;
- * `mpi4py <https://mpi4py.readthedocs.io/en/stable/>`_;
- * and `gcc`.  
+Known Issues
+------------
 
+* The transformations occur on strings which are immutable. Need to investigate using byte arrays. This does not
+cause errors, but can be slow when parsing really large modelica files.
 
+Release Instructions
+--------------------
 
-Status
-======
+* Bump version to <NEW_VERSION> in setup.cfg (use semantic versioning as much as possible).
+* Run `autopep8` to nicely format the code (or run `pre-commit --all-files`).
+* Create a PR against develop into main.
+* After main branch passes, then merge and checkout the main branch. Build the distribution using the following code:
 
-.. image:: https://github.com/GeoscienceAustralia/tcrm/actions/workflows/tcrm-tests.yml/badge.svg?branch=master
-    :target: https://github.com/GeoscienceAustralia/tcrm/actions/workflows/tcrm-tests.yml
-    :alt: Build status
+.. code-block:: bash
 
+    # Remove old dist packages
+    rm -rf dist/*
+    python setup.py sdist
 
-.. image:: https://coveralls.io/repos/GeoscienceAustralia/tcrm/badge.svg?branch=master
-  :target: https://coveralls.io/r/GeoscienceAustralia/tcrm?branch=master
-  :alt: Test coverage
+* Run `git tag <NEW_VERSION>`. (Note that `python setup.py --version` pulls from the latest tag`.)
+* Verify that the files in the dist/* folder have the correct version (no dirty, no sha)
+* Run the following to release
 
-    
-.. image:: https://landscape.io/github/GeoscienceAustralia/tcrm/master/landscape.svg?style=flat
-    :target: https://landscape.io/github/GeoscienceAustralia/tcrm/master
-    :alt: Code Health
-    
-.. image:: https://zenodo.org/badge/10637300.svg
-   :target: https://zenodo.org/badge/latestdoi/10637300
+.. code-block:: bash
 
-Screenshot
-==========
+    pip install twine
+    twine upload dist/*
 
-.. image:: docs/screenshot.png
+* Push the tag to GitHub after everything is published to PyPi, then go to GitHub and add in the CHANGELOG.rst notes into the tagged release and officially release.
 
-Contributing to TCRM
-====================
+.. code-block:: bash
 
-If you would like to take part in TCRM development, take a look at the `Contributing guide <docs/contributing.rst>`_.
-
-License
-=======
-
-This repository is licensed under the GNU General Public License. See
-the file `LICENSE.rst <LICENSE.rst>`_
-for information on the history of this software, terms and conditions
-for usage, and a DISCLAIMER OF ALL WARRANTIES.
-
-Contacts
-========
-
-Community Safety Branch
-Geoscience Australia
-hazards@ga.gov.au
-
-
+    git push origin <NEW_VERSION>

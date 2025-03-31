@@ -1,58 +1,27 @@
+# -*- coding: utf-8 -*-
 """
-Setup file
+    Setup file for modelica_builder.
+    Use setup.cfg to configure your project.
 
+    This file was generated with PyScaffold 3.2.3.
+    PyScaffold helps you to put up the scaffold of your new Python project.
+    Learn more under: https://pyscaffold.org/
 """
+import sys
+from pkg_resources import VersionConflict, require
+from setuptools import setup
 
-from setuptools import setup, find_packages
+from management.update_licenses import UpdateLicenses
 
-setup(
-    name = "TCRM",
-    version = '3.1.4',
-    packages=find_packages(), 
-    scripts=['tcrm.py', 'tcevent.py'],
-    include_package_data=True,
-    package_data = {
-        '' : ['input/*'],
-        'tests/test_data' : ['*'],
-        'MSLP/' : ['*.nc']
-    },
-    
-    install_requires = [
-    'numpy',
-    'scipy',
-    'matplotlib',
-    'basemap',
-    'shapely',
-    'nose',
-    'netcdf4',
-    'cftime',
-    'coverage',
-    'coveralls',
-    'pycurl',
-    'pyproj',
-    'seaborn',
-    'simplejson',
-    'sqlite',
-    'statsmodels',
-    'libgdal'
-    'gdal',
-    'configparser',
-    'cartopy',
-    'affine',
-    'pandas',
-    'tqdm',
-    'xarray',
-    'pthread-stubs',
-    'imageio',
-    'mpi4py',
-    'boto3',
-    'botocore'],
-    
-    # metadata:
-    author = "Craig Arthur",
-    author_email = "hazards@ga.gov.au",
-    description = "Tropical Cyclone Risk Model",
-    keywords = "Tropical cyclone risk hazard",
-    url = "https://geoscienceaustralia.github.io/tcrm",
-    
+try:
+    require('setuptools>=38.3')
+except VersionConflict:
+    print("Error: version of setuptools is too old (<38.3)!")
+    sys.exit(1)
+
+
+if __name__ == "__main__":
+    setup(
+        use_pyscaffold=True,
+        cmdclass={"update_licenses": UpdateLicenses},
     )
