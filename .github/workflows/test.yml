@@ -1,66 +1,48 @@
----
-name: Python
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Output env variables
-        run: |
-           echo "Default branch=${default-branch}"
-           echo "GITHUB_WORKFLOW=${GITHUB_WORKFLOW}"
-           echo "GITHUB_ACTION=$GITHUB_ACTION"
-           echo "GITHUB_ACTIONS=$GITHUB_ACTIONS"
-           echo "GITHUB_ACTOR=$GITHUB_ACTOR"
-           echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
-           echo "GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME"
-           echo "GITHUB_EVENT_PATH=$GITHUB_EVENT_PATH"
-           echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
-           echo "GITHUB_SHA=$GITHUB_SHA"
-           echo "GITHUB_REF=$GITHUB_REF"
-           echo "GITHUB_HEAD_REF=$GITHUB_HEAD_REF"
-           echo "GITHUB_BASE_REF=$GITHUB_BASE_REF"
-           echo "::debug::---Start content of file $GITHUB_EVENT_PATH"
-           cat $GITHUB_EVENT_PATH
-           echo "\n"
-           echo "::debug::---end"
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install tox tox-gh-actions
-      - name: Check
-        run: |
-          tox -e checks
+  test:
 
-  tests:
-    needs: check
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 5
+      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
 
     steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install tox tox-gh-actions
-      - name: Test with tox
-        run: |
-          tox
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install graphviz
+      run: |
+        sudo apt-get install graphviz
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Test with nose2
+      run: |
+        coverage run -m nose2 tests
+        coverage lcov -o cover/coverage.lcov
+
+    - name: Coveralls
+      uses: coverallsapp/github-action@main
+      with:
+        path-to-lcov: cover/coverage.lcov
+        github-token: ${{ secrets.GITHUB_TOKEN }}

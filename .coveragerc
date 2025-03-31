@@ -1,13 +1,21 @@
-# https://pytest-cov.readthedocs.io/
+# Configuration for coverage.py (https://pypi.python.org/pypi/coverage)
 
 [run]
-source = semver
+# Enable branch coverage
 branch = True
 
 [report]
-show_missing = true
-precision = 1
+
+# Regexes for lines to exclude from consideration
 exclude_lines =
+
     pragma: no cover
+
+    # Ignore non-runnable code
     if __name__ == .__main__.:
-    if not hasattr\(__builtins__, .cmp.\):
+
+    pass
+
+# Only check coverage for source files
+include =
+    automata/*/*.py
