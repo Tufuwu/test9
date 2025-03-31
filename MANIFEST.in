@@ -1,2 +1,2 @@
-include README.md
-recursive-include prometheus_speedtest *
+include README.md requirements.txt
+recursive-include test *.npy

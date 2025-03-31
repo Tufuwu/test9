@@ -1,345 +1,76 @@
-# Prometheus Speedtest
 
-Instrument [Speedtest.net](http://speedtest.net) tests from
-[Prometheus](https://prometheus.io). Provides metrics on download\_speed,
-upload\_speed, and latency.
+## quickspikes
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jeanralphaviles/prometheus_speedtest/python.yml)](https://github.com/jeanralphaviles/prometheus_speedtest/actions/workflows/python.yml)
-[![PyPI status](https://img.shields.io/pypi/status/prometheus_speedtest.svg)](https://pypi.python.org/pypi/prometheus_speedtest/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/jraviles/prometheus_speedtest)](https://hub.docker.com/r/jraviles/prometheus_speedtest)
-[![PyPI version shields.io](https://img.shields.io/pypi/v/prometheus_speedtest.svg)](https://pypi.python.org/pypi/prometheus_speedtest/)
-[![PyPI license](https://img.shields.io/pypi/l/prometheus_speedtest.svg)](https://pypi.python.org/pypi/prometheus_speedtest/)
-[![PyPI pyversions](https://img.shields.io/pypi/pyversions/prometheus_speedtest.svg)](https://pypi.python.org/pypi/prometheus_speedtest/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1246809.svg)](https://doi.org/10.5281/zenodo.1246809)
 
-![Grafana](https://github.com/jeanralphaviles/prometheus_speedtest/raw/master/images/grafana.png)
+This is a very basic but very fast window discriminator for detecting and
+extracting spikes in a time series. It was developed for analyzing extracellular
+neural recordings, but also works with intracellular data and probably many
+other kinds of time series.
 
-## Getting Started
+Here's how it works:
 
-These instructions will install and run `prometheus_speedtest` on your system.
+![detection diagram](algorithm.png)
 
-### PyPi Package
+The algorithm iterates through the time series. When the signal crosses the threshold (1) going away from zero, the algorithm then looks for a peak (2) that occurs within some number of samples from the threshold crossing. The number of samples can be adjusted to filter out broad spikes that are likely to be artifacts. If a peak occurs, its sample index is added to an array. These times can be used as-is, or they can be used to extract samples to either side of the peak for further analysis (e.g. spike sorting).
 
-`prometheus_speedtest` is provided as a
-[PyPi package](https://pypi.org/project/prometheus_speedtest).
+The algorithm uses a streaming pattern (i.e., it processes chunks of data and keeps its state between chunks), so it's suitable for realtime operations. Many signals of interest will require highpass filtering to remove slow variations.
 
-1. Installing
+### Installation and Use
 
-   ```shell
-   pip install prometheus_speedtest
-   ```
+The algorithm is written in cython. You can get a python package from PyPI:
 
-1. Running
+    pip install quickspikes
 
-   ```shell
-   prometheus_speedtest
-   ```
+Or to build from a copy of the repository:
 
-#### Usage
+    pip install .
 
-```
-Instrument speedtest.net speedtests from Prometheus.
-flags:
+To detect peaks, you instantiate the detector with parameters that match the events you want to detect, and then send the detector chunks of data. For example, an extracellular recording at 20 kHz stored in 16-bit integers may have a noise floor around 2000, and the spikes will be on the order of 20 samples wide:
 
-prometheus_speedtest.py:
-  --address: address to listen on
-    (default: '0.0.0.0')
-  --excludes: speedtest server(s) to exclude - leave empty for no exclusion
-    (a comma separated list)
-  --port: port to listen on
-    (default: '9516')
-    (an integer)
-  --servers: speedtest server(s) to use - leave empty for auto-selection
-    (a comma separated list)
-  --[no]version: show version
-    (default: 'false')
+```python
+import quickspikes as qs
+det = qs.detector(1000, 30)
+times = det.send(samples)
 ```
 
-### Running with Docker
+You can continue sending chunks of data by calling `send()`. The detector will keep its state between calls, so you can detect spikes that occur on chunk boundaries. For example, if you're receiving data from some kind of generator, you could use a pattern like this:
 
-`prometheus_speedtest` is also available as a [Docker](http://docker.com) image
-on [Docker Hub](https://hub.docker.com/r/jraviles/prometheus_speedtest)
-:whale:.
-
-```shell
-docker run --rm -d --name prometheus_speedtest -p 9516:9516/tcp jraviles/prometheus_speedtest:latest
+``` python
+for chunk in my_data_generator():
+    times = det.send(chunk)
+    # process times
 ```
 
-You can also append extra flags when running with Docker. For example:
+Conversely, if the data are not contiguous, you should reinitialize the detector for each chunk.
 
-```shell
-$ docker run --rm --name prometheus_speedtest -p 9516:9516/tcp \
-    jraviles/prometheus_speedtest:latest --version
-prometheus_speedtest v0.9.9
+You can adjust the detector's threshold at any point, for example to compensate for shifts in the mean and standard deviation of the signal:
+
+```python
+reldet = qs.detector(2.5, 30)
+reldet.scale_thresh(samples.mean(), samples.std())
+times = reldet.send(samples)
 ```
 
-### Running with Kubernetes
+To detect negative-going events, you'll need to invert the signal.
 
-Since you can run this from a Docker container, you can also run it in Kubernetes.
+There are also some functions you can use to extract and align spike waveforms. Given a list of times returned from the `detector.send()` method, to extract waveforms starting 30 samples before the peak and ending 270 samples after:
 
-```shell
-kubectl apply -f deploy/namespace.yaml
-kubectl apply -f deploy/deployment.yaml
+```python
+f_times = qs.filter_times(times, 30, samples.size - 270)
+spikes = qs.peaks(samples, f_times, 30, 270)
+times, aligned = qs.realign_spikes(f_times, spikes, upsample=3, jitter=4)
 ```
 
-The Kubernetes YAML files are pre-configured to work with the
-`kubernetes-pods-slow` job that comes with Prometheus, which is configured with
-5m scrape times and 30s timeouts.  If you need to raise the timeout, you'll
-need to change that in your Prometheus config map.
+Note that the list of event times may need to be filtered to avoid trying to access data points outside the bounds of the input time series. If you care about these events, you'll need to pad your input signal. The `realign_spikes` function uses a sinc-based resampling to more accurately locate the peak of the event.
 
-Just keep in mind, that if you increase the replica count, then Prometheus will
-run a speedtest for each pod, every 5m. The same goes for if you are running
-more than one replica of Prometheus, as each replica independently scrapes
-targets.
+There is also a reference copy of an ANSI C implementation and an `f2py` wrapper in `f2py/`. This algorithm is slightly less efficient and flexible, but may give better results if included directly in a C codebase.
 
-### Integrating with Prometheus
+### License
 
-`prometheus_speedtest` is best when paired with
-[Prometheus](https://prometheus.io). Prometheus can be configured to perform
-Speedtests on an interval and record their results.
+Free for use under the terms of the GNU General Public License. See [[COPYING]]
+for details.
 
-Speedtest metrics available to query in Prometheus.
+If you use this code in an academic work, citations are appreciated. There is no methods paper describing the algorithm, but the most relevant reference is:
 
-| Metric Name           | Description                 |
-|---------------------- |---------------------------- |
-| download\_speed\_bps  | Download speed (bit/s)      |
-| upload\_speed\_bps    | Upload speed (bit/s)        |
-| ping\_ms              | Latency (ms)                |
-| bytes\_received       | Bytes received during test  |
-| bytes\_sent           | Bytes sent during test      |
-
-#### prometheus.yml config
-
-Add this to your
-[Prometheus config](https://prometheus.io/docs/prometheus/latest/configuration/configuration)
-to start instrumenting Speedtests and recording their metrics.
-
-```yaml
-global:
-  scrape_timeout: 2m
-
-scrape_configs:
-- job_name: 'speedtest'
-  metrics_path: /probe
-  static_configs:
-  - targets:
-    - localhost:9516
-```
-
-Note if you're running `prometheus` under Docker, you must link the
-`prometheus` container to `prometheus_speedtest`. See the steps below for how
-this can be done.
-
-#### Trying it out
-
-An example
-[Prometheus config](https://prometheus.io/docs/prometheus/latest/configuration/configuration)
-has been provided at
-[example/prometheus.yml](https://github.com/jeanralphaviles/prometheus_speedtest/blob/master/example/prometheus.yml).
-We'll start `prometheus` with this config.
-
-1. Docker Network
-
-   Create the [Docker network](https://docs.docker.com/network) that will link
-   `prometheus_speedtest` and `prometheus` together.
-
-   ```shell
-   docker network create prometheus_network
-   ```
-
-1. Start Prometheus Speedtest
-
-   ```shell
-   docker run --rm -d --net prometheus_network -p 9516:9516/tcp \
-      --name prometheus_speedtest jraviles/prometheus_speedtest:latest
-   ```
-
-1. Start Prometheus
-
-   ```shell
-   docker run --rm -d --net prometheus_network -p 9516:9516/tcp \
-      -v $PWD/example/prometheus.yml:/etc/prometheus/prometheus.yml \
-      --name prometheus prom/prometheus:latest
-   ```
-
-1. Query results
-
-   * Visit <http://localhost:9516/probe>
-
-   * Wait around **45 seconds** for Prometheus to perform a Speedtest
-
-   * Issue a query for **download\_speed\_bps**
-
-     You should see something like this.
-
-     ![Prometheus Query](https://github.com/jeanralphaviles/prometheus_speedtest/raw/master/images/query.png)
-
-### Instrumenting Speedtests with cURL
-
-Once `prometheus_speedtest` has been started, with either Docker or PyPi,
-Speedtests can be instrumented with [cURL](https://curl.haxx.se).
-
-```shell
-$ curl localhost:9516/probe
-# HELP download_speed_bps Download speed (bit/s)
-# TYPE download_speed_bps gauge
-download_speed_bps 88016694.95692767
-# HELP upload_speed_bps Upload speed (bit/s)
-# TYPE upload_speed_bps gauge
-upload_speed_bps 3415613.277989314
-# HELP ping_ms Latency (ms)
-# TYPE ping_ms gauge
-ping_ms 20.928
-# HELP bytes_received Bytes received during test
-# TYPE bytes_received gauge
-bytes_received 111342756.0
-# HELP bytes_sent Bytes sent during test
-# TYPE bytes_sent gauge
-bytes_sent 5242880.0
-```
-
-You can also visit <http://localhost:9516/probe> in your browser to see the same
-metrics.
-
-### Default Port
-
-Prometheus Speedtest defaults to running on port 9516; this is the allocated
-port for this exporter in the
-[Prometheus Default Port Allocations Guide](https://github.com/prometheus/prometheus/wiki/Default-port-allocations).
-
-## Getting Started (Development)
-
-These instructions will get you a copy `prometheus_speedtest` up and running on
-your local machine for development and testing purposes.
-
-### Prerequisites
-
-* [Python](https://www.python.org)
-* [Docker](https://www.docker.com)
-* [Pytest](https://pytest.org)
-
-### Running Locally
-
-#### Python
-
-1. Ensure packages listed in
-   [requirements.txt](https://github.com/jeanralphaviles/prometheus_speedtest/blob/master/requirements.txt)
-   are installed with `pip`
-
-   ```python
-   pip3 install -r requirements.txt
-   ```
-
-1. Run `prometheus_speedtest`
-
-   ```python
-   python3 -m prometheus_speedtest.prometheus_speedtest
-   ```
-
-#### Docker
-
-1. Building image
-
-   ```shell
-   docker build -t prometheus_speedtest:latest .
-   ```
-
-1. Running
-
-   ```shell
-   docker run --rm -d --name prometheus_speedtest -p 9516:9516/tcp prometheus_speedtest:latest
-   ```
-
-### Perform a Speedtest
-
-```shell
-curl localhost:9516/probe
-```
-
-Or visit <http://localhost:9516/probe>
-
-### Running Unit Tests
-
-```shell
-pytest
-```
-
-### Contributing
-
-Pull requests are welcome. Please adhere to the
-[Google Python style guide](https://github.com/google/styleguide/blob/gh-pages/pyguide.md).
-
-Please format your contributions with the
-[yapf](https://github.com/google/yapf) formatter and lint your code with
-[pylint](https://www.pylint.org). A
-[.pylintrc](https://github.com/jeanralphaviles/prometheus_speedtest/blob/master/.pylintrc)
-config has been provided.
-
-```shell
-yapf -i **/*.py
-pylint **/*.py
-pytype
-```
-
-## Grafana Dashboard Template
-
-User Doğukan Çağatay has created a Grafana dashboard template for
-prometheus_speedtest. Go check it out on
-[grafana.com](https://grafana.com/grafana/dashboards/11229).
-
-## Maintenance
-
-### Deploying to PyPi
-
-1. Increment version number in
-   [version.py](https://github.com/jeanralphaviles/prometheus_speedtest/blob/master/prometheus_speedtest/version.py)
-
-1. Create PyPi package
-
-   ```shell
-   python3 setup.py sdist
-   ```
-
-1. Upload package to PyPi
-
-   Ensure that [Twine](https://github.com/pypa/twine) has been installed.
-
-   ```shell
-   twine upload dist/*
-   ```
-
-### Deploying multi-architecture images to Docker Hub
-
-1. Ensure that Docker >= 19.03 and
-   [docker buildx](https://docs.docker.com/buildx/working-with-buildx/) is
-   installed.
-
-1. Build and push the new image.
-
-   ```shell
-   # Ensure you have run 'docker login'
-   # https://github.com/docker/buildx/issues/495#issuecomment-754688157
-   docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-   docker buildx create --use --name my-builder
-   TAG="$(python3 -m prometheus_speedtest.prometheus_speedtest --version \
-       | cut -d 'v' -f 2)"
-   docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7 \
-       -t jraviles/prometheus_speedtest:latest \
-       -t jraviles/prometheus_speedtest:${TAG:?} .
-   docker buildx rm my-builder
-   ```
-
-## Authors
-
-* Jean-Ralph Aviles
-
-## License
-
-This product is licensed under the Apache 2.0 license. See [LICENSE](LICENSE)
-file for details.
-
-## Acknowledgments
-
-* Matt Martz [speedtest-cli](https://github.com/sivel/speedtest-cli)
-* The Prometheus team <https://prometheus.io>
-* Testing in Python team <http://lists.idyll.org/listinfo/testing-in-python>
-* Benjamin Staffin [python-glog](https://github.com/benley/python-glog)
+C. D. Meliza and D. Margoliash (2012). Emergence of selectivity and tolerance in the avian auditory cortex. Journal of Neuroscience, doi:10.1523/JNEUROSCI.0845-12.2012
