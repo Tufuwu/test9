@@ -1,14 +1,13 @@
-# global
 *.pyc
-*.pyo
-__pycache__
-
-# /
-/*.egg
-/*.egg-info
-/.coverage
-/.tox
-/build
-/coverage
-/dist
-/output.pskcxml
+.DS_Store
+_build
+.*.sw[po]
+*.egg-info
+dist
+build
+MANIFEST
+tests/tastypie.db
+.buildinfo
+.tox
+env
+env3

@@ -1,3 +1,6 @@
-include README NEWS ChangeLog COPYING tox.ini *.py
-recursive-include tests *.doctest *.py *.pskcxml *.xml *.pem *.txt *.pskc README
-recursive-include docs *.rst *.py
+recursive-include docs *
+recursive-include tastypie/templates/tastypie *.html
+include AUTHORS
+include LICENSE
+include README.rst
+include VERSION
