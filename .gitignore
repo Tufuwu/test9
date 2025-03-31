@@ -1,115 +1,46 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-./lib/
-./lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*,cover
-.hypothesis/
-coverage/
-.nyc_output/
-.pytest_cache/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-celerybeat-schedule.db
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-#Ipython/Jupyter Notebook
-.ipynb_checkpoints
-*.ipynb
-
-# Heroku/Foreman
-.env
-
-# webpack
-static/bundles
-node_modules
-
-# JS directories
-!static/js/lib
-
-# Editor stuff
-*.swp
-*.orig
-
-/nbproject
+# Developers
+.hg
+.git
+.svn
 .idea/
-.redcar/
-codekit-config.json
-.pycharm_helpers/
+.sass-cache/
+.vscode/
+*.db
+*.pyc
+__pycache__
+*~
 
-.project
-.pydevproject
+# Javascript libraries
+/node_modules/
 
-*.DS_Store
+# Generated files
+src/openzaak/static/fonts
+src/openzaak/static/css/screen.css
+src/openzaak/static/css/admin/
+src/openzaak/static/js/
+docs/_build
+/volumes/
 
-# Django static
-staticfiles/
+# Coverage reports
+/reports/
+/htmlcov/
+.coverage
+coverage.xml
 
-.venv
-release-notes-checklist
+# Environment
+src/openzaak/conf/includes/local.py
+/env/
+/media/
+/static/
+/mail/
+/log/*.log*
+/log/nginx/*.log*
+.env
+/private-media/
 
-static/scss/material.css
+# Ansible secrets
+deployment/single-server/vars/*
+!deployment/single-server/vars/*example*
 
-# Local settings
-micromasters.yml
-
-# Webpack
-webpack-stats.json
-
-# Celery Beat
-celerybeat-schedule
-
-# profiling
-recreate_index_*.profile
-
-# Selenium
-output/
+deployment/kubernetes/vars/*
+!deployment/kubernetes/vars/*example*

@@ -1,0 +1,15 @@
+# Dependencies only relevant for (unit) testing
+coverage
+django-webtest
+factory_boy
+freezegun
+requests-mock
+tblib
+
+# Code formatting
+isort
+black
+flake8
+
+# SPDX header checks
+click

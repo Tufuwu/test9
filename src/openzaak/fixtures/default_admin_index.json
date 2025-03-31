@@ -1,0 +1,151 @@
+[
+{
+    "model": "admin_index.appgroup",
+    "fields": {
+        "order": 0,
+        "name": "Accounts",
+        "slug": "accounts",
+        "models": [
+            [
+                "accounts",
+                "user"
+            ],
+            [
+                "auth",
+                "group"
+            ]
+        ]
+    }
+},
+{
+    "model": "admin_index.appgroup",
+    "fields": {
+        "order": 1,
+        "name": "API Autorisaties",
+        "slug": "api-authorizations",
+        "models": [
+            [
+                "authorizations",
+                "applicatie"
+            ],
+            [
+                "zgw_consumers",
+                "service"
+            ]
+        ]
+    }
+},
+{
+    "model": "admin_index.appgroup",
+    "fields": {
+        "order": 3,
+        "name": "Configuratie",
+        "slug": "configuration",
+        "models": [
+            [
+                "admin_index",
+                "appgroup"
+            ],
+            [
+                "config",
+                "featureflags"
+            ],
+            [
+                "config",
+                "nlxconfig"
+            ],
+            [
+                "drc_cmis",
+                "cmisconfig"
+            ],
+            [
+                "django_auth_adfs_db",
+                "adfsconfig"
+            ],
+            [
+                "nlx_url_rewriter",
+                "urlrewrite"
+            ],
+            [
+                "notifications",
+                "notificationsconfig"
+            ],
+            [
+                "notifications",
+                "subscription"
+            ],
+            [
+                "selectielijst",
+                "referentielijstconfig"
+            ],
+            [
+                "sites",
+                "site"
+            ]
+        ]
+    }
+},
+{
+    "model": "admin_index.appgroup",
+    "fields": {
+        "order": 2,
+        "name": "Gegevens",
+        "slug": "gegevens",
+        "models": [
+            [
+                "besluiten",
+                "besluit"
+            ],
+            [
+                "catalogi",
+                "catalogus"
+            ],
+            [
+                "documenten",
+                "enkelvoudiginformatieobject"
+            ],
+            [
+                "zaken",
+                "zaak"
+            ]
+        ]
+    }
+},
+{
+    "model": "admin_index.appgroup",
+    "fields": {
+        "order": 4,
+        "name": "Logs",
+        "slug": "logs",
+        "models": [
+            [
+                "axes",
+                "accessattempt"
+            ],
+            [
+                "axes",
+                "accesslog"
+            ],
+            [
+                "django_db_logger",
+                "statuslog"
+            ],
+            [
+                "notifications_log",
+                "failednotification"
+            ]
+        ]
+    }
+},
+{
+    "model": "admin_index.applink",
+    "fields": {
+        "order": 0,
+        "app_group": [
+            "configuration"
+        ],
+        "name": "Service configuration",
+        "link": "/admin/config/detail"
+    }
+}
+]

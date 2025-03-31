@@ -1,0 +1,16 @@
+{% extends "admin/login.html" %}
+{% comment %} SPDX-License-Identifier: EUPL-1.2 {% endcomment %}
+{% comment %} Copyright (C) 2020 Dimpact {% endcomment %}
+{% load solo_tags i18n %}
+
+
+{% block content %}
+{{ block.super }}
+
+{% get_solo 'django_auth_adfs_db.ADFSConfig' as adfs_config %}
+{% if adfs_config.enabled %}
+<div class="submit-row">
+    <a href="{% url 'django_auth_adfs:login' %}">{% trans "Login with ADFS" %}</a>
+</div>
+{% endif %}
+{% endblock %}
