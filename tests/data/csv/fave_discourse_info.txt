@@ -1,3 +1,0 @@
-discourse	noise level	style
-fave_test	high	interview
-fave_test2	low	interview

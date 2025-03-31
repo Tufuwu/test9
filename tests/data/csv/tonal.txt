@@ -1,4 +1,0 @@
-﻿spelling,transcription,frequency
-fam,fam11,13.0
-fam,fam12,33.0
-fan,fan12,43.0

@@ -1,26 +1,98 @@
-PolyglotDB
-==========
+# Flake8 Markdown
 
-[![Build Status](https://travis-ci.org/MontrealCorpusTools/PolyglotDB.svg?branch=master)](https://travis-ci.org/MontrealCorpusTools/PolyglotDB)
-[![Coverage Status](https://coveralls.io/repos/MontrealCorpusTools/PolyglotDB/badge.svg?branch=master&service=github)](https://coveralls.io/github/MontrealCorpusTools/PolyglotDB?branch=master)
-[![Documentation Status](https://readthedocs.org/projects/polyglotdb/badge/?version=latest)](http://polyglotdb.readthedocs.org/en/latest/?badge=latest)
-[![PyPI version](https://badge.fury.io/py/polyglotdb.svg)](https://badge.fury.io/py/polyglotdb)
+[
+![PyPI](https://img.shields.io/pypi/v/flake8-markdown.svg)
+![PyPI](https://img.shields.io/pypi/pyversions/flake8-markdown.svg)
+![PyPI](https://img.shields.io/github/license/johnfraney/flake8-markdown.svg)
+](https://pypi.org/project/flake8-markdown/)
+[![TravisCI](https://travis-ci.com/johnfraney/flake8-markdown.svg?branch=master)](https://travis-ci.com/johnfraney/flake8-markdown)
 
+Flake8 Markdown lints [GitHub-style Python code blocks](https://help.github.com/en/articles/creating-and-highlighting-code-blocks#fenced-code-blocks) in Markdown files using [`flake8`](https://flake8.readthedocs.io/en/stable/).
 
-PolyglotDB is a Python package for storing and querying large speech corpora.  It constructs various kinds of database,
-and has a consistent Python API for interacting with the various underlying databases.  The online documentation is
-available at http://polyglotdb.readthedocs.io/en/latest/.
+This package helps improve a Python project's documentation by ensuring that code samples are error-free.
 
-This package is intended for developers and those experienced with scripting in Python.  If you would like to use a
-graphical interface for querying and interacting with PolyglotDB databases, please see Speech Corpus Tools
-(http://speech-corpus-tools.readthedocs.io/en/latest/).  Speech Corpus Tools is currently depreciated and undergoing
-significant update to match recent development of PolyglotDB.
+## Features
 
-Citation
---------
+- Lints code blocks containing regular Python and Python interpreter code ([`pycon`](http://pygments.org/docs/lexers/#pygments.lexers.python.PythonConsoleLexer))
+- [pre-commit](#pre-commit-hook) hook to lint on commit
 
-McAuliffe, Michael, Elias Stengel-Eskin, Michaela Socolof, Arlie Coles, Sarah Mihuc, and Morgan Sonderegger (2017). PolyglotDB [Computer program]. Version 0.0.1 (alpha), retrieved 28 July 2017 from https://github.com/MontrealCorpusTools/PolyglotDB.
+## Installation
 
-or
+Flake8 Markdown can be installed from PyPI using `pip` or your package manager of choice:
 
-McAuliffe, Michael, Elias Stengel-Eskin, Michaela Socolof, and Morgan Sonderegger (2017). Polyglot and Speech Corpus Tools: a system for representing, integrating, and querying speech corpora. In *Proceedings of Interspeech 2017*.
+```shell
+pip install flake8-markdown
+```
+
+## Usage
+
+### CLI
+
+You can use Flake8 Markdown as a CLI tool using the `flake8-markdown` command.
+
+`flake8-markdown` accepts one or more [globs](https://docs.python.org/3.7/library/glob.html) as its arguments.
+
+Example:
+
+```console
+$ flake8-markdown "tests/samples/*.md"
+tests/samples/emphasized_lines.md:6:1: F821 undefined name 'emphasized_imaginary_function'
+tests/samples/basic.md:8:48: E999 SyntaxError: EOL while scanning string literal
+tests/samples/basic.md:14:7: F821 undefined name 'undefined_variable'
+```
+
+### pre-commit hook
+
+You can also add `flake8-markdown` to your project using [pre-commit](https://pre-commit.com/). When configured, any staged Markdown files will be linted using `flake8-markdown` once you run `git commit`.
+
+To enable this hook in your local repository, add the following `repo` to your `.pre-commit-config.yaml` file:
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/johnfraney/flake8-markdown
+    rev: v0.4.0
+    hooks:
+      - id: flake8-markdown
+```
+
+## Code of Conduct
+
+Everyone interacting in the project's codebases, issue trackers, chat rooms, and mailing lists is expected to follow the [PyPA Code of Conduct](https://www.pypa.io/en/latest/code-of-conduct/).
+
+## History
+
+### [0.4.0] - 2022-09-11
+
+#### Added
+
+- Added support for `flake8` v5
+- Added support for `python` 3.10
+
+#### Removed
+
+- Dropped support for `python` 3.6
+
+### [0.3.0] - 2021-10-19
+
+#### Added
+
+- Added support for `flake8` v4
+
+### [0.2.0] - 2019-06-14
+
+#### Added
+
+- [`pycon`](http://pygments.org/docs/lexers/#pygments.lexers.python.PythonConsoleLexer) code block support
+
+### [0.1.1] - 2019-05-19
+
+#### Changed
+
+- Fixed pre-commit example in README
+
+### [0.1.0] - 2019-05-19
+
+#### Added
+
+- Added code for initial release

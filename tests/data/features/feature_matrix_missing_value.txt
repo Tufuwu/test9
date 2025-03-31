@@ -1,5 +1,0 @@
-symbol,feature1,feature2
-a,+,+
-b,+,-
-c,-,+
-d,-

@@ -1,4 +1,0 @@
-speaker	is_interviewer	gender	age
-Interviewer	true	male	old
-Gary Salvi	false	male	young
-Rose Pseudonym	false	female	young
