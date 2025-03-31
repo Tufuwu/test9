@@ -1,2 +1,4 @@
-[run]
-omit = tests/*
+[report]
+sort = Cover
+omit =
+    .env/*
