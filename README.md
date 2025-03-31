@@ -1,150 +1,134 @@
-[![Python Package](https://github.com/ptrstn/deepl-translate/actions/workflows/python-package.yml/badge.svg)](https://github.com/ptrstn/deepl-translate/actions/workflows/python-package.yml)
-[![codecov](https://codecov.io/gh/ptrstn/deepl-translate/branch/master/graph/badge.svg)](https://codecov.io/gh/ptrstn/deepl-translate)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Package CI](https://github.com/SUSE/salt-shaptools/actions/workflows/salt-shaptools-ci.yml/badge.svg)](https://github.com/SUSE/salt-shaptools/actions/workflows/salt-shaptools-ci.yml)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/770395dbb4bb868502b3/test_coverage)](https://codeclimate.com/github/SUSE/salt-shaptools/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/770395dbb4bb868502b3/maintainability)](https://codeclimate.com/github/SUSE/salt-shaptools/maintainability)
 
-# DeepL Translate
+# SAP Applications and SUSE Linux Enterprise High Availability salt modules and States
 
-An unofficial python package to translate text using [DeepL](https://www.deepl.com/).
+This project has been created to provide salt modules and states for SAP HANA and other SAP applications and the SLE-HA clustering tools. For that,
+it wraps the [shaptools](https://github.com/SUSE/shaptools) project code. The
+main idea is to use this module in salt formulas to deploy these applications easily.
 
-## Installation
+## Installation and usage
 
-```bash
-pip install git+https://github.com/ptrstn/deepl-translate
-```
+**INFO:** Currently this project has been created as an independent project, but
+the idea is to merge to the [salt](https://github.com/saltstack/salt) project
+to extend it with these new functionalities.
 
-## Usage
+### Run locally
 
-### Supported languages
-
-Currently the following languages are supported:
-
-| Abbreviation | Language   | Writing in own language |
-|--------------|------------|-------------------------|
-| BG           | Bulgarian  | Български               |
-| ZH           | Chinese    | 中文                    |
-| CS           | Czech      | Česky                   |
-| DA           | Danish     | Dansk                   |
-| NL           | Dutch      | Nederlands              |
-| EN           | English    | English                 |
-| ET           | Estonian   | Eesti                   |
-| FI           | Finnish    | Suomi                   |
-| FR           | French     | Français                |
-| DE           | German     | Deutsch                 |
-| EL           | Greek      | Ελληνικά                |
-| HU           | Hungarian  | Magyar                  |
-| IT           | Italian    | Italiano                |
-| JA           | Japanese   | 日本語                  |
-| LV           | Latvian    | Latviešu                |
-| LT           | Lithuanian | Lietuvių                |
-| PL           | Polish     | Polski                  |
-| PT           | Portuguese | Português               |
-| RO           | Romanian   | Română                  |
-| RU           | Russian    | Русский                 |
-| SK           | Slovak     | Slovenčina              |
-| SL           | Slovenian  | Slovenščina             |
-| ES           | Spanish    | Español                 |
-| SV           | Swedish    | Svenska                 |
-
-You can either input the abbreviation or the language written in english. 
-
-### Command line tool
-
-#### Help
+To run the module functionalities locally run:
 
 ```bash
-deepl --help
+cd salt-shaptools
+sudo salt-call --local -m modules hana.is_installed
 ```
 
-```
-usage: deepl [-h] [--version] [--formal | --informal] [-t TEXT | -f FILE] source_language target_language
-
-Python client to translate texts using deepl.com
-
-positional arguments:
-  source_language       Source language of your text
-  target_language       Target language of your desired text
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --version             show program's version number and exit
-  --formal              Use formal tone in translation
-  --informal            Use informal tone in translation
-  -t TEXT, --text TEXT  Text to be translated
-  -f FILE, --file FILE  File to be translated
-```
-
-#### Example 1
-
-This will translate a Spanish (```ES```) text into Russian (```RU```):
+To run the state modules (there is a demo example in the demo folder) run:
 
 ```bash
-deepl spanish russian -t "¡Buenos días!"
+cd salt-shaptools
+sudo salt-call --retcode-passthrough -l debug -m . state.template demo/primary.sls
 ```
 
-```
-Доброе утро!
-```
+### Run in minions
 
-#### Example 2
+To run the module funcionalities in the minions:
 
-This will translate the file (```test.txt```) text from Italian (```IT```) into Portuguese (```PT```):
+1. Copy the content of **modules** in your "salt://\_modules/" (by default /srv/salt/\_modules)
+2. Copy the content of **states** in your "salt://\_states/" (by default /srv/salt/\_states)
+3. Synchronize modules with the minions. For that run:
 
 ```bash
-deepl IT PT --file test.txt
+sudo salt-call  saltutil.sync_all
 ```
 
-#### Example 3
-
-This will translate a Spanish (```ES```) text into Russian (```RU```) in _formal_ tone:
+4. Execute the module functionalities. For that run:
 
 ```bash
-deepl ES RU --text "¿Cómo te llamas?" --formal
+sudo salt-call hana.is_installed
 ```
 
-```
-Как Вас зовут?
-```
+## Writing unit test
 
-Note: _informal_ would be "_Как **тебя** зовут?_"
+You can have look at: https://docs.saltstack.com/en/latest/topics/development/tests/unit.html
 
-#### Example 4
+## How to run the tests
 
-This will translate a Japanese (```JP```) text into German (```DE```) in _informal_ tone:
+Salt has a quite particular way to execute the tests. As a summary, tests are splitted
+in _integration_ and _unit_ tests. The first group tests the module using actual
+salt master/minions, so the setup is more complicated. The _unit_ tests in the other
+hand only check the code functions.
+
+In order to execute the tests, the test files must be stored in the _salt_ project
+tests folder sub-folder (integration or unit, for example). By now, as the project
+is in a separated repository, the easiest way is to copy our project code to a
+actual salt repository and run the tests. For that follow the next instructions:
+
+1. Download 2 **needed extra projects**: (saltstack and shaptools)
 
 ```bash
-deepl JP DE --text "お元気ですか？" --informal
+git clone --depth=50 https://github.com/openSUSE/salt
+git clone https://github.com/SUSE/shaptools.git
 ```
 
-```
-Wie geht es dir?
-```
-
-Note: _formal_ would be "_Wie geht es **Ihnen**?_"
-
-### Python library
-
-#### Example 1
-
-This will translate a Chinese (```ZH```) text into Dutch (```NL```):
-
-```python
-import deepl
-deepl.translate(source_language="ZH", target_language="NL", text="你好")
-```
+Your directory layout should looks like ( all the 3 dirs are in same three dir level)
 
 ```
-'Hallo'
+- salt-shaptools
+- salt
+- shaptools
 ```
 
-#### Example 2
+2. Create a virtual environment, inside the `salt-shaptools` dir and install dependencies:
 
-This will translate a ```danish``` text into ```german``` in informal tone:
-
-```python
-import deepl
-deepl.translate(source_language="danish", target_language="german", text="Ring til mig!", formality_tone="informal")
+```bash
+virtualenv saltvirtenv
+source saltvirtenv/bin/activate
+pip install pyzmq PyYAML pycrypto msgpack-python jinja2 psutil futures tornado pytest-salt mock pytest-cov
+pip install -e ../salt
+pip install -e ../shaptools
+rm ../salt/tests/conftest.py # remove this file from the saltstack repo
 ```
 
+3. Run the tests. For that:
+
+```bash
+cd salt-shaptools
+sudo chmod 755 tests/run.sh
+./tests/run.sh
 ```
-'Ruf mich an!'
+
+4. Running your modules/states:
+
+For testing/running modules:
+
 ```
+salt-call --local saptune.apply_solution "SAP-ASE"
+
+```
+
+For testing/running states:
+
+```
+salt-call --local state.single saptune.solution_applied "HANA"
+```
+
+## Dependencies
+
+List of dependencies are specified in the ["Requirements file"](requirements.txt). Items can be installed using pip:
+
+    pip install -r requirements.txt
+
+## License
+
+See the [LICENSE](LICENSE) file for license rights and limitations.
+
+## Author
+
+Xabier Arbulu Insausti (xarbulu@suse.com)
+
+## Reviewers
+
+_Pull request_ preferred reviewers for this project:
+
+- Xabier Arbulu Insausti (xarbulu@suse.com)
