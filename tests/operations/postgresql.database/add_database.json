@@ -1,9 +1,0 @@
-{
-    "args": ["somedb"],
-    "facts" :{
-        "postgresql_databases": {}
-    },
-    "commands": [
-        "psql -Ac 'CREATE DATABASE somedb'"
-    ]
-}

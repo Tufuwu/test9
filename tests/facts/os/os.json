@@ -1,5 +1,0 @@
-{
-    "command": "uname -s",
-    "output": ["os"],
-    "fact": "os"
-}

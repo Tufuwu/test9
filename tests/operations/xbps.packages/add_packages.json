@@ -1,9 +1,0 @@
-{
-    "args": ["curl"],
-    "facts": {
-        "xbps_packages": {}
-    },
-    "commands": [
-        "xbps-install -y -u curl"
-    ]
-}

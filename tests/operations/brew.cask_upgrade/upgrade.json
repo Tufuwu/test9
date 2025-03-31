@@ -1,6 +1,0 @@
-{
-    "args": [],
-    "commands": [
-        "brew cask upgrade"
-    ]
-}

@@ -1,9 +1,0 @@
-{
-    "args": ["spooler"],
-    "kwargs": {
-        "running": false
-    },
-    "commands": [
-        "Stop-Service -Name spooler"
-    ]
-}

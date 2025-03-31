@@ -1,0 +1,8 @@
+-r requirements_test.txt
+
+django-extensions
+invoke
+twine
+wheel
+zest.releaser
+

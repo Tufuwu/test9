@@ -1,22 +1,35 @@
 ---
-
-name: 🐛 Bug Report
-about: Create a report to help us improve pyinfra.
-labels: Bug
-
+name: Bug report
+about: Create a report to help us improve
 ---
 
-**Describe the bug**
+# Bug Report
+
+_Please help us help you by filling out any applicable information in this template and removing the rest!_
+
+## Describe the bug
+
 A clear and concise description of what the bug is.
 
-**To Reproduce**
-Steps to reproduce the behavior (include code & usage example):
+## To Reproduce
 
-**Expected behavior**
+Steps to reproduce the behavior
+
+## Expected behavior
+
 A clear and concise description of what you expected to happen.
 
-**Meta**
-+ Include output of `pyinfra --support`.
-+ How was pyinfra installed (source/pip)?
-+ Include pyinfra-debug.log (if one was created)
-+ Consider including output with `-vv` and `--debug`.
+## Screenshots or reproduction
+
+If applicable, add screenshots (errors, example of the behavior, etc.) to help explain your problem or post a link to a repository that replicates the issue.
+
+## Versions
+
+### Django-sockpuppet
+- pypi: [e.g. 0.3.4]
+
+### External tools
+
+- Python: [e.g. 3.6]
+- Django: [e.g. 2.2.0]
+- OS: [Linux, MacOS, Windows]

@@ -1,6 +1,0 @@
-{
-    "arg": "some-command",
-    "command": "some-command",
-    "output": ["a", "nop"],
-    "fact": "a\nnop"
-}

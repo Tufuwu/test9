@@ -1,5 +1,0 @@
-{
-    "command": "uname -p",
-    "output": ["x86_64"],
-    "fact": "x86_64"
-}

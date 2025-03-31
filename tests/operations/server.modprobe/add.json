@@ -1,9 +1,0 @@
-{
-    "args": ["somemodule"],
-    "facts": {
-        "kernel_modules": {}
-    },
-    "commands": [
-        "modprobe -a somemodule"
-    ]
-}

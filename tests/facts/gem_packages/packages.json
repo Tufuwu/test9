@@ -1,9 +1,0 @@
-{
-    "command": "gem list --local",
-    "output": [
-        "pydash (3.48)"
-    ],
-    "fact": {
-        "pydash": ["3.48"]
-    }
-}

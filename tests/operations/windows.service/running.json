@@ -1,6 +1,0 @@
-{
-    "args": ["spooler"],
-    "commands": [
-        "Start-Service -Name spooler"
-    ]
-}

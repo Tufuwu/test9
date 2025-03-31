@@ -1,75 +1,110 @@
-<h1>
-    <a href="https://pyinfra.com">
-        <img src="https://raw.githubusercontent.com/Fizzadar/pyinfra/master/docs/static/logo_full.png" height="48px" />
+<p align="center">
+  <h1 align="center">Welcome to Sockpuppet 👋</h1>
+  <p align="center">
+    <img src="https://img.shields.io/pypi/v/django-sockpuppet"/>
+    <img src="https://img.shields.io/npm/v/sockpuppet-js.svg?color=blue" />
+    <a href="https://www.npmjs.com/package/sockpuppet-js">
+      <img alt="downloads" src="https://img.shields.io/npm/dm/sockpuppet-js.svg?color=blue" target="_blank" />
     </a>
-</h1>
+    <a href="https://github.com/jonathan-s/sockpuppet/blob/master/LICENSE">
+      <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-brightgreen.svg" target="_blank" />
+    </a>
+    <a href="https://sockpuppet.argpar.se/" target="_blank">
+      <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
+    </a>
+    <br />
+    <a href="#badge">
+      <img alt="semantic-release" src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg">
+    </a>
+    <img src="https://travis-ci.org/jonathan-s/django-sockpuppet.svg?branch=master" alt="Tests">
+  </p>
+</p>
 
-[![PyPI version](https://img.shields.io/pypi/v/pyinfra?color=blue)](https://pypi.python.org/pypi/pyinfra)
-[![PyPi downloads](https://pepy.tech/badge/pyinfra)](https://pepy.tech/project/pyinfra)
-[![Docs status](https://img.shields.io/readthedocs/pyinfra)](https://docs.pyinfra.com)
-[![Travis.CI status](https://img.shields.io/travis/com/Fizzadar/pyinfra/master)](https://travis-ci.com/Fizzadar/pyinfra)
-[![Codecov Coverage](https://img.shields.io/codecov/c/gh/Fizzadar/pyinfra)](https://codecov.io/github/Fizzadar/pyinfra)
-[![MIT Licensed](https://img.shields.io/pypi/l/pyinfra)](https://github.com/Fizzadar/pyinfra/blob/develop/LICENSE.md)
 
-pyinfra automates/provisions/manages/deploys infrastructure super fast at massive scale. It can be used for ad-hoc command execution, service deployment, configuration management and more. Core design features include:
+### 🎉 **You just discovered an exciting new way to build modern, reactive, real-time apps with Django.**
 
-+ 🚀 **Super fast** execution over thousands of hosts with predictable performance.
-+ 🚨 **Instant debugging** with stdout & stderr output on error or as required (`-v`|`-vv`|`-vvv`).
-+ 📦 **Extendable** with _any_ Python package as configured & written in standard Python.
-+ 💻 **Agentless execution** against SSH/Docker/subprocess/winrm hosts.
-+ ❗️ **Two stage process** that enables `--dry` runs before executing any changes.
-+ 🔌 **Integrated** with Docker, Vagrant/Mech & Ansible out of the box.
+**Why should I spend time exploring this?** If you use current frontend libraries, such as react, vue or angular you end up creating state for the frontend and then updating state changes in the backend through an api.
 
-When you run pyinfra you'll see something like ([non animated version](https://raw.githubusercontent.com/Fizzadar/pyinfra/master/docs/static/example_deploy.png)):
+This means that you forgo server-rendered html with the advantages that brings + you'll end up with a more complex app overall.
 
-<img width="100%" src="https://raw.githubusercontent.com/Fizzadar/pyinfra/master/docs/static/example_deploy.gif" />
+With this library you can still use normal django templates, and any frontend state you change will be directly reflected in the backend. Currently this happens through the use of websockets.
 
-## Quickstart
+This is the django implementation of the excellent rails library [stimulus-reflex][1], which in turn is inspired by [Phoenix LiveView][2].
 
-pyinfra can be installed via pip:
+Hit me up on twitter if you have any questions.  [![Twitter follow](https://img.shields.io/twitter/follow/argparse?style=social)](https://twitter.com/argparse)
 
-```sh
-pip install pyinfra
+## 📚 Documentation
+
+- [Official Documentation](https://sockpuppet.argpar.se/)
+
+## ⚡️ Get started
+
+```bash
+pip install django-sockpuppet
+
+# Add these into INSTALLED_APPS in settings.py
+INSTALLED_APPS = [
+    'channels',
+    'sockpuppet'
+]
+
+# generates scaffolding for webpack.config.js and installs required js dependencies
+# if you prefer to do that manually read the more thorough documentation
+python manage.py initial_sockpuppet
+
+# scaffolds a new reflex with everything that's needed.
+python manage.py generate_reflex app_name name_of_reflex
 ```
 
-Now you can execute commands & operations over SSH:
+You're almost there, read about how to tie it all together in the [quickstart documentation][3]
 
-```sh
-# Execute an arbitrary shell command
-pyinfra my-server.net exec -- echo "hello world"
+## 💙 Community
 
-# Install iftop apt package if not present
-pyinfra my-server.net apt.packages iftop sudo=true update=true
+- [Discord](https://discord.gg/XveN625) - We share the discord together with stimulus-reflex, and there is a channel dedicated for python/django discussions.
+- [django-sockpuppet-expo](https://github.com/zodman/django-sockpuppet-expo) - Do you want more examples? There code examples of chats, book search, etc ... We accept PRs :)
+
+
+## 🛠 Development in the repo
+
+See some common commands that can be useful for development
+
+```bash
+pip install -r requirements_dev.txt
+invoke -l
 ```
 
-These can then be saved to a _deploy file_, let's call it `deploy.py`:
+Try out a minimal example manually
 
-```py
-from pyinfra.operations import apt
-
-apt.packages(
-    name='Ensure iftop is installed',
-    packages=['iftop'],
-    sudo=True,
-    update=True,
-)
+```
+git clone git@github.com:jonathan-s/django-sockpuppet.git
+npm install
+npm run build:test
+python manage.py runserver
+# visit https://localhost:8000/test
 ```
 
-And executed with:
+## ⛑ Running tests locally
+The most important tests are integration tests that makes sure that frontend and backend work together in conjunction with each other.
 
-```sh
-pyinfra my-server.net deploy.py
+```
+# Install the cypress et al
+npm install
+
+# Spin up a dev server.
+python manage.py runserver
+
+# Run the cypress tests
+npm run cypress:run
 ```
 
-or
 
-```sh
-pyinfra @docker/ubuntu deploy.py
+## 🔜 Release
+
+```
+pip install -r requirements_dev.txt
+invoke release -b feature
 ```
 
-## [Documentation](https://docs.pyinfra.com)
-
-+ [Getting started](https://docs.pyinfra.com/page/getting_started.html)
-+ [Writing deploys](https://docs.pyinfra.com/page/deploys.html)
-+ [Using the CLI](https://docs.pyinfra.com/page/cli.html)
-+ [Connectors](https://pyinfra.readthedocs.io/page/connectors.html)
+[1]: https://github.com/hopsoft/stimulus_reflex
+[2]: https://youtu.be/Z2DU0qLfPIY?t=670
+[3]: https://sockpuppet.argpar.se/quickstart-django

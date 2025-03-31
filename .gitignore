@@ -1,27 +1,69 @@
-.DS_Store
+*.py[cod]
+__pycache__
 
-*.pyc
+# C extensions
+*.so
+
+# Packages
+*.egg
 *.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+*.tgz
 
-.*swp
+# Installer logs
+pip-log.txt
 
-build/
-dist/
-
-venv/
-.cache/
-
-.vagrant*
-
+# Unit test / coverage reports
 .coverage
+.tox
+nosetests.xml
+htmlcov
 
-.docstmp
-docs/build/
-docs/facts/
-docs/operations/
-docs/apidoc/
-docs/_deploy_globals.rst
+# Translations
+*.mo
 
-.idea/
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
 
-pyinfra-debug.log
+# Pycharm/Intellij
+.idea
+
+# Complexity
+output/*.html
+output/*/index.html
+
+# Sphinx
+docs/_build
+
+node_modules
+notes.md
+*.sqlite3
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+
+# repo specific
+dist/
+jsdist/
+cypress/videos/
+cypress/screenshots/
+slides
