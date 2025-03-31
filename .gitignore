@@ -1,31 +1,49 @@
-*.py[cod]
-.idea/
-env/
+# From https://github.com/github/gitignore/blob/master/Python.gitignore
+
+# Pyc/pyo files.
+*.py[co]
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+.venv
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+nosetests.xml
+coverage.xml
 .coverage
-.cache/
-htmlcov/
-media/
-sandbox/
-py/sandbox.py
-nginx/prod/keys/
-.pytest_cache/
+htmlcov
 
-# js
-js/node_modules
-js/coverage
-js/build
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+#Translations
+# *.mo
+# ^^^ No, django needs the .mo files as it doesn't compile them on the fly.
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-js/README.md
-js/src/styles/bootstrap-scss
-activate.*.sh
-/deploy-settings-*/
-/setup.cfg
-/TODO.md
-/js/public/logo.png
+#Mr Developer
+.mr.developer.cfg
+src
+
+# Ignore generated config files
+etc/*.nginx.conf
+etc/*.logrotate
+
+# Ignore ide's
+.idea/
+.vscode
+
+# ignore docs
+docs/_*
+
+notebooks
+*.ipynb
