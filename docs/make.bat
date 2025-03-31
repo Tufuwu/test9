@@ -7,9 +7,9 @@ REM Command file for Sphinx documentation
 if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
-set SOURCEDIR=.
-set BUILDDIR=_build
-set SPHINXPROJ=dotenv-linter
+set SOURCEDIR=source
+set BUILDDIR=build
+set SPHINXPROJ=funsor
 
 if "%1" == "" goto help
 

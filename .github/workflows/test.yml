@@ -1,9 +1,14 @@
-name: test
+name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build:
+  default:
+
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -12,39 +17,73 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-
-    - name: Install poetry
-      run: |
-        curl -sSL \
-          "https://raw.githubusercontent.com/python-poetry/poetry/main/get-poetry.py" | python
-
-    - name: Set up cache
-      uses: actions/cache@v4
-      with:
-        path: .venv
-        key: venv-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
     - name: Install dependencies
       run: |
-        source "$HOME/.poetry/env"
-        poetry config virtualenvs.in-project true
-        poetry install
-
-    - name: Run checks
+        sudo apt install -y pandoc
+        python -m pip install --upgrade pip
+        # Keep track of pyro-api main branch
+        pip install https://github.com/pyro-ppl/pyro-api/archive/main.zip
+        pip install .[test]
+        pip freeze
+    - name: Run test
       run: |
-        source "$HOME/.poetry/env"
+        make test
 
-        poetry run flake8 .
-        poetry run mypy dotenv_linter
-        poetry run pytest
-        poetry run doc8 -q docs
-        poetry run safety check --bare --full-report
-        poetry check
-        poetry run pip check
 
-    - name: Upload coverage to Codecov  
-      uses: codecov/codecov-action@v1
+  torch:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
       with:
-        file: ./coverage.xml
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Keep track of pyro-api main branch
+        pip install https://github.com/pyro-ppl/pyro-api/archive/main.zip
+        pip install torch==1.7.0+cpu torchvision==0.8.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+        # Keep track of Pyro main branch
+        pip install https://github.com/pyro-ppl/pyro/archive/main.zip
+        pip install .[test,torch]
+        pip freeze
+    - name: Run test
+      run: |
+        make test
+        FUNSOR_BACKEND=torch make test
+
+
+  jax:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Keep track of pyro-api main branch
+        pip install https://github.com/pyro-ppl/pyro-api/archive/main.zip
+        # Keep track of NumPyro main branch
+        pip install https://github.com/pyro-ppl/numpyro/archive/main.zip
+        pip install .[test,jax]
+        pip freeze
+    - name: Run test
+      run: |
+        CI=1 FUNSOR_BACKEND=jax make test

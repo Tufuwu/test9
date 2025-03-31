@@ -1,68 +1,141 @@
-# dotenv-linter
+[![Build Status](https://github.com/pyro-ppl/funsor/workflows/CI/badge.svg)](https://github.com/pyro-ppl/funsor/actions)
+[![Latest Version](https://badge.fury.io/py/funsor.svg)](https://pypi.python.org/pypi/funsor)
+[![Documentation Status](https://readthedocs.org/projects/funsor/badge)](http://funsor.readthedocs.io)
 
-[![wemake.services](https://img.shields.io/badge/%20-wemake.services-green.svg?label=%20&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC%2FxhBQAAAAFzUkdCAK7OHOkAAAAbUExURQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP%2F%2F%2F5TvxDIAAAAIdFJOUwAjRA8xXANAL%2Bv0SAAAADNJREFUGNNjYCAIOJjRBdBFWMkVQeGzcHAwksJnAPPZGOGAASzPzAEHEGVsLExQwE7YswCb7AFZSF3bbAAAAABJRU5ErkJggg%3D%3D)](https://wemake.services)
-[![Build Status](https://github.com/wemake-services/dotenv-linter/workflows/dotenv/badge.svg?branch=master&event=push)](https://github.com/wemake-services/dotenv-linter/actions?query=workflow%3Atest)
-[![codecov](https://codecov.io/gh/wemake-services/dotenv-linter/branch/master/graph/badge.svg)](https://codecov.io/gh/wemake-services/dotenv-linter)
-[![Github Action](https://github.com/wemake-services/dotenv-linter/workflows/dotenv/badge.svg)](https://github.com/wemake-services/dotenv-linter/actions?query=workflow%3Adotenv)
-[![Python Version](https://img.shields.io/pypi/pyversions/dotenv-linter.svg)](https://pypi.org/project/dotenv-linter/)
-[![Documentation Status](https://readthedocs.org/projects/dotenv-linter/badge/?version=latest)](https://dotenv-linter.readthedocs.io/en/latest/?badge=latest)
+# Funsor
 
----
+Funsor is a tensor-like library for functions and distributions.
 
-Simple linter for `.env` files.
+See
+[Functional tensors for probabilistic programming](https://arxiv.org/abs/1910.10775)
+for a system description.
 
-![dotenv-logo](https://raw.githubusercontent.com/wemake-services/dotenv-linter/master/docs/_static/dotenv-logo@2.png)
+## Installing
 
-While `.env` files are very simple it is required to keep them consistent.
-This tool offers a wide range of consistency rules and best practices.
+**Install using pip:**
 
-And it integrates perfectly to any existing workflow.
+Funsor supports Python 3.6+.
 
-Read [the announcing post](https://sobolevn.me/2019/01/announcing-dotenv-linter).
-
-
-## Installation and usage
-
-```bash
-pip install dotenv-linter
+```sh
+pip install funsor
 ```
 
-And then run it:
-
-```bash
-dotenv-linter .env .env.template
+**Install from source:**
+```sh
+git clone git@github.com:pyro-ppl/funsor.git
+cd funsor
+git checkout master
+pip install .
 ```
 
-See [Usage](https://dotenv-linter.readthedocs.io/en/latest/#usage)
-section for more information.
+## Using funsor
 
+Funsor can be used through a number of interfaces:
 
-## Examples
+-   Funsors can be used directly for probabilistic computations, using PyTorch
+    optimizers in a standard training loop. Start with these examples:
+    [discrete_hmm](examples/discrete_hmm.py),
+    [eeg_slds](examples/eeg_slds.py),
+    [kalman_filter](examples/kalman_filter.py),
+    [pcfg](examples/pcfg.py),
+    [sensor](examples/sensor.py),
+    [slds](examples/slds.py), and
+    [vae](examples/vae.py).
+-   Funsors can be used to implement custom inference algorithms within Pyro,
+    using custom elbo implementations in standard
+    [pyro.infer.SVI](http://docs.pyro.ai/en/stable/inference_algos.html#pyro.infer.svi.SVI)
+    training. See these examples:
+    [mixed_hmm](examples/mixed_hmm/model.py) and
+    [bart forecasting](https://github.com/pyro-ppl/sandbox/blob/master/2019-08-time-series/bart/forecast.py).
+-   [funsor.pyro](https://funsor.readthedocs.io/en/latest/pyro.html) provides a
+    number of Pyro-compatible (and PyTorch-compatible) distribution classes
+    that use funsors under the hood, as well
+    [utilities](https://funsor.readthedocs.io/en/latest/pyro.html#module-funsor.pyro.convert)
+    to convert between funsors and distributions.
+-   [funsor.minipyro](https://funsor.readthedocs.io/en/latest/minipyro.html)
+    provides a limited alternate backend for the Pyro probabilistic programming
+    language, and can perform some ELBO computations exactly.
 
-There are many things that can go wrong in your `.env` files:
+## Design
 
-```ini
-# Next line has leading space which will be removed:
- SPACED=
+See [design doc](https://docs.google.com/document/d/1NVlfQnNQ0Aebg8vfIGcJKsnSqAhB4bbClQrb5dwm2OM). 
 
-# Equal signs should not be spaced:
-KEY = VALUE
+The goal of this library is to generalize [Pyro](http://pyro.ai)'s delayed
+inference algorithms from discrete to continuous variables, and to create
+machinery to enable partially delayed sampling compatible with universality. To
+achieve this goal this library makes three orthogonal design choices:
 
-# Quotes won't be preserved after parsing, do not use them:
-SECRET="my value"
+1.  Open terms are objects. Funsors generalize the tensor interface
+    to also cover arbitrary functions of multiple variables ("inputs"), where
+    variables may be integers, real numbers, or real tensors. Function
+    evaluation / substitution is the basic operation, generalizing tensor
+    indexing.  This allows probability distributions to be first-class Funsors
+    and make use of existing tensor machinery, for example we can generalize
+    tensor contraction to computing analytic integrals in conjugate
+    probabilistic models.
 
-# Beware of duplicate keys!
-SECRET=Already defined ;(
+2.  Support nonstandard interpretation. Funsors support user-defined
+    interpretations, including, eager, lazy, mixed eager+lazy, memoized (like
+    opt\_einsum's sharing), and approximate interpretations like Monte Carlo
+    approximations of integration operations (e.g. `.sum()` over a funsor
+    dimension).
 
-# Respect the convention, use `UPPER_CASE`:
-kebab-case-name=1
-snake_case_name=2
+3.  Named dimensions. Substitution is the most basic operation of Funsors. To
+    avoid the difficulties of broadcasting and advanced indexing in
+    positionally-indexed tensor libraries, all Funsor dimensions are named.
+    Indexing uses the `.__call__()` method and can be interpreted as
+    substitution (with well-understood semantics).  Funsors are viewed as
+    algebraic expressions with one algebraic free variable per dimension. Each
+    dimension is either covariant (an output) or contravariant (an input).
+
+Using `funsor` we can easily implement Pyro-style
+[delayed sampling](http://pyro.ai/examples/enumeration.html), roughly:
+
+```py
+trace_log_prob = 0.
+
+def pyro_sample(name, dist, obs=None):
+    assert isinstance(dist, Funsor)
+    if obs is not None:
+        value = obs
+    elif lazy:
+        # delayed sampling (like Pyro's parallel enumeration)
+        value = funsor.Variable(name, dist.support)
+    else:
+        value = dist.sample('value')[0]['value']
+
+    # save log_prob in trace
+    trace_log_prob += dist(value)
+
+    return value
+
+# ...later during inference...
+loss = -trace_log_prob.reduce(logaddexp)  # collapses delayed variables
 ```
+See [funsor/minipyro.py](funsor/minipyro.py) for complete implementation.
 
-And much more! You can find the [full list of violations in our docs](https://dotenv-linter.readthedocs.io/en/latest/pages/violations/).
+## Related projects
 
+- Pyro's [ops.packed](https://github.com/uber/pyro/blob/dev/pyro/ops/packed.py),
+  [ops.einsum](https://github.com/uber/pyro/blob/dev/pyro/ops/einsum), and
+  [ops.contract](https://github.com/uber/pyro/blob/dev/pyro/ops/contract.py)
+- [Birch](https://birch-lang.org/)'s [delayed sampling](https://arxiv.org/abs/1708.07787)
+- [autoconj](https://arxiv.org/abs/1811.11926)
+- [dyna](http://www.cs.jhu.edu/~nwf/datalog20-paper.pdf)
+- [PSI solver](https://psisolver.org)
+- [Hakaru](https://hakaru-dev.github.io)
+- [sympy](https://www.sympy.org/en/index.html)
+- [namedtensor](https://github.com/harvardnlp/namedtensor)
 
-## Gratis
+## Citation
 
-Special thanks goes to [Ignacio Toledo](https://ign.uy)
-for creating an awesome logo for the project.
+If you use Funsor, please consider citing:
+```
+@article{obermeyer2019functional,
+  author = {Obermeyer, Fritz and Bingham, Eli and Jankowiak, Martin and
+            Phan, Du and Chen, Jonathan P},
+  title = {{Functional Tensors for Probabilistic Programming}},
+  journal = {arXiv preprint arXiv:1910.10775},
+  year = {2019}
+}
+```
