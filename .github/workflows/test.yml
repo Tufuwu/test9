@@ -1,44 +1,38 @@
-name: build
+name: Test
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+  push:
+  schedule:
+    - cron: '0 6 * * *'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10"]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
 
-      - name: Install
+      - name: Install dependencies
         run: |
-          sudo apt-get install -y --no-install-recommends python3-dev libxml2-dev libxslt1-dev libxslt-dev libyajl2
-          python3 -m pip install --upgrade pip
-          python3 -m pip install setuptools wheel twine ujson importlib-metadata coveralls
-          python3 -m pip install -r requirements-dev.txt
-          python3 -m pip install --upgrade pytest
-          python3 -m pip install -ve .
+          python -m pip install --upgrade pip wheel
+          python -m pip install --upgrade --upgrade-strategy=eager tox
 
-      - name: Test
-        run: |
-          py.test -vv --cov-report term-missing:skip-covered --cov=linkpreview
+      - name: Run tests
+        run: tox -e py -- --cov-report=xml
 
-      - name: Coveralls
-        run: coveralls --service=github
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Build Package
-        run: python3 setup.py sdist bdist_wheel
-
-      - name: Publish
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
+          fail_ci_if_error: false
+
+# vim:set et sts=2:
