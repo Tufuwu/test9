@@ -1,3 +1,0 @@
-# pip dev/test dependencies
-flake8
-pytest

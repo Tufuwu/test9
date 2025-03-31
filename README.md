@@ -1,140 +1,199 @@
-# Trimmer
+# py-solc-x
 
-[![ci](https://github.com/jonlabelle/Trimmer/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jonlabelle/Trimmer/actions/workflows/ci.yml)
-[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/fdcdvfsip9d9efg3?svg=true)](https://ci.appveyor.com/project/jonlabelle/trimmer)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/jonlabelle/Trimmer.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jonlabelle/Trimmer/context:python)
-[![Package Control Installs](https://img.shields.io/packagecontrol/dt/Trimmer.svg?label=installs)](https://packagecontrol.io/packages/Trimmer)
-[![Latest Release](https://img.shields.io/github/tag/jonlabelle/Trimmer.svg?label=version)](https://github.com/jonlabelle/Trimmer/releases)
-[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/jonlabelle/Trimmer/blob/master/LICENSE.md)
+[![Pypi Status](https://img.shields.io/pypi/v/py-solc-x.svg)](https://pypi.org/project/py-solc-x/) [![Build Status](https://img.shields.io/travis/com/iamdefinitelyahuman/py-solc-x.svg)](https://travis-ci.com/iamdefinitelyahuman/py-solc-x) [![Coverage Status](https://coveralls.io/repos/github/iamdefinitelyahuman/py-solc-x/badge.svg?branch=master)](https://coveralls.io/github/iamdefinitelyahuman/py-solc-x?branch=master)
 
-> [Trimmer](https://github.com/jonlabelle/Trimmer) is a [Sublime Text](http://www.sublimetext.com) plug-in for cleaning up whitespace.
+Python wrapper around the `solc` Solidity compiler with `0.5.x` and `0.6.x` support.
 
-## Features
+Forked from [py-solc](https://github.com/ethereum/py-solc).
 
-- Trim whitespace at the end of each line.
-- Trim whitespace at the start of each line.
-- Trim whitespace at the start and end of each line.
-- Trim whitespace from selection(s).
-- Delete empty, whitespace only lines.
-- Collapse multiple consecutive empty lines into one empty line.
-- Collapse multiple consecutive spaces into one space.
-- Trim empty, whitespace only lines at the beginning and end of file.
-- Remove blank space characters.
-- Normalize spaces (consecutive spaces reduced, empty lines removed and lines trimmed).
-- Tokenize a string by collapsing consecutive spaces, and trimming leading and trailing spaces.
-- Delete empty, whitespace only HTML and XML tags.
-- Remove code comments and collapse lines.
+## Dependencies
 
-## Additional Features
+Py-solc-x allows the use of multiple versions of solc and installs them as needed. You must have all required [solc dependencies](https://solidity.readthedocs.io/en/latest/installing-solidity.html#building-from-source) installed for it to work properly.
 
-A **Replace Smart Characters** command that performs the following actions:
+## Supported Versions
 
-- **Smart single quotes:** `’` *to* `'`
-- **Smart double quotes:** `“` *to* `"`
-- **Prime:** `′` *to* `'`
-- **Double Prime:** `″` *to* `"`
-- **German quotes:** `„` *to* `"` and `‚` *to* `'`
-- **Ellipsis:** `…` *to* `...`
-- **Em dash:** `—` *to* `---`
-- **En dash:** `–` *to* `--`
-- **Bullet:** `•` *to* `*`
-- **Middle dot:** `·` *to* `-`
-- **Em space** *to* three spaces
-- **En space** *to* two spaces
-- **Non-breaking space** *to* one space
-- **Thin space** *to* one space
-- **Hair space** *to* one space
-- **Left angle quote:** `«` *to* `<<`
-- **Right angle quote:** `»` *to* `>>`
-- **Copyright symbol:** `©` *to* `(C)`
-- **Trademark symbol:** `™` *to* `(T)`
-- **Registered trademark symbol:** `®` *to* `(R)`
+Py-solc-x can install the following solc versions:
 
-![ScreenShot](https://raw.githubusercontent.com/jonlabelle/Trimmer/master/screenshots/command_palette.png)
+* Linux and Windows: `>=0.4.11`
+* OSX: `>=0.5.0`
 
-Watch a [**Quick Demo**](https://raw.githubusercontent.com/jonlabelle/Trimmer/master/screenshots/demo.gif)
+`0.4.x` versions are available on OSX if they have been [installed via brew](https://github.com/ethereum/homebrew-ethereum), but cannot be installed directly by py-solc-x.
 
-## Install
+## Quickstart
 
-Trimmer is compatible with both Sublime Text 2 and 3 and all supported Operating Systems.
+Installation
 
-### Package Control
-
-The easiest, and recommended way to install Trimmer is using [Package Control](https://packagecontrol.io).
-
-From the main application menu, navigate to:
-
-- `Tools` -> `Command Palette...` -> `Package Control: Install Package`, type
-  the word ***Trimmer***, then select it to complete installation.
-
-### Git
-
-To install Trimmer using Git, change to your **Sublime Text Packages** directory
-and clone the [Trimmer repository](https://github.com/jonlabelle/Trimmer).
-
-For example, on **OS X**... start a new **Terminal** session and enter the following
-commands:
-
-```shell
-$ cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/
-$ git clone https://github.com/jonlabelle/Trimmer
+```sh
+pip install py-solc-x
 ```
 
-### Manually
+## Installing the `solc` Executable
 
-**Download** and **extract** the [zip](https://github.com/jonlabelle/Trimmer/zipball/master)
-or [tarball](https://github.com/jonlabelle/Trimmer/tarball/master) to your
-Sublime Text packages directory.
+The first time py-solc-x is imported it will automatically check for an installed version of solc on your system. If none is found, you must manually install via `solcx.install_solc`:
 
-**Default Sublime Text Packages Paths:**
+```python
+>>> from solcx import install_solc
+>>> install_solc('v0.4.25')
+```
 
-* **OS X:** `~/Library/Application Support/Sublime Text [2|3]/Packages`
-* **Linux:** `~/.Sublime Text [2|3]/Packages`
-* **Windows:** `%APPDATA%/Sublime Text [2|3]/Packages`
+Or via the command line:
 
-> **NOTE** Replace the `[2|3]` part with the appropriate Sublime Text
-> version for your installation.
+```bash
+python -m solcx.install v0.4.25
+```
 
-## Usage
+By default, `solc` versions are installed at `~/.solcx/`. If you wish to use a different directory you can specify it with the `SOLCX_BINARY_PATH` environment variable.
 
-All commands are accessible from the **Command Palette** using prefix
-***Trimmer***, and in the **Main Menu** under `Edit` -> `Line` -> *Trimmer* command.
+## Setting the `solc` Version
 
-- [Command Palette screenshot](https://raw.githubusercontent.com/jonlabelle/Trimmer/master/screenshots/command_palette.png)
-- [Main Menu screenshot](https://raw.githubusercontent.com/jonlabelle/Trimmer/master/screenshots/main_menu.png)
+Py-solc-x defaults to the most recent installed version set as the active one. To check or modify the active version:
 
-### Key Bindings
+```python
+>>> from solcx import get_solc_version, set_solc_version
+>>> get_solc_version()
+Version('0.5.7+commit.6da8b019.Linux.gpp')
+>>> set_solc_version('v0.4.25')
+>>>
+```
 
-The *default* key binding will trim trailing whitespace at the end of each of
-line (entire file).
+You can also set the version based on the pragma version string. The highest compatible version will be used:
 
-- **OS X**: `Ctrl + S`
-- **Linux**: `Ctrl + Alt + S`
-- **Windows**: `Ctrl + Alt + S`
+```python
+>>> from solcx import set_solc_version_pragma
+>>> set_solc_version_pragma('^0.4.20 || >0.5.5 <0.7.0')
+Using solc version 0.5.8
+>>> set_solc_version_pragma('^0.4.20 || >0.5.5 <0.7.0', check_new=True)
+Using solc version 0.5.8
+Newer compatible solc version exists: 0.6.0
+```
 
-### Trimmer Command API
+To view available and installed versions:
 
-|              Command               |                                              Description                                               |          Context          |
-|------------------------------------|--------------------------------------------------------------------------------------------------------|---------------------------|
-| `trimmer`                          | trim whitespace at the end of each line                                                                | entire file               |
-| `trim_leading_whitespace`          | trim whitespace at the start of each line                                                              | selection, or entire file |
-| `trim_leading_trailing_whitespace` | trim whitespace at the start and end of each line                                                      | selection, or entire file |
-| `trim_selections`                  | trim whitespace from selection(s)                                                                      | selection                 |
-| `delete_empty_lines`               | delete empty, whitespace only lines                                                                    | selection, or entire file |
-| `collapse_lines`                   | collapse multiple consecutive empty lines into one empty line                                          | selection, or entire file |
-| `collapse_spaces`                  | collapse multiple consecutive spaces into one space                                                    | selection, or entire file |
-| `trim_edges`                       | trim empty, whitespace only lines at the beginning and end of the file                                 | entire file               |
-| `remove_blank_spaces`              | remove all blank space characters (tab, cr, ff, vt, space)                                             | selection, or entire file |
-| `normalize_spaces`                 | consecutive spaces reduced, empty lines removed and lines trimmed                                      | selection, or entire file |
-| `replace_smart_characters`         | replace smart characters (smart quotes, em/en dash, ellipsis, nbsp)                                    | selection, or entire file |
-| `tokenize_string`                  | convert a string to a token by collapsing consecutive spaces, and trimming leading and trailing spaces | selection, or entire file |
-| `delete_empty_tags`                | delete empty, whitespace only html and xml tags                                                        | selection, or entire file |
-| `remove_comments`                  | remove code comments and collapse lines                                                                | selection, or entire file |
+```python
+>>> from solcx import get_installed_solc_versions, get_available_solc_versions
+>>> get_installed_solc_versions()
+['v0.4.25', 'v0.5.3', 'v0.6.0']
+>>> get_available_solc_versions()
+['v0.6.0', 'v0.5.15', 'v0.5.14', 'v0.5.13', 'v0.5.12', 'v0.5.11', 'v0.5.10', 'v0.5.9', 'v0.5.8', 'v0.5.7', 'v0.5.6', 'v0.5.5', 'v0.5.4', 'v0.5.3', 'v0.5.2', 'v0.5.1', 'v0.5.0', 'v0.4.25', 'v0.4.24', 'v0.4.23', 'v0.4.22', 'v0.4.21', 'v0.4.20', 'v0.4.19', 'v0.4.18', 'v0.4.17', 'v0.4.16', 'v0.4.15', 'v0.4.14', 'v0.4.13', 'v0.4.12', 'v0.4.11']
+```
 
-## Author
+To install the highest compatible version based on the pragma version string:
 
-[Jon LaBelle](https://jonlabelle.com)
+```python
+>>> from solcx import install_solc_pragma
+>>> install_solc_pragma('^0.4.20 || >0.5.5 <0.7.0')
+```
+
+## Standard JSON Compilation
+
+Use the `solcx.compile_standard` function to make use of the [standard-json](http://solidity.readthedocs.io/en/latest/using-the-compiler.html#compiler-input-and-output-json-description) compilation feature.
+
+```python
+>>> from solcx import compile_standard
+>>> compile_standard({
+...     'language': 'Solidity',
+...     'sources': {'Foo.sol': 'content': "...."},
+... })
+{
+    'contracts': {...},
+    'sources': {...},
+    'errors': {...},
+}
+>>> compile_standard({
+...     'language': 'Solidity',
+...     'sources': {'Foo.sol': {'urls': ["/path/to/my/sources/Foo.sol"]}},
+... }, allow_paths="/path/to/my/sources")
+{
+    'contracts': {...},
+    'sources': {...},
+    'errors': {...},
+}
+```
+
+## Legacy Combined JSON compilation
+
+```python
+>>> from solcx import compile_source, compile_files
+>>> compile_source("contract Foo { function Foo() {} }")
+{
+    'Foo': {
+        'abi': [{'inputs': [], 'type': 'constructor'}],
+        'code': '0x60606040525b5b600a8060126000396000f360606040526008565b00',
+        'code_runtime': '0x60606040526008565b00',
+        'source': None,
+        'meta': {
+            'compilerVersion': '0.3.5-9da08ac3',
+            'language': 'Solidity',
+            'languageVersion': '0',
+        },
+    },
+}
+>>> compile_files(["/path/to/Foo.sol", "/path/to/Bar.sol"])
+{
+    'Foo': {
+        'abi': [{'inputs': [], 'type': 'constructor'}],
+        'code': '0x60606040525b5b600a8060126000396000f360606040526008565b00',
+        'code_runtime': '0x60606040526008565b00',
+        'source': None,
+        'meta': {
+            'compilerVersion': '0.3.5-9da08ac3',
+            'language': 'Solidity',
+            'languageVersion': '0',
+        },
+    },
+    'Bar': {
+        'abi': [{'inputs': [], 'type': 'constructor'}],
+        'code': '0x60606040525b5b600a8060126000396000f360606040526008565b00',
+        'code_runtime': '0x60606040526008565b00',
+        'source': None,
+        'meta': {
+            'compilerVersion': '0.3.5-9da08ac3',
+            'language': 'Solidity',
+            'languageVersion': '0',
+        },
+    },
+}
+```
+
+## Unlinked Libraries
+
+```python
+>>> from solcx import link_code
+>>> unlinked_bytecode = "606060405260768060106000396000f3606060405260e060020a6000350463e7f09e058114601a575b005b60187f0c55699c00000000000000000000000000000000000000000000000000000000606090815273__TestA_________________________________90630c55699c906064906000906004818660325a03f41560025750505056"
+>>> link_code(unlinked_bytecode, {'TestA': '0xd3cda913deb6f67967b99d67acdfa1712c293601'})
+... "606060405260768060106000396000f3606060405260e060020a6000350463e7f09e058114601a575b005b60187f0c55699c00000000000000000000000000000000000000000000000000000000606090815273d3cda913deb6f67967b99d67acdfa1712c29360190630c55699c906064906000906004818660325a03f41560025750505056"
+```
+
+## Import Path Remappings
+
+`solc` provides path aliasing allow you to have more reusable project configurations.
+
+You can use this like:
+
+```python
+>>> from solcx import compile_files
+
+>>> compile_files([source_file_path], import_remappings=["zeppeling=/my-zeppelin-checkout-folder"])
+```
+
+[More information about solc import aliasing](http://solidity.readthedocs.io/en/latest/layout-of-source-files.html#paths)
+
+## Development
+
+This project was forked from [py-solc](https://github.com/ethereum/py-solc) and should be considered a beta. Comments, questions, criticisms and pull requests are welcomed.
+
+### Tests
+
+Py-solc-x is tested on Linux and Windows with solc versions ``>=0.4.11``.
+
+To run the test suite:
+
+```bash
+pytest tests/
+```
+
+By default, the test suite installs all available solc versions for your OS. If you only wish to test against already installed versions, include the `--no-install` flag.
 
 ## License
 
-Trimmer is licensed under the [MIT license](http://opensource.org/licenses/MIT).
+This project is licensed under the [MIT license](LICENSE).
