@@ -1,0 +1,41 @@
+branches:
+  only:
+    - master
+    - /win.*/
+
+# Start builds on tags only
+# skip_non_tags: true
+
+image:
+  - Visual Studio 2019
+
+environment:
+  matrix:
+    - MSYS2_ARCH: i686
+      MSYSTEM: MINGW32
+
+build_script:
+  - set
+  - set PATH=C:\msys64\%MSYSTEM%\bin;C:\msys64\usr\bin;%PATH%
+  - set CHERE_INVOKING=yes
+  # remove precisely conflicting packages
+  - bash -lc "pacman --noconfirm --ask 20 --remove mingw-w64-x86_64-gcc-ada mingw-w64-x86_64-gcc-objc mingw-w64-i686-gcc-ada mingw-w64-i686-gcc-objc"
+  # workaround updating msys2-runtime breaks all programs until last one exited
+  - bash -lc "pacman -Syuu --noconfirm"
+  - Powershell.exe "Stop-Process -name dirmngr -Erroraction silentlycontinue; echo killing_dirmng"
+  - Powershell.exe "Stop-Process -name gpg-agent -Erroraction silentlycontinue; echo killing_gpg-agent"
+  - bash -lc "pacman -Syuu --noconfirm"
+  - Powershell.exe "Stop-Process -name dirmngr -Erroraction silentlycontinue; echo killing_dirmng"
+  - Powershell.exe "Stop-Process -name gpg-agent -Erroraction silentlycontinue; echo killing_gpg-agent"
+  # finally run the install process
+  - bash -lc "bash .appveyor/msys2.sh"
+
+artifacts:
+  - path: tools/win_installer/gpodder-*-contents.txt
+  - path: tools/win_installer/gpodder-*-installer.exe
+  - path: tools/win_installer/gpodder-*-portable.exe
+
+deploy: off
+
+on_failure:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
