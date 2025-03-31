@@ -1,1 +1,6 @@
-include ladybug_comfort/_mannequin/*.csv
+include README.md
+include LICENSE
+include requirements.txt
+recursive-include mg_toolkit *
+recursive-exclude * __pycache__
+recursive-exclude * *.pyc

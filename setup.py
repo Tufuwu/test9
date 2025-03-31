@@ -1,31 +1,72 @@
-import setuptools
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+# Copyright 2020 EMBL - European Bioinformatics Institute
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
+import sys
+import os
 
-setuptools.setup(
-    name="ladybug-comfort",
-    use_scm_version=True,
-    setup_requires=['setuptools_scm'],
-    author="Ladybug Tools",
-    author_email="info@ladybug.tools",
-    description="Ladybug comfort is a Python library that adds thermal comfort "
-    "functionalities to Ladybug.",
+from setuptools import setup, find_packages
+
+_base = os.path.dirname(os.path.abspath(__file__))
+_requirements = os.path.join(_base, "requirements.txt")
+_requirements_test = os.path.join(_base, "requirements-test.txt")
+
+install_requirements = []
+with open(_requirements) as f:
+    install_requirements = f.read().splitlines()
+
+test_requirements = []
+if "test" in sys.argv:
+    with open(_requirements_test) as f:
+        test_requirements = f.read().splitlines()
+
+long_description = ""
+with open(os.path.join(_base, "README.md"), "rb") as f:
+    long_description = f.read().decode("utf-8")
+
+setup(
+    name="mg-toolkit",
+    url="https://github.com/EBI-metagenomics/emg-toolkit",
+    author="EBI Microbiome Informatics Team",
+    description="Metagenomics toolkit.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/ladybug-tools/ladybug-comfort",
-    packages=setuptools.find_packages(exclude=['tests']),
+    packages=find_packages(exclude=["ez_setup"]),
+    version="0.10.0",
+    python_requires=">=3.5",
+    install_requires=install_requirements,
+    setup_requires=["pytest-runner"],
+    tests_require=test_requirements,
     include_package_data=True,
-    install_requires=requirements,
+    zip_safe=False,
+    license="Apache Software License",
     classifiers=[
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: Implementation :: CPython",
-        "License :: OSI Approved :: GNU Affero General Public License v3",
-        "Operating System :: OS Independent"
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: OS Independent",
     ],
-    license="AGPL-3.0"
+    test_suite="tests",
+    entry_points={
+        "console_scripts": [
+            "mg-toolkit=mg_toolkit.__main__:main",
+        ],
+    },
 )
