@@ -1,115 +1,78 @@
-```
-                                  __   _ __      ___  _________
-                                 / /  (_) /____ / _ \/ ___/  _/__
-                                / /__/ / __/ -_) ___/ /___/ // -_)
-                               /____/_/\__/\__/_/   \___/___/\__/
+# ai-toolkit
 
-                               Copyright 2015-2020 / EnjoyDigital
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/)
+[![Build Status](https://github.com/TylerYep/ai-toolkit/actions/workflows/test.yml/badge.svg)](https://github.com/TylerYep/ai-toolkit/actions/workflows/test.yml)
+[![GitHub license](https://img.shields.io/github/license/TylerYep/ai-toolkit)](https://github.com/TylerYep/ai-toolkit/blob/main/LICENSE)
+[![codecov](https://codecov.io/gh/TylerYep/ai-toolkit/branch/main/graph/badge.svg)](https://codecov.io/gh/TylerYep/ai-toolkit)
 
-                            A small footprint and configurable PCIe core
-                                     powered by Migen & LiteX
-```
+## Motivation
 
-[![](https://github.com/enjoy-digital/litepcie/workflows/ci/badge.svg)](https://github.com/enjoy-digital/litepcie/actions) ![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)
+When working on ML projects, especially supervised learning, there tends to be a lot of repeated code, because in every project, we always want a way to checkpoint our work, visualize loss curves in tensorboard, add additional metrics, and see example output. Some projects we are able to do this better than others. Ideally, we want to have some way to consolidate all of this code into a single place.
 
+The problem is that Pytorch examples are generally not very similar. Like most data exploration, we want the ability to modify every part of the codebase to handle different loss metrics, different types of data, or different visualizations based on our data dimensions. Combining everything into a single repository often overcomplicates the underlying logic (making the training loop extremely unreadable, for example). We want to strike a balance between extremely minimalistic / readable code that makes it easy to add extra functionality when needed.
 
-[> Intro
---------
-LitePCIe provides a small footprint and configurable PCIe core.
+This project is for developers or ML scientists who want features of a fully-functioning ML pipeline from the beginning. Each project comes with consistent styling, an opinionated way of handling logging, metrics, and checkpointing / resuming training from checkpoints. It also integrates seamlessly with Google Colab and AWS/Google Cloud GPUs.
 
-LitePCIe is part of LiteX libraries whose aims are to lower entry level of
-complex FPGA cores by providing simple, elegant and efficient implementations
-of components used in today's SoC such as Ethernet, SATA, PCIe, SDRAM Controller...
+# Try It Out!
 
-Using Migen to describe the HDL allows the core to be highly and easily configurable.
+The first thing you should do is go into one of the output\_\*/ folders and try training a model.
+We currently have the following models:
 
-LitePCIe can be used as LiteX library or can be integrated with your standard
-design flow by generating the verilog rtl that you will use as a standard core.
+- MNIST CNN [(Source)](https://github.com/pytorch/examples/blob/main/mnist/main.py)
+- Character-Level RNN+LSTM [(Source)](https://pytorch.org/tutorials/intermediate/char_rnn_classification_tutorial.html)
+- Object Detection [(Source)](https://pytorch.org/tutorials/intermediate/torchvision_tutorial.html)
 
-[> Features
------------
-PHY:
-  - Xilinx Ultrascale(+) (up to PCIe Gen3 X16)
-  - Xilinx 7-Series (up to PCIe Gen2 X8)
-  - Intel Cyclone5  (up to PCIe Gen2 X4)
-  - 64/128/256/512-bit datapath
-  - Clock domain crossing
+## Notable Features
 
-Core:
-  - TLP layer
-  - Reordering
-  - MSI (Single, Multi-vector)/MSI-X
+- In train.py, the code performs some verification checks on all models to make sure you aren't mixing up your batch dimensions.
+- Try stopping it and starting it after a couple epochs - it should resume training from the same place.
+- On tensorboard, loss curves should already be plotting seamlessly across runs.
+- All checkpoints should be available in checkpoints/, which contains activation layers, input data, and best models.
+- Scheduling runs is easy by specifying a file in the configs/ folder.
 
-Frontend:
-  - DMA (with Scatter-Gather)
-  - Wishbone bridge
+# Evaluation Criteria
 
-Software:
-  - Linux Driver (DMA and Sysfs)
+The goal is for this repository to contain a series of clean ML examples of different levels of understanding that I can draw from and use as examples, test models, etc. I essentially want to gather all of the best-practice code gists I find or have used in the past, and make them modular and easily imported or exported for later use.
 
-[> FPGA Proven
----------------
-LitePCIe is already used in commercial and open-source designs:
-- PCIe SDR MIMO 2x2: https://www.amarisoft.com/products-lte-ue-ots-sdr-pcie/#sdr
-- PCIe TLP sniffer/injector: https://ramtin-amin.fr/#nvmedma
-- and others commercial designs...
+The goal is not for this to be some ML framework built on PyTorch, but to focus on a single researcher/developer workflow and make it very easy to begin working. Great for Kaggle competitions, simple data exploration, or experimenting with different models.
 
-[> Possible improvements
-------------------------
-- add standardized interfaces (AXI, Avalon-ST)
-- add Intel Stratix support
-- add Lattice support
-- add more documentation
-- ... See below Support and consulting :)
+The rough evaluation metric for this repo's success is how fast I can start working on a Kaggle challenge after downloading the data: getting insights on the data, its distributions, running baseline and finetuning models, getting loss curves and plots.
 
-If you want to support these features, please contact us at florent [AT]
-enjoy-digital.fr.
+# Current Workflow
 
-[> Getting started
-------------------
-1. Install Python 3.6+ and FPGA vendor's development tools.
-2. Install LiteX and the cores by following the LiteX's wiki [installation guide](https://github.com/enjoy-digital/litex/wiki/Installation).
-3. You can find examples of integration of the core with LiteX in LiteX-Boards and in the examples directory.
+1. Add data to your `data/` folder and edit the corresponding DataasetLoader in `datasets/`.
+2. Add your config and model to `configs/` and `models/`.
+3. Run `train.py`, which saves model checkpoints, output predictions, and tensorboards in the same folder.
+4. Start tensorboard using the `checkpoints/` folder with `tensorboard --logdir=checkpoints/`
+5. Start and stop training using `python train.py --checkpoint=<checkpoint name>`. The code should automatically resume training at the previous epoch and continue logging to the previous tensorboard.
+6. Run `python test.py --checkpoint=<checkpoint name>` to get final predictions.
 
-[> Tests
---------
-Unit tests are available in ./test/.
-To run all the unit tests:
-```sh
-$ ./setup.py test
-```
+# Directory Structure
 
-Tests can also be run individually:
-```sh
-$ python3 -m unittest test.test_name
-```
+- checkpoints/ (Only created once you run train.py)
+- data/
+- configs/
+- src/
+  - datasets/
+  - losses/
+  - metrics/
+  - models/
+    - layers/
+    - ...
+  - visualizations/
+  - args.py (Modify default hyperparameters manually)
+  - metric_tracker.py
+  - test.py
+  - train.py
+  - util.py
+  - verify.py
+  - viz.py (Stub, create more visualizations if necessary)
+- tests/
 
-[> License
-----------
-LitePCIe is released under the very permissive two-clause BSD license. Under
-the terms of this license, you are authorized to use LiteEth for closed-source
-proprietary designs.
-Even though we do not require you to do so, those things are awesome, so please
-do them if possible:
- - tell us that you are using LitePCIe
- - cite LitePCIe in publications related to research it has helped
- - send us feedback and suggestions for improvements
- - send us bug reports when something goes wrong
- - send us the modifications and improvements you have done to LitePCIe.
+# Goal Workflow
 
-[> Support and consulting
--------------------------
-We love open-source hardware and like sharing our designs with others.
-
-LitePCIe is developed and maintained by EnjoyDigital.
-
-If you would like to know more about LitePCIe or if you are already a happy
-user and would like to extend it for your needs, EnjoyDigital can provide standard
-commercial support as well as consulting services.
-
-So feel free to contact us, we'd love to work with you! (and eventually shorten
-the list of the possible improvements :)
-
-[> Contact
-----------
-E-mail: florent [AT] enjoy-digital.fr
+1. Move data into `data/`.
+2. Fill in `preprocess.py` and `dataset.py`. (Optional: explore data by running `python viz.py`)
+3. Change `args.py` to specify input/output dimensions, batch size, etc.
+4. Run `train.py`, which saves model checkpoints, output predictions, and tensorboards in the same folder. Also automatically starts tensorboard server in a tmux session. Resume training at any point.
+5. Run `test.py` to get final predictions.
