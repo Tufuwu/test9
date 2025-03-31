@@ -1,72 +1,41 @@
-name: Test and build Python package
+name: pytest
 
 on:
   push:
-    branches: [ main ]
-    tags:
-      - v*
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  build:
+
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgis/postgis:10-2.5
-        env:
-          POSTGRES_USER: test
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
-        django-series: ['2.2', '3.0']
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: "3.9"
     - name: Install dependencies
       run: |
-        sudo apt update
-        sudo apt install -y gdal-bin
-        pip install -U setuptools six
-        pip install .[dev] --pre Django==${{ matrix.django-series }}
-    - name: Lint with flake8
-      run: |
-        flake8
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r tests/requirements.txt
+        pip install codecov
     - name: Test with pytest
       run: |
-        ./run-tests.sh
-    - name: Calculate test coverage
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        coveralls --service=github
+        python -m pytest --cov-report xml --cov=app --cov=poll --cov=formatters --cov=mattermost_api
 
-  build:
-    needs: test
-    name: Build package and upload to PyPI
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Build and publish
-      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-      run: |
-        pip install twine wheel
-        pip wheel -w dist --no-deps .
-        python setup.py sdist
-        twine upload dist/*
-      continue-on-error: true
+    - name: Codecov Report
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+        files: ./coverage.xml
+        env_vars: OS,PYTHON
+        flags: unittests
+        fail_ci_if_error: true
+        verbose: true

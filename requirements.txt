@@ -1,0 +1,4 @@
+flask==2.2
+Flask-Babel==2.0
+requests
+Pillow
