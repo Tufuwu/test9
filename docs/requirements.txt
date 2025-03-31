@@ -1,6 +1,0 @@
-multipledispatch
-numpy>=1.7
-opt_einsum>=2.3.2
-pytest>=4.1
-makefun
-typing_extensions

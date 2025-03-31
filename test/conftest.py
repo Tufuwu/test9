@@ -1,30 +1,36 @@
-# Copyright Contributors to the Pyro project.
-# SPDX-License-Identifier: Apache-2.0
+"""
+Author:  PH01L
+Email:   phoil@osrsbox.com
+Website: https://www.osrsbox.com
 
-import os
+Copyright (c) 2019, PH01L
 
-import numpy as np
+###############################################################################
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###############################################################################
+"""
+import pytest
+from pathlib import Path
 
-import funsor.util
 
-_BACKEND = os.environ.get("FUNSOR_BACKEND", "numpy")
-funsor.util.set_backend(_BACKEND)
-
-
-def _disallow_set_backend(*args):
-    raise ValueError("set_backend() cannot be called during tests")
+PROJECT_ROOT_PATH = Path(__file__).absolute().parent.parent
+TEST_PATH = Path(PROJECT_ROOT_PATH / "test")
 
 
-def pytest_runtest_setup(item):
-    np.random.seed(0)
-    if _BACKEND == "torch":
-        import pyro
+@pytest.fixture(scope="session")
+def path_to_docs_dir() -> Path:
+    return PROJECT_ROOT_PATH / "docs"
 
-        pyro.set_rng_seed(0)
-        pyro.enable_validation(True)
-    elif _BACKEND == "jax":
-        from jax.config import config
 
-        config.update("jax_platform_name", "cpu")
-
-    funsor.util.set_backend = _disallow_set_backend
+@pytest.fixture(scope="session")
+def path_to_cache_dir() -> Path:
+    return TEST_PATH / "cache"
