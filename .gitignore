@@ -23,6 +23,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+*.pyc
 MANIFEST
 
 # PyInstaller
@@ -103,17 +104,5 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# pycharm
+# Pycharm project settings
 .idea/
-
-# visual studio code
-.vscode/
-
-# environment variables
-.env
-
-# envrc
-.envrc
-
-# others
-.DS_Store
