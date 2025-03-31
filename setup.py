@@ -1,54 +1,32 @@
-#!/usr/bin/env python
-
-import codecs
-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
 
 
-with codecs.open("README.rst", encoding="utf8") as readme_f:
-    README = readme_f.read()
+def scm_version():
+    def local_scheme(version):
+        if version.tag and not version.distance:
+            return version.format_with("")
+        else:
+            return version.format_choice("+{node}", "+{node}.dirty")
+    return {
+        "relative_to": __file__,
+        "version_scheme": "guess-next-dev",
+        "local_scheme": local_scheme
+    }
+
 
 setup(
-    name="srt",
-    version="3.5.0",
-    python_requires=">=2.7",
-    description="A tiny library for parsing, modifying, and composing SRT files.",
-    long_description=README,
-    author="Chris Down",
-    author_email="chris@chrisdown.name",
-    url="https://github.com/cdown/srt",
-    py_modules=["srt", "srt_tools.utils"],
-    scripts=[
-        "srt_tools/srt",
-        "srt_tools/srt-deduplicate",
-        "srt_tools/srt-normalise",
-        "srt_tools/srt-fixed-timeshift",
-        "srt_tools/srt-linear-timeshift",
-        "srt_tools/srt-lines-matching",
-        "srt_tools/srt-mux",
-        "srt_tools/srt-play",
-        "srt_tools/srt-process",
-    ],
-    license="Public Domain",
-    keywords="srt",
-    classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
-        "License :: Public Domain",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Topic :: Multimedia :: Video",
-        "Topic :: Software Development :: Libraries",
-        "Topic :: Text Processing",
-    ],
+    name="nmigen-soc",
+    use_scm_version=scm_version(),
+    author="whitequark",
+    author_email="whitequark@whitequark.org",
+    description="System on Chip toolkit for nMigen",
+    #long_description="""TODO""",
+    license="BSD",
+    setup_requires=["wheel", "setuptools", "setuptools_scm"],
+    install_requires=["nmigen>=0.2,<0.5"],
+    packages=find_packages(),
+    project_urls={
+        "Source Code": "https://github.com/nmigen/nmigen-soc",
+        "Bug Tracker": "https://github.com/nmigen/nmigen-soc/issues",
+    },
 )
