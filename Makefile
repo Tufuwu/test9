@@ -1,83 +1,104 @@
-SHELL = /bin/bash
-MANAGE = python manage.py
-define USAGE=
-@echo -e
-@echo -e "Usage:"
-@echo -e "\tmake black [arg=--<arg>]                 -- black formatting"
-@echo -e "\tmake serve                               -- start source server"
-@echo -e "\tmake serve_target                        -- start target server"
-@echo -e "\tmake serve_taskflow [arg=sync]           -- start taskflow server"
-@echo -e "\tmake collectstatic                       -- run collectstatic"
-@echo -e "\tmake test [arg=<test_object>]            -- run all tests or specify module/class/function"
-@echo -e "\tmake test_taskflow [arg=<test_object>]   -- run all tests and taskflow tests or specify module/class/function"
-@echo -e "\tmake sync_taskflow                       -- sync taskflow"
-@echo -e "\tmake manage_target arg=<target_command>  -- run management command on target site, arg is mandatory"
-@echo -e
-endef
+.DEFAULT_GOAL := help
 
-# Argument passed from commandline, optional for some rules, mandatory for others.
-arg =
+REMOVE = python scripts/remove.py
+BROWSER = python scripts/browser.py
 
-# Port of target site, can be overriden by passing the parameter on the commandline.
-target_port = 8001
+.PHONY: help
+help:
+	@python scripts/make-help.py < $(MAKEFILE_LIST)
 
+.PHONY: venv
+venv: ## creates a virtualenv using tox
+	tox -e dev
 
-.PHONY: black
-black:
-	black . -l 80 --skip-string-normalization --exclude ".git|.venv|.tox|env|src|docs|migrations|versioneer.py" $(arg)
+.PHONY: install
+install: clean ## install the package in dev mode
+	pip install -e .
 
+.PHONY: mypy
+mypy: ## check code, tests and examples with mypy
+	mypy cloup tests examples
 
-.PHONY: serve
-serve:
-	$(MANAGE) runserver --settings=config.settings.local
-
-
-.PHONY: serve_target
-serve_target:
-	$(MANAGE) runserver 0.0.0.0:$(target_port) --settings=config.settings.local_target
-
-
-.PHONY: serve_taskflow
-ifeq ($(arg),sync)
-serve_taskflow: sync_taskflow
-else
-serve_taskflow:
-endif
-	$(MANAGE) runserver --settings=config.settings.local_taskflow
-
-
-.PHONY: collectstatic
-collectstatic:
-	$(MANAGE) collectstatic --no-input
-
+.PHONY: lint
+lint: ## check code, tests and examples with flake8
+	flake8 cloup tests examples
 
 .PHONY: test
-test: collectstatic
-	$(MANAGE) test -v 2 --parallel --settings=config.settings.test $(arg)
+test: ## run tests quickly with the default Python
+	pytest
 
+.PHONY: coverage
+coverage: ## check code coverage quickly with the default Python
+	pytest --cov=cloup -vv
+	coverage report -m
+	coverage html
+	$(BROWSER) htmlcov/index.html
 
-.PHONY: test_taskflow
-test_taskflow: test
-	$(MANAGE) test -v 2 --tag=Taskflow --settings=config.settings.test_taskflow $(arg)
+.PHONY: clean-docs
+clean-docs: ## clean the documentation
+	$(MAKE) -C docs clean
+	$(REMOVE) docs/autoapi
 
+.PHONY: docs
+docs: ## generate Sphinx HTML documentation
+	$(MAKE) -C docs html
 
-.PHONY: manage_target
-manage_target:
-ifeq ($(arg),)
-	@echo -e
-	@echo -e "ERROR:\tPlease provide \`arg=<target_command>\`"
-	$(USAGE)
-else
-	$(MANAGE) $(arg) --settings=config.settings.local_target
-endif
+.PHONY: re-docs
+re-docs: clean-docs docs ## (re)generate Sphinx HTML documentation from scratch
 
+.PHONY: view-docs
+view-docs: docs ## open the built docs in the default browser
+	$(BROWSER) docs/_build/html/index.html
 
-.PHONY: sync_taskflow
-sync_taskflow:
-	$(MANAGE) synctaskflow --settings=config.settings.local_taskflow
+LIVE_DOCS = sphinx-autobuild docs docs/_build/html \
+	--watch *.rst \
+	--watch cloup/**/*.py \
+	--ignore docs/autoapi \
+	--open-browser
 
+.PHONY: live-docs
+live-docs:   ## watch docs files and rebuild the docs when they change
+	$(LIVE_DOCS)
 
-.PHONY: usage
-usage:
-	$(USAGE)
+.PHONY: live-docs-all
+live-docs-all:   ## write all files (useful when working on html/css)
+	$(LIVE_DOCS) -a
 
+.PHONY: clean
+clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
+
+.PHONY: clean-build
+clean-build: ## remove build artifacts
+	$(REMOVE) build dist .eggs
+	$(REMOVE) -r './**/*.egg-info'
+	$(REMOVE) -r './**/*.egg'
+
+.PHONY: clean-pyc
+clean-pyc: ## remove Python file artifacts
+	$(REMOVE) -r './**/__pycache__'
+	$(REMOVE) -r './**/*.pyc'
+	$(REMOVE) -r './**/*.pyo'
+
+.PHONY: clean-test
+clean-test: ## remove test and coverage artifacts
+	$(REMOVE) .tox .coverage htmlcov .pytest_cache
+
+.PHONY: dist
+dist: clean-build ## builds source and wheel package
+	python setup.py sdist bdist_wheel
+	twine check dist/*
+
+.PHONY: release
+release: dist ## package and upload a release
+	twine upload dist/*
+
+.PHONY: pip-compile
+pip-compile: ## pin dependencies in requirements/ using the current env
+	pip-compile requirements/test.in
+	pip-compile requirements/docs.in
+	pip-compile requirements/dev.in
+
+.PHONY: pip-sync
+pip-sync: pip-compile ## sync development environment with requirements/dev.txt
+	pip-sync requirements/dev.txt
+	pip install -e .
