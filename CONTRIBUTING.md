@@ -1,6 +1,3 @@
-Contributing
-------------
-We welcome contributions from anyone, even if you are new to open source we will be happy to help you to get started. Most of the Ladybug Tools developers started learning programming through developing for Ladybug Tools.
+# Contributing
 
-### Code contribution
-This project follows Ladybug Tools contributing guideline. See [contributing to Ladybug Tools projects](https://github.com/ladybug-tools/contributing/blob/master/README.md).
+Welcome! As a [Jupyter](https://jupyter.org) project, we follow the [Jupyter contributor guide](https://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html).
