@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block container %}
+  <h2 class="subtitle">Decrypt a secret</h2>
+  <form
+    id="readSecret"
+    action="{{ url_for('api.secret') }}"
+    method="GET"
+    autocomplete="off"
+  >
+    <fieldset id="readSecretFs">
+      <div class="field is-grouped">
+        <p class="control is-expanded has-icons-left">
+          <input
+            class="input is-family-monospace"
+            name="passphrase"
+            id="passphrase"
+            type="text"
+            placeholder="Passphrase"
+            autocomplete="off"
+            required
+          />
+          <span class="icon is-small is-left">
+            <span class="feather" data-feather="key"></span>
+          </span>
+        </p>
+        <input type="hidden" name="slug" id="slugId" value="{{ slug }}" />
+        <p class="control">
+          <button type="submit" class="button is-primary" id="decryptBtn">Decrypt</button>
+        </p>
+      </div>
+    </fieldset>
+  </form>
+
+  <p class="mt-3">
+    As soon as the message gets decrypted, <strong>it is deleted forever</strong>,
+    make sure to <strong>save it in a secure place</strong> before leaving this page.
+  </p>
+
+  <p href="#" class="hidden" id="copy"></p>
+
+  <div id="response">
+    <strong><span id="msg"></span></strong>
+  </div>
+{% endblock %}
+
+{% block js %}
+  {% assets "read" %}
+    <script type="module" src="{{ ASSET_URL }}"></script>
+  {% endassets %}
+{% endblock %}

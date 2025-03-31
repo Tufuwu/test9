@@ -1,8 +1,0 @@
-flywheel
-google-cloud-storage
-numpydoc
-psycopg2-binary
-redis
-requests
-sphinx
-sphinx_rtd_theme

@@ -1,0 +1,16 @@
+version: "2"
+checks:
+  argument-count:
+    enabled: false
+plugins:
+  bandit:
+    enabled: true
+exclude_patterns:
+  - "**/.*"
+  - "*.txt"
+  - "*.json"
+  - "Procfile"
+  - "tests/"
+  - "bin/"
+  - "dockerenv/"
+  - "postgres/"

@@ -1,47 +1,21 @@
-*.py[cod]
-*.swp
-*.sqlite
+*.db
+*.DS_Store
+*.log
+*.min.css
+*.min.js
+*.pid
+*.rdb
 
-# C extensions
-*.so
+environments/
+!environments/docker.dev
+!environments/local.dev.template
 
-# Packages
-*.egg
-*.egg-info
-dist
-build
-.eggs
-eggs
-parts
-bin
-var
-sdist
-packages
-develop-eggs
-.installed.cfg
-
-# Installer logs
-pip-log.txt
-
-# Unit test / coverage reports
 .coverage
-.tox
-nosetests.xml
-htmlcov
+tags
 
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-.ropeproject
-pypicloud_env
-_build
-_local.db
-*.ini
-.idea
-.mypy_cache
-.direnv/
+.mypy_cache/
+.vscode/
+__pycache__/
+env/
+shhh/static/vendor/
+venv/
