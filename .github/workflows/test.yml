@@ -1,138 +1,45 @@
-name: Continuous Integration
-
-on: [push, pull_request]
-
+on:
+  push:
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#patterns-to-match-branches-and-tags
+    # e.g., v1.10.1
+    tags:        
+      - 'v[0-9].[0-9]+.[0-9]+' 
+permissions:
+  contents: write
 jobs:
   build:
-    if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]')"
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-        - dir: win-libs-vc14-x64
-          generator: Visual Studio 16 2019
-          config: Release
-          os: windows-latest
-          args: -A x64
-          archive: thirdparty-win64.zip
-
-        - dir: win-libs-vc14
-          generator: Visual Studio 16 2019
-          config: Release
-          os: windows-latest
-          args: -A Win32
-          archive: thirdparty-win32.zip
-
-        - dir: darwin-libs-a
-          generator: Unix Makefiles
-          config: Release
-          os: macos-latest
-          args: >-
-            -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
-            -DBUILD_NVIDIACG=OFF
-          archive: thirdparty-mac.tar.xz
-
-        - dir: android-libs-arm64
-          generator: Unix Makefiles
-          config: Release
-          os: ubuntu-latest
-          args: >-
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake
-            -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a
-            -DCMAKE_ANDROID_ARCH=arm64
-            -DCMAKE_SYSTEM_VERSION=21
-            -DANDROID_ABI=arm64-v8a
-            -DANDROID_PLATFORM=android-21
-            -DBUILD_FCOLLADA=OFF
-            -DBUILD_VRPN=OFF
-            -DBUILD_ARTOOLKIT=OFF
-          archive: thirdparty-android-arm64.tar.xz
-
-        - dir: android-libs-arm
-          generator: Unix Makefiles
-          config: Release
-          os: ubuntu-latest
-          args: >-
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake
-            -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a
-            -DCMAKE_ANDROID_ARCH=arm
-            -DCMAKE_SYSTEM_VERSION=19
-            -DANDROID_ABI=armeabi-v7a
-            -DANDROID_PLATFORM=android-19
-            -DBUILD_FCOLLADA=OFF
-            -DBUILD_VRPN=OFF
-            -DBUILD_ARTOOLKIT=OFF
-          archive: thirdparty-android-arm.tar.xz
-
-        - dir: android-libs-x86_64
-          generator: Unix Makefiles
-          config: Release
-          os: ubuntu-latest
-          args: >-
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake
-            -DCMAKE_ANDROID_ARCH_ABI=x86_64
-            -DCMAKE_ANDROID_ARCH=x86_64
-            -DCMAKE_SYSTEM_VERSION=21
-            -DANDROID_ABI=x86_64
-            -DANDROID_PLATFORM=android-21
-            -DBUILD_FCOLLADA=OFF
-            -DBUILD_VRPN=OFF
-            -DBUILD_ARTOOLKIT=OFF
-          archive: thirdparty-android-x86_64.tar.xz
-
-        - dir: android-libs-x86
-          generator: Unix Makefiles
-          config: Release
-          os: ubuntu-latest
-          args: >-
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake
-            -DCMAKE_ANDROID_ARCH_ABI=x86
-            -DCMAKE_ANDROID_ARCH=x86
-            -DCMAKE_SYSTEM_VERSION=19
-            -DANDROID_ABI=x86
-            -DANDROID_PLATFORM=android-19
-            -DBUILD_FCOLLADA=OFF
-            -DBUILD_VRPN=OFF
-            -DBUILD_ARTOOLKIT=OFF
-          archive: thirdparty-android-x86.tar.xz
-
-    runs-on: ${{ matrix.os }}
-
+    name: Build exectuable 📦
+    runs-on: windows-latest
     steps:
-    - name: Clone
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        path: thirdparty
-
-    - name: Install yasm
-      if: runner.os == 'macOS' || startsWith(matrix.os, 'ubuntu')
-      run: ${{runner.os == 'macOS' && 'brew' || 'sudo apt-get'}} install yasm
-
-    - name: Configure
-      working-directory: thirdparty
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.config}} -G "${{matrix.generator}}" ${{matrix.args}}
-
-    - name: Build
-      working-directory: thirdparty
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.config}} -j4
-
-    - name: Get Python (Windows)
-      if: github.event_name == 'push' && runner.os == 'Windows'
-      working-directory: thirdparty
-      run: .\install-python.ps1 ${{matrix.dir}}
-
-    - name: Make ZIP file
-      if: endsWith(matrix.archive, '.zip')
-      run: 7z a ${{matrix.archive}} thirdparty/${{matrix.dir}} thirdparty/win-util thirdparty/win-python*/
-
-    - name: Make tarball
-      if: endsWith(matrix.archive, '.tar') || contains(matrix.archive, '.tar.')
-      run: tar -cJvf ${{matrix.archive}} thirdparty/${{matrix.dir}}
-
-    - name: Upload
-      if: github.event_name == 'push'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{matrix.dir}}
-        path: ${{matrix.archive}}
+        python-version: "3.9"
+    - name: Install dependencies
+      run: |
+            python -m pip install --upgrade pip
+            python -m pip install . pyinstaller
+    - name: Build binary
+      run:  pyinstaller "main.spec"
+    - name: Zip files 🗜️
+      run: |
+            cp tools/Forensicsim_Parser.py dist/
+            cd dist
+            tar.exe -a -cf forensicsim.zip Forensicsim_Parser.py ms_teams_parser.exe
+    - name: Create GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: >-
+        gh release create
+        '${{ github.ref_name }}'
+        --repo '${{ github.repository }}'
+        --title '${{ github.ref_name }}'
+        --generate-notes
+    - name: Upload artifacts to GitHub Release
+      env:
+            GITHUB_TOKEN: ${{ github.token }}
+      run: >-
+        gh release upload
+        '${{ github.ref_name }}' dist/forensicsim.zip
+        --repo '${{ github.repository }}'

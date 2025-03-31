@@ -1,0 +1,3 @@
+[submodule "forensicsim-data"]
+	path = forensicsim-data
+	url = https://github.com/KarelZe/forensicsim-data.git
