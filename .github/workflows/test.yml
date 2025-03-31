@@ -1,33 +1,27 @@
-name: build
-
+name: test
 on:
   push:
-    branches:
-      - '*'
-    tags-ignore:
-      - v*
+  workflow_dispatch:
   pull_request:
-    branches:
-      - '*'
-    tags-ignore:
-      - v*
-
+  schedule:
+    - cron: '0 0 1 * *'  # On the first of every month
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+            python-version: 3.x
+            cache: pip
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+      - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install .[dev]
-      - name: Test
-        run: |
-          pytest
+          pip install -r requirements.txt -r requirements-dev.txt
+          gem install mdl
+      - uses: pre-commit/action@v3.0.1
+      - name: pytest
+        run: pytest

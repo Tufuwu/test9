@@ -1,104 +1,60 @@
-#!/usr/bin/env python
-from pathlib import Path
+# -*- coding: utf-8 -*-
+"""Build script for setuptools, used to create PyPi package."""
+import os
 
-from setuptools import setup, find_packages
+from setuptools import setup
+from setuptools import find_packages
+
+from prometheus_speedtest import version
 
 
-if __name__ == "__main__":
+def read_file(rel_path):
+    """Reads a relative file, returns contents as a string.
 
-    base_dir = Path(__file__).parent
-    src_dir = base_dir / 'src'
+    Args:
+      rel_path: relative file path, string.
+    """
+    here = os.path.abspath(os.path.dirname(__file__))
+    with open(os.path.join(here, rel_path), 'r', encoding='utf-8') as rel_file:
+        return rel_file.read().strip()
 
-    about = {}
-    with (src_dir / "vivarium" / "__about__.py").open() as f:
-        exec(f.read(), about)
 
-    with (base_dir / "README.rst").open() as f:
-        long_description = f.read()
-
-    install_requirements = [
-        'numpy',
-        'pandas',
-        'pyyaml>=5.1',
-        'scipy',
-        'click',
-        'tables',
-        'networkx',
-        'loguru',
-    ]
-
-    interactive_requirements = [
-        'IPython',
-        'ipywidgets',
-        'jupyter',
-    ]
-
-    test_requirements = [
-        'pytest',
-        'pytest-mock',
-    ]
-
-    doc_requirements = [
-        'sphinx<2.1',
-        'sphinx-autodoc-typehints<=1.7',
-        'sphinx-rtd-theme',
-        'sphinx-click',
-        'IPython',
-        'matplotlib'
-    ]
-
-    setup(
-        name=about['__title__'],
-        version=about['__version__'],
-
-        description=about['__summary__'],
-        long_description=long_description,
-        license=about['__license__'],
-        url=about["__uri__"],
-
-        author=about["__author__"],
-        author_email=about["__email__"],
-
-        classifiers=[
-            "Intended Audience :: Developers",
-            "Intended Audience :: Education",
-            "Intended Audience :: Science/Research",
-            "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-            "Natural Language :: English",
-            "Operating System :: MacOS :: MacOS X",
-            "Operating System :: POSIX",
-            "Operating System :: POSIX :: BSD",
-            "Operating System :: POSIX :: Linux",
-            "Operating System :: Microsoft :: Windows",
-            "Programming Language :: Python",
-            "Programming Language :: Python :: 3.6",
-            "Programming Language :: Python :: Implementation :: CPython",
-            "Topic :: Education",
-            "Topic :: Scientific/Engineering",
-            "Topic :: Scientific/Engineering :: Artificial Life",
-            "Topic :: Scientific/Engineering :: Mathematics",
-            "Topic :: Scientific/Engineering :: Medical Science Apps.",
-            "Topic :: Scientific/Engineering :: Physics",
-            "Topic :: Software Development :: Libraries",
+setup(
+    name='prometheus_speedtest',
+    author='Jean-Ralph Aviles',
+    author_email='jeanralph.aviles+pypi@gmail.com',
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: Apache Software License',
+        'Operating System :: OS Independent',
+        'Topic :: System :: Monitoring',
+        'Topic :: System :: Networking :: Monitoring',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python',
+    ],
+    description=('Performs speedtest-cli tests and pushes metrics to '
+                 'Prometheus Pushgateway'),
+    entry_points={
+        'console_scripts': [
+            ('prometheus_speedtest='
+             'prometheus_speedtest.prometheus_speedtest:init'),
         ],
-
-        package_dir={'': 'src'},
-        packages=find_packages(where='src'),
-        include_package_data=True,
-
-        install_requires=install_requirements,
-        tests_require=test_requirements,
-        extras_require={
-            'docs': doc_requirements,
-            'test': test_requirements,
-            'interactive': interactive_requirements,
-            'dev': doc_requirements + test_requirements + interactive_requirements,
-        },
-
-        entry_points="""
-                [console_scripts]
-                simulate=vivarium.interface.cli:simulate
-            """,
-
-        zip_safe=False,
-    )
+    },
+    include_package_data=True,
+    packages=find_packages(),
+    install_requires=[
+        'absl-py==2.1.0',
+        'prometheus_client==0.21.1',
+        'speedtest-cli==2.1.3',
+    ],
+    keywords=['prometheus', 'monitoring', 'speedtest', 'speedtest.net'],
+    license='Apache License, Version 2.0',
+    long_description=read_file('README.md'),
+    long_description_content_type='text/markdown',
+    py_modules=['prometheus_speedtest'],
+    setup_requires=['setuptools==75.6.0'],
+    url='https://github.com/jeanralphaviles/prometheus_speedtest',
+    version=version.VERSION,
+)

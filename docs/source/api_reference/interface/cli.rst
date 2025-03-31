@@ -1,3 +1,0 @@
-.. automodule:: vivarium.interface.cli
-
-

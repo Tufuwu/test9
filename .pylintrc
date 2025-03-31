@@ -1,5 +1,2 @@
-[FORMAT]
-max-line-length=120
-good-names=f, _log
-[TYPECHECK]
-ignored-modules = numpy, numpy.random
+[MESSAGES CONTROL]
+disable=too-few-public-methods
