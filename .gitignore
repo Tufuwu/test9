@@ -1,15 +1,3 @@
-conf.custom.yml
-.env.dev.custom
-.vscode
-./models
-notebooks/
-notebooks/data/
-
-# config.yml
-
-.DS_Store
-.idea/*
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -94,6 +82,7 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
+.env
 .venv
 env/
 venv/
@@ -113,3 +102,18 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# pycharm
+.idea/
+
+# visual studio code
+.vscode/
+
+# environment variables
+.env
+
+# envrc
+.envrc
+
+# others
+.DS_Store
