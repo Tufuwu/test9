@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Permissions Auditor Example App</h1>
+
+<ul>
+    <li><a href="{% url 'admin:index' %}">Admin</a></li>
+    <li><a href="{% url 'func:user_index' %}">Users List</a> (requires 'auth.view_users' permission)</li>
+    <li><a href="{% url 'func:superuser_index' %}">Super Users List</a> (super users only)</li>
+    <li><a href="{% url 'func:permissions_index' %}">Permissions List</a> (staff members only)</li>
+</ul>
+
+<a href="{% url 'logout' %}?next=/">Logout</a>
+{% endblock content %}
