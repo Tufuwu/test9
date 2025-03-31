@@ -1,49 +1,92 @@
-name: CI
+name: Linux
 
-on:
-  pull_request:
+on: [push, pull_request]
 
 jobs:
-  pytest:
+  TestLinux:
+    name: Python ${{ matrix.python }} (GEOS ${{ matrix.geos }}, numpy ${{ matrix.numpy || 'latest' }})
+    # runs-on: ubuntu-latest
     runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10"]
-        django-version: ['django22']
-        status: ['']
         include:
-          - python-version: 'py38'
-            django-version: 'django30'
-            status: 'ignored'
+          # 2015
+          - python: 3.9
+            geos: 3.5.2
+            numpy: 1.10.4
+          # 2017
+          - python: 3.9
+            geos: 3.6.4
+            numpy: 1.13.3
+          # 2018
+          - python: 3.9
+            geos: 3.7.3
+            numpy: 1.15.4
+          # 2019
+          - python: 3.9
+            geos: 3.8.1
+            numpy: 1.17.5
+          # 2020
+          - python: 3.9
+            geos: 3.8.1
+            numpy: 1.19.4
+          # dev
+          - python: 3.9
+            geos: main
+
+    env:
+      GEOS_VERSION: ${{ matrix.geos }}
+      GEOS_INSTALL: ${{ github.workspace }}/geosinstall/geos-${{ matrix.geos }}
 
     steps:
       - uses: actions/checkout@v2
-      - run: make ci_up
-      - run: make ci_test TOXENV=${{ matrix.python-version }}-${{ matrix.django-version }}
-        # Unfortunately, continue-on-error marks the job as successful. We really want something like "allow failure"
-        # that would note the failure, but not fail the entire workflow and not email the author about it.
-        # See https://github.com/actions/toolkit/issues/399
-        continue-on-error: ${{ matrix.status == 'ignored' }}
-      - uses: codecov/codecov-action@v1
 
-  quality:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: make ci_up
-      - run: make ci_quality
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
 
-  semgrep:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: returntocorp/semgrep-action@v1
-        name: django rules
+      - name: Cache GEOS and pip packages
+        uses: actions/cache@v4
         with:
-          config: p/django
-      - uses: returntocorp/semgrep-action@v1
-        name: other rules
-        with:
-          config: https://semgrep.live/dlukeomalley:use-assertEqual-for-equality
+          key: ${{ runner.os }}-geos-${{ matrix.geos }}
+          path: |
+            ~/.cache/pip
+            ${{ github.workspace }}/geosinstall
+
+      - name: Install GEOS
+        shell: bash
+        run: |
+          ./ci/install_geos.sh
+          cd ${{ github.workspace }}
+
+      - name: Install python dependencies
+        shell: bash
+        run: |
+          pip install --disable-pip-version-check --upgrade pip
+          pip install --upgrade wheel
+          if [ "$GEOS_VERSION" = "main" ]; then
+            pip install --upgrade --pre Cython numpy pytest;
+          else
+            pip install --upgrade Cython numpy==${{ matrix.numpy }} pytest;
+          fi
+          pip list
+
+      - name: Set environment variables
+        shell: bash
+        run: |
+          echo "LD_LIBRARY_PATH=$GEOS_INSTALL/lib" >> $GITHUB_ENV
+          echo $GEOS_INSTALL/bin >> $GITHUB_PATH
+
+      - name: Build PyGEOS
+        shell: bash
+        run: |
+          python setup.py build_ext --inplace
+          pip install --no-deps -e .
+
+      - name: Run tests
+        shell: bash
+        continue-on-error: ${{ matrix.geos == 'main' }}
+        run: |
+          pytest --doctest-modules

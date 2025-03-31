@@ -1,100 +1,71 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
 *.py[cod]
-
-*.log
+*$py.class
 
 # C extensions
 *.so
 
-# Packages
-*.egg
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
 .installed.cfg
-lib
-lib64
-__pycache__
+*.egg
+*.log
+*.whl
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
 
 # Installer logs
 pip-log.txt
-
-# Django
-default.db
-
-# Static assets
-media/cache/
-assets/
+pip-delete-this-directory.txt
 
 # Unit test / coverage reports
+htmlcov/
+.tox/
 .coverage
 .coverage.*
-htmlcov
-.tox
+.cache
 nosetests.xml
-unittests.xml
-
-### Internationalization artifacts
-*.mo
-*.po
-*.prob
-!django.po
-!django.mo
-!djangojs.po
-!djangojs.mo
-course_discovery/conf/locale/fake*/LC_MESSAGES/*.po
-course_discovery/conf/locale/fake*/LC_MESSAGES/*.mo
-course_discovery/conf/locale/messages.mo
-
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-# QA
 coverage.xml
-diff_*.html
-*.report
-report
-venv
-acceptance_tests.*.log
-acceptance_tests.*.png
+*,cover
+.hypothesis/
 
-# Override config files
-override.cfg
-private.py
-
-# JetBrains
-.idea
-
-# OS X
-.DS_Store
-
-# Editor Temp Files
-*.swp
-
-# pyenv
+# pyenv python configuration file
 .python-version
 
-*.trace
+# PyCharm
+.idea
 
-.cache/
-.dev/
-course_discovery/media/
-course_discovery/static/bower_components/
-docs/_build/
-node_modules/
-course_discovery/static/bundles/
-webpack-stats.json
-
-# Visual Studio Code
+# VS Code
 .vscode
 
-# Emacs
-*~
+# Pipenv
+.venv
+Pipfile
+Pipfile.lock
+
+
+# Documentation
+docs/_build
+
+# Benchmarks
+.asv
+
+# Cython C files
+pygeos/*.c

@@ -1,5 +1,0 @@
-{% include 'search/indexes/course_metadata/basecourse_text.txt' %}
-
-{% for course_run in object.course_runs.all %}
-    {{ course_run }}
-{% endfor %}

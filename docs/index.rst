@@ -1,13 +1,34 @@
-edX Discovery Service
-=====================
+.. pygeos documentation master file, created by
+   sphinx-quickstart on Mon Jul 22 11:02:13 2019.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-**Discovery** is a service that provides access to consolidated course and program metadata. It does this primarily through a REST API that supports courses, course runs, programs, catalogs, and search.
+.. include:: ../README.rst
 
-This guide begins with some background information on the service, then focuses on what you need to know to run and develop for the service.
+API Reference
+=============
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+   :caption: Contents:
 
-   introduction
-   quickstart
-   advanced
+   installation
+   geometry
+   creation
+   io
+   measurement
+   predicates
+   set_operations
+   constructive
+   linear
+   coordinates
+   strtree
+   changelog
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

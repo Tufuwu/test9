@@ -1,91 +1,134 @@
-Course Discovery Service  |Codecov|_
-==============================================
-.. |Codecov| image:: http://codecov.io/github/edx/course-discovery/coverage.svg?branch=master
-.. _Codecov: http://codecov.io/github/edx/course-discovery?branch=master
+======
+PyGEOS
+======
 
-Service providing access to consolidated course and program metadata.
+.. Documentation at RTD — https://readthedocs.org
 
-Documentation
--------------
+.. image:: https://readthedocs.org/projects/pygeos/badge/?version=latest
+	:alt: Documentation Status
+	:target: https://pygeos.readthedocs.io/en/latest/?badge=latest
 
-`Documentation <https://edx-discovery.readthedocs.io/en/latest/>`_ is hosted on Read the Docs. The source is hosted in this repo's `docs <https://github.com/edx/course-discovery/tree/master/docs>`_ directory. The docs are automatically rebuilt and redeployed when commits are merged to master. To contribute, please open a PR against this repo.
+.. Github Actions status — https://github.com/pygeos/pygeos/actions
 
-License
--------
+.. image:: https://github.com/pygeos/pygeos/workflows/Conda/badge.svg
+	:alt: Github Actions status
+	:target: https://github.com/pygeos/pygeos/actions?query=workflow%3AConda
 
-The code in this repository is licensed under version 3 of the AGPL unless otherwise noted. Please see the LICENSE_ file for details.
+.. Appveyor CI status — https://ci.appveyor.com
 
-.. _LICENSE: https://github.com/edx/course-discovery/blob/master/LICENSE
+.. image:: https://ci.appveyor.com/api/projects/status/jw48gpd88f188av6?svg=true
+	:alt: Appveyor CI status
+	:target: https://ci.appveyor.com/project/caspervdw/pygeos-3e5cu
 
-How To Contribute
------------------
+.. PyPI
 
-Contributions are welcome. Please read `How To Contribute <https://github.com/edx/edx-platform/blob/master/CONTRIBUTING.rst>`_ for details. Even though it was written with ``edx-platform`` in mind, these guidelines should be followed for Open edX code in general.
+.. image:: https://badge.fury.io/py/pygeos.svg
+	:alt: PyPI
+	:target: https://badge.fury.io/py/pygeos
 
-Development
------------
+.. Anaconda
 
-Using elasticsearch locally
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To use elasticsearch locally, and to update your index after adding new data that you want elasticsearch to access
-run:
+.. image:: https://anaconda.org/conda-forge/pygeos/badges/version.svg
+  :alt: Anaconda
 
-.. code-block:: shell
+.. Zenodo
 
-    $ ./manage.py update_index --disable-change-limit
-
-
-Working with memcached locally
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Some endpoints, such as /api/v1/courses, have their responses cached in memcached through mechanisms such as the
-CompressedCacheResponseMixin. This caching may make it difficult to see code changes reflected in various endpoints
-without first clearing the cache or updating the cache keys. You can update the cache keys by going to any
-course_metadata model in the admin dashboard and clicking save. To flush your local memcached, make sure the
-edx.devstack.memcached container is up and run:
-
-.. code-block:: shell
-
-    $ telnet localhost 11211
-    $ flush_all
-    $ quit
+.. image:: https://zenodo.org/badge/191151963.svg
+  :alt: Zenodo 
+  :target: https://zenodo.org/badge/latestdoi/191151963
 
 
-Running Tests Locally, Fast
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PyGEOS is a C/Python library with vectorized geometry functions. The geometry
+operations are done in the open-source geometry library GEOS. PyGEOS wraps
+these operations in NumPy ufuncs providing a performance improvement when
+operating on arrays of geometries.
 
-There is a test settings file ``course_discovery.settings.test_local`` that allows you to persist the test
-database between runs of the unittests (as long as you don't restart your container).  It stores the SQLite
-database file at ``/dev/shm``, which is a filesystem backed by RAM.  Using this test file in conjunction with
-pytest's ``--reuse-db`` option can significantly cut down on local testing iteration time.  You can use this
-as follows: ``pytest course_discovery/apps/course_metadata/tests/test_utils.py --ds=course_discovery.settings.test_local --reuse-db``
+Note: PyGEOS is a very young package. While the available functionality should
+be stable and working correctly, it's still possible that APIs change in upcoming
+releases. But we would love for you to try it out, give feedback or contribute!
 
-The first run will incur the normal cost of database creation (typically around 30 seconds), but the second run
-will completely skip that startup cost, since the ``--reuse-db`` option causes pytest to use the already persisted
-database in the ``/dev/shm`` directory.  If you need to change models or create databases between runs, you can tell
-pytest to recreate the database with ``-recreate-db``.
+What is a ufunc?
+----------------
 
-Debugging Tests Locally
-~~~~~~~~~~~~~~~~~~~~~~~
+A universal function (or ufunc for short) is a function that operates on
+n-dimensional arrays in an element-by-element fashion, supporting array
+broadcasting. The for-loops that are involved are fully implemented in C
+diminishing the overhead of the Python interpreter.
 
-Pytest in this repository uses the `pytest-xdist <https://github.com/pytest-dev/pytest-xdist>`_ package for distributed testing. This is configured in the `pytest.ini file`_. However, `pytest-xdist does not support pdb.set_trace()`_.
-In order to use `pdb <https://docs.python.org/3/library/pdb.html>`_ when debugging Python unit tests, you can use the `pytest-no-xdist.ini file`_ instead. Use the ``-c`` option to the pytest command to specify which ini file to use.
+Multithreading
+--------------
 
-For example,
+PyGEOS functions support multithreading. More specifically, the Global
+Interpreter Lock (GIL) is released during function execution. Normally in Python, the
+GIL prevents multiple threads from computing at the same time. PyGEOS functions
+internally releases this constraint so that the heavy lifting done by GEOS can be
+done in parallel, from a single Python process.
 
-.. code-block:: shell
-
-   pytest -c pytest-no-xdist.ini --ds=course_discovery.settings.test --durations=25 course_discovery/apps/publisher/tests/test_views.py::CourseRunDetailTests::test_detail_page_with_comments
-
-.. _pytest.ini file: https://github.com/edx/course-discovery/blob/master/pytest.ini
-.. _pytest-xdist does not support pdb.set_trace(): https://github.com/pytest-dev/pytest/issues/390#issuecomment-112203885
-.. _pytest-no-xdist.ini file: https://github.com/edx/course-discovery/blob/master/pytest=no-xdist.ini
-
-Reporting Security Issues
--------------------------
-
-Please do not report security issues in public. Please email security@edx.org.
-
-Get Help
+Examples
 --------
 
-Ask questions and discuss this project on `Slack <https://openedx.slack.com/messages/general/>`_ or in the `edx-code Google Group <https://groups.google.com/forum/#!forum/edx-code>`_.
+Compare an grid of points with a polygon:
+
+.. code:: python
+
+  >>> geoms = points(*np.indices((4, 4)))
+  >>> polygon = box(0, 0, 2, 2)
+
+  >>> contains(polygon, geoms)
+
+    array([[False, False, False, False],
+           [False,  True, False, False],
+           [False, False, False, False],
+           [False, False, False, False]])
+
+
+Compute the area of all possible intersections of two lists of polygons:
+
+.. code:: python
+
+  >>> from pygeos import box, area, intersection
+
+  >>> polygons_x = box(range(5), 0, range(10, 15), 10)
+  >>> polygons_y = box(0, range(5), 10, range(10, 15))
+
+  >>> area(intersection(polygons_x[:, np.newaxis], polygons_y[np.newaxis, :]))
+
+  array([[100.,  90.,  80.,  70.,  60.],
+       [ 90.,  81.,  72.,  63.,  54.],
+       [ 80.,  72.,  64.,  56.,  48.],
+       [ 70.,  63.,  56.,  49.,  42.],
+       [ 60.,  54.,  48.,  42.,  36.]])
+
+See the documentation for more: https://pygeos.readthedocs.io
+
+
+Relationship to Shapely
+-----------------------
+
+Both Shapely and PyGEOS are exposing the functionality of the GEOS C++ library
+to Python. While Shapely only deals with single geometries, PyGEOS provides
+vectorized functions to work with arrays of geometries, giving better
+performance and convenience for such usecases.
+
+There is active discussion and work toward integrating PyGEOS into Shapely:
+
+* latest proposal: https://github.com/shapely/shapely-rfc/pull/1
+* prior discussion: https://github.com/Toblerity/Shapely/issues/782
+
+For now PyGEOS is developed as a separate project.
+
+References
+----------
+
+- GEOS: http://trac.osgeo.org/geos
+- Shapely: https://shapely.readthedocs.io/en/latest/
+- Numpy ufuncs: https://docs.scipy.org/doc/numpy/reference/ufuncs.html
+- Joris van den Bossche's blogpost: https://jorisvandenbossche.github.io/blog/2017/09/19/geopandas-cython/
+- Matthew Rocklin's blogpost: http://matthewrocklin.com/blog/work/2017/09/21/accelerating-geopandas-1
+
+
+Copyright & License
+-------------------
+
+PyGEOS is licensed under BSD 3-Clause license. Copyright (c) 2019, Casper van der Wel.
+GEOS is available under the terms of ​GNU Lesser General Public License (LGPL) 2.1 at https://trac.osgeo.org/geos.
