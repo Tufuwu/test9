@@ -1,28 +1,42 @@
-import setuptools
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+import io
+from setuptools import setup, find_packages
+from swid_generator import meta
 
-setuptools.setup(
-    author='Alex Hill',
-    author_email='alex@hill.net.au',
-    name='django-relativity',
-    version='0.2.6',
-    description='A flexible relationship field for the Django ORM.',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    url='https://github.com/alexhill/django-relativity',
-    packages=setuptools.find_packages(exclude=['tests']),
-    install_requires=['django>=1.11'],
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Environment :: Web Environment',
-        'Framework :: Django',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
-        'Natural Language :: English',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-    ],
-)
+readme = io.open('README.rst', mode='r', encoding='utf8').read()
+
+setup(name='swid_generator',
+      version=meta.version,
+      description=meta.description,
+      author=meta.authors,
+      url='https://github.com/strongswan/swidGenerator',
+      packages=find_packages(exclude=['*.tests', '*.tests.*', 'tests.*', 'tests']),
+      install_requires=['distro'],
+      zip_safe=True,
+      include_package_data=True,
+      license=meta.license,
+      keywords='swid dpkg rpm pacman tnc',
+      long_description=readme,
+      entry_points={
+          'console_scripts': [
+              '%s = swid_generator.main:main' % meta.title,
+          ]
+      },
+      classifiers=[
+          'Development Status :: 5 - Production/Stable',
+          'Environment :: Console',
+          'Intended Audience :: Information Technology',
+          'Intended Audience :: System Administrators',
+          'License :: OSI Approved :: MIT License',
+          'Operating System :: POSIX :: Linux',
+          'Programming Language :: Python :: 2',
+          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9'
+      ],
+      )
