@@ -1,75 +1,58 @@
-import os.path
-import re
+# -*- coding: utf-8 -*-
+#
+# This software may be modified and distributed under the terms
+# of the MIT license.  See the LICENSE file for details.
+
+from os import path
+from setuptools import setup
+from shutil import rmtree
 import sys
-from setuptools import setup, Extension
-from distutils.command.install import INSTALL_SCHEMES
 
-for scheme in INSTALL_SCHEMES.values():
-    scheme['data'] = scheme['purelib']
+NAME = 'python-logstash-async'
+VERSION = '2.3.0'
 
-
-setsc = Extension("guppy.sets.setsc", [
-                      "src/sets/sets.c",
-                      "src/sets/bitset.c",
-                      "src/sets/nodeset.c"
-                  ])
-
-heapyc = Extension("guppy.heapy.heapyc", [
-                       'src/heapy/heapyc.c',
-                       'src/heapy/stdtypes.c'
-                   ])
+here = path.abspath(path.dirname(__file__))
+with open(path.join(here, 'README.rst'), 'rb') as f:
+    LONG_DESCRIPTION = f.read().decode('utf-8')
 
 
-def doit():
-    if sys.version_info.major < 3:
-        print('''\
-setup.py: Error: This guppy package only supports Python 3.
-You can find the original Python 2 version, Guppy-PE, here:
-http://guppy-pe.sourceforge.net/''', file=sys.stderr)
-        sys.exit(1)
-    if sys.implementation.name != 'cpython':
-        print('''\
-setup.py: Warning: This guppy package only supports CPython.
-Compilation failure expected, but continuting anyways...''', file=sys.stderr)
-
-    with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
-        long_description = f.read()
-
-    with open('guppy/_version.py', 'r') as versionfile:
-        version = re.search(r'^__version__ = [\'"]([^\'"]*)[\'"]$',
-                            versionfile.read(), re.M)
-        version = version.group(1)
-
-    setup(name="guppy3",
-          version=version,
-          description="Guppy 3 -- Guppy-PE ported to Python 3",
-          long_description=long_description,
-          long_description_content_type='text/markdown',
-          author="YiFei Zhu",
-          author_email="zhuyifei1999@gmail.com",
-          url="https://github.com/zhuyifei1999/guppy3/",
-          license='MIT',
-          packages=[
-              "guppy",
-              "guppy.etc",
-              "guppy.gsl",
-              "guppy.heapy",
-              "guppy.heapy.test",
-              "guppy.sets",
-          ],
-          ext_modules=[setsc, heapyc],
-          python_requires='>=3.6',
-          classifiers=[
-              "Programming Language :: Python :: 3",
-              "Programming Language :: Python :: Implementation :: CPython",
-              "Programming Language :: C",
-              "License :: OSI Approved :: MIT License",
-              "Operating System :: OS Independent",
-              "Development Status :: 4 - Beta",
-              "Topic :: Software Development :: Debuggers",
-              "Environment :: Console",
-              "Intended Audience :: Developers",
-          ])
+if 'bdist_wheel' in sys.argv:
+    # Remove previous build dir when creating a wheel build, since if files have been removed
+    # from the project, they'll still be cached in the build dir and end up as part of the
+    # build, which is really neat!
+    for directory in ('build', 'dist', 'python_logstash_async.egg-info'):
+        rmtree(directory, ignore_errors=True)
 
 
-doit()
+setup(
+    name=NAME,
+    packages=['logstash_async'],
+    version=VERSION,
+    description='Asynchronous Python logging handler for Logstash.',
+    long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/x-rst',
+    license='MIT',
+    author='Enrico Tröger',
+    author_email='enrico.troeger@uvena.de',
+    url='https://github.com/eht16/python-logstash-async',
+    project_urls={
+        'Travis CI': 'https://travis-ci.org/eht16/python-logstash-async/',
+        'Source code': 'https://github.com/eht16/python-logstash-async/',
+        'Documentation': 'https://python-logstash-async.readthedocs.io/en/stable/',
+    },
+    keywords='logging logstash asynchronous',
+    install_requires=['limits', 'pylogbeat', 'requests'],
+    python_requires='>3.5',
+    include_package_data=True,
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Topic :: Internet :: WWW/HTTP',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: System :: Logging',
+    ]
+)
