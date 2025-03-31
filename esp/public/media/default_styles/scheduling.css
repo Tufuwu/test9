@@ -1,0 +1,142 @@
+table,th,td
+{
+    border:1px solid black;
+    border-collapse: collapse;
+}
+
+.matrix-cell{
+    height: 40px;
+    min-width: 80px;
+    max-width: 80px;
+    width: 80px;
+    text-align: center;
+    background: #222222;
+}
+
+.disabled-cell{
+    background: #222222;
+}
+
+.available-cell{
+    opacity: 0.35;
+}
+
+.occupied-cell{
+}
+
+.locked-cell{
+    outline: 4px #FF0000 solid !important;
+}
+
+.ghost-section {
+    opacity: .7 !important;
+}
+
+.teacher-available-cell {
+    background-color: #32cd32;
+    opacity: .9;
+}
+
+.teacher-teaching-cell {
+    background-color: yellow;
+    opacity: .9;
+}
+
+.teacher-available-not-first-cell {
+    background: repeating-linear-gradient(
+                45deg,
+                #32cd32,
+                #32cd32 15px,
+                #555555 15px,
+                #555555 20px
+    );
+    opacity: .9;
+}
+
+td .selected-section {
+    outline: 1px solid yellow;
+}
+
+td.matrix-cell > a {
+    text-decoration: none;
+    color: inherit !important;
+}
+
+td.matrix-cell > a:hover {
+    text-decoration: underline;
+}
+
+.component-div {
+    overflow-y: scroll;
+}
+
+input.numeric {
+    width: 40px;
+}
+
+#class-search {
+    margin-bottom: 20px;
+}
+
+#side-panel-wrapper {
+    height: 100%;
+}
+
+#info-panel {
+    height: 35%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: calc(11px - .2em);
+}
+
+#message-div {
+    height: 100%;
+}
+
+#section-info-div {
+    height: 100%;
+    font-size: 1em;
+}
+
+#separator {
+    cursor: row-resize;
+    background-color: #e9e9e9;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='10'><path d='M0 2 h30 M0 5 h30 M0 8 h30' fill='none' stroke='black'/></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 10px;
+    width: 100%;
+
+/* prevent browser's built-in drag from interfering */
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#side-panel {
+    height: 61%;
+    bottom: 0;
+}
+
+th {
+    color: black;
+}
+button.sidetoolbar {
+    font-size: .7em !important;
+}
+
+#side-panel-header {
+    text-align: center;
+}
+
+.no-border {
+    border: 0px;
+}
+
+.room-description {
+	font-size: .7em;
+}
+
+.ft_c {
+    height: unset !important; /* allows us to hide rows properly */
+}

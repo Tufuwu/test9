@@ -1,36 +1,52 @@
-name: Tests
+name: "Lint and Unit Tests"
 
 on:
-  pull_request:
   push:
-    branches: main
+    branches: [main, ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [main]
 
 jobs:
-  test:
-    name: test w/ Python ${{ matrix.python-version }}
-
+  build:
+    name: ${{ matrix.travis_job }}
     runs-on: ubuntu-latest
-
+    services:
+      postgres:
+        image: postgres:10.8
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: test_django
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     strategy:
       matrix:
         python-version: ["3.9", "3.10"]
+        travis_job: ["lint", "test"]
+    env:
+      DJANGO_SETTINGS_MODULE: esp.settings
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-      - uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - run: python3 -m pip install -U -r dev-requirements.txt
-      - run: python3 -m coverage run --branch -m pytest tests/
-      - uses: codecov/codecov-action@v1
-        if: always()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
-
+    - uses: actions/checkout@v2
+    - uses: niden/actions-memcached@v7
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Prepare for Installing Dependencies
+      run: deploy/travis/before_install
+    - name: Install Dependencies for ${{ matrix.travis_job }}
+      env:
+        TRAVIS_JOB: ${{ matrix.travis_job }}
+      run: deploy/travis/install
+    - name: Prepare for ${{ matrix.travis_job }}
+      env:
+        TRAVIS_JOB: ${{ matrix.travis_job }}
+      run: deploy/travis/before_script
+    - name: Run ${{ matrix.travis_job }}
+      env:
+        TRAVIS_JOB: ${{ matrix.travis_job }}
+      run: deploy/travis/script

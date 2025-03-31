@@ -1,0 +1,108 @@
+{% extends "main.html" %}
+
+{% block title %}{{program.niceName}} Registration{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="/media/styles/forms.css" />
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+{% endblock %}
+
+{% block xtrajs %}
+<script type="text/javascript">
+$j(document).ready(function () {
+    {% for f in forms %}{% if f.type == "multiple" %}
+    $j("#id_{{ f.form.prefix }}-count").spinner({
+        min: 0,
+        max: {{ f.max }},
+        change: function (event, ui) { $j("#id_{{ f.form.prefix }}-count").attr("value", $j("#id_{{ f.form.prefix }}-count").spinner("value")) }
+    });
+    {% endif %}{% endfor %}
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<style type="text/css">
+.nocheckmark { border: 1px solid black; }
+td>ul { list-style-type: none; padding: 0px }
+</style>
+<br /><br />
+<h1>Additional Purchases</h1>
+
+{% load render_qsd %}
+
+{% inline_program_qsd_block program "learn:extracosts" %}
+<h2>This program contains additional items that you can pay for online.</h2>
+<br />
+
+<p>To purchase any of the following items, please check its corresponding checkbox and click "Save".  They will be added to your bill if you pay by credit card.  Otherwise, you will be charged when you arrive for the program.</p>
+
+<p>Food and other additional items can only be changed up until <b>1 week before the program.</b></p>
+{% end_inline_program_qsd_block %}
+
+<br />
+
+{% if error_custom %}<div class="formerror">You selected a choice with a custom amount but did not specify an amount; please do so below. </div>
+{% elif errors %}<div class="formerror">There was a problem recording your choices.  Please review the form and make sure that it is filled out completely.</div>{% endif %}
+
+<br />
+
+<div id="program_form">
+<form action="" method="post">
+<center>
+<table width="400" cellpadding="2" cellspacing="0">
+<tr><th>Additional Items for {{ program.niceName }}</th></tr>
+{% for f in forms %}
+<tr>
+    <td><b>{{ f.LineItem.text }}</b> {% if f.LineItem.required %}(required; please make a selection below){% else %}<!-- (optional) -->{% endif %}</td>
+</tr>
+<tr style="border-bottom: 1px dashed grey;">
+    <td>
+        {% if f.type == "single" %}
+            {{ f.form.cost }} ${{ f.LineItem.amount_dec|floatformat:2 }}
+        {% endif %}
+        {% if f.type == "multiple" %}
+            {{ f.form.count }} ${{ f.LineItem.amount_dec|floatformat:2 }} each
+        {% endif %}
+        {% if f.type == "select" %}
+            <div class="form-inline">{{ f.form.option }}</div>
+        {% endif %}
+        {% if f.form.errors %}<font color="red">{{ f.form.errors }}</font>{% endif %}
+        
+        {# If num_options, radio buttons will be used for the field. In order to  #}
+        {# be able to remove a selected item, we need a button. The Javascript    #}
+        {# code for the button is at the bottom.                                  #}
+
+        {% if f.LineItem.num_options and not f.LineItem.required %}
+            <button type="button"
+                    class="remove-item"
+                    name="{{ f.form.prefix }}-option{% if f.type == "select" and f.LineItem.has_custom_options %}_0{% endif %}"
+                    onclick="remove_item(this);">
+                Remove this item
+            </button>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+<tr>
+    <td align="center">
+        <input type="submit" class="btn btn-primary" value="Save"/>
+    </td>
+</tr>
+</table>
+</center>
+</form>
+</div>
+
+<script type="text/javascript">
+    /*
+     * A click handler that unchecks all inputs with the same name as the
+     * button.
+     **/
+    function remove_item(button) {
+        $j("input[name="+button.name+"]").prop("checked", false);
+    }
+</script>
+
+{% endblock %}

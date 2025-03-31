@@ -1,0 +1,53 @@
+{% extends "main.html" %}
+
+{% block title %}{{program.niceName}} Management{% endblock %}
+
+{% block content %}
+<style type="text/css">
+.nocheckmark { border: 1px solid black; }
+</style>
+<br />
+<br />
+
+<br /><br />
+<h1>Onsite Portal for {{program.niceName}} </h1>
+
+<p style="text-align: center">
+Welcome to the OnSite portal for {{program.niceName}}.<br />
+Please select from the option below to continue.
+</p>
+
+<br />
+<strong>Your Options:</strong>
+<ul>
+
+{% for module in modules %}
+{% if module.isStep %}
+  {% if not module.useTemplate %}
+    <li>{% autoescape off %}{{ module.makeLink }}{% endautoescape %}</li>
+  {% else %}
+    <li><em>{{ module.module.link_title }} (below)</em></li>
+  {% endif %}
+{% endif %}
+{% endfor %}
+
+</ul>
+
+
+<br />
+<br />
+<br />
+{% for module in modules %}
+{% if module.useTemplate %}
+<br />
+ {% include module.getTemplate %}
+
+{% endif %}
+{% endfor %}
+
+
+{% if core_admin %}
+{% include "program/modules/admincore/returnlink.html" %}
+{% endif %}
+
+{% endblock %}
