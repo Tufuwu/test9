@@ -1,29 +1,30 @@
-import setuptools
+import os
+from distutils.core import setup
 
-with open('README.md', 'r') as fh:
-    long_description = fh.read()
 
-requires = [
-    'numpy==1.24.2',
-    'terminaltables==3.1.0',
-    'ortools==9.7.2996',
-]
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-setuptools.setup(
-    name='draftfast',
-    version='3.9.0',
-    author='Ben Brostoff',
-    author_email='ben.brostoff@gmail.com',
-    description='A tool to automate and optimize DraftKings and FanDuel '
-                'lineup construction.',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    url='https://github.com/BenBrostoff/draftfast',
-    packages=setuptools.find_packages(),
+setup(
+    name='xapian-haystack',
+    version='3.0.0',
+    description='A Xapian backend for Haystack',
+    long_description=read('README.rst'),
     classifiers=[
-        'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'Topic :: Internet :: WWW/HTTP :: Indexing/Search',
+        'Framework :: Django',
     ],
-    install_requires=requires,
+    author='Jorge C. Leitão',
+    author_email='jorgecarleitao@gmail.com',
+    url='http://github.com/notanumber/xapian-haystack',
+    download_url='http://github.com/notanumber/xapian-haystack/tarball/2.1.0',
+    license='GPL2',
+    py_modules=['xapian_backend'],
+    install_requires=[
+        'django>=2.2',
+        'django-haystack>=2.8.0',
+    ]
 )

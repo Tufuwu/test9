@@ -1,4 +1,2 @@
-google-apputils==0.4.2
-numpy==1.24.2
-terminaltables==3.1.0
-ortools===9.7.2996
+Django>=2.2
+Django-Haystack>=3.0
