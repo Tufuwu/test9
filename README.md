@@ -1,96 +1,127 @@
-# pytest-check-links
+![pynautobot](docs/nautobot_logo.svg "Nautobot logo")
 
-pytest plugin that checks URLs for HTML-containing files.
+# Pynautobot [![build main](https://travis-ci.com/nautobot/pynautobot.svg?branch=main)](https://travis-ci.com/nautobot/pynautobot)
+Python API client library for [Nautobot](https://github.com/nautobot/nautobot).
 
-[![codecov](https://codecov.io/gh/jupyterlab/pytest-check-links/branch/master/graph/badge.svg)](https://codecov.io/gh/jupyterlab/pytest-check-links)
-[![Tests](https://github.com/jupyterlab/pytest-check-links/workflows/Tests/badge.svg)](https://github.com/jupyterlab/pytest-check-links/actions?query=workflow%3ATests+branch%3Amaster)
-[![PyPI version](https://badge.fury.io/py/pytest-check-links.svg)](https://badge.fury.io/py/pytest-check-links)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pytest-check-links)
+> Pynautobot was initially developed as a fork of [pynetbox](https://github.com/digitalocean/pynetbox/).
+  Pynetbox was originally developed by Zach Moody at DigitalOcean and the NetBox Community.
 
 
-## Supported files
+The complete documentation for pynautobot can be found at [Read the Docs](https://pynautobot.readthedocs.io/en/stable/).
 
-- `.html`
-- `.rst`
-- `.md` (TODO: select renderer)
-- `.ipynb` (requires `nbconvert`)
+Questions? Comments? Join us in the **#nautobot** Slack channel on [Network to Code](https://networktocode.slack.com)!
 
-## Install
+## Installation
 
-    pip install pytest-check-links
+You can install via [pip](#using-pip) or [poetry](#using-poetry)
 
-## Use
+### Using pip
 
-    pytest --check-links mynotebook.ipynb
+```shell
+$ pip install pynautobot
+...
+```
 
-## Configure
+### Using poetry
 
-#### --links-ext
-
-> default: `md,rst,html,ipynb`
-
-A comma-separated list of extensions to check
-
-#### --check-anchors
-
-Also check whether links with `#anchors` HTML files (either local, or with
-served with `html` in the `Content-Type`) actually exist, and point to _exactly one_
-named anchor.
-
-### Cache
-
-Caching requires the installation of `requests-cache`.
-
-    pip install requests-cache
-
-If enabled, each occurance of a link will be checked, no matter how many times
-it appears in a collection of files to check.
-
-#### --check-links-cache
-
-Cache requests when checking links. Caching is disabled by default, and this option
-must be provided, even if other cache configuration options are provided.
-
-#### --check-links-cache-name
-
-> default: `.pytest-check-links-cache`
-
-Name of link cache, either the base name of a file or similar, depending on backend.
-
-#### --check-links-cache-backend
-
-> default: `sqlite3`
-
-Cache persistence backend. The other known backends are:
-- `memory`
-- `redis`
-- `mongodb`
-
-See the [requests-cache documentation](https://requests-cache.readthedocs.io)
-for more information.
-
-#### --check-links-cache-expire-after
-
-> default: `None` (unlimited)
-
-Time to cache link responses (seconds).
-
-#### --check-links-cache-backend-opt
-
-Backend-specific options for link cache, provided as `key:value`. These are passed
-directly to the `requests_cache.CachedSession` constructor, as they vary depending
-on the backend.
-
-Values will be parsed as JSON first, so to overload the default of caching all
-HTTP response codes (which requires a list of `int`s):
-
-```bash
---check-links-backend-opt allowable_codes:[200]
+```shell
+$ git clone https://github.com/nautobot/pynautobot.git
+...
+$ pip install poetry
+...
+$ poetry shell
+Virtual environment already activated: /home/user/pynautobot/.venv
+$ poetry install
+...
 ```
 
 
-## TODO
+## Quick Start
 
-- pick a markdown renderer (probably commonmark) or make the markdown renderer pluggable
-- options for validating links (allow absolute links, only remote or local, etc.)
-- find URLs in Python docstrings
+A short introduction is provided here; the full documention for pynautobot is at [Read the Docs](http://pynautobot.readthedocs.io/).
+
+To begin, import pynautobot and instantiate an `Api` object, passing the `url` and `token`.
+
+```python
+import pynautobot
+nautobot = pynautobot.api(
+    url="http://localhost:8000",
+    token="d6f4e314a5b5fefd164995169f28ae32d987704f",
+)
+```
+
+The Api object provides access to the Apps in Nautobot.
+The Apps provide access to the Models and the field data stored in Nautobot.
+Pynautobot uses the `Endpoint` class to represent Models.
+For example, here is how to access **Devices** stored in Nautobot:
+
+```python
+devices = nautobot.dcim.devices
+devices
+<pynautobot.core.endpoint.Endpoint object at 0x7fe801e62fa0>
+```
+
+## Queries
+
+Pynautobot provides several ways to retrieve objects from Nautobot.
+Only the `get()` method is show here.
+To continue from the example above, the `Endpoint` object returned will be used to `get`
+the device named _hq-access-01_.
+
+```python
+switch = devices.get(nam="hq-access-01")
+```
+
+The object returned from the `get()` method is an implementation of the `Record` class.
+This object provides access to the field data from Nautobot.
+
+```python
+switch.id
+'6929b68d-8f87-4470-8377-e7fdc933a2bb'
+switch.name
+'hq-access-01'
+switch.site
+hq
+```
+
+### Threading
+
+Pynautobot supports multithreaded calls for `.filter()` and `.all()` queries. It is **highly recommended** you have `MAX_PAGE_SIZE` in your Nautobot install set to anything *except* `0` or `None`. The default value of `1000` is usually a good value to use. To enable threading, add `threading=True` parameter when instantiating the `Api` object:
+
+```python
+nautobot = pynautobot.api(
+    url="http://localhost:8000",
+    token="d6f4e314a5b5fefd164995169f28ae32d987704f",
+    threading=True,
+)
+```
+
+### Versioning
+
+Used for Nautobot Rest API versioning. Versioning can be controlled globally by setting `api_version` on initialization of the `API` class and/or for a specific request e.g (`list()`, `get()`, `create()` etc.) by setting an optional `api_version` parameter.
+
+__Global versioning__
+```python
+import pynautobot
+nautobot = pynautobot.api(
+    url="http://localhost:8000",
+    token="d6f4e314a5b5fefd164995169f28ae32d987704f",
+    api_version="1.3"
+)
+```
+
+__Request specific versioning__
+```python
+import pynautobot
+nautobot = pynautobot.api(
+  url="http://localhost:8000", token="d6f4e314a5b5fefd164995169f28ae32d987704f",
+)
+tags = nautobot.extras.tags
+tags.create(name="Tag", slug="tag", api_version="1.2",)
+tags.list(api_version="1.3",)
+```
+
+## Related projects
+
+Please see [our wiki](https://github.com/nautobot/nautobot/wiki/Related-Projects)
+for a list of relevant community projects.

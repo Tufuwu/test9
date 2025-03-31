@@ -1,0 +1,27 @@
+{
+    "id": "5b39ba88-e5ab-4be2-89f5-5a016473b53c",
+    "name": "TEST1",
+    "slug": "test1",
+    "region": null,
+    "tenant": null,
+    "facility": "Test Facility",
+    "asn": 65535,
+    "physical_address": "555 Test Ave.\r\nTest, NY 55555",
+    "shipping_address": "",
+    "contact_name": "",
+    "contact_phone": "",
+    "contact_email": "",
+    "comments": "",
+    "custom_fields": {
+        "test_custom": "Hello",
+        "test_selection": {
+            "value": 2,
+            "label": "second"
+        }
+    },
+    "count_prefixes": 2,
+    "count_vlans": 1,
+    "count_racks": 2,
+    "count_devices": 11,
+    "count_circuits": 0
+}

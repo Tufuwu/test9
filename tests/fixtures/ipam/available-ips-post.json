@@ -1,0 +1,11 @@
+{
+    "id": "5b39ba88-e5ab-4be2-89f5-5a016473b53c",
+    "address": "10.1.1.1/32",
+    "vrf": null,
+    "tenant": null,
+    "status": 1,
+    "role": null,
+    "interface": null,
+    "description": "",
+    "nat_inside": null
+}

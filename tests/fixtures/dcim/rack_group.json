@@ -1,0 +1,11 @@
+{
+    "id": "5b39ba88-e5ab-4be2-89f5-5a016473b53c",
+    "name": "TEST",
+    "slug": "test",
+    "site": {
+        "id": 1,
+        "url": "http://localhost:8000/api/dcim/sites/1/",
+        "name": "TEST1",
+        "slug": "test1"
+    }
+}
