@@ -1,5 +1,7 @@
-*.pyc
-*.swp
-doc/tags
-/.ropeproject/
-/.mypy_cache/
+__pycache__
+xmltest.py
+dist
+aioxmpp.egg-info
+.local
+.vagrant
+.coverage
