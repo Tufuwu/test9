@@ -1,83 +1,23 @@
-name: CI
+name: Python package
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.9", "3.10"]
-        django-version: ['2.0', '2.1', '2.2', '3.0', '3.1']
-        exclude:
-          - python-version: '3.9'
-            django-version: '3.0'
-          - python-version: '3.9'
-            django-version: '3.1'
-          - python-version: '3.9'
-            django-version: '2.0'
-          - python-version: '3.9'
-            django-version: '2.1'
-          - python-version: '3.9'
-            django-version: '2.0'
-          - python-version: '3.9'
-            django-version: '2.1'
 
-    services:
-      redis:
-        image: redis:6.0
-        ports:
-          - 6379:6379
-      postgres:
-        image: postgres
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: cachalot
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: cachalot
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      mysql:
-        image: mysql
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_DATABASE: cachalot
-        ports:
-          - 3306:3306
-      memcached:
-        image: memcached
-        ports:
-          - 11211:11211
+    runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        sudo apt-get install -y libmemcached-dev zlib1g-dev
-        python -m pip install --upgrade pip
-        pip install tox tox-gh-actions coveralls
-    - name: Tox Test
-      run: tox
-      env:
-        TOX_TESTENV_PASSENV: POSTGRES_PASSWORD
-        POSTGRES_PASSWORD: password
-        PYTHON_VER: ${{ matrix.python-version }}
-        DJANGO: ${{ matrix.django-version }}
-    - name: Coverage (Coveralls)
-      if: ${{ success() }}
-      run: coveralls --service=github
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          # Optional - x64 or x86 architecture, defaults to x64
+          architecture: 'x64'
+      - name: Install requirements
+        run: pip install -r requirements.txt; pip install -r test-requirements.txt
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Run Tests
+        run: nose2
