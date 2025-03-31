@@ -1,122 +1,98 @@
-# [MTGJSON v5](https://mtgjson.com/)
-<p align="center"><a href="https://mtgjson.com/"><img src="https://www.mtgjson.com/images/assets/logo-mtgjson-dark-blue.svg" height="100px" alt="MTGJSON Logo"/></a></p>
-<p align="center">
-    <a href="https://mtgjson.com/changelog/"><img src="https://img.shields.io/badge/dynamic/json.svg?label=Version&url=https%3A%2F%2Fmtgjson.com%2Fapi%2Fv5%2FMeta.json&query=%24.data.version&colorB=blue" alt="MTGJSON Version"/></a> 
-    <a href="https://mtgjson.com/changelog/"><img src="https://img.shields.io/badge/dynamic/json.svg?label=Release%20Date&url=https%3A%2F%2Fmtgjson.com%2Fapi%2Fv5%2FMeta.json&query=%24.data.date&colorB=blue" alt="MTGJSON Version Date"/></a>
-    <br/><br/>
-</p>
+# JILL.py
 
+[![py version](https://img.shields.io/pypi/pyversions/jill.svg?logo=python&logoColor=white)](https://pypi.org/project/jill)
+[![version](https://img.shields.io/pypi/v/jill.svg)](https://github.com/johnnychen94/jill.py/releases)
+[![Actions Status](https://github.com/johnnychen94/jill.py/workflows/Unit%20test/badge.svg
+)](https://github.com/johnnychen94/jill.py/actions)
+[![codecov](https://codecov.io/gh/johnnychen94/jill.py/branch/master/graph/badge.svg)](https://codecov.io/gh/johnnychen94/jill.py)
 
-MTGJSON is an open-source repository of [Magic: The Gathering](https://magic.wizards.com/) card data, specifically in [JSON](https://json.org/) and [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) formats. This repository contains the build scripts we use to create our data sets.
+The Python fork of [JILL](https://github.com/abelsiqueira/jill) - Julia Installer 4 Linux (and MacOS) - Light
 
-## How to Contribute
+## Features
 
-Running a project as large as ours isn't easy, and we rely on the community to help keep our project going. The community can support us through two different ways: financial contributions and code contributions.
+* download *latest* Julia release from *nearest* mirror server. Check [sources](jill/config/sources.json) for the list of all registered mirrors.
+* install julia for Linux and MacOS (including nightly build: `latest`)
+* easily set up a new release mirror 🚧
 
-[![Github Sponsors](https://img.shields.io/static/v1.svg?label=GitHub%20Sponsors&message=Support%20MTGJSON&color=34d058&logo=github)](https://github.com/sponsors/ZeldaZach)  
-We accept reoccurring donations via GitHub Sponsors, that grant priority support from MTGJSON maintainers and a special role on our Discord indicating your support.
-**This is the preferred approach for financial contributions, as the MTGJSON team pays _no fees_ for these types of donations!**
+## Installation
 
-[![Patreon](https://img.shields.io/static/v1.svg?label=Patreon&message=Support%20MTGJSON&color=f96854&logo=patreon)](https://patreon.com/mtgjson)  
-We accept reoccurring donations via Patreon, that grant priority support from MTGJSON maintainers and a special role on our Discord indicating your support.  
+`pip install jill --user -U`
 
-[![PayPal](https://img.shields.io/static/v1.svg?label=PayPal&message=Support%20MTGJSON&color=009cde&logo=paypal)](https://paypal.me/zachhalpern)  
-We accept one-time donations via PayPal, for those who want to say thank you to the project.
+Note that `Python >= 3.6` is required.
 
-[![Code Contributions](https://img.shields.io/static/v1.svg?label=GitHub&message=Development&color=aaa&logo=github)](https://github.com/mtgjson)  
-We love it when the community contributes back to the project! If you'd like to help improve our data for the hundreds of projects and stores we support, do reach out via [Discord](https://mtgjson.com/discord)!  
+## Basic usage examples
 
-## Connect With Us  
+* download:
+    - latest stable release for current system: `jill download`
+    - latest `1.y` version: `jill download 1`
+    - latest `1.3.z` version: `jill download 1.3`
+    - from specific upstream: `jill download --upstream Official`
+    - specific release version: `jill download --version 1.3.0`
+    - specific system: `jill download --sys freebsd`
+    - specific architecture: `jill download --arch i686`
+    - download Julia to specific dir: `jill download --outdir another/dir`
+* install Julia for current system:
+    - system-wide: `sudo jill install` (make symlink in `/usr/bin`)
+    - only for current user: `jill install` (make symlink in `~/.local/bin`)
+    - don't need interactive promopt: `jill install --confirm`
+* check if there're new Julia versions:
+    - `jill update`
+    - add `--update` flag to `download` or `install` commands
+* find out all registered upstreams: `jill upstream`
+* check the not-so-elaborative documentation: `jill [COMMAND] -h` (e.g., `jill download -h`)
 
-[![Discord](https://img.shields.io/discord/224178957103136779?label=Discord&logo=discord&logoColor=white&color=7289da)](https://mtgjson.com/discord)  
-The team stays in contact via [Discord](https://mtgjson.com/discord). The server is open to the public and is a great place to collaborate with other like-minded people. Stop by today and say hi!  
+## Mirror 🚧
 
-## About Us
+`jill mirror [outdir]` downloads all Julia releases into `outdir`(default `./julia_pkg`)
 
-### The Team  
-The MTGJSON team has been led by Zach Halpern since 2018, with support from an awesome group of people. The full team lineup can be found [MTGJSON's homepage](https://mtgjson.com/).  
+You can create a `mirror.json` in current folder to override the default mirror
+behaviors. The [mirror configuration example](mirror.example.json) shows all possible
+configurable items, where only `version` is required.
 
-### Our Product
-MTGJSON at its core is a database that can be downloaded for offline access to Magic: the Gathering card data. We pride ourselves on our [documentation](https://mtgjson.com/data-models/), and aim for full transparency with the community.  
+## Register new mirror
 
-### Our Partners  
-Over time, MTGJSON has gone through a number of transitions to bring the best product for our consumers. We'd like to thank the following groups, in alphabetical order, for helping to support our mission by enriching our data:  
-- [CardHoarder](https://www.cardhoarder.com/?affiliate_id=mtgjson&utm_source=mtgjson&utm_campaign=affiliate&utm_medium=card)
-- [CardKingdom](https://www.cardkingdom.com/?partner=mtgjson&utm_source=mtgjson&utm_medium=affiliate&utm_campaign=mtgjson)
-- [CardMarket](https://www.cardmarket.com/en/Magic?utm_campaign=card_prices&utm_medium=text&utm_source=mtgjson)
-- [Gatherer](https://gatherer.wizards.com)
-- [MTG.wtf](https://mtg.wtf/)
-- [MTGBan](https://www.mtgban.com/)
-- [Scryfall](https://scryfall.com)
-- [TCGPlayer](https://www.tcgplayer.com/?partner=mtgjson&utm_campaign=affiliate&utm_medium=mtgjson&utm_source=mtgjson)
-- [What's in Standard](https://whatsinstandard.com/)
+If it's an public mirror and you want to share it worldwide. You can add an entry to the
+[public registry](jill/config/sources.json), make a PR, then I will tag a new release for that.
 
-## How to Use  
-### For 99% of our Users  
-MTGJSON supplies precompiled databases at https://mtgjson.com/api/v5/. **This is the recommended way to use our service**.  
+If it's an internal mirror and you don't plan to make it public, you can create a config
+file at `~/.config/jill/sources.json` locally. The contents will be appended to
+the public registry and overwrite already existing items if there are.
 
-As stated before, we pride ourselves on our documentation which can be found at https://mtgjson.com/. If you find anything to be unclear or ambiguous, please [open a ticket](https://github.com/mtgjson/mtgjson-website/issues) on our documentation repository so we can address your concern immediately.
+In the registry config file, a new mirror is a dictionary in the `upstream` field:
 
-We fully rebuild our API data once a week (on Monday afternoons) and our price dataset once a day. You can poll the [Meta.json](https://mtgjson.com/api/v5/Meta.json) file to see when our data was last updated.  
+* `name`: a distinguishable mirror name
+* `urls`: URL template to retrive Julia release
+* `latest_urls`: URL template to retrive the nightly build of Julia release
 
-### For those who want to build MTGJSON locally  
-Most of our users shouldn't have a need to build MTGJSON locally. However, there are always exceptions and we aren't ones to judge.  
-#### Build Box
-While MTGJSON will work on Windows, Mac, and Linux, we prefer working within the Linux environment for lower overheads and less manual dependency management.  
+## Placeholders
 
-- For **Linux** based build boxes (we recommend Ubuntu 20.04), your build box should have at least 2 cores and 4 GiB of RAM available.  
-- For **Mac** based build boxes, your build box should have at least 2 cores and 4 GiB of RAM available.
-- For **Windows** based build boxes, your build box should have at least 4 cores and 8 GiB of RAM available.
+Placeholders are used to register new mirrors. For example, the stable release url of
+the "Official" release server owned by [JuliaComputing](https://juliacomputing.com) is
+`"https://julialang2.s3.amazonaws.com/bin/$sys/$arch/$minor_version/$filename"`
 
-#### Install Python3
-MTGJSON is built on and tested against a wide range of Python3 verisons. Currently, we maintain support for the following versions:
-- Python 3.6
-- Python 3.7
-- Python 3.8
+There're several predefined placeholders for various systems and architectures:
 
-#### Install MTGJSON
-##### Local Installation
-`python3 -m pip install /path/to/mtgjson5/`
-##### PyPi Repository
-We intend to put MTGJSON5 on the pip package archive in the near future, once the first set of revisions takes place.
+* `system`: `windows`, `macos`, `linux`, `freebsd`
+* `sys`: `winnt`, `mac`, `linux`, `freebsd`
+* `os`: `win`, `mac`, `linux`, `freebsd`
+* `architecture`: `x86_64`, `i686`, `ARMv7`, `ARMv8`
+* `arch`: `x86`, `x64`, `armv7l`, `aarch64`
+* `osarch`: `win32`, `win64`, `mac64`, `linux-armv7l`, `linux-aarch64`
+* `osbit`: `win32`, `win64`, `linux32`, `linux64`, `linuxaarch64`
+* `bit`: `32`, `64`
+* `extension`: `exe`, `tar.gz`, `dmg` (no leading `.`)
 
-#### Using MTGJSON
-A fully up-to-date help menu can be achieved via `python3 -m mtgjson5 -h`, but for your convenience here is a recent rundown:  
-```
-usage: mtgjson5 [-h] [-s [SET [SET ...]] | -a] [-c] [-x] [-z] [-p]
-                [-SS [SET [SET ...]]] [-PB] [-R] [-NA]
+There're also placeholders for versions:
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -s [SET [SET ...]], --sets [SET [SET ...]]
-                        Set(s) to build, using Scryfall set code notation.
-                        Non-existent sets silently ignored.
-  -a, --all-sets        Build all possible sets, overriding the --sets option.
-  -c, --full-build      Build new prices, MTGSQLive, and compiled outputs like
-                        AllPrintings.
-  -x, --resume-build    While determining what sets to build, ignore
-                        individual set files found in the output directory.
-  -z, --compress        Compress the output folder's contents for
-                        distribution.
-  -p, --pretty          When dumping JSON files, prettify the contents instead
-                        of minifying them.
-  -SS [SET [SET ...]], --skip-sets [SET [SET ...]]
-                        Purposely exclude sets from the build that may have
-                        been set using --sets or --all-sets.
+* `patch_version`: `1.2.3`, `latest`
+* `minor_version`: `1.2`, `latest`
+* `major_version`: `1`
+* `version`: `v1.2.3-pre`, `latest`
+* `vpatch_version`: `v1.2.3`, `latest`
+* `vminor_version`: `v1.2`, `latest`
+* `vmajor_version`: `v1`, `latest`
 
-mtgjson maintainer arguments:
-  -PB, --price-build    Build updated pricing data then exit.
-  -R, --referrals       Create and maintain a referral map for referral
-                        linkages.
-  -NA, --no-alerts      Prevent push notifications from sending when property
-                        keys are defined.
-```
+To keep consistent names with official releases, you can use predefined name placeholders:
 
-#### MTGJSON Environment Variables
-Due to how the new system is built, a few advanced values can be set by the user in the shell environment.
-- `MTGJSON5_DEBUG` When set to 1 or true, additional logging will be dumped to the output files
-- `MTGJSON5_OUTPUT_PATH` When set, MTGJSON will dump all outputs to a specific directory
-    - Ex:  `MTGJSON5_OUTPUT_PATH=~/Desktop` will dump database files to `/home/USER/Desktop/mtgjson_build_5XXX` and log files to `/home/USER/Desktop/logs`
-
-## Licensing  
-MTGJSON is a freely available product under the [MIT License](https://github.com/mtgjson/mtgjson/blob/master/LICENSE.txt), allowing our users to enjoy Magic: the Gathering data free of charge, in perpetuity.
+* stable release `filename`: `julia-$patch_version-$osarch.$extension`
+* nightly release `latest_filename`: `"julia-latest-$osbit.$extension"`

@@ -1,63 +1,37 @@
-"""
-Installation setup for mtgjson5
-"""
-import configparser
-import pathlib
+from setuptools import find_packages
 
 import setuptools
+import os
+from io import open as io_open
 
-# Establish project directory
-project_root: pathlib.Path = pathlib.Path(__file__).resolve().parent
+src_dir = os.path.abspath(os.path.dirname(__file__))
 
-# Read config details to determine version-ing
-config_file = project_root.joinpath("mtgjson5/resources/mtgjson.properties")
-config = configparser.ConfigParser()
-if config_file.is_file():
-    config.read(str(config_file))
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+requirements = os.path.join(src_dir, 'requirements.txt')
+with io_open(requirements, mode='r') as fd:
+    install_requires = [i.strip().split('#', 1)[0].strip()
+                        for i in fd.read().strip().split('\n')]
 
 setuptools.setup(
-    name="mtgjson5",
-    version=config.get("MTGJSON", "version", fallback="5.0.0+fallback"),
-    author="Zach Halpern",
-    author_email="zach@mtgjson.com",
-    url="https://mtgjson.com/",
-    description="Magic: the Gathering compiled database generator",
-    long_description=project_root.joinpath("README.md").open(encoding="utf-8").read(),
+    name='jill',
+    version='0.1.0',
+    author="Johnny Chen",
+    author_email="johnnychen94@hotmail.com",
+    description="Julia Installer 4 Linux(and MacOS) - Light",
+    long_description=long_description,
     long_description_content_type="text/markdown",
-    license="MIT",
-    classifiers=[
-        "Intended Audience :: Developers",
-        "Intended Audience :: Education",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: MIT License",
-        "Natural Language :: English",
-        "Operating System :: MacOS :: MacOS X",
-        "Operating System :: Microsoft :: Windows :: Windows 10",
-        "Operating System :: Unix",
-        "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python",
-        "Topic :: Database",
-        "Topic :: Software Development :: Version Control :: Git",
-    ],
-    keywords=[
-        "Big Data",
-        "Card Games",
-        "Collectible",
-        "Database",
-        "JSON",
-        "MTG",
-        "MTGJSON",
-        "Trading Cards",
-        "Magic: The Gathering",
-    ],
+    url="https://github.com/johnnychen94/jill.py",
+    packages=['jill'] + ['jill.' + i for i in find_packages('jill')],
+    provides=['jill'],
+    install_requires=install_requires,
+    python_requires=">=3.6",
+    entry_points={'console_scripts': ['jill=jill.__main__:main'], },
     include_package_data=True,
-    packages=setuptools.find_packages(),
-    install_requires=project_root.joinpath("requirements.txt")
-    .open(encoding="utf-8")
-    .readlines()
-    if project_root.joinpath("requirements.txt").is_file()
-    else [],  # Use the requirements file, if able
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
 )

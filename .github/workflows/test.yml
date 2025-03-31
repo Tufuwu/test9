@@ -1,45 +1,55 @@
-name: Tests
+name: Unit test
 
 on:
   push:
     branches:
       - main
-    paths-ignore:
-      - '**.md'
   pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - '**.md'
 
 jobs:
-  tests:
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
-        include:
-          - python-version: 3.9
-            allow-failure: yes
-
+  unit_test:
     runs-on: ubuntu-latest
 
-    continue-on-error: ${{matrix.allow-failure == 'yes'}}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.9", "3.10"]
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-
-      - name: Setup python version
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v1
+      - name: add symlink dir to PATH
+        run: echo "::add-path::$HOME/.local/bin"
+      - name: Set up Python
+        uses: actions/setup-python@v1
         with:
-          python-version: ${{matrix.python-version}}
+          python-version: ${{ matrix.python }}
 
-      - name: Install requirements using pip
-        shell: bash
+      - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip setuptools
-          python3 -m pip install --requirement requirements_test.txt
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install coverage
 
-      - name: Run tox
-        shell: bash
-        run: python3 -m tox
+      - name: Test jill download and install
+        run: |
+          make test
+
+      - name: Test jill upstream
+        run: |
+          coverage run -a -m jill upstream
+
+      - name: Test jill update
+        run: |
+          coverage run -a -m jill update
+          coverage run -a -m jill update --upstream Official
+
+      - name: generate covrage report
+        run: |
+          coverage report
+          coverage xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
