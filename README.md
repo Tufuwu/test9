@@ -1,65 +1,139 @@
-# [django-pattern-library](https://torchbox.github.io/django-pattern-library/)
+<img src="/docs/waterbutler.png?raw=true" width="25%" style="float:left;">
 
-[![PyPI](https://img.shields.io/pypi/v/django-pattern-library.svg)](https://pypi.org/project/django-pattern-library/) [![PyPI downloads](https://img.shields.io/pypi/dm/django-pattern-library.svg)](https://pypi.org/project/django-pattern-library/) [![Build status](https://github.com/torchbox/django-pattern-library/workflows/CI/badge.svg)](https://github.com/torchbox/django-pattern-library/actions) [![Total alerts](https://img.shields.io/lgtm/alerts/g/torchbox/django-pattern-library.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/torchbox/django-pattern-library/alerts/)
+# WaterButler
 
-> UI pattern libraries for Django templates. Try our [online demo](https://torchbox.github.io/django-pattern-library/demo/pattern-library/).
+[![Documentation Status](https://readthedocs.org/projects/waterbutler/badge/?version=latest)](http://waterbutler.readthedocs.org/en/latest/?badge=latest)
+[![Code Climate](https://codeclimate.com/github/CenterForOpenScience/waterbutler/badges/gpa.svg)](https://codeclimate.com/github/CenterForOpenScience/waterbutler)
 
-![Screenshot of the pattern library UI, with navigation, pattern rendering, and configuration](https://raw.githubusercontent.com/torchbox/django-pattern-library/master/.github/pattern-library-screenshot.webp)
+`master` Build Status: [![Build Status](https://github.com/CenterForOpenScience/waterbutler/actions/workflows/test-build.yml/badge.svg?branch=master)](https://github.com/CenterForOpenScience/waterbutler/actions)[![Coverage Status](https://coveralls.io/repos/github/CenterForOpenScience/waterbutler/badge.svg?branch=master)](https://coveralls.io/github/CenterForOpenScience/waterbutler?branch=master)
 
-## Features
+`develop` Build Status: [![Build Status](https://github.com/CenterForOpenScience/waterbutler/actions/workflows/test-build.yml/badge.svg?branch=develop)](https://github.com/CenterForOpenScience/waterbutler/actions)[![Coverage Status](https://coveralls.io/repos/github/CenterForOpenScience/waterbutler/badge.svg?branch=develop)](https://coveralls.io/github/CenterForOpenScience/waterbutler?branch=develop)
 
-This package automates the maintenance of UI pattern libraries or styleguides for Django projects, and allows developers to experiment with Django templates without having to create Django views and models.
+### Compatibility
 
-- Create reusable patterns by creating Django templates files as usual.
-- All patterns automatically show up in the pattern library’s interface.
-- Define data as YAML files for the templates to render with the relevant Django context.
-- Override Django templates tags as needed to mock the template’s dependencies.
-- Document your patterns with Markdown.
+WaterButler is compatible with Python 3.6.
 
-## Why you need this
+### Documentation
 
-Pattern libraries will change your workflow for the better:
+Documentation available at https://waterbutler.readthedocs.io/en/latest/
 
-- They help separate concerns, both in code, and between members of a development team.
-- If needed, they make it possible for UI development to happen before models and views are created.
-- They encourage code reuse – defining independent UI components, that can be reused across apps, or ported to other projects.
-- It makes it much simpler to test UI components – no need to figure out where they’re used across a site or app.
+### Setting up
 
-Learn more by watching our presentation – [Reusable UI components: A journey from React to Wagtail](https://www.youtube.com/watch?v=isrOufI7TKc).
+In order to run WaterButler, you must create a Python 3.6-based virtualenv for it.
 
-## Online demo
+For MacOSX, you can install the latest version of Python3 using:
 
-The pattern library is dependent on Django for rendering – but also supports exporting as a static site if needed. Try out our online demo:
+```bash
+brew install python3
+```
 
-- For a component, [accordion.html](https://torchbox.github.io/django-pattern-library/demo/pattern-library/pattern/patterns/molecules/accordion/accordion.html)
-- For a page-level template, [person_page.html](https://torchbox.github.io/django-pattern-library/demo/pattern-library/pattern/patterns/pages/people/person_page.html)
+For Ubuntu users:
 
-## Documentation
+```bash
+apt-get install python3.6
+```
 
-Documentation is available at [torchbox.github.io/django-pattern-library](https://torchbox.github.io/django-pattern-library/), with source files in the `docs` directory.
+After completing the installation of Python 3.6, you must create a virtual environment. This can be done with the following commands:
 
-- **[Getting started](https://torchbox.github.io/django-pattern-library/getting-started/)**
-- **Guides**
-  - [Defining template context](https://torchbox.github.io/django-pattern-library/guides/defining-template-context/)
-  - [Overriding template tags](https://torchbox.github.io/django-pattern-library/guides/overriding-template-tags/)
-  - [Customizing template rendering](https://torchbox.github.io/django-pattern-library/guides/customizing-template-rendering/)
-  - [Usage tips](https://torchbox.github.io/django-pattern-library/guides/usage-tips/)
-- **Reference**
-  - [API & settings](https://torchbox.github.io/django-pattern-library/reference/api/)
-  - [Known issues and limitations](https://torchbox.github.io/django-pattern-library/reference/known-issues/)
+```bash
+pip install virtualenv
+pip install virtualenvwrapper
+mkvirtualenv --python=python3.6 waterbutler
 
-## Contributing
+pip install setuptools=37.0.0
+pip install invoke==0.13.0
 
-See anything you like in here? Anything missing? We welcome all support, whether on bug reports, feature requests, code, design, reviews, tests, documentation, and more. Please have a look at our [contribution guidelines](https://github.com/torchbox/django-pattern-library/blob/master/CONTRIBUTING.md).
+invoke install
+invoke server
+```
 
-If you want to set up the project on your own computer, the contribution guidelines also contain all of the setup commands.
+The above code will get the virtualenv up and running for the first time.  After the initial setup, you can run waterbutler by running:
 
-### Nightly builds
+```bash
+workon waterbutler
+invoke server
+```
 
-To try out the latest features before a release, we also create builds from every commit to `master`. Note we make no guarantee as to the quality of those pre-releases, and the pre-releases are overwritten on every build so shouldn’t be relied on for reproducible builds. [Download the latest `django_pattern_library-0.0.0.dev0-py3-none-any.whl`](http://torchbox.github.io/django-pattern-library/dist/django_pattern_library-0.0.0.dev0-py3-none-any.whl).
+Some tasks also require a running celery worker.  You will need to install `rabbitmq` and run a server:
 
-## Credits
+```bash
+brew install rabbitmq
+# on Ubuntu:
+# apt-get install rabbitmq-server
+rabbitmq-server
+```
 
-View the full list of [contributors](https://github.com/torchbox/django-pattern-library/graphs/contributors). [BSD](https://github.com/torchbox/django-pattern-library/blob/master/LICENSE) licensed.
+Then in your WaterButler virtualenv:
 
-Project logo from [FxEmoji](https://github.com/mozilla/fxemoji). Documentation website built with [MkDocs](https://www.mkdocs.org/), and hosted in [GitHub Pages](https://pages.github.com/).
+```bash
+invoke celery
+```
+
+### Configuring
+
+WaterButler configuration is done through a JSON file (`waterbutler-test.json`) that lives in the `.cos` directory of your home directory.  If this is your first time setting up WaterButler or its sister project, [MFR](https://github.com/CenterForOpenScience/modular-file-renderer/), you probably do not have this directory and will need to create it:
+
+```bash
+mkdir ~/.cos
+```
+
+The data in `waterbutler-test.json` is used by the many Django-style `settings.py` files sprinkled about.  Most of these files define a top-level key that its specific configuration should be listed under.  For instance, if you wanted your local WaterButler server to listen on port 8989 instead of the default 7777, you would check the settings file for `waterbutler.server`.  That file looks for `HOST` and `DOMAIN` configuration keys under the `SERVER_CONFIG` top-level key.  Your configuration file would need to be updated to look like this:
+
+```json
+{
+  "SERVER_CONFIG": {
+    "PORT": 8989,
+    "DOMAIN": "http://localhost:8989"
+  }
+}
+```
+
+If you then wanted to update the GitHub commit message WaterButler submits when deleting files, you would look in `waterbutler.providers.github.settings`. The `DELETE_FILE_MESSAGE` parameter should come under the `GITHUB_PROVIDER_CONFIG` key:
+
+```json
+{
+  "SERVER_CONFIG": {
+    "PORT": 8989,
+    "DOMAIN": "http://localhost:8989"
+  },
+  "GITHUB_PROVIDER_CONFIG": {
+    "DELETE_FILE_MESSAGE": "WaterButler deleted this. You're welcome."
+  }
+}
+```
+
+### Testing
+
+Before running the tests, you will need to install some additional requirements. In your checkout, run:
+
+```bash
+workon waterbutler
+invoke install --develop
+invoke test
+```
+
+### Known issues
+
+- **Updated, 2018-01-02:** *WB has been updated to work with setuptools==37.0.0, as of WB release v0.37. The following issue should not happen for new installs, but may occur if you downgrade to an older version.*  Running `invoke install -d` with setuptools v31 or greater can break WaterButler.  The symptom error message is: `"AttributeError: module 'waterbutler' has no attribute '__version__'"`.  If you encounter this, you will need to remove the file `waterbutler-nspkg.pth` from your virtualenv directory, run `pip install setuptools==30.4.0`, then re-run `invoke install -d`.
+
+- `invoke $command` results in `'$command' did not receive all required positional arguments!`: this error message occurs when trying to run WB v0.30.0+ with `invoke<0.13.0`.  Run `pip install invoke==0.13.0`, then retry your command.
+
+### License
+
+Copyright 2013-2018 Center for Open Science
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+### COS is hiring!
+
+Want to help save science? Want to get paid to develop free, open source software? [Check out our openings!](https://cos.io/our-communities/jobs/)

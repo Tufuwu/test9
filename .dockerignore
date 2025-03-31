@@ -1,6 +1,3 @@
-/.git/
-node_modules/
-/build/
-/dist/
-/pattern_library/static/
-site/
+.git
+*.pyc
+**/*.pyc

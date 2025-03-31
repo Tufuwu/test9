@@ -1,107 +1,63 @@
-name: CI
-on:
-  push:
-    branches:
-      - main
-  pull_request:
+name: wb_ci_testing
+
+on: [push, pull_request, workflow_dispatch]
+
 jobs:
-  test:
+
+  build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.9"
-      - uses: Gr1n/setup-poetry@v4
-        with:
-          poetry-version: '1.1.4'
-      - run: pip install tox
-      - run: tox -e lint,py39-dj32
-  test_compatibility:
-    needs: test
-    runs-on: ubuntu-latest
+    env:
+      GHA_DISTRO: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
     strategy:
       matrix:
-        include:
-          - python: "3.9"
-            toxenv: py36-dj22,py36-dj30,py36-dj31,py36-dj32
-          - python: "3.9"
-            toxenv: py37-dj22,py37-dj30,py37-dj31,py37-dj32
-          - python: "3.9"
-            toxenv: py38-dj22,py38-dj30,py38-dj31,py38-dj32,py38-djmain
-          - python: "3.9"
-            toxenv: py39-dj22,py39-dj30,py39-dj31,py39-dj32,py39-djmain
+        python-version: ["3.9", "3.10"]
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Cache Build Requirements
+        id: pip-cache-step
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.GHA_DISTRO }}-${{ env.pythonLocation }}-${{ hashFiles('requirements.txt', 'dev-requirements.txt') }}
+      - name: install dependencies
+        if: steps.pip-cache-step.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install --upgrade pip==18.1
+          pip install -r dev-requirements.txt
+
+  runtests:
+    name: Run unit tests
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      GHA_DISTRO: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python }}
-      - uses: Gr1n/setup-poetry@v4
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v4
         with:
-          poetry-version: '1.1.4'
-      - run: pip install tox
-      - run: tox -q
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.GHA_DISTRO }}-${{ env.pythonLocation }}-${{ hashFiles('requirements.txt', 'dev-requirements.txt') }}
+      - name: run syntax checks
+        run: |
+          flake8 .
+      - name: build plugins
+        run: |
+          python setup.py develop
+      - name: run unit tests
+        run: |
+          py.test --cov-report term-missing --cov waterbutler tests
+      - name: Upload coverage data to coveralls.io
+        run: coveralls --service=github
         env:
-          TOXENV: ${{ matrix.toxenv }}
-  build_site:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - id: nvm
-        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
-      - uses: actions/setup-node@v2-beta
-        with:
-          node-version: "${{ steps.nvm.outputs.NVMRC }}"
-      - uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - run: npm install --no-optional --no-audit --no-fund --progress=false
-      - run: npm run build
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.9"
-      - uses: Gr1n/setup-poetry@v4
-        with:
-          poetry-version: '1.1.4'
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-python-
-      - run: |
-          poetry config virtualenvs.create false &&
-          poetry install
-      - run: poetry run django-admin runserver --settings=tests.settings.production --pythonpath=. &
-      # Docs website build.
-      - run: poetry run mkdocs build --strict
-      # Demo website build.
-      - run: wget --mirror --page-requisites --no-parent --no-verbose http://localhost:8000/django-pattern-library/demo/pattern-library/
-      - run: mv localhost:8000/django-pattern-library/demo site
-      # Demo render_patterns.
-      - run: poetry run django-admin render_patterns --settings=tests.settings.production --pythonpath=. --wrap-fragments --output=site/dpl-rendered-patterns
-      # Package build, incl. publishing an experimental pre-release via GitHub Pages for builds on `main`.
-      - run: cat pyproject.toml| awk '{sub(/^version = .+/,"version = \"0.0.0.dev\"")}1' > pyproject.toml.tmp && mv pyproject.toml.tmp pyproject.toml
-      - run: poetry build
-      - run: mv dist site
-      - uses: actions/upload-artifact@v4
-        with:
-          name: site
-          path: site
-          retention-days: 1
-  deploy_site:
-    runs-on: ubuntu-latest
-    needs: build_site
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-      - uses: JamesIves/github-pages-deploy-action@4.1.3
-        with:
-          branch: gh-pages
-          folder: site
-          clean: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
