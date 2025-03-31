@@ -1,2 +1,0 @@
-#!/bin/bash
-PYBOSSA_SETTINGS="./settings_test.py" PYBOSSA_REDIS_CACHE_DISABLED=1 nosetests ${@:-test/}

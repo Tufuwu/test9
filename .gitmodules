@@ -1,3 +1,0 @@
-[submodule "pybossa/themes/default"]
-	path = pybossa/themes/default
-	url = https://github.com/bloomberg/pybossa-default-theme.git
