@@ -1,159 +1,203 @@
-0.11.0 (2021-07-04)
-===================
- * Added supporting Django v3.2
- * Added Python 3.9 in tests
- * Added MJML 4.10.1 in tests
- * Removed Python 3.5 from tests
- * Removed MJML older than 4.4.0 from tests
- * Upgraded Node to v14 for tcp-server
- * Upgraded MJML to 4.9.3 in dockerfile
- * Moved from Travis to GitHub Actions
+# Release Notes
 
+## 2.2.2 (2024-01-06)
 
-0.10.2 (2020-08-28)
-===================
- * Import `requests` only if it's really needed
+- Fixed `Manager.all()` behavior for patterns with default vales.
 
+## 2.2.1 (2024-01-04)
 
-0.10.1 (2020-08-16)
-===================
-  *  Added supporting Django v3.1
+- Updated `Manager.get()` to handle default values in pattern arguments.
 
+## 2.2 (2023-10-14)
 
-0.10.0 (2020-06-29)
-===================
-  * Added `requests` in extras require in `setup.py`
-  * Added MJML 4.6.3 in tests
-  * Upgraded MJML to 4.6.3 in dockerfile
-  * Updated docs
+- Added a `sync()` utility to map arbitrary objects to the filesystem.
 
+## 2.1.2 (2023-05-27)
 
-0.9.0 (2019-12-24)
-==================
-  * Added supporting Django v3.0
-  * Added supporting render http-server (including official MJML API https://mjml.io/api)
-  * Added Python 3.8 in tests
-  * Added MJML 4.5.1 in tests
-  * Upgraded MJML to 4.5.1 in dockerfile
-  * Upgraded Node to v12 for tcp-server
-  * Reorganized tests
-  * Updated docs
+- Fixed the `mypy` plugin to support newer versions.
 
+## 2.1.1 (2023-05-04)
 
-0.8.0 (2019-07-29)
-==================
-  * Fixed a trouble with unicode
-  * Added MJML 4.4.0 in tests
-  * Upgraded MJML to 4.4.0 in dockerfile
+- Fixed missing default value for `target_object` in container converters.
 
+## 2.1 (2023-03-26)
 
-0.7.0 (2019-04-06)
-==================
-  * Removed MJML 4.0.5, 4.1.2 and 4.2.1 from tests
-  * Added MJML 4.3.1 in tests
-  * Updated tcp-server adding cleanly termination
-  * Upgraded MJML to 4.3.1 in dockerfile
-  * Updated dockerfile by using `exec`
-  * Added supporting Django v2.2
+- Added support for Python 3.11.
+- Updated `Manager.get()` to be more flexible with positional arguments.
+- Added support for passing `frozen=True` to the underlying `dataclass`.
+- Added `py.typed` to tell type checkers that `datafiles` has types.
 
+## 2.0 (2022-08-20)
 
-0.6.0 (2018-12-06)
-==================
-  * Added `MJML_CHECK_CMD_ON_STARTUP` setting (thanks to Marcel Chastain)
-  * Added Python 3.7 in tests
-  * Added MJML v.4.2.1 in tests
-  * Removed MJML v.2.3.3 from tests
-  * Updated MJML to 4.2.1 in dockerfile
+- Dropped support for Python 3.7.
 
+## 1.4.3 (2022-08-19)
 
-0.5.4 (2018-10-19)
-==================
-  * Fixed Popen PIPE subprocess deadlock by using TemporaryFile for stdout
+- Fixed handling of invalid YAML files in manager methods.
 
+## 1.4.2 (2022-07-29)
 
-0.5.3 (2018-08-07)
-==================
-  * Added supporting MJML v4.1.2
-  * Added supporting Django v2.1
-  
+- Fixed exception when `Union[int, float]` or `Union[str, ...]` is used.
 
-0.5.2 (2018-06-29)
-==================
-  * Added supporting MJML v4.1.0
-  * Added .pyup.yaml
-  * Updated tests
-  * Added dockerfile for tcpserver
-  * Remove mjml 3.0.2, 3.1.1 and 3.2.2 from tests
+## 1.4.1 (2022-07-28)
 
+- Fixed exception when `TypedDict` is used, but schema is not yet supported.
 
-0.5.1 (2018-06-05)
-==================
-  * Add stopping tcpserver on SIGINT
+## 1.4 (2022-06-03)
 
+- Added support for accessing `Dict` keys as attributes.
+- Added a proper `repr()` implementation for `auto()` datafiles.
+- Added support for "thawing" objects upon exiting the `frozen()` context manager.
 
-0.5.0 (2018-04-28)
-==================
-  * Add support MJML v4
-  * Tcpserver doesn't skip mjml errors now (thanks @yourcelf)
-  * Refactor arguments in tcpserver
-  * Fix incomplete sending data via socket (thanks @cavanierc)
+## 1.3 (2022-04-09)
 
+- Added support for paths relative to the user's home directory.
 
-0.4.0 (2018-01-10)
-==================
-  * Add support Django 2.0
-  * Update support new versions of MJML (up to 3.3.5)
+## 1.2 (2022-02-24)
 
+- Added a `frozen()` context manager to temporarily disable file updates.
 
-0.3.2 (2017-04-06)
-==================
-  * Add support Django 1.11
+## 1.1.1 (2022-02-02)
 
+- Fixed handling of `OSError` when trying to determine a models path.
 
-0.3.1 (2017-03-18)
-==================
-  * Update support new versions of MJML (up to 3.3.0)
+## 1.1 (2022-01-21)
 
+- Added support for Python 3.10's builtin optional types (e.g. `int | None`).
+- Fixed handling of commented blocks in YAML files.
+- Fixed serialization for `list` of `dict` in YAML.
 
-0.3.0 (2017-03-03)
-==================
-  * Update support new versions of MJML (up to 3.2.2)
-  * Add support Python 3.6
+## 1.0 (2021-10-04)
 
+- Initial stable release.
 
-0.2.3 (2016-10-13)
-==================
-  * Add supporting django 1.8
-  
+## 0.15.2 (2021-09-03)
 
-0.2.2 (2016-08-15)
-==================
-  * Check mjml only if mode is "cmd"
+- Fixed `ValueError` when loading enum values from TOML files.
 
+## 0.15.1 (2021-07-01)
 
-0.2.1 (2016-08-03)
-==================
-  * Add support Django 1.10
-  
+- Fixed handling of no file extension to use YAML by default.
 
-0.2.0 (2016-07-24)
-==================
-  * Add backend mode TPCServer
-  * Remove Python 3.4 from tests
-  * Upgrade Django to 1.9.8 in tests
-  
+## 0.15 (2021-05-26)
 
-0.1.2 (2016-05-01)
-==================
-  * Fix release tools and setup.py
+- Removed `auto_load`/`auto_save` model options.
+- Removed `INDENT_YAML_BLOCKS` setting.
+- Removed `YAML_LIBRARY` setting.
+- Renamed `HIDE_TRACEBACK_IN_HOOKS` setting to `HIDDEN_TRACEBACK`.
+- Renamed `MINIMIZE_LIST_DIFFS` settings to `MINIMAL_DIFFS`.
 
+## 0.14 (2021-05-21)
 
-0.1.0 (2016-04-30)
-==================
-  * Migrate to MJML 2.x
-  * Add support Python 3.4+
+- Renamed model option `auto_attr` to `infer`.
+- Deprecated `auto_load`/`auto_save` model options in favor of `manual`.
 
+## 0.13.3 (2021-05-20)
 
-0.0.1 (2016-04-19)
-==================
-  * First release
+- Added support for filtering on nested attributes.
+
+## 0.13.2 (2021-05-16)
+
+- Fixed loading of partially defined nested objects with optional attributes.
+
+## 0.13.1 (2021-04-18)
+
+- Fixed handling of string annotations for extended types.
+
+## 0.13 (2021-04-17)
+
+- Added support for generic types.
+- Added support for sets.
+- Updated default `attrs` to exclude computed properties, i.e. `field(init=False)`.
+- Fixed automatic save when modifying nested dictionary values.
+- Fixed initialization for non-compliant `None` default values.
+
+## 0.12 (2021-03-05)
+
+- Added `_exclude` parameter to `all()` and `filter()` manager methods to exclude certain objects from loading as a performance optimization.
+- Fixed handling of untyped `List`/`Dict` annotations in Python 3.9.
+- Fixed `ValueError` when setting an `Optional[<enum>]` to `None`.
+
+## 0.11.1 (2020-09-12)
+
+- Fixed error message for `Dict` annotations lacking types.
+
+## 0.11 (2020-09-10)
+
+- Added support to treat `Mapping` type annotations as dictionaries.
+- Fixed handling of default values for `dataclass` attributes.
+- Added `MINIMIZE_LIST_DIFFS` setting to control the semantic representation of empty lists.
+
+## 0.10 (2020-07-03)
+
+- Added support for recursively matching arbitrary depth paths of files.
+- Fixed `AttributeError` when attempting to load malformed YAML files.
+
+## 0.9 (2020-04-13)
+
+- Fixed serialization of optional nested dataclasses with a value of `None`.
+- Fixed preservation of comments on nested dataclass attributes.
+- Added support for using `enum.Enum` subclasses as type annotations.
+
+## 0.8.1 (2020-03-30)
+
+- Fixed loading of `Missing` nested dataclasses attributes.
+
+## 0.8 (2020-03-28)
+
+- Updated the `@datafile(...)` decorator to be used as a drop-in replacement for `@dataclass(...)`.
+- Added support for loading unlimited levels of nested objects.
+
+## 0.7 (2020-02-20)
+
+- Added a `YAML_LIBRARY` setting to control the underlying YAML library.
+- Fixed ORM methods to handle relative file patterns.
+- Updated the `@datafile` decorator to be able to be called without parentheses to act as `@dataclass`.
+- Updated YAML serialization to preserve quotation marks in files.
+
+## 0.6 (2020-01-25)
+
+- Added a registration system for custom formatter classes.
+- Fixed loading of missing attribute from disk for ORM methods.
+- Added support for file patterns relative to the current directory.
+
+## 0.5.1 (2019-11-14)
+
+- Removed unnecessary warning when loading objects.
+
+## 0.5 (2019-09-28)
+
+- Added an `INDENT_YAML_BLOCKS` setting to optionally use the old serialization behavior.
+- Disabled initial file creation when `settings.HOOKS_ENABLED = False` is set.
+
+## 0.4.2 (2019-09-27)
+
+- Fixed a `TypeError` when converting custom types with `from __future__ import annotations` enabled.
+
+## 0.4.1 (2019-08-25)
+
+- Fixed a `TypeError` when converting non-builtin attributes.
+
+## 0.4 (2019-06-29)
+
+- Fixed ORM methods for datafiles with relative path patterns.
+- Added plugin for `mypy` support.
+- Updated YAML format to indent lists.
+
+## 0.3 (2019-06-09)
+
+- Added ORM method: `all()`
+- Added ORM method: `get_or_none()`.
+- Added ORM method: `get_or_create()`.
+- Added ORM method: `filter`.
+
+## 0.2 (2019-03-30)
+
+- Added an option to automatically resave files after loading.
+- Added an option to automatically reload files after saving.
+- Added a registration system for custom converter classes.
+- Added initial support for file inference via `auto(filename)`.
+
+## 0.1 (2019-01-13)
+
+- Initial release.
