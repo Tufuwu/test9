@@ -1,90 +1,49 @@
-name: Hatchet Unit Tests CI
+name: CI
 
 on:
-  push:
-    branches: [ develop ]
   pull_request:
-    branches: [ develop, releases/** ]
 
 jobs:
-  build:
+  pytest:
+    runs-on: ubuntu-latest
 
-    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        # TODO: add macos-latest
-        os: [ubuntu-latest]
-        # TODO: add pypy2, pypy3
         python-version: ["3.9", "3.10"]
-        exclude:
-          - os: macos-latest
-            python-version: ["3.9", "3.10"]
+        django-version: ['django22']
+        status: ['']
+        include:
+          - python-version: 'py38'
+            django-version: 'django30'
+            status: 'ignored'
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+      - run: make ci_up
+      - run: make ci_test TOXENV=${{ matrix.python-version }}-${{ matrix.django-version }}
+        # Unfortunately, continue-on-error marks the job as successful. We really want something like "allow failure"
+        # that would note the failure, but not fail the entire workflow and not email the author about it.
+        # See https://github.com/actions/toolkit/issues/399
+        continue-on-error: ${{ matrix.status == 'ignored' }}
+      - uses: codecov/codecov-action@v1
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: make ci_up
+      - run: make ci_quality
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip flake8 pytest
-        pip install -r requirements.txt
-        python setup.py install
-        python setup.py build_ext --inplace
-        python -m pip list
-
-    - name: Update Black
-      if: ${{ matrix.python-version == 3.7 }}
-      run: |
-        pip install --upgrade black
-
-    - name: Lint and Format Check with Flake8 and Black
-      if: ${{ matrix.python-version == 3.7 }}
-      run: |
-        black --diff --check .
-        flake8
-
-    - name: Basic Test with pytest
-      run: |
-        PYTHONPATH=. coverage run $(which pytest)
-
-    - name: Clone Caliper
-      uses: actions/checkout@v2
-      with:
-        repository: LLNL/Caliper
-        path: Caliper
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Build Caliper
-      working-directory: Caliper
-      run: |
-        echo -e "PWD: $(pwd)"
-        mkdir build && mkdir install
-        cd build
-        cmake -DCMAKE_INSTALL_PREFIX=../install ../
-        make VERBOSE=1
-        make install
-        export PATH=$(pwd)/../install/bin:${PATH}
-        echo -e "PATH=${PATH}"
-        cd $GITHUB_WORKSPACE
-        echo -e "PWD:${PWD}"
-        which cali-query
-
-    - name: Build Timemory
-      if: ${{ matrix.python-version >= 3.6 }}
-      run: |
-        python -m pip install --upgrade scikit-build
-        # python -m pip install --upgrade --no-cache-dir --no-deps -v --pre timemory --install-option=--disable-{c,gotcha,tools}
-        python -m pip install --upgrade --no-cache-dir --no-deps -v timemory==3.2.0.dev4 --install-option=--disable-{c,gotcha,tools}
-
-    - name: Test Caliper and Timemory Support with pytest
-      run: |
-        PYTHONPATH=. coverage run $(which pytest)
-
-    - name: "Upload coverage to Codecov"
-      uses: "codecov/codecov-action@v1"
-      with:
-        fail_ci_if_error: true
+  semgrep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: returntocorp/semgrep-action@v1
+        name: django rules
+        with:
+          config: p/django
+      - uses: returntocorp/semgrep-action@v1
+        name: other rules
+        with:
+          config: https://semgrep.live/dlukeomalley:use-assertEqual-for-equality

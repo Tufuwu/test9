@@ -1,33 +1,17 @@
-# -*- conf -*-
-# .coveragerc to control coverage.py
 [run]
-parallel = True
 branch = True
-source = .
+data_file = .coverage
+source=course_discovery
+concurrency=multiprocessing
 omit =
-     hatchet/tests/*
-     docs/examples/*
-
-[report]
-# Regexes for lines to exclude from consideration
-exclude_lines =
-    # Have to re-enable the standard pragma
-    pragma: no cover
-
-    # Don't complain about missing debug-only code:
-    def __repr__
-    if self\.debug
-
-    # Don't complain if tests don't hit defensive assertion code:
-    raise AssertionError
-    raise NotImplementedError
-
-    # Don't complain if non-runnable code isn't run:
-    if 0:
-    if False:
-    if __name__ == .__main__.:
-
-ignore_errors = True
-
-[html]
-directory = htmlcov
+    course_discovery/settings*
+    course_discovery/conf*
+    course_discovery/apps/course_metadata/tests/factories.py
+    course_discovery/apps/course_metadata/algolia_models.py
+    course_discovery/apps/course_metadata/index.py
+    *conftest.py
+    *wsgi.py
+    *migrations*
+    *admin.py
+    *static*
+    *templates*
