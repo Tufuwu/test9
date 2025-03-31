@@ -1,72 +1,50 @@
-[![PyPi Release](https://img.shields.io/pypi/v/keithleygui.svg?style=flat)](https://pypi.org/project/keithleygui/)
-[![Downloads](https://pepy.tech/badge/keithleygui)](https://pepy.tech/project/keithleygui)
-[![Build Status](https://travis-ci.com/OE-FET/keithleygui.svg?branch=master)](https://travis-ci.com/OE-FET/keithleygui)
+# About
 
-**Warning:** Keithleygui v1.1.4 is the last release that is developed and tested
-for Python 2.7. Newer releases require Python 3.6 or higher.
+Source for Google Click to Deploy solutions listed on Google Cloud Marketplace.
 
-# keithleygui
-A high-level user interface for Keithley 2600 series instruments which allows
-the user to configure, record and save voltage sweeps such as transfer and
-output measurements. Since there typically is no need to provide a live stream
-of readings from the Keithley, the data from an IV-curve is buffered locally on
-the instrument and only transferred to CustomXepr after completion of a
-measurement.
+# Disclaimer
 
-`keithleygui` build on the Python driver provided by
-[keithley2600](https://github.com/OE-FET/keithley2600).
+This is not an officially supported Google product.
 
-![Screenshot of the user interface](screenshots/KeithleyGUI.png)
+# Cloud Build CI
 
-## Installation
-Install the stable version from PyPI by running
-```console
-$ pip install keithleygui
-```
-Or install the latest development version from GitHub:
-```console
-$ pip install git+https://github.com/OE-FET/keithleygui
-```
+This repository uses Cloud Build for continuous integration. Each type of application has its own configuration file.
 
-## Usage
-In the terminal, run `keithleygui` to start the user interface. If your provide the
-`--verbose` option, log output showing the communication with the Keithley will be
-printed to the console.
+For detailed information on each configuration, see the following documentations:
 
-To start the user interface in a running Python terminal:
+*   [Docker images](docker/README.md#cloud-build-ci)
+*   [K8s applications](k8s/README.md#cloud-build-ci)
+*   [VM applications](vm/README.md#cloud-build-ci)
 
-```Python
-from PyQt5 import QtWidgets
-from keithleygui import KeithleyGuiApp
+## GCB custom worker pools
 
-app = QtWidgets.QApplication([])
+The Cloud Build configurations use Google Cloud Build (GCB) custom worker pools.
 
-keithley_gui = KeithleyGuiApp()
-keithley_gui.show()
-app.exec()
+If you want to create a new worker pool, run the following command:
+
+```shell
+gcloud alpha builds worker-pools create gcb-workers-pool \
+  --project=[PROJECT_ID] \
+  --regions=us-central1,us-west1,us-east1,us-east-4 \
+  --worker-count=2 \
+  --worker-machine-type=n1-standard-1 \
+  --worker-tag=gcb-worker \
+  --worker-network-name=default \
+  --worker-network-project=[PROJECT_ID] \
+  --worker-network-subnet=default
 ```
 
-You can optionally provide an existing `Keithley2600` instance to be used by the GUI:
+Where:
 
-```Python
-from PyQt5 import QtWidgets
-from keithley2600 import Keithley2600
-from keithleygui import KeithleyGuiApp
+*   `[PROJECT_ID]` is the GCP project ID where you want to create your custom worker pool.
 
-app = QtWidgets.QApplication([])
+If you want to update the number of workers in an existing pool, run the following command:
 
-keithley = Keithley2600('visa_address')
-keithley_gui = KeithleyGuiApp(keithley)
-keithley_gui.show()
-app.exec()
+```shell
+gcloud alpha builds worker-pools update gcb-workers-pool \
+  --project=[PROJECT_ID] \
+  --worker-count=4 \
 ```
 
-
-## System requirements
-
-- Linux or macOS
-- Python 3.6 or higher
-
-## Acknowledgements
-- Config modules are based on the implementation from [Spyder](https://github.com/spyder-ide).
-- Scientific spin boxes are taken from [qudi](https://github.com/Ulm-IQO/qudi).
+For more information, see the
+[gcloud alpha builds worker-pools commands](https://cloud.google.com/sdk/gcloud/reference/alpha/builds/worker-pools/).

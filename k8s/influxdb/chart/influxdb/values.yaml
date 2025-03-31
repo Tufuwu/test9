@@ -1,0 +1,16 @@
+influxdb:
+  image:
+    repo: null
+    tag: null
+  persistence:
+    storageClass: null
+    size: 1Gi
+
+admin:
+  user: influxdb-admin
+  password: null
+
+metrics:
+  image: null
+  exporter:
+    enabled: false
