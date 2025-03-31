@@ -1,25 +1,21 @@
-FROM python:3.7
-ENV PYTHONUNBUFFERED 1
-
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
-RUN apt-get install -y nodejs
-
-COPY ./requirements.txt /requirements.txt
-RUN pip3 install -r /requirements.txt
-
-RUN groupadd -r django && useradd -r -g django django
-COPY . /app
-RUN chown -R django /app
-
+FROM python:3.6
 WORKDIR /app
 
-RUN make install
+COPY . /app
 
-USER django
+RUN apt-get -y update \
+    && apt-get -y install libgmp-dev \
+    && apt-get -y install libmpfr-dev \
+    && apt-get -y install libmpc-dev \
+    && rm -rf /var/lib/apt/lists/* 
 
-RUN make build_sandbox
+RUN pip install --upgrade pip \
+    && pip install -r requirements.txt \
+    && rm -rf ~/.cache/pip
 
-RUN cp --remove-destination /app/src/oscar/static/oscar/img/image_not_found.jpg /app/sandbox/public/media/
+RUN make protobuf \
+    && make op
 
-WORKDIR /app/sandbox/
-CMD uwsgi --ini uwsgi.ini
+ENV PYTHONPATH=/app:$PYTHONPATH
+
+CMD []

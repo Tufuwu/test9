@@ -1,0 +1,91 @@
+nfs-server-provisioner:
+  enabled: true
+
+nfs-client-provisioner:
+  enabled: false
+
+  nfs:
+    path: /
+    mountOptions:
+      - vers=3
+      - nolock,tcp,noresvport
+
+  storageClass:
+    name: nfs
+
+  image:
+    repository: registry.cn-beijing.aliyuncs.com/fedlearner/nfs-client-provisioner
+    tag: v3.1.0-k8s1.11
+    pullPolicy: IfNotPresent
+
+mariadb:
+  enabled: true
+  master:
+    persistence:
+      storageClass: nfs
+  slave:
+    persistence:
+      storageClass: nfs
+  rootUser:
+    password: fedlearner
+  db:
+    user: fedlearner
+    password: fedlearner
+    name: fedlearner
+  replication:
+    user: fedlearner
+    password: fedlearner
+
+elastic-stack:
+  enabled: true
+  elasticsearch:
+    master:
+      replicas: 2 # default 3
+      persistence:
+        storageClass: nfs
+    data:
+      replicas: 1 # default 2
+      persistence:
+        storageClass: nfs
+
+  logstash:
+    enabled: false
+    persistence:
+      storageClass: nfs
+
+  filebeat:
+    enabled: true
+    indexTemplateLoad:
+      - "{{ .Release.Name }}-elasticsearch-client:9200"
+
+ingress-nginx:
+  controller:
+    image:
+      repository: fedlearner/nginx-ingress-controller
+      tag: "0b3ebb2"
+
+    config:
+      proxy-body-size: 2g
+      proxy-buffer-size: 2048k
+      proxy-connect-timeout: "300"
+      proxy-read-timeout: "1200"
+      proxy-send-timeout: "600"
+
+    service:
+      type: NodePort
+      nodePorts:
+        http: 32080
+        https: 32443
+        tcp:
+          8080: 32808
+
+    admissionWebhooks:
+      enabled: false
+
+etcd:
+  enabled: true
+  auth:
+    rbac:
+      enabled: false
+  persistence:
+    storageClass: nfs

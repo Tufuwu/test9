@@ -1,7 +1,5 @@
-.cache
-.tox
-.tx
-__pycache__
-*.pyc
-node_modules/
-sandbox/public/
+.git
+.github
+deploy/proxy
+test/
+thirdparty/tensorflow/.git
