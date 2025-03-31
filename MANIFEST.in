@@ -1,6 +1,5 @@
-include README.md
-include LICENSE
-include requirements.txt
-recursive-include mg_toolkit *
-recursive-exclude * __pycache__
-recursive-exclude * *.pyc
+include Makefile LICENSE CHANGELOG.rst Pipfile Dockerfile
+
+graft tests
+graft docs
+
