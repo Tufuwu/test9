@@ -1,12 +1,2 @@
-*.egg
-*.egg-info/
 *.pyc
-.cache/
-.coverage
-.eggs/
-.tox/
-__pycache__/
-build/
-dist/
-docs/_build/
-venv/
+.vscode
