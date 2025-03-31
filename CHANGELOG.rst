@@ -1,75 +1,90 @@
-#########
-Changelog
-#########
+Release Notes
+=============
 
-Release 0.9.12
---------------
+2.0.1
+-----
+* Rebuild for PyPI
 
-- Fixed a typo in README.rst, thanks to proofit404
-- Declared compatibility with Python 3.11 and Django 4.1
+2.0.0
+-----
+* Remove Python 2 support
+* Allow running makemessages without specifying a locale (runs on all
+  locales)
+* Address Django upgrade warnings
+* Ensure that makemessages works when a non-English locale is active
+  during its execution
 
-Release 0.9.11
---------------
+1.2.1
+-----
 
-- Reformatted code with Black
-- Replaced subprocess.Popen by subprocess.check_output method to call npm install command
-- Replaced os, os.path, shutil module features by pathlib module features
-- Remove Python3.6 and Django 2.1/3.0/3.1 versions support, add Django 4.0 support
+* Fix Python 2 support for makemessages
 
-Release 0.9.10
---------------
+  * Add a test for makemessages
 
-- Declared compatibility with Python 3.10
 
-Release 0.9.9
--------------
+1.2.0
+--------
 
-- Sorted imports by isort
-- Updated documentation
+* Added an optional contexts parameter for the register function, for
+  providing translation context for model fields.
 
-Release 0.9.8
--------------
+* Update middleware to the 1.10+ style
 
-- Dropped Python 3.4, Python 3.5 and Django 2.0 support
-- Declared compatibility with Python 3.9 and Django 3.1
+  * Maintains backwards-compat with 1.9 and below
 
-Release 0.9.7
--------------
+    * Will now work in either ``MIDDLEWARE_CLASSES`` or ``MIDDLEWARE``
 
-- Fixed package.json copying
+  * Deprecates ``VinaigrettteAdminLanguageMiddleware`` for ``VinaigretteAdminLanguageMiddleware``
 
-Release 0.9.6
--------------
+    * Users should change to ``vinaigrette.middleware.VinaigretteAdminLanguageMiddleware``
+    * ``vinaigrette.VinaigrettteAdminLanguageMiddleware`` will continue to work until next major version
 
-- Added __init__.py files to management and management/commands directories to build distributive properly (issue https://github.com/pypa/setuptools/issues/97)
+* Adds tox and pytest for development and testing
 
-Release 0.9.5
--------------
+1.1.1
+-----
 
-- Stopped using symbolic link to copy package.json (issue https://github.com/whitespy/django-node-assets/issues/2)
+* Update contact info
 
-Release 0.9.4
--------------
+1.1.0
+-----
 
-- Fixed NodeModulesFinder.find method
+* Django 2.0 support
 
-Release 0.9.3
--------------
+1.0.1
+-----
 
-- Improved the npminstall management command
-- Changed imports order
+* Remembered to update version properly
 
-Release 0.9.2
--------------
+1.0.0
+-----
 
-- Updated README.rst
+* Add the ``--keep-vinaigrette-temp`` option which keeps the temporary file containing the generated list of translations
+* Added support for Django 1.9
+* Remove support for Django versions < 1.8
 
-Release 0.9.1
--------------
+0.5.0
+-----
 
-- Supplemented README.rst
+* Can specify properties to use instead of database field names in .register() function.
 
-Release 0.9.0
--------------
+0.4.0
+-----
 
-- Initial release
+* Support for Django 1.7
+
+0.3.0
+-----
+
+* Support for python 3.3.
+
+0.2.0
+-----
+
+* Bug fix for the --all option, it now works again.
+* New VinaigrettteAdminLanguageMiddleware middleware.
+
+0.1.3
+-----
+
+* Support for Django 1.6.
