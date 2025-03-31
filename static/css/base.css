@@ -1,0 +1,61 @@
+html {
+  overflow-y: scroll;
+}
+
+th.repo-full-name {
+  border-top: none;
+}
+
+table.dataTable, table.dataTable th, table.dataTable td {
+  box-sizing: border-box;
+}
+
+.user-card {
+  position: sticky;
+  top: 48px;
+}
+
+a#note {
+  display: inline-block;
+  cursor:default;
+  text-decoration: none;
+  border-bottom-style: dotted;
+  border-bottom-width: 1px;
+  margin-bottom: 8px;
+}
+
+/* Django admin styles */
+caption.app-header {
+  position: relative;
+}
+
+#config-button {
+  background-color: greenyellow;
+  margin-top: -8px;
+  padding: 8px;
+  position: absolute;
+  right: 0;
+}
+
+.repo-list {
+  padding-left: 0;
+  columns: 100px 2;
+}
+
+.repo-list li {
+  list-style-type: none;
+}
+
+/* Sticky footer styles */
+html {
+  position: relative;
+  min-height: 100%;
+}
+main {
+  margin-bottom: 180px; /* Same as footer height */
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
