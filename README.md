@@ -1,66 +1,80 @@
-# buildmaster-config
+# ST-OpenUri
 
-[Buildbot](https://buildbot.net/) master configuration for
-[buildbot.python.org](http://buildbot.python.org/all/).
+[![Required ST Build](https://img.shields.io/badge/ST-3118+-orange.svg?style=flat-square&logo=sublime-text)](https://www.sublimetext.com)
+[![Travis (.org) branch](https://img.shields.io/travis/jfcherng-sublime/ST-OpenUri/master?style=flat-square)](https://travis-ci.org/jfcherng-sublime/ST-OpenUri)
+[![Package Control](https://img.shields.io/packagecontrol/dt/OpenUri?style=flat-square)](https://packagecontrol.io/packages/OpenUri)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/jfcherng-sublime/ST-OpenUri?style=flat-square&logo=github)](https://github.com/jfcherng-sublime/ST-OpenUri/tags)
+[![Project license](https://img.shields.io/github/license/jfcherng-sublime/ST-OpenUri?style=flat-square&logo=github)](https://github.com/jfcherng-sublime/ST-OpenUri/blob/master/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/jfcherng-sublime/ST-OpenUri?style=flat-square&logo=github)](https://github.com/jfcherng-sublime/ST-OpenUri/stargazers)
+[![Donate to this project using Paypal](https://img.shields.io/badge/paypal-donate-blue.svg?style=flat-square&logo=paypal)](https://www.paypal.me/jfcherng/5usd)
 
-[![Build Status](https://travis-ci.org/python/buildmaster-config.svg?branch=master)](https://travis-ci.org/python/buildmaster-config)
+Finally! A performant and highly customizable URI-opening plugin comes.
 
-## Private settings
+![screenshot](https://raw.githubusercontent.com/jfcherng-sublime/ST-OpenUri/master/docs/screenshot.png)
 
-The production server uses /etc/buildbot/settings.yaml configuration file which
-contains secrets like the IRC nickname password.
+`OpenUri` is a Sublime Text plugin which provides an easy access to URIs (mostly URLs)
+in a file by clicking on a phantom, the popup or key/mouse bindings.
 
-## Update requirements
+## Bug fix for `PhantomSet` in ST 3
 
-Run locally:
+If you are using ST 4, just ignore this section.
 
-    make regen-requirements
+The official `PhantomSet` implementation in Sublime Text 3 is [buggy](https://github.com/SublimeTextIssues/Core/issues/2897#issuecomment-514868381).
+You can fix it by overwriting it with [a patched sublime.py](https://gist.github.com/jfcherng/0ea38bd05a8875be1a40f30b5b9f784c).
+Remember, backup `sublime.py` before patching it.
 
-Create a PR. Merge the PR. Then recreate the venv on the server:
+- On Windows: `C:\Program Files\Sublime Text 3\sublime.py`
+- On Linux: `/opt/sublime_text/sublime.py`
+- On Mac OSX: `/Applications/Sublime Text.app/Contents/MacOS/sublime.py`
 
-    make stop-master
-    mv venv old-venv
-    make venv
-    make start-master
+## Installation
 
-Upgrading buildbot sometimes requires to run the command:
+This plugin is available on Package Control by the name of [OpenUri](https://packagecontrol.io/packages/OpenUri).
 
-    ./venv/bin/buildbot upgrade-master /data/buildbot/master
+Note that this plugin only supports ST >= 3118 because of Phantom API.
 
-Make sure that the server is running, and then remove the old virtual environment:
+💡 You may also be interested in my other plugins: https://packagecontrol.io/search/jfcherng
 
-    rm -rf old-venv
+## Settings
 
-## Hosting
+To edit settings, go to `Preferences` » `Package Settings` » `OpenUri` » `Settings`.
 
-The buildbot master is hosted on the PSF Infrastructure and is managed via
-[salt](https://github.com/python/psf-salt/blob/master/salt/buildbot/init.sls).
+I try to make the [settings file](https://github.com/jfcherng-sublime/ST-OpenUri/blob/master/OpenUri.sublime-settings)
+self-explanatory. But if you still have questions, feel free to open an issue.
 
-psycopg2 also requires libpq-dev:
+## Default Bindings
 
-    sudo apt-get install libpq-dev
+### Key Binding
 
-- Backend host address is `buildbot.nyc1.psf.io`.
-- The host is behind the PSF HaProxy cluster which is CNAMEd by `buildbot.python.org`.
-- Database is hosted on a managed Postgres cluster, including backups.
-- Remote backups of `/etc/buildbot/settings.yaml` are taken hourly and retained for 90 days.
-- No other state for the buildbot host is backed up!
+- <kbd>Alt + o</kbd>, <kbd>Alt + u</kbd>:
+  Open URIs from (multiple) cursors. `o, u` is mnemonic for `Open, URI`.
 
-Configurations from this repository are applied from the `master` branch on
-a `*/15` cron interval using the `update-master` target in `Makefile`.
+### Mouse Binding
 
-Python 3.9 is installed manually using ``pyenv`` (which was also installed
-manually). Commands to install Python 3.9:
+- <kbd>Ctrl + Right Click</kbd>: Open the clicked URI. (`open_uri_from_cursors`)
 
-    pyenv update
-    pyenv install 3.9.1
-    pyenv global 3.8.1 3.9.1
+You may also add a mouse binding for `select_uri_from_cursors`.
+There are just too few modifier keys to be chosen so I am not adding a default one for it.
 
+### How to disable default bindings
 
-## Add a worker
+If you do not want those default key/mouse bindings, you can use an empty one to overwrite them.
+Or if you want to change them, you can use a non-empty one.
 
-The list of workers is stored in `/etc/buildbot/settings.yaml` on the server.
-A worker password should be made of 14 characters (a-z, A-Z, 0-9 and special
-characters), for example using KeePassX.
+Here I take the default mouse binding as an example.
 
-Documentation: http://docs.buildbot.net/current/manual/configuration/workers.html#defining-workers
+1. Go to `Preferences` » `Browser Packages...`.
+1. Create file `OpenUri/bindings/Default.sublime-mousemap` (and its parent directories if necessary).
+1. Fill `Default.sublime-mousemap` with `[]`.
+   Then this `Default.sublime-mousemap` will overwrite this plugin's.
+
+## Commands
+
+These commands are always available no matter what `show_open_button` is or how large the file is.
+
+| Command                 | Functionality                     |
+| ----------------------- | --------------------------------- |
+| open_uri_from_cursors   | Open URIs from cursors            |
+| open_uri_from_view      | Open URIs from the current view   |
+| select_uri_from_cursors | Select URIs from cursors          |
+| select_uri_from_view    | Select URIs from the current view |

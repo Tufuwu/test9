@@ -1,19 +1,43 @@
-name: Build
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Main
 
 on:
   push:
-    branches: [main]
+    branches:
+      - "*"
+      - "*/*"
   pull_request:
-    branches: [main]
+    branches:
+      - "*"
+      - "*/*"
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  job_lint:
+    name: Linting (Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: ["ubuntu-latest"]
+        python-version: ["3.9", "3.10"]
+
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Python
+
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
-      - name: Check configuration
-        run: make check PIP=pip BUILDBOT=buildbot
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Do linting
+        run: |
+          mypy -p plugin
+          flake8 plugin
+          black --check .

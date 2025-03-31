@@ -1,8 +1,9 @@
-*.pyc
-!.gitignore
-backup/
-bin/
-buildbot/
-lib/
-venv/
-worker/
+# OS
+.DS_Store
+Desktop.ini
+Thumbs.db
+
+# Python
+*.py[cod]
+.mypy_cache/
+__pycache__/
