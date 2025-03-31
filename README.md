@@ -1,138 +1,113 @@
-# Datatable View
+# django-sendgrid-v5
 
-This package is used in conjunction with the jQuery plugin [DataTables](http://datatables.net/), and supports state-saving detection with [fnSetFilteringDelay](http://datatables.net/plug-ins/api).  The package consists of a class-based view, and a small collection of utilities for rendering table data from models.
+[![Latest Release](https://img.shields.io/pypi/v/django-sendgrid-v5.svg)](https://pypi.python.org/pypi/django-sendgrid-v5/)
 
-[![PyPI Downloads][pypi-dl-image]][pypi-dl-link]
-[![PyPI Version][pypi-v-image]][pypi-v-link]
-[![Build Status][travis-image]][travis-link]
-[![Documentation Status][rtfd-image]][rtfd-link]
+This package implements an email backend for Django that relies on sendgrid's REST API for message delivery.
 
-[pypi-dl-link]: https://pypi.python.org/pypi/django-datatable-view
-[pypi-dl-image]: https://img.shields.io/pypi/dm/django-datatable-view.png
-[pypi-v-link]: https://pypi.python.org/pypi/django-datatable-view
-[pypi-v-image]: https://img.shields.io/pypi/v/django-datatable-view.png
-[travis-link]: https://travis-ci.org/pivotal-energy-solutions/django-datatable-view
-[travis-image]: https://travis-ci.org/pivotal-energy-solutions/django-datatable-view.svg?branch=traviscl
-[rtfd-link]: http://django-datatable-view.readthedocs.org/en/latest/?badge=latest
-[rtfd-image]: https://readthedocs.org/projects/django-datatable-view/badge/?version=latest
+It is under active development, and pull requests are more than welcome\!
 
-Dependencies:
+To use the backend, simply install the package (using pip), set the `EMAIL_BACKEND` setting in Django, and add a `SENDGRID_API_KEY` key (set to the appropriate value) to your Django settings.
 
-* Python 3.8 or later
-* [Django](http://www.djangoproject.com/) >= 2.2
-* [dateutil](http://labix.org/python-dateutil) library for flexible, fault-tolerant date parsing.
-* [jQuery](https://jquery.com/) >= 2
-* [dataTables.js](https://datatables.net/) >= 1.10
+## How to Install
 
-# Getting Started
+1. `pip install django-sendgrid-v5`
+2. In your project's settings.py script:
+    1. Set `EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"`
+    2. Set the SENDGRID\_API\_KEY in settings.py to your api key that was provided to you by sendgrid. `SENDGRID_API_KEY = os.environ["SENDGRID_API_KEY"]`
 
-Install the package:
+### Other settings
 
-```bash
-pip install django-datatable-view
-```
+1. To toggle sandbox mode (when django is running in DEBUG mode), set `SENDGRID_SANDBOX_MODE_IN_DEBUG = True/False`.
+    1. To err on the side of caution, this defaults to True, so emails sent in DEBUG mode will not be delivered, unless this setting is explicitly set to False.
+2. `SENDGRID_ECHO_TO_STDOUT` will echo to stdout or any other file-like
+    object that is passed to the backend via the `stream` kwarg.
+3. `SENDGRID_TRACK_EMAIL_OPENS` - defaults to true and tracks email open events via the Sendgrid service. These events are logged in the Statistics UI, Email Activity interface, and are reported by the Event Webhook.
+4. `SENDGRID_TRACK_CLICKS_HTML` - defaults to true and, if enabled in your Sendgrid account, will tracks click events on links found in the HTML message sent.
+5. `SENDGRID_TRACK_CLICKS_PLAIN` - defaults to true and, if enabled in your Sendgrid account, will tracks click events on links found in the plain text message sent.
 
-Add to ``INSTALLED_APPS`` (so default templates and js can be discovered), and use the ``DatatableView`` like a Django ``ListView``:
+## Usage
+
+### Simple
 
 ```python
-# settings.py
-INSTALLED_APPS = [
-    'datatableview',
-    # ...
-]
+from django.core.mail import send_mail
 
-
-# views.py
-from datatableview.views import DatatableView
-class ZeroConfigurationDatatableView(DatatableView):
-    model = MyModel
+send_mail(
+    'Subject here',
+    'Here is the message.',
+    'from@example.com',
+    ['to@example.com'],
+    fail_silently=False,
+)
 ```
 
-Use the ``{{ datatable }}`` provided in the template context to render the table and initialize from server ajax:
+### Dynamic Template with JSON Data
 
-```html
-<!-- myapp/mymodel_list.html -->
+First, create a [dynamic template](https://mc.sendgrid.com/dynamic-templates) and copy the ID.
 
-<!-- Load dependencies -->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-        crossorigin="anonymous"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+```python
+from django.core.mail import EmailMessage
 
-<!-- Load js for initializing tables via their server-side options -->
-<script type="text/javascript" charset="utf8" src="{% static 'js/datatableview.js' %}"></script>
-<script type="text/javascript">
-    $(function(){
-        datatableview.initialize($('.datatable'));
-    });
-</script>
-
-<!-- Render the table skeleton, includes the .datatable class for the on-ready initializer. -->
-{{ datatable }}
+msg = EmailMessage(
+  from_email='to@example.com',
+  to=['to@example.com'],
+)
+msg.template_id = "your-dynamic-template-id"
+msg.dynamic_template_data = {
+  "title": foo
+}
+msg.send(fail_silently=False)
 ```
 
-# Features at a glance
+### The kitchen sink EmailMessage (all of the supported sendgrid-specific properties)
 
-* ``DatatableView``, a drop-in replacement for ``ListView`` that allows options to be specified for the datatable that will be rendered on the page.
-* ``MultipleDatatableView`` for configurating multiple Datatable specifications on a single view
-* ``ModelForm``-like declarative table design.
-* Support for ``ValuesQuerySet`` execution mode instead of object instances
-* Queryset caching between requests
-* Customizable table headers
-* Compound columns (columns representing more than one model field)
-* Columns backed by methods or callbacks instead of model fields
-* Easy related fields
-* Automatic search and sort support
-* Total control over cell contents (HTML, processing of raw values)
-* Search data fields that aren't present on the table
-* Support for DT_RowData
-* Customization hook for full JSON response object
-* Drop-in x-editable support, per-column
-* Customizable table templates
-* Easy Bootstrap integration
-* Allows all normal dataTables.js and x-editable Javascript options
-* Small library of common column markup processors
-* Full test suite
+```python
+from django.core.mail import EmailMessage
 
-# Documentation and Live Demos
-Read the module documentation at http://django-datatable-view.readthedocs.org.
+msg = EmailMessage(
+  from_email='to@example.com',
+  to=['to@example.com'],
+  cc=['cc@example.com'],
+  bcc=['bcc@example.com'],
+)
 
-A public live demo server is in the works.  For version 0.8, we will continue to keep the live demo site alive at http://django-datatable-view.appspot.com/  Please note that 0.8 does not reflect the current state or direction of the project.
+# Personalization custom args
+# https://sendgrid.com/docs/for-developers/sending-email/personalizations/
+msg.custom_args = {'arg1': 'value1', 'arg2': 'value2'}
 
-You can run the live demos locally from the included example project, using a few common setup steps.
+# Reply to email address (sendgrid only supports 1 reply-to email address)
+msg.reply_to = 'reply-to@example.com'
 
-```bash
-$ git clone https://github.com/pivotal-energy-solutions/django-datatable-view.git
-$ cd django-datatable-view
-$ mkvirtualenv datatableview
-(datatableview)$ pip install -r requirements.txt
-(datatableview)$ datatableview/tests/example_project/manage.py migrate
-(datatableview)$ datatableview/tests/example_project/manage.py loaddata initial_data
-(datatableview)$ datatableview/tests/example_project/manage.py runserver
+# Send at (accepts an integer per the sendgrid docs)
+# https://sendgrid.com/docs/API_Reference/SMTP_API/scheduling_parameters.html#-Send-At
+msg.send_at = 1600188812
+
+# Transactional templates
+# https://sendgrid.com/docs/ui/sending-email/how-to-send-an-email-with-dynamic-transactional-templates/
+msg.template_id = "your-dynamic-template-id"
+msg.dynamic_template_data = {  # Sendgrid v6+ only
+  "title": foo
+}
+msg.substitutions = {
+  "title": bar
+}
+
+# Unsubscribe groups
+# https://sendgrid.com/docs/ui/sending-email/unsubscribe-groups/
+msg.asm = {'group_id': 123, 'groups_to_display': ['group1', 'group2']}
+
+# Categories
+# https://sendgrid.com/docs/glossary/categories/
+msg.categories = ['category1', 'category2']
+
+# IP Pools
+# https://sendgrid.com/docs/ui/account-and-settings/ip-pools/
+msg.ip_pool_name = 'my-ip-pool'
+
+
+msg.send(fail_silently=False)
 ```
 
-The example project is configured to use a local sqlite3 database, and relies on the ``django-datatable-view`` app itself, which is made available in the python path by simply running the project from the distributed directory root.
+## Examples
 
-
-## Authors
-
-* Autumn Valenta
-* Steven Klass
-
-
-## Copyright and license
-
-Copyright 2011-2023 Pivotal Energy Solutions.  All rights reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this work except in compliance with the License.
-You may obtain a copy of the License in the LICENSE file, or at:
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+- Marcelo Canina [(@marcanuy)](https://github.com/marcanuy) wrote a great article demonstrating how to integrate `django-sendgrid-v5` into your Django application on his site: [https://simpleit.rocks/python/django/adding-email-to-django-the-easiest-way/](https://simpleit.rocks/python/django/adding-email-to-django-the-easiest-way/)
