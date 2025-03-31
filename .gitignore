@@ -1,18 +1,12 @@
+# Python
+*.py[cod]
+/.cache/
+/.coverage
+/.tox/
+# Vim
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
 *~
-.#*
-*.bak
-*.pyc
-*.pyo
-*.egg-info
-*.swp
-*.swo
-.coverage*
-junit-results.xml
-.pytest_cache
-doc/_build
-build
-dist
-doc/_build
-numpydoc/tests/tinybuild/_build
-numpydoc/tests/tinybuild/generated
-MANIFEST
+# xbmc-checkpo
+*.po.bak
+/*.log
