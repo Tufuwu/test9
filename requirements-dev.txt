@@ -1,3 +1,8 @@
-pytest
-scipy
-matplotlib
+black
+codecov
+coverage
+isort
+mypy-mypyc
+python-coveralls
+twine
+wheel

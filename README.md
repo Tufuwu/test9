@@ -1,74 +1,69 @@
-# BayesO Benchmarks
-[![Build Status](https://app.travis-ci.com/jungtaekkim/bayeso-benchmarks.svg?branch=main)](https://app.travis-ci.com/jungtaekkim/bayeso-benchmarks)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<a href="https://pybowler.io"><img alt="Bowler" height="96" src="https://github.com/facebookincubator/Bowler/raw/master/website/static/img/logo/Bowler_FullColor_DarkText.png" /></a>
 
-Benchmarks for Bayesian optimization.
-The details of benchmark functions can be found in [these notes](http://jungtaek.github.io/notes/benchmarks_bo.pdf).
+**Safe code refactoring for modern Python projects.**
 
-## Installation
-We recommend installing it with `virtualenv`.
-You can choose one of three installation options.
+[![build status](https://travis-ci.com/facebookincubator/Bowler.svg?branch=master)](https://travis-ci.com/facebookincubator/Bowler)
+[![code coverage](https://img.shields.io/coveralls/github/facebookincubator/Bowler/master.svg)](https://coveralls.io/github/facebookincubator/Bowler)
+[![version](https://img.shields.io/pypi/v/bowler.svg)](https://pypi.org/project/bowler)
+[![changelog](https://img.shields.io/badge/change-log-blue.svg)](https://github.com/facebookincubator/bowler/blob/master/CHANGELOG.md)
+[![license](https://img.shields.io/pypi/l/bowler.svg)](https://github.com/facebookincubator/bowler/blob/master/LICENSE)
+[![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
-* Using PyPI repository (for user installation)
 
-To install the released version in PyPI repository, command it.
+Overview
+--------
 
-```shell
-$ pip install bayeso-benchmarks
-```
+Bowler is a refactoring tool for manipulating Python at the syntax tree level. It enables
+safe, large scale code modifications while guaranteeing that the resulting code compiles
+and runs. It provides both a simple command line interface and a fluent API in Python for
+generating complex code modifications in code.
 
-* Using source code (for developer installation)
+Bowler uses a "fluent" `Query` API to build refactoring scripts through a series
+of selectors, filters, and modifiers.  Many simple modifications are already possible
+using the existing API, but you can also provide custom selectors, filters, and
+modifiers as needed to build more complex or custom refactorings.  See the
+[Query Reference](https://pybowler.io/docs/api-query) for more details.
 
-To install `bayeso-benchmarks` from source code, command
+Using the query API to rename a single function, and generate an interactive diff from
+the results, would look something like this:
 
-```shell
-$ pip install .
-```
-in the `bayeso-benchmarks` root.
-
-* Using source code (for editable development mode)
-
-To use editable development mode, command
-
-```shell
-$ pip install -r requirements.txt
-$ python setup.py develop
-```
-in the `bayeso-benchmarks` root.
-
-* Uninstallation
-
-If you would like to uninstall `bayeso-benchmarks`, command it.
-
-```shell
-$ pip uninstall bayeso-benchmarks
-```
-
-## Required Packages
-Mandatory pacakges are inlcuded in `requirements.txt`.
-The following `requirements` files include the package list, the purpose of which is described as follows.
-
-* `requirements-dev.txt`: It is for developing the `bayeso-benchmarks` package.
-
-## Simple Example
-A simple example on Branin function is shown below.
 ```python
-from bayeso_benchmarks import Branin
-
-obj_fun = Branin()
-bounds = obj_fun.get_bounds()
-
-X = obj_fun.sample_uniform(100)
-
-Y = obj_fun.output(X)
-Y_noise = obj_fun.output_gaussian_noise(X)
+query = (
+    Query(<paths to modify>)
+    .select_function("old_name")
+    .rename("new_name")
+    .diff(interactive=True)
+)
 ```
 
-## Author
-* [Jungtaek Kim](http://jungtaek.github.io) (POSTECH)
+For more details or documentation, check out https://pybowler.io
 
-## Contact
-* Jungtaek Kim: [jtkim@postech.ac.kr](mailto:jtkim@postech.ac.kr)
 
-## License
-[MIT License](LICENSE)
+Installing Bowler
+-----------------
+
+Bowler supports modifications to code from any version of Python 2 or 3, but it
+requires Python 3.6 or higher to run. Bowler can be easily installed using most common
+Python packaging tools. We recommend installing the latest stable release from
+[PyPI][] with `pip`:
+
+```bash
+pip install bowler
+```
+
+You can also install a development version from source by checking out the Git repo:
+
+```bash
+git clone https://github.com/facebookincubator/bowler
+cd bowler
+python setup.py install
+```
+
+
+License
+-------
+
+Bowler is MIT licensed, as found in the `LICENSE` file.
+
+
+[PyPI]: https://pypi.org/p/bowler

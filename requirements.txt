@@ -1,1 +1,4 @@
-numpy
+attrs
+click
+fissix
+sh

@@ -1,2 +1,1 @@
-include requirements.txt
-include LICENSE
+include README.md LICENSE CODE_OF_CONDUCT.md CONTRIBUTING.md requirements.txt docs/*.md
