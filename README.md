@@ -1,184 +1,141 @@
-# Perforce Buildkite Plugin [![Build Status](https://travis-ci.com/improbable-eng/perforce-buildkite-plugin.svg?branch=master)](https://travis-ci.com/improbable-eng/perforce-buildkite-plugin)
+# stanford-karel
 
-A [Buildkite plugin](https://buildkite.com/docs/agent/v3/plugins) that lets you check out code from [Perforce Version Control](https://www.perforce.com/products/helix-core) on Windows, Linux and macOS platforms.
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/release/python-370/)
+[![Build Status](https://github.com/TylerYep/stanfordkarel/actions/workflows/test.yml/badge.svg)](https://github.com/TylerYep/stanfordkarel/actions/workflows/test.yml)
+[![PyPI version](https://badge.fury.io/py/stanfordkarel.svg)](https://badge.fury.io/py/stanfordkarel)
+[![GitHub license](https://img.shields.io/github/license/TylerYep/stanfordkarel)](https://github.com/TylerYep/stanfordkarel/blob/main/LICENSE)
+[![Downloads](https://pepy.tech/badge/stanfordkarel)](https://pepy.tech/project/stanfordkarel)
 
-1. Configure at least `P4PORT` and `P4USER` (see examples below)
-2. Provision with credentials - a `P4TICKETS` file is recommended
-3. Optionally customise workspace mapping with `stream`, `sync` or `view` settings.
+This is a Python implementation of Karel for Stanford's CS 106A. This package is available on PyPI and allows you to run Karel programs without any additional setup!
 
-The `P4CLIENT`, `P4USER` and `P4PORT` used by the plugin are written to a [`P4CONFIG`](https://www.perforce.com/manuals/v16.2/cmdref/P4CONFIG.html) file at the workspace root and the `P4CONFIG` env var is set, so build scripts are able to automatically pick up configuration for any further interactions with Perforce.
+Huge props to @nick-bowman for rewriting this project from scratch!
 
-## Examples
+**StanfordKarel now supports:**
 
-### Configuration via env vars
+- Pip-installable package means you can run Karel programs from anywhere!
+- Solution code no longer needed to grade assignments - instead, the output worlds are compared.
+- Karel in ASCII! Plus autograder support.
+- Improved autograding, testing, linting, and auto-formatting.
+- Exception trace makes suggestions if you misspell a command (e.g. `turnLeft()` -> `turn_left()`).
 
-```yaml
-env:
-  P4PORT: perforce:1666
-  P4USER: username
+# Usage
 
-steps:
-  plugins:
-    - improbable-eng/perforce: ~
+`pip install stanfordkarel`
+
+# Documentation
+
+Follow the Karel tutorial on the
+[Karel Reader!](https://compedu.stanford.edu/karel-reader/docs/python/en/intro.html)
+
+## Running Karel
+
+First, ensure that StanfordKarel is correctly installed using pip.
+Any `.py` file can become a Karel program!
+
+**collect_newspaper_karel.py**
+
+```python
+from stanfordkarel import *
+
+
+def main():
+    """ Karel code goes here! """
+    turn_left()
+    move()
+    turn_left()
+
+
+if __name__ == "__main__":
+    run_karel_program()
 ```
 
-### Configuration via plugin
+Save the file and run:
 
-```yaml
-steps:
-  plugins:
-    - improbable-eng/perforce:
-      p4port: perforce:1666
-      p4user: username
+```
+python collect_newspaper_karel.py
 ```
 
-`P4PORT` may also be configured by setting `BUILDKITE_REPO` for your pipeline.
+![Karel Program](images/karel_program.png)
 
-## Configuration
+## Available Commands
 
-### Basic
+| Karel Commands       |                        |                          |
+| -------------------- | ---------------------- | ------------------------ |
+| `move()`             | `right_is_clear()`     | `facing_east()`          |
+| `turn_left()`        | `right_is_blocked()`   | `not_facing_east()`      |
+| `put_beeper()`       | `beepers_present()`    | `facing_west()`          |
+| `pick_beeper()`      | `no_beepers_present()` | `not_facing_west()`      |
+| `front_is_clear()`   | `beepers_in_bag()`     | `facing_south()`         |
+| `front_is_blocked()` | `no_beepers_in_bag()`  | `not_facing_south()`     |
+| `left_is_clear()`    | `facing_north()`       | `paint_corner(color)`    |
+| `left_is_blocked()`  | `not_facing_north()`   | `corner_color_is(color)` |
 
-#### `p4user/p4port/p4tickets/p4trust` (optional, string)
+### Folder structure
 
-Override configuration at the User Environment level. May be overridden by P4CONFIG or P4ENVIRO files.
+You can set a default world by passing a world name to run_karel_program,
+e.g. `run_karel_program("collect_newspaper_karel")`
 
-See [p4 set](https://www.perforce.com/manuals/cmdref/Content/CmdRef/p4_set.html?Highlight=precedence) for more on system variables and precedence.
+Worlds should be saved/loaded in a `worlds/` folder in the same folder as the file being run.
 
-#### `fingerprint` (optional, string)
+- `assignment1/`
+  - `worlds/` (additional worlds go here)
+    - `collect_newspaper_karel.w`
+    - `collect_newspaper_karel_end.w`
+  - `collect_newspaper_karel.py`
 
-Supply a trusted p4 server fingerprint to ensure the server the client connects to has not been MITM'd.
+## Creating Worlds
 
-#### `stream` (optional, string)
+If using the pip-installed version, create a Python file containing:
 
-Which p4 stream to sync, e.g. `//dev/minimal`. Can be overridden by `view`.
+```python
+from stanfordkarel.world_editor import run_world_editor
 
-#### `sync` (optional, []string)
-
-List of paths to sync, useful when only a subset of files in the clients view are required.
-
-```yaml
-sync:
-  - //dev/minimal/.buildkite/...
-  - //dev/minimal/scripts/...
+if __name__ == "__main__":
+    run_world_editor()
 ```
 
-#### `view` (optional, string)
+Then run `python world_editor.py`.
 
-Custom workspace view. Must consist of concrete depot paths. Overrides `stream`.
+![World Editor](images/world_editor.png)
 
-```yaml
-view: >-
-  //dev/project/... project/...
-  //dev/vendor/... vendor/...
-```
+## Grading
 
-### Advanced
+`./autograde` runs the available tests using pytest in the `tests/` folder and prints out any output differences in the world.
 
-#### `client_options` (optional, string)
+### Functionality
 
-Default: `clobber`.
+The tests use the student's code and the expected world output to determine correctness. If the output is not the same, the test driver will print out an ASCII representation of the differences.
 
-Additional options for the client workspace, see [Options field](https://www.perforce.com/manuals/cmdref/Content/CmdRef/p4_client.html?#Options2).
+![Autograder](images/autograder.png)
 
-```yaml
-client_options: noclobber nowriteall
-```
+### Style
 
-#### `client_type` (optional, string)
+The autograde command also runs the builtin Karel Style Checker that performs linting automatically.
 
-Default: `writeable`.
+## Development
 
-`readonly` and `partitioned` client workspaces can be used to reduce impact of automated build systems on Perforce server performance.
-See related article [Readonly and Partitioned Client Workspaces](https://community.perforce.com/s/article/15372).
+Everything important is located in `stanfordkarel/`.
 
-Note that `writeable` client workspaces must be deleted and re-created to change to `readonly` or `partitioned` and vice versa.
+- Python 3.5+ is required because of `importlib.util.module_from_spec`
+- Python 3.6+ is required for f-strings.
+- Python 3.7+ is required for type annotations.
+- `stanfordkarel/` is the exported package, which contains all of the available functions and commands for students to use.
+- `karel_application.py` is responsible for loading student code and displaying it to the screen.
 
-Note that `readonly` or `partitioned` workspaces do not appear in the `db.have` table, which prevents them from being used as a revision specifier.
+# Contributing
 
-This adds a caveat if you wish to re-use workspace data across different machines: the original client which populated that workspace must have been `writeable`.
+All issues and pull requests are much appreciated!
 
-(e.g. If a disk with existing workspace data is attached to a new machine, the plugin will create a new client, read the old workspace name from P4CONFIG and `p4 flush //...@<old-workspace>`. The flush command fails if the old workspace was not of type `writeable`)
+- First, run `pre-commit install`.
+- To see test coverage scripts and other auto-formatting tools, use `pre-commit run`.
+- To run all tests, run `pytest`.
 
-#### `parallel` (optional, string)
+## Future Milestones
 
-Default: `0` (no parallelism)
+In the future, I hope to add:
 
-Number of threads to use for parallel sync operations. High values may affect Perforce server performance.
-
-#### `share_workspace` (optional, bool)
-
-Default: `no`
-
-Allow multiple Buildkite pipelines to share each stream-specific client workspace.
-
-Useful to avoid syncing duplicate data for large workspaces.
-
-Can only be used with stream workspaces and when no more than one buildkite-agent process is running on that machine.
-
-#### `stream_switching` (optional, bool)
-
-Default: `no`
-
-Allows multiple Buildkite pipelines to share a single client workspace, switching streams as required.
-
-Must have `share_workspace: yes` to take effect.
-
-## Triggering Builds
-
-There are a few options for triggering builds that use this plugin, in this order from least valuable but most convenient to most valuable but least convenient.
-
-### Manual
-
-Relies on people within your team manually clicking `New Build` within the BuildKite UI.
-
-* To build current head revision on the server - accept the defaults.
-* To build a specific revision - paste the revision number into the `Commit` textbox.
-  * Note you can also use more abstract p4 revision specifiers such as `@labelname` or `@datespec`
-* To build a shelved changelist - paste your changelist number into the `Branch` textbox.
-
-### Schedule
-
-[Scheduled builds](https://buildkite.com/docs/pipelines/scheduled-builds) with a cron in buildkite - this requires no additional setup, but provides the slowest response time between a change being made and a build triggered.
-
-### Polling
-
-A service polls your perforce for the current head revision and POSTs to the Buildkite API to trigger builds for any new changes. Note that you will need to store state to avoid duplicate and skipped builds.
-
-### P4 Trigger
-
-Set up a `p4 trigger` which POSTs to the buildkite API to trigger a build. See [p4 triggers](https://www.perforce.com/manuals/v18.1/cmdref/Content/CmdRef/p4_triggers.html) for more information. Note that this will require admin access to the Perforce server.
-
-See [examples](./examples) for sample p4 trigger scripts.
-
-## Contributing
-
-### OSX
-
-Run `dev/setup_env_osx.sh`
-
-Python [virtualenv](https://docs.python.org/3/tutorial/venv.html) `.dev-venv` for running tests will be created at repo root.
-
-Run the `test_server_fixture` unit test to check everything is setup correctly:
-
-```bash
-source .dev-venv/bin/activate
-pytest python/test_perforce.py -k test_server_fixture
-```
-
-### Linux/Windows
-
-TBC, feedback welcome.
-
-### Suggested workflow
-
-Making changes to `python/`
-
-* Read implementation of `test_server_fixture` in `test_perforce.py`
-* Write unit test in `test_perforce.py`, optionally making changes to the test fixture if required
-* Implement new functionality
-* Iterate via unit test
-
-Making changes to `hooks/` and scripts called by hooks
-
-* Add entries to local-pipeline.yml to test new behaviour, if relevant
-* `make` to start p4d on localhost:1666, vendor the plugin, run the pipeline and kill p4d.
+- Automatic student style checking
+- Ways of determining the student's strategy or approach from observing Karel movements
+- Autograde more worlds, broken down by assignment
+- Allow students to autograde their own work
+- Accessibility for visually-impaired students

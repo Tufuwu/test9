@@ -1,81 +1,48 @@
----
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
-
-# ignore:
-# vendor'd code (that has vendor in its path)
-exclude: vendor
-
 repos:
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.25.0
+  - repo: local
     hooks:
-      - id: yamllint
-        args:
-          - --format=parsable
-          - --strict
+      - id: pyupgrade
+        name: pyupgrade
+        entry: pyupgrade --py38-plus
+        language: python
+        types: [python]
 
-  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-    rev: 0.1.0  # or higher tag
-    hooks:
-      - id: yamlfmt
-        args:
-          - --mapping=2
-          - --sequence=4
-          - --offset=2
-          - --width=1200    # match .yamllint.yaml; we don't care about line-length.
-        exclude: repocop.yaml
+      - id: isort
+        name: isort
+        entry: isort
+        language: python
+        types: [python]
 
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.3.0
-    hooks:
-      - id: check-added-large-files
-      - id: check-byte-order-marker
-      - id: check-case-conflict
-      - id: check-executables-have-shebangs
-      - id: check-json
-      - id: check-merge-conflict
-      - id: check-symlinks
-      - id: detect-private-key
-      - id: end-of-file-fixer
-      - id: forbid-new-submodules
-      - id: mixed-line-ending
-      - id: pretty-format-json
-        args:
-          - --autofix
-      - id: sort-simple-yaml
-      - id: trailing-whitespace
-
-  - repo: https://github.com/syntaqx/git-hooks
-    rev: v0.0.16
-    hooks:
-      - id: forbid-binary
-        # Exclude png and server.zip forbid, we can check these in.
-        exclude: ^.+\.(png|server\.zip)$
-      # See checks in shellcheck wiki: https://github.com/koalaman/shellcheck/wiki/
-      - id: shellcheck
-      - id: shfmt
-        # do not use these args (yet):
-        # -s, simplify code
-        # -mn, minify to reduce its size
-        args:
-          - -w      # autofix in place
-          - -d      # show diff
-          - -i=2    # indent 2 spaces
-
-  - repo: https://github.com/PyCQA/pylint
-    rev: pylint-2.6.0
-    hooks:
-      - id: pylint
-
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.4
-    hooks:
-      - id: flake8
-
-  - repo: https://github.com/psf/black
-    rev: 20.8b1
-    hooks:
       - id: black
-        args:
-          - --skip-string-normalization
+        name: black
+        entry: black -C
+        language: python
+        types: [python]
+
+      - id: flake8
+        name: flake8
+        entry: flake8
+        language: python
+        types: [python]
+
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: python
+        types: [python]
+        require_serial: true
+
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: python
+        types: [python]
+
+      - id: pytest
+        name: pytest
+        entry: pytest --cov=stanfordkarel --cov-report=html --durations=0
+        language: python
+        types: [python]
+        always_run: true
+        pass_filenames: false
+        verbose: true
