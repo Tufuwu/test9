@@ -1,197 +1,487 @@
-# Apache Airavata Django Portal
+pytorch_memlab
+======
+[![Build Status](https://travis-ci.com/Stonesjtu/pytorch_memlab.svg?token=vyTdxHbi1PCRzV6disHp&branch=master)](https://travis-ci.com/Stonesjtu/pytorch_memlab)
+![PyPI](https://img.shields.io/pypi/v/pytorch_memlab.svg)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Stonesjtu/pytorch_memlab.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Stonesjtu/pytorch_memlab/context:python)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/pytorch_memlab.svg)
 
-![Build Status](https://github.com/apache/airavata-django-portal/actions/workflows/build-and-test.yaml/badge.svg)
-[![Build Status](https://readthedocs.org/projects/apache-airavata-django-portal/badge/?version=latest)](https://apache-airavata-django-portal.readthedocs.io/en/latest/?badge=latest)
+A simple and accurate **CUDA** memory management laboratory for pytorch,
+it consists of different parts about the memory:
 
-The Airavata Django Portal is a web interface to the
-[Apache Airavata](http://airavata.apache.org/) API implemented using the Django
-web framework. The intention is that the Airavata Django Portal can be used as
-is for a full featured web based science gateway but it can also be customized
-through various plugins to add more domain specific functionality as needed.
+- Features:
 
-## Getting Started
+  - Memory Profiler: A `line_profiler` style CUDA memory profiler with simple API.
+  - Memory Reporter: A reporter to inspect tensors occupying the CUDA memory.
+  - Courtesy: An interesting feature to temporarily move all the CUDA tensors into
+    CPU memory for courtesy, and of course the backward transferring.
+  - IPython support through `%mlrun`/`%%mlrun` line/cell magic
+    commands.
 
-The following steps will help you quickly get started with running the Airavata
-Django Portal locally. This will allow you to try it out and can also be used as
-a development environment. If you just want to run the Airavata Django Portal
-locally, see the Docker instructions below for a more simplified approach.
 
-The Airavata Django Portal works with Python versions 3.6, 3.7, 3.8 and 3.9.
-You'll need one of these versions installed locally.
+- Table of Contents
+  * [Installation](#installation)
+  * [User-Doc](#user-doc)
+    + [Memory Profiler](#memory-profiler)
+    + [IPython support](#ipython-support)
+    + [Memory Reporter](#memory-reporter)
+    + [Courtesy](#courtesy)
+    + [ACK](#ack)
+  * [CHANGES](#changes)
 
-You'll also need Node.js and yarn to build the JavaScript frontend code. Please
-install
-[the most recent LTS version of Node.js](https://nodejs.org/en/download/). You
-can also use [nvm](https://github.com/nvm-sh/nvm) to manage the Node.js install.
-If you have nvm installed you can run `nvm install && nvm use` before running
-any yarn commands. See
-[the Yarn package manager](https://classic.yarnpkg.com/lang/en/) for information
-on how to install Yarn 1 (Classic).
+Installation
+-----
 
-1.  Checkout this project and create a virtual environment.
-
-    ```
-    git clone https://github.com/apache/airavata-django-portal.git
-    cd airavata-django-portal
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install --upgrade pip setuptools wheel
-    pip install -r requirements.txt
-    ```
-
-    - **macOS note**: to install the MySQL dependencies you need to have the
-      MySQL development headers and libraries installed. Also, on macOS you need
-      to have openssl installed. See the
-      [mysqlclient-python installation notes](https://github.com/PyMySQL/mysqlclient-python#install)
-      for more details.
-
-2.  Create a local settings file.
-
-    - Option 1 (**recommended**). The best way to get a local settings file is
-      to download one from an existing Airavata Django Portal instance. If you
-      have Admin access, you can log in, go to _Settings_ and then _Developer
-      Console_ (/admin/developers) and download a `settings_local.py` file for
-      local development. Save it to the `django_airavata/` directory.
-
-    - Option 2. Otherwise, if you know the hostname and ports of an Airavata
-      deployment, you can copy `django_airavata/settings_local.py.sample` to
-      `django_airavata/settings_local.py` and edit the contents to match your
-      Keycloak and Airavata server deployments.
-
-      ```
-      cp django_airavata/settings_local.py.sample django_airavata/settings_local.py
-      ```
-
-3.  Run Django migrations
-
-    ```
-    python manage.py migrate
-    ```
-
-4.  Build the JavaScript sources. There are a few JavaScript packages in the
-    source tree, colocated with the Django apps in which they are used. The
-    `build_js.sh` script will build them all.
-
-    ```
-    ./build_js.sh
-    ```
-
-    - **Window note**: on Windows, run `.\build_js.bat` instead
-
-5.  Load the default Wagtail CMS pages.
-
-    ```
-    python manage.py load_cms_data new_default_theme
-    ```
-
-6.  Run the server
-
-    ```
-    python manage.py runserver
-    ```
-
-7.  Point your browser to http://localhost:8000.
-
-## Docker instructions
-
-To run the Django Portal as a Docker container, you need a `settings_local.py`
-file which you can create from the `settings_local.py.sample` file. Then run the
-following:
-
-1. Build the Docker image.
-
-   ```
-   docker build -t airavata-django-portal .
-   ```
-
-2. Run the Docker container.
-
-   ```
-   docker run -d \
-     -v /path/to/my/settings_local.py:/code/django_airavata/settings_local.py \
-     -p 8000:8000 airavata-django-portal
-   ```
-
-3. Load an initial set of Wagtail pages (theme). You only need to do this when
-   starting the container for the first time.
-
-   ```
-   docker exec CONTAINER_ID python manage.py load_cms_data new_default_theme
-   ```
-
-4. Point your browser to http://localhost:8000.
-
-### Multi-architecture images
-
-To build and push
-[multi-architecture images](https://docs.docker.com/desktop/multi-arch/), first
-create a builder (one time)
-
-```
-docker buildx create --name mybuilder --use
+- Released version:
+```bash
+pip install pytorch_memlab
 ```
 
-then run
-
-```
-docker buildx build --pull --platform linux/amd64,linux/arm64 -t TAG --push .
-```
-
-## Documentation
-
-Documentation currently is available at
-https://apache-airavata-django-portal.readthedocs.io/en/latest/ (built from the
-'docs' directory).
-
-To build the documentation locally, first
-[set up a development environment](#setting-up-development-environment), then
-run the following in the root of the project:
-
-```
-mkdocs serve
+- Newest version:
+```bash
+pip install git+https://github.com/stonesjtu/pytorch_memlab
 ```
 
-## Feedback
+What's for
+-----
 
-Please send feedback to the mailing list at <dev@airavata.apache.org>. If you
-encounter bugs or would like to request a new feature you can do so in the
-[Airavata Jira project](https://issues.apache.org/jira/projects/AIRAVATA) (just
-select the _Django Portal_ component when you make your issue).
+Out-Of-Memory errors in pytorch happen frequently, for new-bees and
+experienced programmers. A common reason is that most people don't really
+learn the underlying memory management philosophy of pytorch and GPUs.
+They wrote memory in-efficient codes and complained about pytorch eating too
+much CUDA memory.
 
-## Customization
+In this repo, I'm going to share some useful tools to help debugging OOM, or
+to inspect the underlying mechanism if anyone is interested in.
 
-See the Customization Guide in the
-[documentation](https://apache-airavata-django-portal.readthedocs.io/en/latest/)
-for information on how to customize the Airavata Django Portal user interface.
-To get started we recommend going through the
-[Gateways Tutorial](https://apache-airavata-django-portal.readthedocs.io/en/latest/tutorial/gateways_tutorial/).
-This tutorial covers the different ways that the user interface can be
-customized.
 
-## Contributing
+User-Doc
+-----
 
-For general information on how to contribute, please see the
-[Get Involved](http://airavata.apache.org/get-involved.html) section of the
-Apache Airavata website.
+### Memory Profiler
 
-### Setting up development environment
+The memory profiler is a modification of python's `line_profiler`, it gives
+the memory usage info for each line of code in the specified function/method.
 
-Run `pip install -r requirements-dev.txt` to install development and testing
-libraries.
+#### Sample:
 
-Use a code editor that integrates with editorconfig and flake8. I also recommend
-autopep8 for automatically formatting code to follow the PEP8 guidelines.
-Prettier is used for formatting JavaScript and Vue.js code.
+```python
+import torch
+from pytorch_memlab import LineProfiler
 
-See the docs for more information on
-[developing the backend](./docs/dev/developing_backend.md) and
-[frontend code](./docs/dev/developing_frontend.md).
+def inner():
+    torch.nn.Linear(100, 100).cuda()
 
-### Running Django Tests
+def outer():
+    linear = torch.nn.Linear(100, 100).cuda()
+    linear2 = torch.nn.Linear(100, 100).cuda()
+    inner()
 
-Run `./runtests.py` to run the Django unit tests.
+with LineProfiler(outer, inner) as prof:
+    outer()
+prof.display()
+```
 
-## License
+After the script finishes or interrupted by keyboard, it gives the following
+profiling info if you're in a Jupyter notebook:
 
-The Apache Airavata Django Portal is licensed under the Apache 2.0 license. For
-more information see the [LICENSE](LICENSE) file.
+<p align="center"><img src="readme-output.png" width="640"></p>
+
+or the following info if you're in a text-only terminal:
+
+```
+## outer
+
+active_bytes reserved_bytes line  code
+         all            all
+        peak           peak
+       0.00B          0.00B    7  def outer():
+      40.00K          2.00M    8      linear = torch.nn.Linear(100, 100).cuda()
+      80.00K          2.00M    9      linear2 = torch.nn.Linear(100, 100).cuda()
+     120.00K          2.00M   10      inner()
+
+
+## inner
+
+active_bytes reserved_bytes line  code
+         all            all
+        peak           peak
+      80.00K          2.00M    4  def inner():
+     120.00K          2.00M    5      torch.nn.Linear(100, 100).cuda()
+```
+
+An explanation of what each column means can be found in the [Torch documentation](https://pytorch.org/docs/stable/cuda.html#torch.cuda.memory_stats). The name of any field from `memory_stats()`
+can be passed to `display()` to view the corresponding statistic.
+
+If you use `profile` decorator, the memory statistics are collected during
+multiple runs and only the maximum one is displayed at the end.
+We also provide a more flexible API called `profile_every` which prints the
+memory info every *N* times of function execution. You can simply replace
+`@profile` with `@profile_every(1)` to print the memory usage for each
+execution.
+
+The `@profile` and `@profile_every` can also be mixed to gain more control
+of the debugging granularity.
+
+- You can also add the decorator in the module class:
+
+```python
+class Net(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+    @profile
+    def forward(self, inp):
+        #do_something
+```
+
+- The *Line Profiler* profiles the memory usage of CUDA device 0 by default,
+you may want to switch the device to profile by `set_target_gpu`. The gpu
+selection is globally,  which means you have to remember which gpu you are
+profiling on during the whole process:
+
+```python
+import torch
+from pytorch_memlab import profile, set_target_gpu
+@profile
+def func():
+    net1 = torch.nn.Linear(1024, 1024).cuda(0)
+    set_target_gpu(1)
+    net2 = torch.nn.Linear(1024, 1024).cuda(1)
+    set_target_gpu(0)
+    net3 = torch.nn.Linear(1024, 1024).cuda(0)
+
+func()
+```
+
+
+More samples can be found in `test/test_line_profiler.py`
+
+### IPython support
+
+Make sure you have `IPython` installed, or have installed `pytorch-memlab` with
+`pip install pytorch-memlab[ipython]`.
+
+First, load the extension:
+
+```python
+%load_ext pytorch_memlab
+```
+
+This makes the `%mlrun` and `%%mlrun` line/cell magics available for use. For
+example, in a new cell run the following to profile an entire cell
+
+```python
+%%mlrun -f func
+import torch
+from pytorch_memlab import profile, set_target_gpu
+def func():
+    net1 = torch.nn.Linear(1024, 1024).cuda(0)
+    set_target_gpu(1)
+    net2 = torch.nn.Linear(1024, 1024).cuda(1)
+    set_target_gpu(0)
+    net3 = torch.nn.Linear(1024, 1024).cuda(0)
+```
+
+Or you can invoke the profiler for a single statement on via the `%mlrun` cell
+magic.
+
+```python
+import torch
+from pytorch_memlab import profile, set_target_gpu
+def func(input_size):
+    net1 = torch.nn.Linear(input_size, 1024).cuda(0)
+%mlrun -f func func(2048)
+```
+
+See `%mlrun?` for help on what arguments are supported. You can set the GPU
+device to profile, dump profiling results to a file, and return the
+`LineProfiler` object for post-profile inspection.
+
+Find out more by checking out the [demo Jupyter notebook](./demo.ipynb)
+
+
+### Memory Reporter
+
+As *Memory Profiler* only gives the overall memory usage information by lines,
+a more low-level memory usage information can be obtained by *Memory Reporter*.
+
+*Memory reporter* iterates all the `Tensor` objects and gets the underlying
+`Storage` object to get the actual memory usage instead of the surface
+`Tensor.size`.
+
+#### Sample
+
+- A minimal one:
+
+```python
+import torch
+from pytorch_memlab import MemReporter
+linear = torch.nn.Linear(1024, 1024).cuda()
+reporter = MemReporter()
+reporter.report()
+```
+outputs:
+```
+Element type                                            Size  Used MEM
+-------------------------------------------------------------------------------
+Storage on cuda:0
+Parameter0                                      (1024, 1024)     4.00M
+Parameter1                                           (1024,)     4.00K
+-------------------------------------------------------------------------------
+Total Tensors: 1049600  Used Memory: 4.00M
+The allocated memory on cuda:0: 4.00M
+-------------------------------------------------------------------------------
+```
+
+- You can also pass in a model object for automatically name inference.
+
+```python
+import torch
+from pytorch_memlab import MemReporter
+
+linear = torch.nn.Linear(1024, 1024).cuda()
+inp = torch.Tensor(512, 1024).cuda()
+# pass in a model to automatically infer the tensor names
+reporter = MemReporter(linear)
+out = linear(inp).mean()
+print('========= before backward =========')
+reporter.report()
+out.backward()
+print('========= after backward =========')
+reporter.report()
+```
+
+outputs:
+```
+========= before backward =========
+Element type                                            Size  Used MEM
+-------------------------------------------------------------------------------
+Storage on cuda:0
+weight                                          (1024, 1024)     4.00M
+bias                                                 (1024,)     4.00K
+Tensor0                                          (512, 1024)     2.00M
+Tensor1                                                 (1,)   512.00B
+-------------------------------------------------------------------------------
+Total Tensors: 1573889  Used Memory: 6.00M
+The allocated memory on cuda:0: 6.00M
+-------------------------------------------------------------------------------
+========= after backward =========
+Element type                                            Size  Used MEM
+-------------------------------------------------------------------------------
+Storage on cuda:0
+weight                                          (1024, 1024)     4.00M
+weight.grad                                     (1024, 1024)     4.00M
+bias                                                 (1024,)     4.00K
+bias.grad                                            (1024,)     4.00K
+Tensor0                                          (512, 1024)     2.00M
+Tensor1                                                 (1,)   512.00B
+-------------------------------------------------------------------------------
+Total Tensors: 2623489  Used Memory: 10.01M
+The allocated memory on cuda:0: 10.01M
+-------------------------------------------------------------------------------
+```
+
+
+- The reporter automatically deals with the sharing weights parameters:
+
+```python
+import torch
+from pytorch_memlab import MemReporter
+
+linear = torch.nn.Linear(1024, 1024).cuda()
+linear2 = torch.nn.Linear(1024, 1024).cuda()
+linear2.weight = linear.weight
+container = torch.nn.Sequential(
+    linear, linear2
+)
+inp = torch.Tensor(512, 1024).cuda()
+# pass in a model to automatically infer the tensor names
+
+out = container(inp).mean()
+out.backward()
+
+# verbose shows how storage is shared across multiple Tensors
+reporter = MemReporter(container)
+reporter.report(verbose=True)
+```
+
+outputs:
+```
+Element type                                            Size  Used MEM
+-------------------------------------------------------------------------------
+Storage on cuda:0
+0.weight                                        (1024, 1024)     4.00M
+0.weight.grad                                   (1024, 1024)     4.00M
+0.bias                                               (1024,)     4.00K
+0.bias.grad                                          (1024,)     4.00K
+1.bias                                               (1024,)     4.00K
+1.bias.grad                                          (1024,)     4.00K
+Tensor0                                          (512, 1024)     2.00M
+Tensor1                                                 (1,)   512.00B
+-------------------------------------------------------------------------------
+Total Tensors: 2625537  Used Memory: 10.02M
+The allocated memory on cuda:0: 10.02M
+-------------------------------------------------------------------------------
+```
+
+- You can better understand the memory layout for more complicated module:
+
+```python
+import torch
+from pytorch_memlab import MemReporter
+
+lstm = torch.nn.LSTM(1024, 1024).cuda()
+reporter = MemReporter(lstm)
+reporter.report(verbose=True)
+inp = torch.Tensor(10, 10, 1024).cuda()
+out, _ = lstm(inp)
+out.mean().backward()
+reporter.report(verbose=True)
+```
+
+As shown below, the `(->)` indicates the re-use of the same storage back-end
+outputs:
+```
+Element type                                            Size  Used MEM
+-------------------------------------------------------------------------------
+Storage on cuda:0
+weight_ih_l0                                    (4096, 1024)    32.03M
+weight_hh_l0(->weight_ih_l0)                    (4096, 1024)     0.00B
+bias_ih_l0(->weight_ih_l0)                           (4096,)     0.00B
+bias_hh_l0(->weight_ih_l0)                           (4096,)     0.00B
+Tensor0                                       (10, 10, 1024)   400.00K
+-------------------------------------------------------------------------------
+Total Tensors: 8499200  Used Memory: 32.42M
+The allocated memory on cuda:0: 32.52M
+Memory differs due to the matrix alignment
+-------------------------------------------------------------------------------
+Element type                                            Size  Used MEM
+-------------------------------------------------------------------------------
+Storage on cuda:0
+weight_ih_l0                                    (4096, 1024)    32.03M
+weight_ih_l0.grad                               (4096, 1024)    32.03M
+weight_hh_l0(->weight_ih_l0)                    (4096, 1024)     0.00B
+weight_hh_l0.grad(->weight_ih_l0.grad)          (4096, 1024)     0.00B
+bias_ih_l0(->weight_ih_l0)                           (4096,)     0.00B
+bias_ih_l0.grad(->weight_ih_l0.grad)                 (4096,)     0.00B
+bias_hh_l0(->weight_ih_l0)                           (4096,)     0.00B
+bias_hh_l0.grad(->weight_ih_l0.grad)                 (4096,)     0.00B
+Tensor0                                       (10, 10, 1024)   400.00K
+Tensor1                                       (10, 10, 1024)   400.00K
+Tensor2                                        (1, 10, 1024)    40.00K
+Tensor3                                        (1, 10, 1024)    40.00K
+-------------------------------------------------------------------------------
+Total Tensors: 17018880         Used Memory: 64.92M
+The allocated memory on cuda:0: 65.11M
+Memory differs due to the matrix alignment
+-------------------------------------------------------------------------------
+```
+
+NOTICE:
+> When forwarding with `grad_mode=True`, pytorch maintains tensor buffers for
+> future Back-Propagation, in C level. So these buffers are not going to be
+> managed or collected by pytorch. But if you store these intermediate results
+> as python variables, then they will be reported.
+
+- You can also filter the device to report on by passing extra arguments:
+`report(device=torch.device(0))`
+
+- A failed example due to pytorch's C side tensor buffers
+
+In the following example, a temp buffer is created at `inp * (inp + 2)` to
+store both `inp` and `inp + 2`, unfortunately python only knows the existence
+of inp, so we have *2M* memory lost, which is the same size of Tensor `inp`.
+
+```python
+import torch
+from pytorch_memlab import MemReporter
+
+linear = torch.nn.Linear(1024, 1024).cuda()
+inp = torch.Tensor(512, 1024).cuda()
+# pass in a model to automatically infer the tensor names
+reporter = MemReporter(linear)
+out = linear(inp * (inp + 2)).mean()
+reporter.report()
+```
+
+outputs:
+```
+Element type                                            Size  Used MEM
+-------------------------------------------------------------------------------
+Storage on cuda:0
+weight                                          (1024, 1024)     4.00M
+bias                                                 (1024,)     4.00K
+Tensor0                                          (512, 1024)     2.00M
+Tensor1                                                 (1,)   512.00B
+-------------------------------------------------------------------------------
+Total Tensors: 1573889  Used Memory: 6.00M
+The allocated memory on cuda:0: 8.00M
+Memory differs due to the matrix alignment or invisible gradient buffer tensors
+-------------------------------------------------------------------------------
+```
+
+
+### Courtesy
+
+Sometimes people would like to preempt your running task, but you don't want
+to save checkpoint and then load, actually all they need is GPU resources (
+typically CPU resources and CPU memory is always spare in GPU clusters), so
+you can move all your workspaces from GPU to CPU and then halt your task until
+a restart signal is triggered, instead of saving&loading checkpoints and
+bootstrapping from scratch.
+
+Still developing..... But you can have fun with:
+```python
+from pytorch_memlab import Courtesy
+
+iamcourtesy = Courtesy()
+for i in range(num_iteration):
+    if something_happens:
+        iamcourtesy.yield_memory()
+        wait_for_restart_signal()
+        iamcourtesy.restore()
+```
+
+#### Known Issues
+
+- As is stated above in `Memory_Reporter`, intermediate tensors are not covered
+properly, so you may want to insert such courtesy logics after `backward` or
+before `forward`.
+- Currently the CUDA context of pytorch requires about 1 GB CUDA memory, which
+means even all Tensors are on CPU, 1GB of CUDA memory is wasted, :-(. However
+it's still under investigation if I can fully destroy the context and then
+re-init.
+
+
+### ACK
+
+I suffered a lot debugging weird memory usage during my 3-years of developing
+efficient Deep Learning models, and of course learned a lot from the great
+open source community.
+
+## CHANGES
+
+
+##### 0.2.4 (2021-10-28)
+  - Fix colab error (#35)
+  - Support python3.8 (#38)
+  - Support sparse tensor (#30)
+##### 0.2.3 (2020-12-01)
+  - Fix name mapping in `MemReporter` (#24)
+  - Fix reporter without model input (#22 #25)
+##### 0.2.2 (2020-10-23)
+  - Fix memory leak in `MemReporter`
+##### 0.2.1 (2020-06-18)
+  - Fix `line_profiler` not found
+##### 0.2.0 (2020-06-15)
+  - Add jupyter notebook figure and ipython support
+##### 0.1.0 (2020-04-17)
+  - Add ipython magic support (#8)
+##### 0.0.4 (2019-10-08)
+  - Add gpu switch for line-profiler(#2)
+  - Add device filter for reporter
+##### 0.0.3 (2019-06-15)
+  - Install dependency for pip installation
+##### 0.0.2 (2019-06-04)
+  - Fix statistics shift in loop
+##### 0.0.1 (2019-05-28)
+  - initial release

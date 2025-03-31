@@ -1,56 +1,37 @@
-import os
+from setuptools import setup, find_packages
 
-from setuptools import find_packages, setup
-
-
-def read(fname):
-    with open(os.path.join(os.path.dirname(__file__), fname)) as f:
-        return f.read()
-
+try:
+    long_description = open('README.md').read()
+except FileNotFoundError:
+    long_description = ''
 
 setup(
-    name='airavata-django-portal',
-    version='0.1',
-    url='https://github.com/apache/airavata-django-portal',
-    author='Apache Software Foundation',
-    author_email='dev@airavata.apache.org',
-    description=('The Airavata Django Portal is a web interface to the '
-                 'Apache Airavata API implemented using the Django web '
-                 'framework.'),
-    long_description=read('README.md'),
-    license='Apache License 2.0',
-    packages=find_packages(),
+    name='pytorch_memlab',
+    version='0.2.4',
+    licence='MIT',
+    description='A lab to do simple and accurate memory experiments on pytorch',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    classifiers=[
+        "Programming Language :: Python",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        ],
+    keywords='pytorch memory profile',
+    author='Kaiyu Shi',
+    author_email='skyisno.1@gmail.com',
+    url='https://github.com/Stonesjtu/pytorch_memlab',
+    license='MIT',
+    include_package_data=True,
+    zip_safe=True,
     install_requires=[
-            'Django',
-            'djangorestframework',
-            'requests',
-            'requests-oauthlib',
-            'thrift',
-            'thrift_connector',
-            'wagtail',
-            'wagtailfontawesome',
-            'jupyter',
-            'papermill',
-            "airavata-django-portal-sdk",
+        'setuptools',
+        'calmsize',
+        'pandas>=0.18',
+        'torch>=1.4',
     ],
     extras_require={
-        'dev': [
-            'flake8',
-            'flake8-isort'
-        ],
-        'mysql': [
-            'mysqlclient'
-        ]
+        'ipython': ['IPython>=0.13'],
+        'test': ['pytest'],
     },
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Environment :: Web Environment',
-        'Framework :: Django',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 3.6',
-        'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Internet :: WWW/HTTP :: WSGI :: Application'
-    ]
+    packages=find_packages(),
 )
