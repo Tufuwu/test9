@@ -1,5 +1,28 @@
-build/
-.*~
-.nox
+*.egg
+*.egg-info
+*.EGG
+*.EGG-INFO
+*.mo
 *.pyc
-__pycache__
+*.pyo
+*.swp
+bin
+build
+dist
+*~
+v/
+
+# dotenv
+.env
+
+# virtualenv
+.venv
+venv/
+ENV/
+
+.idea
+
+.coverage
+docs/html
+.tox
+cover/

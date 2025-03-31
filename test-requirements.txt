@@ -1,0 +1,6 @@
+pytest-runner
+pytest-cov
+sphinx
+flake8
+mock; python_version < '3.6'
+nose
