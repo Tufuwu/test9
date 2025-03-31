@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block head %}
+{{ super() }}
+<script>
+  function copyPassword(password) {
+    navigator.clipboard.writeText(password);
+  }
+</script>
+{% endblock %}
+
+{% block content %}
+{% if osx_ssl_warning %}
+<div class="alert alert-danger" style="text-align: center;">
+  <p>
+  Contacts.app and Calendar.app on macOS and Windows Calendar and Windows People on Windows require SSL even when explicitly disabled. <br/>
+  For more information please refer to the <a href="https://github.com/etesync/etesync-dav/blob/master/macos-instructions.md">macOS instructions</a>.
+  </p>
+  <p style="font-weight: bold;">
+  IMPORTANT: this operation will shutdown etesync-dav and require you to start it again.
+  </p>
+  <div>
+    <form method="post" action="{{ url_for('certgen') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <button class="btn btn-success">Setup SSL</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<div>
+  <h2>Welcome {{ username }}!</h2>
+  <p>
+  Add the DAV account to any application using the following credentials:
+  </p>
+  <ul>
+    <li>
+      <strong>Server:</strong>
+      Your DAV server, e.g:
+      <code>{{ server_url_example }}</code>
+    </li>
+    <li>
+      <strong>Username:</strong> {{ username }}
+    </li>
+    <li>
+      <strong>Password:</strong>
+      <button class="btn btn-sm btn-success" onclick="copyPassword('{{ password }}')">Copy Password</button>
+    </li>
+  </ul>
+  <p>
+  To see the available collections please view the <a style="min-width: 400px" href="{{ url_for('user_index', user=username) }}">collection list</a>.
+  </p>
+</div>
+{% endblock content %}

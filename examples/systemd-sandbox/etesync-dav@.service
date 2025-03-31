@@ -1,0 +1,69 @@
+# A systemd Unit file to install and start etesync-dav.
+#
+# This Unit is for those that want to isolate the etesync-dav code from
+# their system as much as possible, this is why DynamicUser and other
+# isolation options are present.
+# This unit is tested on systemd-245.4-4 and etesync-dav-0.16.0
+
+# Put this file in /etc/systemd/system/etesync-dav@.service and run:
+#    sudo systemctl daemon-reload
+#    sudo systemctl restart etesync-dav@$USER
+#    sudo systemctl enable etesync-dav@$USER
+# With the management UI at http://localhost:37358/, create your local user,
+# and retrieve the url and password for your calendar client.
+#
+# Developer notes:
+# With radicale master and libsystemd-dev will be able to use
+# systemd socket activation and thus avoid race conditions at startup:
+# https://github.com/Kozea/Radicale/commit/2275ba4f9323e87eeac61f8811a4cc2773061e70
+# Don't use the forking mode and the --daemon flag or logs go to /dev/null.
+[Unit]
+Description=EteSync CalDAV and CardDAV front-end/proxy for %i
+Documentation=https://github.com/etesync/etesync-dav
+After=network-online.target
+
+[Service]
+UMask=022
+RuntimeDirectory=%N
+CacheDirectory=%N
+# The pip3 install must be on a filesystem that is not mounted noexec, %t (/run) is mounted noexec
+Environment=HOME=%T/%N
+Environment=ETESYNC_DATA_DIR=%C/%N/data
+Environment=PIP_MODULES=etesync-dav
+Environment=CONFFILES="htpaswd etesync_creds"
+ExecStartPre=mkdir -p -m 0700 $HOME $ETESYNC_DATA_DIR
+ExecStartPre=+sh -c 'runuser -u %i -- sh -c "tar -C \\$HOME/.local/share/etesync-dav -hc $CONFFILES || tar -c --files-from /dev/null" > %t/%N/creds.tar'
+ExecStartPre=tar -C ${ETESYNC_DATA_DIR} --unlink-first -f %t/%N/creds.tar -x
+ExecStartPre=pip3 --cache-dir %C/%N/pip3-cache $PIP_ARGS install --no-warn-script-location $PIP_MODULES
+ExecStart=%T/%N/.local/bin/etesync-dav $EXTRA_ARGS
+
+# Some of these isolation options are from https://radicale.org/setup/
+DynamicUser=true
+RuntimeDirectoryPreserve=true
+DevicePolicy=closed
+CapabilityBoundingSet=
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+PrivateUsers=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectSystem=strict
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictRealtime=true
+# MemoryDenyWriteExecute=true
+SystemCallFilter=@system-service
+TemporaryFileSystem=/docker:ro /media:ro /opt:ro
+InaccessiblePaths=/mnt /boot
+MemoryHigh=512M
+CPUQuota=90%
+TasksMax=50
+TimeoutStartSec=10m
+
+Restart=on-failure
+RestartSec=30min 1s
+
+[Install]
+WantedBy=multi-user.target

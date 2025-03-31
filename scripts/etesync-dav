@@ -1,0 +1,165 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import logging
+
+import radicale
+from etesync_dav import radicale_main
+
+from etesync_dav.manage import Manager
+from etesync_dav.config import DATA_DIR, SERVER_HOSTS, HTPASSWD_FILE, SSL_KEY_FILE, SSL_CERT_FILE
+from etesync_dav.mac_helpers import has_ssl
+
+logger = logging.getLogger('etesync-dav')
+
+
+def manage(args):
+    import argparse
+    import getpass
+
+    manager = Manager()
+
+    def print_credentials(username, password):
+        print("User: {}\nPassword: {}".format(username, password))
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command",
+                        choices=('add', 'del', 'get', 'list'),
+                        help="Either add to add a user, del to remove a user, get to show login creds, " +
+                             "or list to list all users.")
+    parser.add_argument("username",
+                        nargs='?',
+                        help="The username used with EteSync")
+    parser.add_argument('--legacy', default=False, action='store_true',
+                        help="Use the legacy EteSync backend")
+    parser.add_argument("--password",
+                        help="Your EteSync account password")
+    parser.add_argument("--login-password",
+                        help="The password to login to the EteSync server (only valid in legacy mode)")
+    parser.add_argument("--encryption-password",
+                        help="The encryption password (only valid in legacy mode)")
+    args = parser.parse_args(args=args)
+
+    if args.command == 'add':
+        exists = manager.validate_username(args.username)
+        if exists:
+            raise RuntimeError("User already exists. Delete first if you'd like to override settings.")
+
+        if args.legacy:
+            login_password = (getattr(args, 'login_password') or
+                              getpass.getpass(prompt="Please enter the EteSync login password: "))
+            encryption_password = (getattr(args, 'encryption_password') or
+                                   getpass.getpass(prompt="Please enter your encryption password: "))
+
+            print_credentials(args.username, manager.add(args.username, login_password, encryption_password))
+        else:
+            if getattr(args, 'login_password') or getattr(args, 'encryption_password'):
+                raise RuntimeError("--encryption-password and --login-password are only valid in legacy mode!")
+
+            password = (getattr(args, 'password') or
+                        getpass.getpass(prompt="Please enter the EteSync account password: "))
+
+            print_credentials(args.username, manager.add_etebase(args.username, password))
+
+    elif args.command == 'del':
+        print("Deleting user")
+        manager.delete(args.username)
+
+    elif args.command == 'get':
+        print_credentials(args.username, manager.get(args.username))
+
+    elif args.command == 'list':
+        for user in manager.list():
+            print(user)
+
+
+def certgen(args):
+    from etesync_dav.mac_helpers import generate_cert, trust_cert
+    generate_cert()
+    trust_cert()
+
+
+if len(sys.argv) > 1 and sys.argv[1] == 'manage':
+    manage(sys.argv[2:])
+    sys.exit(0)
+
+
+if len(sys.argv) > 1 and sys.argv[1] == 'certgen':
+    certgen(sys.argv[2:])
+    sys.exit(0)
+
+
+if len(sys.argv) > 1 and sys.argv[1] == '--version':
+    import etesync_dav
+    print("EteSync DAV version: ", etesync_dav.__version__)
+    print("Radicale version: ", radicale.VERSION)
+    sys.exit(0)
+
+logfilename = os.getenv('ETESYNC_LOGFILE', None)
+if logfilename:
+    logfile = open(logfilename, 'a', encoding='utf-8')
+    sys.stdout = logfile
+    sys.stderr = logfile
+
+
+radicale_args = [
+    '--hosts', SERVER_HOSTS,
+
+    '--config', '',  # Prevent radicale from loading the default config
+
+    '--auth-type', 'htpasswd',
+    '--auth-htpasswd-filename', HTPASSWD_FILE,
+    '--auth-htpasswd-encryption', 'plain',
+
+    '--storage-type', 'etesync_dav.radicale.storage',
+
+    '--rights-type', 'etesync_dav.radicale.rights',
+]
+
+if not os.getenv('ETESYNC_NO_WEBUI', None):
+    radicale_args.extend([
+        '--web-type', 'etesync_dav.radicale.web'
+    ])
+else:
+    radicale_args.extend([
+        '--web-type', 'none'
+    ])
+
+if has_ssl():
+    radicale_args += [
+        '--ssl',
+        '--server-key', SSL_KEY_FILE,
+        '--server-certificate', SSL_CERT_FILE,
+    ]
+
+# If first run:
+if not os.path.exists(DATA_DIR):
+    # Init data if no data dir
+    Manager()
+    # Attempt to run the default web browser
+    import webbrowser
+    scheme = 'https' if has_ssl() else 'http'
+    url = 'localhost:37358'  # Not good to have it hardcoded, but will work for most people
+    admin_interface = '{}://{}'.format(scheme, url)
+    try:
+        webbrowser.open(admin_interface)
+    except Exception as e:
+        logger.exception(e)
+
+if sys.platform == 'darwin':
+    from threading import Thread
+    def machack():
+        try:
+            from PyObjCTools import AppHelper
+            AppHelper.runConsoleEventLoop()
+        except ImportError:
+            pass
+
+    thread = Thread(target=machack)
+    thread.setDaemon(True)
+    thread.start()
+
+radicale_main.run(radicale_args + sys.argv[1:])
+
+sys.exit(0)
