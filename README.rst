@@ -1,137 +1,63 @@
-.. image:: http://www.repostatus.org/badges/latest/active.svg
-    :target: http://www.repostatus.org/#active
-    :alt: Project Status: Active - The project has reached a stable, usable
-          state and is being actively developed.
+Address book plugin for Modoboa
+===============================
 
-.. image:: https://github.com/jwodder/javaproperties/workflows/Test/badge.svg?branch=master
-    :target: https://github.com/jwodder/javaproperties/actions?workflow=Test
-    :alt: CI Status
-
-.. image:: https://codecov.io/gh/jwodder/javaproperties/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/jwodder/javaproperties
-
-.. image:: https://img.shields.io/pypi/pyversions/javaproperties.svg
-    :target: https://pypi.org/project/javaproperties
-
-.. image:: https://img.shields.io/github/license/jwodder/javaproperties.svg?maxAge=2592000
-    :target: https://opensource.org/licenses/MIT
-    :alt: MIT License
-
-`GitHub <https://github.com/jwodder/javaproperties>`_
-| `PyPI <https://pypi.org/project/javaproperties>`_
-| `Documentation <https://javaproperties.readthedocs.io>`_
-| `Issues <https://github.com/jwodder/javaproperties/issues>`_
-| `Changelog <https://github.com/jwodder/javaproperties/blob/master/CHANGELOG.md>`_
-
-``javaproperties`` provides support for reading & writing |properties|_ (both
-the simple line-oriented format and XML) with a simple API based on the
-``json`` module — though, for recovering Java addicts, it also includes a
-``Properties`` class intended to match the behavior of |propclass|_ as much as
-is Pythonically possible.
-
-Previous versions of ``javaproperties`` included command-line programs for
-basic manipulation of ``.properties`` files.  As of version 0.4.0, these
-programs have been split off into a separate package, |clipkg|_.
-
+|gha| |codecov|
 
 Installation
-============
-``javaproperties`` requires Python 3.6 or higher.  Just use `pip
-<https://pip.pypa.io>`_ for Python 3 (You have pip, right?) to install
-``javaproperties``::
+------------
 
-    python3 -m pip install javaproperties
+Install this extension system-wide or inside a virtual environment by
+running the following command::
 
+  $ pip install modoboa-contacts
 
-Examples
-========
+Edit the settings.py file of your modoboa instance and apply the following modifications:
 
-Dump some keys & values (output order not guaranteed):
+- add ``modoboa_contacts`` inside the ``MODOBOA_APPS`` variable like this::
 
->>> properties = {"key": "value", "host:port": "127.0.0.1:80", "snowman": "☃", "goat": "🐐"}
->>> print(javaproperties.dumps(properties))
-#Mon Sep 26 14:57:44 EDT 2016
-key=value
-goat=\ud83d\udc10
-host\:port=127.0.0.1\:80
-snowman=\u2603
+    MODOBOA_APPS = (
+        'modoboa',
+        'modoboa.core',
+        'modoboa.lib',
+        'modoboa.admin',
+        'modoboa.relaydomains',
+        'modoboa.limits',
+        'modoboa.parameters',
+        # Extensions here
+        # ...
+        'modoboa_contacts',
+    )
 
-Load some keys & values:
+- Add the following at the end of the file::
 
->>> javaproperties.loads('''
-... #Mon Sep 26 14:57:44 EDT 2016
-... key = value
-... goat: \\ud83d\\udc10
-... host\\:port=127.0.0.1:80
-... #foo = bar
-... snowman   ☃
-... ''')
-{'goat': '🐐', 'host:port': '127.0.0.1:80', 'key': 'value', 'snowman': '☃'}
+    from modoboa_contacts import settings as modoboa_contacts_settings
+    modoboa_contacts_settings.apply(globals())
 
-Dump some properties to a file and read them back in again:
+Finally, run the following commands to setup the database tables::
 
->>> with open('example.properties', 'w', encoding='latin-1') as fp:
-...     javaproperties.dump(properties, fp)
-...
->>> with open('example.properties', 'r', encoding='latin-1') as fp:
-...     javaproperties.load(fp)
-...
-{'goat': '🐐', 'host:port': '127.0.0.1:80', 'key': 'value', 'snowman': '☃'}
+  $ cd <modoboa_instance_dir>
+  $ python manage.py migrate
+  $ python manage.py collectstatic
+  $ python manage.py load_initial_data
 
-Sort the properties you're dumping:
+For developers
+---------------
 
->>> print(javaproperties.dumps(properties, sort_keys=True))
-#Mon Sep 26 14:57:44 EDT 2016
-goat=\ud83d\udc10
-host\:port=127.0.0.1\:80
-key=value
-snowman=\u2603
+The frontend part of this plugin is developed with `VueJS 2 <https://vuejs.org/>`_ and
+requires `nodejs <https://nodejs.org/en/>`_ and `webpack <https://webpack.js.org/>`_.
 
-Turn off the timestamp:
+Once nodejs is installed on your system, run the following commands::
 
->>> print(javaproperties.dumps(properties, timestamp=None))
-key=value
-goat=\ud83d\udc10
-host\:port=127.0.0.1\:80
-snowman=\u2603
+  $ cd frontend
+  $ npm install
+  $ npm run serve
 
-Use your own timestamp (automatically converted to local time):
+To update dist files (the ones that will be distributed with the plugin), run::
 
->>> print(javaproperties.dumps(properties, timestamp=1234567890))
-#Fri Feb 13 18:31:30 EST 2009
-key=value
-goat=\ud83d\udc10
-host\:port=127.0.0.1\:80
-snowman=\u2603
+  $ npm run build
 
-Dump as XML:
+.. |gha| image:: https://github.com/modoboa/modoboa-contacts/actions/workflows/plugin.yml/badge.svg
+   :target: https://github.com/modoboa/modoboa-contacts/actions/workflows/plugin.yml
 
->>> print(javaproperties.dumps_xml(properties))
-<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
-<properties>
-<entry key="key">value</entry>
-<entry key="goat">🐐</entry>
-<entry key="host:port">127.0.0.1:80</entry>
-<entry key="snowman">☃</entry>
-</properties>
-
-New in v0.6.0: Dump Unicode characters as-is instead of escaping them:
-
->>> print(javaproperties.dumps(properties, ensure_ascii=False))
-#Tue Feb 25 19:13:27 EST 2020
-key=value
-goat=🐐
-host\:port=127.0.0.1\:80
-snowman=☃
-
-`And more! <https://javaproperties.readthedocs.io>`_
-
-
-.. |properties| replace:: Java ``.properties`` files
-.. _properties: https://en.wikipedia.org/wiki/.properties
-
-.. |propclass| replace:: Java 8's ``java.util.Properties``
-.. _propclass: https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html
-
-.. |clipkg| replace:: ``javaproperties-cli``
-.. _clipkg: https://github.com/jwodder/javaproperties-cli
+.. |codecov| image:: https://codecov.io/gh/modoboa/modoboa-contacts/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/modoboa/modoboa-contacts
