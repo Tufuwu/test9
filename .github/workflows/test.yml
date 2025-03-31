@@ -1,95 +1,43 @@
-name: Tests
+name: CI
 
-on:
-  push:
-    branches: [ main ]
-
-  pull_request:
-    branches: [ main ]
-
-  workflow_dispatch: # also allow manually invoking this
+on: [push, pull_request]
 
 jobs:
   test:
+    name: Test Python ${{ matrix.python-version }}
+
+    runs-on: ubuntu-latest
+
     strategy:
-      # Disable fail fast since it's useful to see test results for all platforms even if some failed
       fail-fast: false
-      
       matrix:
-        include:
-          - test-run-id: ubuntu-py3.9
-            os: ubuntu-latest
-            python-version: 3.9
-            perf-test: true
+        python-version: ["3.9", "3.10"]
 
-          - test-run-id: win-py3.6
-            os: windows-latest
-            python-version: 3.9
-            perf-test: false
-
-    runs-on: ${{matrix.os}}
-    
     steps:
-      # Install the desired version of Python and PySys
       - uses: actions/checkout@v2
-
-      - uses: actions/setup-python@v2
         with:
-          python-version: ${{matrix.python-version}}
-          
-      - name: Cache Python deps (get location)
-        id: pip-cache
-        run: |
-            python -m pip install -U "pip>=20.1"
-            echo "::set-output name=dir::$(pip cache dir)"
-      - name: Cache Python deps
+          submodules: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache
         uses: actions/cache@v4
         with:
-            path: ${{ steps.pip-cache.outputs.dir }}
-            key: ${{ matrix.test-run-id }}-pip
+          path: ~/.cache/pip
+          key: pip-test-python-${{ matrix.python-version }}-${{ hashFiles('**/tox.ini', '**/setup.*') }}
+          restore-keys: |
+            pip-test-python-${{ matrix.python-version }}-${{ hashFiles('**/tox.ini', '**/setup.*') }}
+            pip-test-python-${{ matrix.python-version }}
+            pip-test-
 
-      - name: Python dependencies - install
-        id: deps
-        shell: bash
+      - name: Install dependencies
         run: |
-          pip install pysys==2.0 wheel
-          
-          # Use older version of coverage as 5.0 requires an SQLite version that doesn't work on this macos image currently
-          pip install coverage==4.5.4
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade tox tox-gh-actions
 
-      - name: Test with PySys
-        working-directory: tests/correctness
-        shell: bash
-        id: pysys
+      - name: Tox tests
         run: |
-          if [[ "${{ matrix.perf-test }}" = "true" ]]; then 
-            cd ..
-            echo Running ALL tests from `pwd`
-          fi
-          
-          python -m pysys run --ci --outdir=${{matrix.test-run-id}}
-
-      - name: Upload Python code coverage
-        uses: codecov/codecov-action@v1
-        if: steps.pysys.outputs.artifact_PythonCoverageDir
-        with:
-          file: ${{ steps.pysys.outputs.artifact_PythonCoverageDir }}/coverage.xml
-        
-      # If any tests fail, PySys will return an error code, so we need "if: always()" so the following steps will run
-      
-      - name: Upload performance CSV artifacts
-        uses: actions/upload-artifact@v4
-        # Only do this if some performance results were generated
-        if: always() && steps.pysys.outputs.artifact_CSVPerformanceReport
-
-        with:
-          name: pysys_performance_${{matrix.test-run-id}}
-          path: ${{ steps.pysys.outputs.artifact_CSVPerformanceReport }}
-
-      - name: Upload archive artifacts for any test failures
-        uses: actions/upload-artifact@v4
-        if: always() && steps.pysys.outputs.artifact_TestOutputArchiveDir
-
-        with:
-          name: pysys_output_${{matrix.test-run-id}}
-          path: ${{ steps.pysys.outputs.artifact_TestOutputArchiveDir }}
+          tox
