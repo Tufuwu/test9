@@ -1,0 +1,39 @@
+max_priority = 9001
+
+[db]
+file = '/efs/main.db'
+
+[github]
+access_token = "${GITHUB_TOKEN}"
+app_client_id = "${GITHUB_CLIENT_ID}"
+app_client_secret = "${GITHUB_CLIENT_SECRET}"
+
+[git]
+local_git = true
+ssh_key = """
+${HOMU_SSH_KEY}
+"""
+
+[web]
+host = '0.0.0.0'
+port = 80
+announcement = "This is a test instance of bors. It will be removed in the near future."
+
+############
+#  Crater  #
+############
+
+[repo.crater]
+owner = "rust-lang"
+name = "crater"
+timeout = 5400
+
+# Permissions managed through rust-lang/team
+rust_team = true
+reviewers = []
+try_users = []
+
+[repo.crater.github]
+secret = "${HOMU_WEBHOOK_SECRET_CRATER}"
+[repo.crater.checks.actions]
+name = "bors build finished"

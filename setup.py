@@ -1,24 +1,40 @@
-#!/usr/bin/env python3
-
 from setuptools import setup
-from setuptools import find_packages
-
 
 setup(
-    name="litescope",
-    description="Small footprint and configurable embedded FPGA logic analyzer core",
-    author="Florent Kermarrec",
-    author_email="florent@enjoy-digital.fr",
-    url="http://enjoy-digital.fr",
-    download_url="https://github.com/enjoy-digital/litescope",
-    test_suite="test",
-    license="BSD",
-    python_requires="~=3.6",
-    packages=find_packages(exclude=("test*", "sim*", "doc*", "examples*")),
-    include_package_data=True,
-    entry_points={
-        "console_scripts": [
-            "litescope_cli=litescope.software.litescope_cli:main",
+    name='homu',
+    version='0.3.0',
+    author='Barosl Lee',
+    url='https://github.com/barosl/homu',
+    test_suite='homu.tests',
+    description=('A bot that integrates with GitHub '
+                 'and your favorite continuous integration service'),
+
+    packages=['homu'],
+    install_requires=[
+        'github3.py==0.9.6',
+        'toml',
+        'Jinja2',
+        'requests',
+        'bottle',
+        'waitress',
+        'retrying',
+    ],
+    setup_requires=[
+        'pytest-runner',
+    ],
+    tests_require=[
+        'pytest',
+    ],
+    package_data={
+        'homu': [
+            'html/*.html',
+            'assets/*',
         ],
     },
+    entry_points={
+        'console_scripts': [
+            'homu=homu.main:main',
+        ],
+    },
+    zip_safe=False,
 )
