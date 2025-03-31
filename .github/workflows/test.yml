@@ -1,45 +1,35 @@
+name: CI
+
 on:
   push:
-    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#patterns-to-match-branches-and-tags
-    # e.g., v1.10.1
-    tags:        
-      - 'v[0-9].[0-9]+.[0-9]+' 
-permissions:
-  contents: write
+  pull_request:
+    types: [opened, reopened]
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
 jobs:
-  build:
-    name: Build exectuable 📦
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.9"
-    - name: Install dependencies
-      run: |
-            python -m pip install --upgrade pip
-            python -m pip install . pyinstaller
-    - name: Build binary
-      run:  pyinstaller "main.spec"
-    - name: Zip files 🗜️
-      run: |
-            cp tools/Forensicsim_Parser.py dist/
-            cd dist
-            tar.exe -a -cf forensicsim.zip Forensicsim_Parser.py ms_teams_parser.exe
-    - name: Create GitHub Release
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      run: >-
-        gh release create
-        '${{ github.ref_name }}'
-        --repo '${{ github.repository }}'
-        --title '${{ github.ref_name }}'
-        --generate-notes
-    - name: Upload artifacts to GitHub Release
-      env:
-            GITHUB_TOKEN: ${{ github.token }}
-      run: >-
-        gh release upload
-        '${{ github.ref_name }}' dist/forensicsim.zip
-        --repo '${{ github.repository }}'
+  Security:
+    name: Security Pipeline
+    uses: uc-cdis/.github/.github/workflows/securitypipeline.yaml@main
+    with:
+       python-poetry: 'false'
+    secrets: inherit
+
+  UnitTest:
+    name: Python Unit Test with Postgres
+    uses: uc-cdis/.github/.github/workflows/python_unit_test.yaml@main
+    with:
+       setup-script: 'tests/ci_setup.sh'
+       test-script: 'tests/ci_commands_script.sh'
+       python-version: '3.9'
+
+  ImageBuildAndPush:
+    name: Build Image and Push
+    uses: uc-cdis/.github/.github/workflows/image_build_push.yaml@main
+    secrets:
+      ECR_AWS_ACCESS_KEY_ID: ${{ secrets.ECR_AWS_ACCESS_KEY_ID }}
+      ECR_AWS_SECRET_ACCESS_KEY: ${{ secrets.ECR_AWS_SECRET_ACCESS_KEY }}
+      QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+      QUAY_ROBOT_TOKEN: ${{ secrets.QUAY_ROBOT_TOKEN }}
