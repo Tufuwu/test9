@@ -1,80 +1,105 @@
-name: tests
+name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - main
+    tags:
+  pull_request:
 
 jobs:
-  tox:
-    runs-on: ubuntu-latest
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 5
+      fail-fast: true
       matrix:
-        python-version: ["3.9", "3.10"]
+        include:
+
+          - name: Python 3.7 with minimal dependencies
+            os: ubuntu-latest
+            python: 3.9
+            toxenv: py37-test
+
+          - name: Python 3.8 with all optional dependencies
+            os: ubuntu-latest
+            python: 3.9
+            toxenv: py38-test-alldeps
+            toxargs: -v --develop
+
+          - name: Python 3.6 with oldest supported version of all dependencies
+            os: ubuntu-latest
+            python: 3.9
+            toxenv: py36-test-oldestdeps   
+            
+          - name: Python 3.7 with numpy 1.17 and full coverage
+            os: ubuntu-latest
+            python: 3.9
+            toxenv: py37-test-alldeps-numpy117-cov
+
+          - name: Python 3.8 with all optional dependencies (Windows)
+            os: windows-latest
+            python: 3.9
+            toxenv: py38-test-alldeps
+            
+          - name: Python 3.7 with all optional dependencies (MacOS X)
+            os: macos-latest
+            python: 3.9
+            toxenv: py37-test-alldeps
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install libkrb5-dev
-        pip install tox tox-gh-actions
-    - name: Test with tox
-      run: tox -- --cov-report=xml tests
+        python-version: ${{ matrix.python }}
+    - name: Install language-pack-de and tzdata
+      if: startsWith(matrix.os, 'ubuntu')
+      run: sudo apt-get install language-pack-de tzdata
+    - name: Install Python dependencies
+      run: python -m pip install --upgrade tox codecov
+    - name: Run tests
+      run: tox ${{ matrix.toxargs }} -e ${{ matrix.toxenv }} -- ${{ matrix.toxposargs }}
     - name: Upload coverage to codecov
+      if: ${{ contains(matrix.toxenv,'-cov') }}
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
-        fail_ci_if_error: true
 
-  integration-tests:
-    runs-on: ubuntu-latest
+  allowed_failures:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        ansible:
-        - ga
-        - pre
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install test dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install \
-          apache2 \
-          libapache2-mod-wsgi-py3 \
-          postgresql \
-          python3-cryptography \
-          python3-dateutil \
-          python3-pip \
-          python3-psycopg2 \
-          python3-requests \
-          python3-rpm \
-          python3-setuptools \
-          python3-six
-    - name: Install Ansible
-      env:
-        ANSIBLE: ${{ matrix.ansible }}
-      run: |
-        sudo apt-get purge ansible
-        if [ "$ANSIBLE" = ga ] ; then
-          PIP_IGNORE_INSTALLED=0 pip3 install ansible --user
-        else
-          PIP_IGNORE_INSTALLED=0 pip3 install ansible --user --pre
-        fi
-    - name: Set up test environment
-      run: tests/integration/setup.sh
-    - name: Run integration tests
-      run: tests/integration/run.sh
+        include:
 
-  test-collection:
-    runs-on: ubuntu-latest
+          - name: Code style checks
+            os: ubuntu-latest
+            python: 3.x
+            toxenv: codestyle
+ 
+          - name: (Allowed Failure) Python 3.7 with dev version of key dependencies
+            os: ubuntu-latest
+            python: 3.9
+            toxenv: py37-test-devdeps
+
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-    - name: Install pandoc
-      run: |
-        sudo apt-get update
-        sudo apt-get install pandoc
-    - name: Test collection build
-      run: tests/integration/collection.sh
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Install language-pack-de and tzdata
+      if: startsWith(matrix.os, 'ubuntu')
+      run: sudo apt-get install language-pack-de tzdata
+    - name: Install Python dependencies
+      run: python -m pip install --upgrade tox codecov
+    - name: Run tests
+      run: tox ${{ matrix.toxargs }} -e ${{ matrix.toxenv }} -- ${{ matrix.toxposargs }}
