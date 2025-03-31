@@ -1,106 +1,146 @@
-.. boxsdk documentation main file, created by
-   sphinx-quickstart on Tue Dec 16 01:10:30 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Efficient-Apriori
+=================
 
-Box Python SDK
-==============
+An efficient pure Python implementation of the Apriori algorithm.
 
+Overview
+--------
 
-Installing
-----------
+An efficient pure Python implementation of the Apriori algorithm.
+Created for Python 3.6 and 3.7.
 
-.. code-block:: console
+The apriori algorithm uncovers hidden structures in categorical data.
+The classical example is a database containing purchases from a supermarket.
+Every purchase has a number of items associated with it.
+We would like to uncover association rules such as `{bread, eggs} -> {bacon}`
+from the data. This is the goal of `association rule
+learning <https://en.wikipedia.org/wiki/Association_rule_learning>`_, and the
+`Apriori algorithm <https://en.wikipedia.org/wiki/Apriori_algorithm>`_ is
+arguably the most famous algorithm for this problem. This project contains an
+efficient, well-tested implementation of the apriori algorithm as descriped in
+the  `original paper <https://www.macs.hw.ac.uk/~dwcorne/Teaching/agrawal94fast.pdf>`_
+by Agrawal et al, published in 1994.
 
-    pip install boxsdk
+Installation
+------------
 
+The package is distributed on `PyPI <https://pypi.org/project/efficient-apriori/>`_.
+From your terminal, simply run the following command to install the package.
 
-Source Code
------------
+::
 
-https://github.com/box/box-python-sdk
+    $ pip install efficient-apriori
 
+Notice that the name of the package is ``efficient-apriori`` on PyPI, while it's
+imported as ``import efficient_apriori``.
 
-Quickstart
-----------
-
-Create a developer token from your app's configuration page (https://app.box.com/developers/services).
-
-You'll be prompted for it on the command line.
-
-.. code-block:: pycon
-
-    $ from boxsdk import DevelopmentClient
-    $ client = DevelopmentClient()
-    >>> Enter developer token: <enter your developer token>
-    $ me = client.user().get()
-
-    GET https://api.box.com/2.0/users/me {'headers': {u'Authorization': u'Bearer ----KkeV',
-                 u'User-Agent': u'box-python-sdk-1.4.3'},
-     'params': None}
-
-    {"type":"user","id":"----6009","name":"Jeffrey Meadows","login":"jmeadows@box.com",...}
-
-    $ me.name
-    >>> Jeffrey Meadows
-
-The ``DevelopmentClient`` uses Box developer tokens for auth (and will prompt you for a new token upon
-expiration), and logs API requests and responses, making it really easy to get started learning the SDK and Box API.
-
-
-Creating an App for Users
+A minimal working example
 -------------------------
 
-Authorization
-~~~~~~~~~~~~~
+.. py:currentmodule:: efficient_apriori
 
-If you'd like other users to use your app, you need to set up a way for them to authorize your app and
-grant it access to their Box account. The ``auth`` module contains several classes to help you do that.
-
-The simplest class is the ``OAuth2`` class. To use it, instantiate it with your ``client_id`` and ``client_secret``.
-
-Follow the `tutorial on GitHub <https://github.com/box/box-python-sdk/blob/main/README.rst#id2>`_ for
-instructions on how to get an authorized client for a user. Using the ``store_tokens`` callback, you may persist
-the user's auth and refresh tokens for the next time they use your app. Once they return to your app, you can
-create an authorized client like so:
+Here's a minimal working example.
+Notice that in every transaction with `eggs` present, `bacon` is present too.
+Therefore, the rule `{eggs} -> {bacon}` is returned with 100 % confidence.
 
 .. code-block:: python
 
-    from boxsdk import OAuth2, Client
+    from efficient_apriori import apriori
+    transactions = [('eggs', 'bacon', 'soup'),
+                    ('eggs', 'bacon', 'apple'),
+                    ('soup', 'bacon', 'banana')]
+    itemsets, rules = apriori(transactions, min_support=0.5,  min_confidence=1)
+    print(rules)  # [{eggs} -> {bacon}, {soup} -> {bacon}]
 
-    oauth = OAuth2(
-        client_id='YOUR_CLIENT_ID',
-        client_secret='YOUR_CLIENT_SECRET',
-        store_tokens=your_store_tokens_callback_method,
-        access_token=persisted_access_token,
-        refresh_token=persisted_refresh_token,
-    )
-    client = Client(oauth)
+See the API documentation for the full signature of :func:`~efficient_apriori.apriori`.
+More examples are included below.
+
+More examples
+-------------
+
+Filtering and sorting association rules
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It's possible to filter and sort the returned list of association rules.
+
+.. code-block:: python
+
+    from efficient_apriori import apriori
+    transactions = [('eggs', 'bacon', 'soup'),
+                    ('eggs', 'bacon', 'apple'),
+                    ('soup', 'bacon', 'banana')]
+    itemsets, rules = apriori(transactions, min_support=0.2,  min_confidence=1)
+
+    # Print out every rule with 2 items on the left hand side,
+    # 1 item on the right hand side, sorted by lift
+    rules_rhs = filter(lambda rule: len(rule.lhs) == 2 and len(rule.rhs) == 1, rules)
+    for rule in sorted(rules_rhs, key=lambda rule: rule.lift):
+      print(rule) # Prints the rule and its confidence, support, lift, ...
 
 
-Making requests to Box
-~~~~~~~~~~~~~~~~~~~~~~
+Working with large datasets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once you have an authorized client, you can use it to make requests to Box on your user's behalf. The client
-has several methods to help you get started, many of which return Box objects, which, in turn, have methods that
-correspond to Box API endpoints.
+If you have data that is too large to fit into memory, you may pass a function
+returning a generator instead of a list. The `min_support` will most likely
+have to be a large value, or the algorithm will take very long before it
+terminates. If you have massive amounts of data, this Python implementation is
+likely not fast enough, and you should consult more specialized implementations.
 
-The module documentation below describes each of these methods and which parameters they require. Some API endpoints
-do not have corresponding SDK methods; for those, you can use the generic ``make_request`` method of the client.
+.. code-block:: python
 
-Module Documentation
---------------------
+    def data_generator(filename):
+      """
+      Data generator, needs to return a generator to be called several times.
+      """
+      def data_gen():
+        with open(filename) as file:
+          for line in file:
+            yield tuple(k.strip() for k in line.split(','))
 
-.. toctree::
-    :maxdepth: 4
+      return data_gen
 
-    boxsdk
+    transactions = data_generator('dataset.csv')
+    itemsets, rules = apriori(transactions, min_support=0.9, min_confidence=0.6)
 
 
-Indices and tables
-==================
+Contributing
+------------
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+You are very welcome to scrutinize the code and make pull requests if you have
+suggestions for improvements. Your submitted code must be PEP8 compliant, and
+all tests must pass.
+See `tommyod/Efficient-Apriori <https://github.com/tommyod/Efficient-Apriori>`_
+on GitHub for more information.
 
+API documentation
+-----------------
+
+Although the Apriori algorithm uses many sub-functions, only three functions
+are likely of interest to the reader. The :func:`~efficient_apriori.apriori`
+returns both the itemsets and the association rules, which is obtained by calling
+:func:`~efficient_apriori.itemsets_from_transactions`
+and
+:func:`~efficient_apriori.generate_rules_apriori`, respectively.
+The rules are returned as instances of the :class:`~efficient_apriori.Rule` class,
+so reading up on it's basic methods might be useful.
+
+Apriori function
+~~~~~~~~~~~~~~~~
+
+.. autofunction:: apriori
+
+Itemsets function
+~~~~~~~~~~~~~~~~~
+
+.. autofunction:: itemsets_from_transactions
+
+Association rules function
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: generate_rules_apriori
+
+Rule class
+~~~~~~~~~~
+
+.. autoclass:: Rule

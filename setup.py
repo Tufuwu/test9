@@ -1,104 +1,100 @@
-# coding: utf-8
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-from codecs import open   # pylint:disable=redefined-builtin
-from os.path import dirname, join
-import re
-import sys
+"""A setuptools based setup module.
+See:
+https://packaging.python.org/en/latest/distributing.html
+https://github.com/pypa/sampleproject
+"""
 
+# Always prefer setuptools over distutils
 from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
+
+# To use a consistent encoding
+from codecs import open
+from os import path
+from efficient_apriori import __version__
+
+VERSION = __version__
+
+here = path.abspath(path.dirname(__file__))
 
 
-CLASSIFIERS = [
-    'Development Status :: 5 - Production/Stable',
-    'Intended Audience :: Developers',
-    'License :: OSI Approved :: Apache Software License',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: Implementation :: CPython',
-    'Programming Language :: Python :: Implementation :: PyPy',
-    'Operating System :: OS Independent',
-    'Operating System :: POSIX',
-    'Operating System :: Microsoft :: Windows',
-    'Operating System :: MacOS :: MacOS X',
-    'Topic :: Software Development :: Libraries :: Python Modules',
-]
+def read(fname):
+    return open(path.join(here, fname)).read()
 
 
-class PyTest(TestCommand):
-    # pylint:disable=attribute-defined-outside-init
-
-    user_options = [(b'pytest-args=', b'a', b"Arguments to pass to py.test")]
-
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.pytest_args = None
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        # Do the import here, once the eggs are loaded.
-        # pylint:disable=import-outside-toplevel
-        import pytest
-        errno = pytest.main(self.pytest_args)
-        sys.exit(errno)
-
-
-def main():
-    base_dir = dirname(__file__)
-    install_requires = [
-        'attrs>=17.3.0',
-        'requests>=2.4.3',
-        'requests-toolbelt>=0.4.0, <1.0.0',
-        'wrapt>=1.10.1'
-    ]
-    redis_requires = ['redis>=2.10.3']
-    jwt_requires = ['pyjwt>=1.3.0', 'cryptography>=3, <3.5.0']
-    extra_requires = {'jwt': jwt_requires, 'redis': redis_requires, 'all': jwt_requires + redis_requires}
-    test_requires = [
-        'bottle',
-        'jsonpatch>1.14',
-        'mock>=2.0.0, <4.0.0',
-        'pycodestyle',
-        'pylint',
-        'sphinx',
-        'sqlalchemy<1.4.0',
-        'tox',
-        'pytest>=2.8.3, <4.0.0',
-        'pytest-cov',
-        'pytest-xdist<1.28.0',
-        'coveralls',
-        'coverage',
-        'tox-gh-actions',
-        'pytz',
-    ]
-    extra_requires['test'] = test_requires
-    with open('boxsdk/version.py', 'r', encoding='utf-8') as config_py:
-        version = re.search(r'^\s+__version__\s*=\s*[\'"]([^\'"]*)[\'"]', config_py.read(), re.MULTILINE).group(1)
-    setup(
-        name='boxsdk',
-        version=version,
-        description='Official Box Python SDK',
-        long_description=open(join(base_dir, 'README.rst'), encoding='utf-8').read(),  # pylint:disable=consider-using-with
-        author='Box',
-        author_email='oss@box.com',
-        url='http://opensource.box.com',
-        packages=find_packages(exclude=['demo', 'docs', 'test', 'test*', '*test', '*test*']),
-        install_requires=install_requires,
-        extras_require=extra_requires,
-        tests_require=test_requires,
-        cmdclass={'test': PyTest},
-        classifiers=CLASSIFIERS,
-        keywords='box oauth2 sdk',
-        license='Apache Software License, Version 2.0, http://www.apache.org/licenses/LICENSE-2.0',
-        package_data={'boxsdk': ['py.typed']},
-    )
-
-
-if __name__ == '__main__':
-    main()
+setup(
+    name="efficient_apriori",
+    # Versions should comply with PEP440.  For a discussion on single-sourcing
+    # the version across setup.py and the project code, see
+    # https://packaging.python.org/en/latest/single_source_version.html
+    version=VERSION,
+    description=" An efficient Python implementation of the Apriori \
+    algorithm.",
+    long_description=read("README.md"),
+    long_description_content_type="text/markdown",
+    # The project's main homepage.
+    url="https://github.com/tommyod/Efficient-Apriori",
+    # Author details
+    author="tommyod",
+    author_email="tommy.odland@gmail.com",
+    # Choose your license
+    license="MIT",
+    # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
+    classifiers=[
+        # How mature is this project? Common values are
+        #   3 - Alpha
+        #   4 - Beta
+        #   5 - Production/Stable
+        "Development Status :: 5 - Production/Stable",
+        # Indicate who your project is intended for
+        # 'Intended Audience :: End Users/Desktop',
+        # 'Intended Audience :: Healthcare Industry',
+        # Pick your license as you wish (should match "license" above)
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        # Specify the Python versions you support here. In particular, ensure
+        # that you indicate whether you support Python 2, Python 3 or both.
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+    ],
+    # You can just specify the packages manually here if your project is
+    # simple. Or you can use find_packages().
+    packages=find_packages(".", exclude=["contrib", "docs", "tests"]),
+    package_dir={"efficient_apriori": "efficient_apriori"},
+    # Alternatively, if you want to distribute just a my_module.py, uncomment
+    # this:
+    #   py_modules=["my_module"],
+    # List run-time dependencies here.  These will be installed by pip when
+    # your project is installed. For an analysis of "install_requires" vs pip's
+    # requirements files see:
+    # https://packaging.python.org/en/latest/requirements.html
+    install_requires=[],
+    # List additional groups of dependencies here (e.g. development
+    # dependencies). You can install these using the following syntax,
+    # for example:
+    # $ pip install -e .[dev,test]
+    # extras_require={
+    #     'dev': ['check-manifest'],
+    #     'test': ['coverage'],
+    # },
+    # If there are data files included in your packages that need to be
+    # installed, specify them here.  If using Python 2.6 or less, then these
+    # have to be included in MANIFEST.in as well.
+    # include_package_data=True,
+    package_data={"": ["templates/*", "*.tex", "*.html"]},
+    # Although 'package_data' is the preferred approach, in some case you may
+    # need to place data files outside of your packages. See:
+    # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files # noqa
+    # In this case, 'data_file' will be installed into '<sys.prefix>/my_data'
+    # data_files=[('my_data', ['data/data_file'])],
+    # To provide executable scripts, use entry points in preference to the
+    # "scripts" keyword. Entry points provide cross-platform support and allow
+    # pip to create the appropriate form of executable for the target platform.
+    # entry_points={
+    #    'console_scripts': [
+    #         'sample=sample:main',
+    #    ],
+    # }
+)
