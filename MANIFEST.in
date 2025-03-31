@@ -1,0 +1,6 @@
+prune docs/_build
+prune docs/api
+
+global-exclude *.pyc
+
+exclude .*
