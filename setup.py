@@ -1,40 +1,90 @@
-"""Setup file."""
-from os import path
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# pylint: disable=C0111,W6005,W6100
+"""
+Package metadata for projectroles.
+"""
+import os
+from setuptools import setup
 
-import setuptools
+import versioneer
 
-from wolk import __version__
+# allow setup.py to be run from any path
+os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
-    long_description = f.read()
 
-setuptools.setup(
-    name="wolk-connect",
-    version=__version__,
-    install_requires=["paho_mqtt>=1.5.1", "requests>=2.18.1"],
+def load_requirements(*requirements_paths):
+    """
+    Load all requirements from the specified requirements files.
+
+    Returns:
+        list: Requirements file relative path strings
+    """
+    requirements = set()
+    for path in requirements_paths:
+        requirements.update(
+            line.split('#')[0].strip()
+            for line in open(path).readlines()
+            if is_requirement(line.strip())
+        )
+    return list(requirements)
+
+
+def is_requirement(line):
+    """
+    Return True if the requirement line is a package requirement.
+
+    Returns:
+        bool: True if the line is not blank, a comment, a URL, or an included file
+    """
+    return not (
+        line == ''
+        or line.startswith('-r')
+        or line.startswith('#')
+        or line.startswith('-e')
+        or line.startswith('git+')
+    )
+
+
+README = open(os.path.join(os.path.dirname(__file__), 'README.rst')).read()
+CHANGELOG = open(
+    os.path.join(os.path.dirname(__file__), 'CHANGELOG.rst')
+).read()
+
+setup(
+    name='django-sodar-core',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
+    description="""SODAR Core framework and project management apps""",
+    long_description=README + '\n\n' + CHANGELOG,
+    author='Berlin Institute of Health, Core Unit Bioinformatics',
+    author_email='cubi@bihealth.de',
+    url='',
+    packages=[
+        'projectroles',
+        'userprofile',
+        'timeline',
+        'filesfolders',
+        'adminalerts',
+        'taskflowbackend',
+        'bgjobs',
+        'sodarcache',
+        'siteinfo',
+    ],
     include_package_data=True,
-    license="Apache License 2.0",
-    author="WolkAbout",
-    author_email="info@wolkabout.com",
-    description="Python 3 library for connecting to WolkAbout IoT Platform",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    keywords=["IoT", "WolkAbout", "Internet of Things"],
-    url="https://github.com/Wolkabout/WolkConnect-Python",
-    test_suite="test",
-    packages=setuptools.find_packages(),
+    install_requires=load_requirements('requirements/base.txt'),
+    zip_safe=False,
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: Apache Software License",
-        "Natural Language :: English",
-        "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Operating System :: OS Independent",
-        "Topic :: Internet",
-        "Topic :: Communications",
-        "Topic :: Software Development :: Embedded Systems",
+        'Framework :: Django',
+        'Framework :: Django :: 1.11',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Operating System :: Linux',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Internet :: WWW/HTTP',
+        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
 )

@@ -1,61 +1,94 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
+### pip ###
+src/
 *.egg-info/
-.installed.cfg
-*.egg
 
-# Sphinx documentation
-docs/_static/
-docs/_templates/
-docs/build/
+### Documentation ###
+/docs*/build/
 
-# pyenv
-.python-version
-
-# Environments
-.env
-.venv
-env/
+### Virtualenv ###
+.venv/
 venv/
-ENV/
-env.bak/
-venv.bak/
 
-# PyCharm
-.idea/
+### OSX ###
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# mypy
-.mypy_cache/
+### SublimeText ###
+# cache files for sublime text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
 
-# Coverage.py
-.coverage
-coverage_html_directory/
-
-# Sublime Text
-*.sublime-project
+# workspace files are user-specific
 *.sublime-workspace
 
-# Logs
-*.log
+# project files should be checked into the repository, unless a significant
+# proportion of contributors will probably not be using SublimeText
+# *.sublime-project
 
-# VS Code
-.vscode
+# sftp configuration file
+sftp-config.json
+
+# Basics
+*.py[cod]
+__pycache__
+
+# Logs
+logs
+*.log
+pip-log.txt
+npm-debug.log*
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+htmlcov
+coverage.xml
+.pytest_cache
+
+# Translations
+*.mo
+*.pot
+
+# Pycharm
+.idea/*
+docs/pycharm/*
+
+# Vim
+
+*~
+*.swp
+*.swo
+
+# npm
+node_modules/
+
+# Compass
+.sass-cache
+
+# virtual environments
+.env
+
+# User-uploaded media
+example_site/media/
+
+# Static files
+staticfiles/
+
+# File handles
+.nfs*
+
+# Flamegraph
+flamegraph.pl
+
+# Certificate files
+*.crt
+*.pem
+
+# Celery
+celerybeat-schedule
+
+# Vscode
+.vscode/*

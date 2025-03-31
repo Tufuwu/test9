@@ -1,0 +1,29 @@
+{% load rules %}
+{% load projectroles_tags %}
+{% load projectroles_common_tags %}
+
+<tr class="sodar-pr-project-list-item" id="sodar-pr-project-search-item-{{ p.sodar_uuid }}">
+  <td>
+    <div class="sodar-overflow-container">
+      <a href="{% url 'projectroles:detail' project=p.sodar_uuid %}">
+        {% get_project_title_html p as project_title %}
+        {% autoescape off %}
+          {% highlight_search_term project_title search_term %}
+          {% get_remote_icon p request %}
+          {% get_star p request.user %}
+        {% endautoescape %}
+      </a>
+    </div>
+  </td>
+  {% if p.description %}
+    <td>
+      <div class="sodar-overflow-container">
+        {% autoescape off %}
+          {% highlight_search_term p.description search_term %}
+        {% endautoescape %}
+      </div>
+    </td>
+  {% else %}
+    <td class="text-muted">N/A</td>
+  {% endif %}
+</tr>
