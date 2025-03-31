@@ -1,85 +1,63 @@
-numerizer
-=========
+Asyncio documentation
+=====================
 
-A Python module to convert natural language numerics into ints and floats.
-This is a port of the Ruby gem `numerizer
-<https://github.com/jduff/numerizer.git>`_
-
-Numerizer has been tested on Python 3.9, 3.10 and 3.11.
-
-Installation
-------------
-
-The numerizer library can be installed from PyPI as follows:
-
-.. code:: bash
-
-    $ pip install numerizer
-
-Usage
------
-
-.. code:: python
-
-    >>> from numerizer import numerize
-    >>> numerize('forty two')
-    '42'
-    >>> numerize('forty-two')
-    '42'
-    >>> numerize('four hundred and sixty two')
-    '462'
-    >>> numerize('one fifty')
-    '150'
-    >>> numerize('twelve hundred')
-    '1200'
-    >>> numerize('twenty one thousand four hundred and seventy three')
-    '21473'
-    >>> numerize('one million two hundred and fifty thousand and seven')
-    '1250007'
-    >>> numerize('one billion and one')
-    '1000000001'
-    >>> numerize('nine and three quarters')
-    '9.75'
-    >>> numerize('platform nine and three quarters')
-    'platform 9.75'
+* Online doc: https://asyncio.readthedocs.io/
+* GitHub: https://github.com/asyncio-docs/asyncio-doc
+* AsyncIO documentation is written with `Sphinx <http://www.sphinx-doc.org/>`_.
 
 
-Using the SpaCy extension
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Notes to writers
+================
 
-Since version 0.2, numerizer is available as a `SpaCy extension <https://spacy.io/usage/processing-pipelines#custom-components-attributes>`_.
-
-Any named entities of a quantitative nature within a SpaCy document can be numerized as follows:
-
-.. code:: python
-
-    >>> from spacy import load
-    >>> nlp = load('en_core_web_sm')  # or load any other spaCy model
-    >>> doc = nlp('The projected revenue for the next quarter is over two million dollars.')
-    >>> doc._.numerize()
-    {the next quarter: 'the next 1/4', over two million dollars: 'over 2000000 dollars'}
-
-Users can specify which entity types are to be numerized, by using the `labels` argument in the extension function, as follows:
-
-.. code:: python
-
-    >>> doc._.numerize(labels=['MONEY'])  # only numerize entities of type 'MONEY'
-    {over two million dollars: 'over 2000000 dollars'}
+Tutorials should use Python 3.5 ``async`` and ``await`` keywords rather than
+``@asyncio.coroutine`` and ``yield from``.
 
 
-The extension is available for tokens and spans as well.
+Ideas
+=====
 
-.. code:: python
+* Advanced section:
 
-    >>> two_million = doc[-4:-2]  # span corresponding to "two million"
-    >>> two_million._.numerize()
-    '2000000'
-    >>> quarter = doc[6]  # token corresponding to "quarter"
-    >>> quarter._.numerized
-    '1/4'
+  - protocols and transports: as least point to good implementations
+  - explain how to *test* asyncio applications. `Twisted documentation example
+    <https://twistedmatrix.com/documents/current/core/howto/trial.html>`_
+
+How to install Sphinx
+=====================
+
+Firstly, you need to install the Sphinx tool using the Linux package manager
+like apt-get or dnf for example.
+
+But if you want to install it via `pip <https://pip.pypa.io/en/stable/>`_ , you
+can create a virtual environment with the `venv` module of Python 3 ::
+
+    python3 -m venv env
+    source env/bin/activate
+    pip install -r requirements.txt
+
+Once you have installed Sphinx, you can build the documentation.
+
+How to build the documentation
+==============================
+
+Install Sphinx using the Linux package manager like apt-get or dnf for example.
+Then build the documentation using::
+
+    make html
 
 
-Extras
-------
+See also
+========
 
-For R users, a wrapper library has been developed by `@amrrs <https://github.com/amrrs>`_. Try it out `here <https://github.com/amrrs/numerizer.git>`_.
+* https://docs.python.org/3/library/asyncio.html
+* http://krondo.com/an-introduction-to-asynchronous-programming-and-twisted/
+* https://curio.readthedocs.io/en/latest/tutorial.html
+
+License
+=======
+
+All of the code examples in this site are licensed under the `Creative Commons Zero
+(CC0) <https://creativecommons.org/share-your-work/public-domain/cc0/>`_ license.
+
+All other content of this site is licensed under the `Creative Commons Attribution
+Share Alike 4.0 (CC-BY-SA) <https://creativecommons.org/licenses/by-sa/4.0/>`_ license.
