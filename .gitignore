@@ -1,14 +1,57 @@
+.idea/
+examples/**/results*
+docs/_static/
+.pytest_cache/
+.vscode/
+
+# Created by https://www.gitignore.io/api/python,fortran
+
+### Fortran ###
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 
 # C extensions
-*.so
 
 # Distribution / packaging
 .Python
 env/
+build/
 develop-eggs/
 dist/
 downloads/
@@ -42,11 +85,8 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*.cover
+*,cover
 .hypothesis/
-
-# pytest cache
-.pytest_cache/
 
 # Translations
 *.mo
@@ -99,17 +139,4 @@ ENV/
 # mkdocs documentation
 /site
 
-# mypy
-.mypy_cache/
-
-# Config file
-yeti.conf
-
-# environment
-.tags
-
-# vue and node things
-node_modules/
-
-# VS studio code
-.vscode
+# End of https://www.gitignore.io/api/python,fortran

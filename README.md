@@ -1,26 +1,33 @@
-# Yeti - Tibetan Brown Bear
+# Capytaine: a linear potential flow BEM solver with Python.
 
-This is a beta. If something's not working, [file an issue](https://github.com/yeti-platform/TibetanBrownBear/issues), or even better, fix it and send a pull request!
+[![DOI](http://joss.theoj.org/papers/10.21105/joss.01341/status.svg)](https://doi.org/10.21105/joss.01341)
 
-## Get me started!
+Capytaine is Python package for the simulation of the interaction between water waves and floating bodies in frequency domain.
+It is built around a full rewrite of the open source Boundary Element Method (BEM) solver Nemoh for the linear potential flow wave theory.
 
-You're gonna need [docker-compose](https://docs.docker.com/compose/install/). Once that's installed, run:
+## Installation
 
+On Windows, macOS and Linux, using the [Conda package manager](https://www.anaconda.com/distribution/):
+
+```bash
+conda install -c conda-forge capytaine
 ```
-$ cd docker
-$ docker-compose up
-```
 
-Point browser to http://localhost:5000. Log in with `admin@admin.com:RESETME`. That's it!
+## Documentation
 
-## I want a more robust install
+[https://ancell.in/capytaine/latest/](https://ancell.in/capytaine/latest/)
 
-Documentation still needs to be written for this, but in the meantime you can check out the [docker-compose file](https://github.com/yeti-platform/TibetanBrownBear/blob/master/docker/docker-compose.yaml) to see how to set up your infrastructure.
+## License
 
-## Build status
+Copyright (C) 2017-2022, Matthieu Ancellin
 
-[![Build Status](https://travis-ci.org/yeti-platform/TibetanBrownBear.svg?branch=master)](https://travis-ci.org/yeti-platform/TibetanBrownBear)
+Since April 2022, the development of Capytaine is funded by the Alliance for Sustainable Energy, LLC, Managing and Operating Contractor for the National Renewable Energy Laboratory (NREL) for the U.S. Department of Energy.
 
-[![CodeFactor](https://www.codefactor.io/repository/github/yeti-platform/tibetanbrownbear/badge)](https://www.codefactor.io/repository/github/yeti-platform/tibetanbrownbear)
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-[![codecov](https://codecov.io/gh/yeti-platform/TibetanBrownBear/branch/master/graph/badge.svg)](https://codecov.io/gh/yeti-platform/TibetanBrownBear)
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+It is based on [Nemoh](https://lheea.ec-nantes.fr/logiciels-et-brevets/nemoh-presentation-192863.kjsp), which has been developed by Gérard Delhommeau, Aurélien Babarit et al., (École Centrale de Nantes) and is distributed under the Apache License 2.0.
+
+It includes code from [meshmagick](https://github.com/LHEEA/meshmagick/) by François Rongère (École
+Centrale de Nantes), licensed under the GNU General Public License (GPL).
