@@ -1,2 +1,6 @@
-include LICENSE.md MANIFEST.in
-recursive-include pyro *.cpp
+include *.rst
+include AUTHORS
+include LICENSE
+recursive-include src/oscar/templates *.txt *.html
+recursive-include src/oscar/static *
+recursive-include src/oscar/locale *.po *.mo

@@ -1,21 +1,21 @@
-### Guidelines
+Found a bug? Please fill out the sections below.
 
-**NOTE:** Issues are for bugs and feature requests only. If you have a question about using Pyro or general modeling questions, please post it on the [forum](https://forum.pyro.ai/).
+### Issue Summary
 
-If you would like to address any minor bugs in the documentation or source, please feel free to contribute a Pull Request without creating an issue first. 
+A summary of the issue.
 
-Please tag the issue appropriately in the title e.g. [bug], [feature request], [discussion], etc.
+### Steps to Reproduce
 
-Please provide the following details:
---------------------------------------------------------------------------------------------------
-### Issue Description
-Provide a brief description of the issue.
+It's essential that you provide enough information for someone else to replicate the problem you're seeing. Simply describing something that's broken on your current project is not enough!
 
-### Environment
-For any bugs, please provide the following:
- - OS and python version.
- - PyTorch version, or if relevant, output of `pip freeze`.
- - Pyro version: output of `python -c 'import pyro; print pyro.__version__'`
+1. (for example) Form the catalogue app with `./manage.py oscar_fork_app catalogue myproject/`
+2. Edit models.py as follows...
+3. ...
 
-### Code Snippet
-Provide any relevant code snippets and commands run to replicate the issue.
+Any other relevant information. For example, why do you consider this a bug and what did you expect to happen instead?
+
+### Technical details
+
+* Python version: Run `python --version`.
+* Django version: Look in your requirements.txt, or run `pip show django | grep Version`.
+* Oscar version: Look in your requirements.txt, or run `pip show django-oscar | grep Version`.
