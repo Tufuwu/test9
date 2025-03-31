@@ -1,23 +1,25 @@
-# Contributing
+# Development
 
-Any contribution is welcome. If you would like to fix a bug or add a feature, you can
- do it ! However, it is important to follow some guidelines so that everything can go
- smoothly.
+To start development for `eth-event` you should begin by cloning the repo.
 
-If you have an idea or a bug, please report it first in the [Issues](https://github.com/SnaKyEyeS/ADE-Scheduler/issues) tab of the repository so we can discuss it and decide of the best strategy to bring your idea to life. Directly issuing a pull request is generally a bad idea: you might end up coding something that has already been done or is being done.
+```bash
+git clone https://github.com/iamdefinitelyahuman/eth-event.git
+```
 
-## Setup your working environment
+Next, ensure all dev dependencies have been installed:
 
-In order to be able to play with this project, you need to setup quite a few things.
-A very comprehensive and complete tutorial is available [here](https://ade-scheduler.readthedocs.io/en/latest/tutorials/setup.html)
+```bash
+pip install -r requirements-dev.txt
+```
 
-## Learning more about how to contribute
+## Pull Requests
 
-Once your have setup the project, you can have a look at the
-[Contribution tutorials](https://ade-scheduler.readthedocs.io/en/latest/tutorials/contribute.html)
+Pull requests are welcomed! Please adhere to the following:
 
-## Reading the documentation
+- Ensure your pull request passes our linting checks (`tox -e lint`)
+- Include test cases for any new functionality
+- Include any relevant [documentation updates](README.md)
 
-An updated version of the documentation is hosted
-[here](https://ade-scheduler.readthedocs.io/en/latest/). This contains
- details about of each function should work and how to use them properly.
+It's a good idea to make pull requests early on. A pull request represents the start of a discussion, and doesn't necessarily need to be the final, finished submission.
+
+If you are opening a work-in-progress pull request to verify that it passes CI tests, please consider [marking it as a draft](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests).

@@ -1,106 +1,96 @@
+# eth-event
 
-<p align="center">
-  <img src="static/img/ade_scheduler_icon.png" width="200" height="200"> </img>
-</p>
-<p align="center">
-    <img alt="Website" src="https://img.shields.io/website?down_color=red&down_message=offline&label=Status%20&style=for-the-badge&up_color=green&up_message=online&url=https%3A%2F%2Fade-scheduler.info.ucl.ac.be">
-</p>
-<p align="center">
-<img src="https://img.shields.io/endpoint?url=https://ade-scheduler.info.ucl.ac.be/api/shield/user">
-<img src="https://img.shields.io/endpoint?url=https://ade-scheduler.info.ucl.ac.be/api/shield/schedule">
-</p>
+[![Pypi Status](https://img.shields.io/pypi/v/eth-event.svg)](https://pypi.org/project/eth-event/) [![Build Status](https://img.shields.io/travis/com/iamdefinitelyahuman/eth-event.svg)](https://travis-ci.com/iamdefinitelyahuman/eth-event) [![Coverage Status](https://img.shields.io/codecov/c/github/iamdefinitelyahuman/eth-event)](https://codecov.io/gh/iamdefinitelyahuman/eth-event)
 
-# ADE Scheduler: a scheduling tool made for humans
+Tools for Ethereum event decoding and topic generation.
 
-[ADE-Scheduler](https://ade-scheduler.info.ucl.ac.be/) is a web-application made by (former) students which is destined to be used by UCLouvain members (students, academics,...).
+## Installation
 
-### Project creators
+You can install the latest release via `pip`:
 
-- [Eertmans Jérome](https://www.linkedin.com/in/j%C3%A9rome-eertmans-130ab1130/)
-- [Navarre Louis](https://www.linkedin.com/in/louis-navarre-36b78b143/)
-- [Poncelet Gilles](https://www.linkedin.com/in/gilles-poncelet-020442195/)
+```bash
+pip install eth-event
+```
 
-We are three former students from the Ecole Polytechnique de Louvain (EPL) and were starting our first master year at the start of the project.
+Or clone the repository and use `setuptools` for the most up-to-date version:
 
-### Why such a tool ?
+```bash
+git clone https://github.com/iamdefinitelyahuman/eth-event.git
+cd eth-event
+python3 setup.py install
+```
 
-The currently used scheduling tool used by the UCLouvain, [ADE](http://horaire.uclouvain.be/direct/), lacks an intuitive interface and general usability. Therefore, we decided to create ADE-Scheduler as a "wrapper" around this tool to make it more intuitive, nice and complete.
+## Usage
 
-Before that, we were using the excellent [ADE2ICS](https://github.com/cdamman/UCL2ICS) made by Corentin Damman which allowed to create subscription links where one could select its events (TPs, CMs, etc). ADE-Scheduler is therefore an improvement of this tool.
+The public API is well documented within the docstrings. The following example may also help:
 
-### Key dates
+```python
+>>> from eth_event import get_topics
 
-- **August 2019** : start of the project
-- **September 2019** : access to the API of ADE and release of the first version of the tool
-- **Summer 2020**: complete overhaul of the tool to make it more attractive, intuitive and mobile-friendly.
-- **September 2020**: release of the second version of the tool
-- **September 2021**: 2 years of service, Python 3.9 upgrade and 3500+ users
+# generating a topic map
+>>> abi = open('abi.json').read()
+>>> topic_map = get_topic_map(abi)
+>>> topic_map
+{
+    '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef': {
+        'name': 'Transfer',
+        'inputs': [
+            {'name': 'from', 'type': 'address', 'indexed': True},
+            {'name': 'to', 'type': 'address', 'indexed': True},
+            {'name': 'value', 'type': 'uint256', 'indexed': False}
+        ]
+    }
+}
 
-### How does it work ?
+# decoding event logs from a transaction receipt
+>>> tx = token.transfer(account[1], 100, {'from': account[0]})
+<Transaction object '0x615a157e84715d5f960a38fe2a3ddb566c8393cfc71f15b06170a0eff74dfdde'>
+>>> eth_event.decode_logs(tx.logs, topic_map)
+[{
+    'name': 'Transfer',
+    'data': [
+        {'name': 'from', 'type': 'address', 'value': '0xbd4940951bfa463f8fb6db762e55686f6cfdb73a', 'decoded': True},
+        {'name': 'to', 'type': 'address', 'value': '0xbd4940951bfa463f8fb6db762e55686f6cfdb73a', 'decoded': True},
+        {'name': 'tokens', 'type': 'uint256', 'value': 100, 'decoded': True}
+    ]
+}]
 
-#### Back-end <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1024px-Python-logo-notext.svg.png" alt="python" width="20" height="20"></img>
+# decoding a structLog from Geth's debug_traceTransaction endpoint
+>>> trace = web3.provider.make_request(
+    "debug_traceTransaction",
+    ['0x615a157e84715d5f960a38fe2a3ddb566c8393cfc71f15b06170a0eff74dfdde', {}]
+)
+>>> struct_log = trace['result']['structLogs']
 
-##### Data source
+>>> eth_event.decode_trace(struct_log, topic_map)
+[{
+    'name': 'Transfer',
+    'data': [
+        {'name': 'from', 'type': 'address', 'value': '0xbd4940951bfa463f8fb6db762e55686f6cfdb73a', 'decoded': True},
+        {'name': 'to', 'type': 'address', 'value': '0xbd4940951bfa463f8fb6db762e55686f6cfdb73a', 'decoded': True},
+        {'name': 'tokens', 'type': 'uint256', 'value': 100, 'decoded': True}
+    ]
+}]
+```
 
-Thanks to the access to the API of ADE, we obtain all the information in a `XML` format. Those are up-to-date with the infos you will find on the ADE website. We are mainly interested in two type of informations:
- - Event list sorted by course
- - Location of every UCLouvain classroom, auditorium, etc.
+## Limitations
 
-#### Data treatment
+* If an array is indexed in an event, the topic is generated as a sha3 hash and so cannot be decrypted. In this case, the unencrypted topic is returned and `decoded` is set to `False`.
 
-The backend of ADE-Scheduler is written in Python using the [Flask](https://flask.palletsprojects.com/en/1.1.x/) micro-framework. Other packages are also used to supply many useful functions to enhance the overall user experience.\
-Among those, we use [pandas](https://pandas.pydata.org/) pandas to optimise the performances, [ics](https://pypi.org/project/ics/) to convert the schedules in the iCal format, [Flask-Security](https://pypi.org/project/Flask-Security-Too/) to handle user registrations and security aspects - and many more.
+* Anonymous events cannot be decoded. Use the `allow_undecoded` kwarg when calling `decode_logs` and `decode_trace` to receive the undecoded log without raising an exception.
 
-We also use a [Redis](https://redis.io) server to store user sessions and buffer data, as well as a [PostgreSQL](https://www.postgresql.org/) database to store user accounts and schedules.
+## Tests
 
-### Front-end <img src="https://www.w3.org/html/logo/downloads/HTML5_Badge_512.png" alt="html" width="20" height="20"></img> <img src="https://i1.wp.com/www.thekitchencrew.com/wp-content/uploads/2016/03/js-logo.png?fit=500%2C500" alt="js" width="20" height="20"></img>
+To run the test suite:
 
-Client-side logic is handled using [Vue](https://vuejs.org/), a JavaScript reactive framework. Moreover, the events are displayed on a calendar generated with the help of the [FullCalendar](https://fullcalendar.io) package.
+```bash
+$ tox
+```
 
-The UI is made mainly with the help of [Bootstrap](https://getbootstrap.com/), which handles all the CSS and makes the website enjoyable and mobile-friendly.
+## Development
 
+This project is still in development. Comments, questions, criticisms and pull requests are welcomed.
 
-### Functionalities and comparison with ADE
+## License
 
-In short, ADE Scheduler offers the same information as ADE, but in a much
- more elegant manner. A side by side comparison of the two sites just
-  speaks for itself:
-
- ![](static/img/ade_official_side_by_side.png)
-
- ![](static/img/ade_scheduler_side_by_side.png)
-
-But an intuitive design is not the only advantage of ADE Scheduler, it also
- comes with several useful tools which ADE does not have:
-
-- [x] black-listing some events in order to have a clean schedule
-- [x] easily viewing multiple courses
-- [x] handling multiple schedules
-- [x] computing your optimized schedule which minimizes conflicts
-- [x] adding private events
-- [x] no connection required
-- [x] caching of you data so you don't lose everything each time you leave
-- [x] detailed map of classrooms and events associated
-- [x] possibility to download schedule to iCal file or create subscription link
-- [x] you can share you calendar with anyone you would like
-
-... and many more !
-
-### Documentation
-
-The website's documentation is available on the [help page](https://ade-scheduler.info.ucl.ac.be/help).
-
-### Future improvements
-
-Here are listed a series of issues we would like to implement in the future:
- - Implement a complete testing suite to enable easy and robust CI
- - Complete the help section with more videos, tips, etc.
-
-We are open to any suggestions !
-
-## Contributing
-
-This application being open source, everyone is more than welcome to contribute in any way !
-To see more details about our contributing guidelines, please refer to [contributing](/CONTRIBUTING.md).
-
-Any suggestion, idea or bugs are much appreciated, and you can contact us at all times either by [mail](mailto:adescheduler@gmail.com) or directly on this repository.
+This project is licensed under the [MIT license](LICENSE).

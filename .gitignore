@@ -14,6 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
+lib/
 lib64/
 parts/
 sdist/
@@ -47,6 +48,7 @@ coverage.xml
 .pytest_cache/
 
 # Translations
+*.mo
 *.pot
 
 # Django stuff:
@@ -101,52 +103,5 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# PyCharm
-.idea
-
-# VS Code
-.vscode
-python/my.ics
-my.ics
-*.ics
-webapp/static/.DS_Store
-webapp/dump.rdb
-
-# For Redis
-personnal_data.py
-
-
-# Private data
-database.db
-hidden.py
-test.py
-
-webapp/templates/map_bis.html
-
-static/gen/
-
-node_modules/
-
-dump.rdb
-
-cache/
-
-.flaskenv
-.botenv
-geo_locations.json
-
-plots/
-
-*.swp
-
-static/img/GitHub-Logos/.DS_Store
-
-fake_api.json
-
-FAKE_API_README.md
-
-ade_fake_api_January_2021.zip
-
-fake_api/
-
-profile/
+# other
+.vscode/
