@@ -1,3 +1,0 @@
-[check-wheel-contents]
-name = Et in TXT ego
-section = W001

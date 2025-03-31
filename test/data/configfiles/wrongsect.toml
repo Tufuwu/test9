@@ -1,3 +1,0 @@
-[check-wheel-contents]
-name = "Not this section"
-select = ["W001"]
