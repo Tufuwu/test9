@@ -1,12 +1,16 @@
 [run]
-omit =
-    tests/*
-    */site-packages/*
+branch = True
+source =
+    cryptography
+    tests/
+
+[paths]
+source =
+   src/cryptography
+   .tox/*/lib/python*/site-packages/cryptography
+   .tox/pypy/site-packages/cryptography
 
 [report]
-# Regexes for lines to exclude from consideration
 exclude_lines =
-    # Have to re-enable the standard pragma
-    pragma: no cover
-    # Ellipsis lines after @typing.overload
-    \.\.\.
+    @abc.abstractmethod
+    @abc.abstractproperty
