@@ -1,9 +1,0 @@
-textdistance
-natsort
-numpy
-scipy
-matplotlib
-torch
-torchvision
-nnutils-pytorch
-pytorch-lightning @ git+https://github.com/PyTorchLightning/pytorch-lightning@0f584fa

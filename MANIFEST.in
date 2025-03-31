@@ -1,5 +1,5 @@
-global-exclude __pycache__
-global-exclude *.py[cod]
-exclude *.yml
-exclude *.yaml
-prune tests
+include tox.ini
+include README.rst
+include LICENSE
+include COPYING
+include globus_sdk/globus.cfg

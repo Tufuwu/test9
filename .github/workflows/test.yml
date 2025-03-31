@@ -1,64 +1,33 @@
-name: Laia CI
-
+name: Test
 on:
-  push:
-    branches: [main]
-    paths-ignore: ['README.md']
-  pull_request:
-  schedule:
-    # at 07:00 on Sunday
-    - cron: '0 7 * * sun'
-
+  - push
+  - pull_request
 jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.9", "3.10"]
+    name: "Python ${{ matrix.python-version }} on ${{ matrix.os }} "
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
         with:
-          python-version: 3.9
-      - name: Run pre-commit
+          python-version: ${{ matrix.python-version }}
+      - name: Install Requirements
         run: |
-          pip install pre-commit
-          pre-commit run --all-files
-
-  pytest:
-    name: Python ${{ matrix.python-version }} - PyTorch ${{ matrix.torch-version }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # TODO: include 3.9 when NumPy adds support
-        python-version: ["3.9", "3.10"]
-        # TODO: include 1.7.* when 1.7.1 is released
-        torch-version: [1.6.*, 1.5.*, 1.4.*]
-        # fix torchvision and nnutils versions for each torch version
-        include:
-          #- torch-version: 1.7.*
-          #  # TODO: update when released
-          #  nnutils-version: 1.6.*
-          #  torchvision-version: 0.8.*
-          - torch-version: 1.6.*
-            nnutils-version: 1.6.*
-            torchvision-version: 0.7.*
-          - torch-version: 1.5.*
-            nnutils-version: 1.5.*
-            torchvision-version: 0.6.*
-          - torch-version: 1.4.*
-            nnutils-version: 1.4.*
-            torchvision-version: 0.5.*
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Configure requirements
-      run: |
-        sed -i s/^torch$/torch==${{ matrix.torch-version }}/ requirements.txt
-        sed -i s/^torchvision$/torchvision==${{ matrix.torchvision-version }}/ requirements.txt
-        sed -i s/^nnutils-pytorch$/nnutils-pytorch==${{ matrix.nnutils-version }}/ requirements.txt
-    - name: Install requirements
-      run: pip install -e .[test]
-    - name: Run pytest
-      run: pytest --cov=laia tests
-    - uses: codecov/codecov-action@v1
+          python -m pip install -U tox
+      - name: Run Linting
+        # only lint on 3.8 for two reasons
+        #  1. faster overall runs
+        #  2. Linting fails on py3.5 because tools require 3.6+
+        if: ${{ matrix.python-version == '3.8' }}
+        run: python -m tox -e lint
+      - name: Run Tests
+        run: python -m tox -e py
+      - name: Ensure docs build
+        # docs are only ever built on a linux 3.8 box (readthedocs)
+        if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-latest' }}
+        run: python -m tox -e docs

@@ -1,17 +1,31 @@
-exclude: egs/*
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.3.0
-    hooks:
-    - id: check-yaml
+- repo: https://github.com/pre-commit/pre-commit-hooks.git
+  rev: v3.1.0
+  hooks:
+    - id: check-merge-conflict
     - id: trailing-whitespace
-    - id: end-of-file-fixer
--   repo: https://github.com/timothycrosley/isort
-    rev: 5.6.4
-    hooks:
-    - id: isort
-      args: [--profile, black]
--   repo: https://github.com/psf/black
-    rev: 20.8b1
-    hooks:
+- repo: https://github.com/python/black
+  # refrain from using 19.10b0 or later until
+  #   https://github.com/psf/black/issues/1288
+  # is fixed
+  rev: 19.3b0
+  hooks:
     - id: black
+      name: "Autoformat python files"
+      types: [python]
+      language_version: python3
+- repo: https://gitlab.com/pycqa/flake8
+  rev: 3.8.3
+  hooks:
+    - id: flake8
+      name: "Lint python files"
+      types: [python]
+      language_version: python3
+      additional_dependencies: ['flake8-bugbear==20.1.4']
+- repo: https://github.com/timothycrosley/isort
+  rev: 5.1.4
+  hooks:
+    - id: isort
+      name: "Sort python imports"
+      types: [python]
+      language_version: python3
