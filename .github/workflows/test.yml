@@ -1,19 +1,47 @@
-name: Trigger docs build
+name: Python package
+
 on:
-  push:
-  schedule:
-    - cron: "0 0 * * 1"
-  workflow_dispatch:
+  - push
+  - pull_request
+
 jobs:
-  trigger:
-    name: Trigger webhook
+  build:
     runs-on: ubuntu-latest
-    env:
-      readthedocs_token: ${{ secrets.readthedocs_token }}
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
-      - if: ${{ env.readthedocs_token != '' }}
-        run: |
-          curl -s -X POST \
-            -d "branches=${{ github.ref_name }}" \
-            -d "token=${{ env.readthedocs_token }}" \
-            https://readthedocs.org/api/v2/webhook/nethserver-devel/49560/
+
+    - uses: actions/checkout@v1
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+        
+    - name: Install psycopg2 prerequisites
+      run: sudo apt-get install libpq-dev
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-test.txt
+        pip install tox tox-gh-actions
+
+    - name: Test with tox
+      run: tox

@@ -1,34 +1,20 @@
 ---
 name: Feature request
-about: We encourage the discussion of new features on https://community.nethserver.org. After coming to a consensus, please fill in this form
+about: Suggest an idea for this project
+title: ''
+labels: enhancement
+assignees: fabiocaccamo
 
 ---
 
-// REMOVE LINES WITH SLASHES, LIKE THIS
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-// Write down a brief description here. In any case, even if your feature request is just 
-// a little enhancement or a completely new thing:
-// 1. explain WHY you are asking 
-// 2. tell us what is the PURPOSE of the feature
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
 
-**Proposed solution**
-
-// Describe the solution you would like to be adopted
-// A clear and concise description of what you want to happen.
-
-**Alternative solutions**
-
-// Describe alternatives you have considered
-// A clear and concise description of any alternative solution or feature you have considered.
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
 
 **Additional context**
-
-// Add any other context or screenshots about the feature request here.
-
-**See also**
-
-// Links to discussion on community.nethserver.org and other web sites
-
-----
-
-// Acknowledgements
+Add any other context or screenshots about the feature request here.

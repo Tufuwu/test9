@@ -1,37 +1,23 @@
 ---
 name: Bug report
 about: Create a report to help us improve
+title: ''
 labels: bug
+assignees: fabiocaccamo
 
 ---
 
-// REMOVE LINES WITH SLASHES, LIKE THIS
+**Python version**
+?
 
-**Steps to reproduce**
+**Django version**
+?
 
-- // Fill in first step
-- // Fill in second step
-- // ...
+**Package version**
+?
+
+**Current behavior (bug description)**
+?
 
 **Expected behavior**
-
-// What do you expect?
-
-**Actual behavior**
-
-// What happens instead?
-
-**Components**
-
-// Fill with NethServer version number and relevant RPM versions. 
-// You can find the RPM version in Software Center page, 
-// under Installed > Packages, or by typing in a shell prompt
-// rpm -qa | grep -F .ns7. | sort
-
-**See also**
-
-// Links to discussion on community.nethserver.org and other web sites
-
-----
-
-// Acknowledgements
+?
