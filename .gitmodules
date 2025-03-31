@@ -1,3 +1,3 @@
-[submodule "vendor/ubbagent"]
-	path = vendor/ubbagent
-	url = https://github.com/GoogleCloudPlatform/ubbagent
+[submodule "astropy_helpers"]
+	path = astropy_helpers
+	url = https://github.com/astropy/astropy-helpers.git
