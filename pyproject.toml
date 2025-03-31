@@ -1,9 +1,12 @@
 [tool.black]
 line-length = 100
+target-version = ['py33']
 
-[tool.coverage.html]
-directory = 'test-reports'
-
-[tool.coverage.run]
-branch = true
-source = ['pyinaturalist']
+# regex
+exclude = '''
+/(
+  \.git |
+  plugin/libs |
+  stubs
+)/
+'''

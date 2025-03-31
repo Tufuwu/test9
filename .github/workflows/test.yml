@@ -1,89 +1,43 @@
-name: Build
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Main
 
 on:
   push:
-    branches: [main, dev]
-    tags: ['v*']
+    branches:
+      - "*"
+      - "*/*"
   pull_request:
-    branches: [main, dev]
-  workflow_dispatch:
+    branches:
+      - "*"
+      - "*/*"
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  job_lint:
+    name: Linting (Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
+        os: ["ubuntu-latest"]
         python-version: ["3.9", "3.10"]
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Cache packages per python version, and reuse until setup.py changes
-      - name: Cache pip packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}
-          restore-keys: ${{ runner.os }}-pip-${{ matrix.python-version }}
-
       - name: Install dependencies
-        run: pip install ".[dev]"
-      - name: Run unit tests
-        run: pytest
-
-  analyze:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      - name: Cache pip packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-3.8-${{ hashFiles('setup.py') }}
-          restore-keys: ${{ runner.os }}-pip-3.8
-
-      - name: Install dependencies
-        run: pip install ".[dev]"
-      - name: Run style checks
-        run: black --check .
-      - name: Run type checks
-        run: mypy .
-      - name: Generate code coverage report
-        run: pytest --cov --cov-report=term --cov-report=html
-      - name: Send code coverage report to Coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: coveralls
-      - name: Test Sphinx documentation build
-        run: make -C docs all
-      - name: Test package build
         run: |
-          python setup.py sdist bdist_wheel
-          twine check dist/*
+          python -m pip install --upgrade pip wheel
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-  # Deploy pre-release builds from dev branch, and stable builds on tags only
-  release:
-    needs: [test, analyze]
-    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/dev'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-
-      - name: Install dependencies
-        run: pip install -U ".[build]"
-      - name: Build wheel
-        run: python setup.py sdist bdist_wheel
-      - name: Deploy to pypi
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: twine upload dist/*
+      - name: Do linting
+        run: |
+          mypy -p plugin
+          flake8 plugin
+          black --check .
