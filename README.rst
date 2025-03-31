@@ -1,154 +1,49 @@
-ClickHouse Python Driver
-========================
+miss-islington
+==============
 
-.. image:: https://img.shields.io/pypi/v/clickhouse-driver.svg
-    :target: https://pypi.org/project/clickhouse-driver
+.. image:: https://github.com/python/miss-islington/actions/workflows/ci.yml/badge.svg?event=push
+    :target: https://github.com/python/miss-islington/actions
+.. image:: https://codecov.io/gh/python/miss-islington/branch/main/graph/badge.svg
+    :target: https://codecov.io/gh/python/miss-islington
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/ambv/black
 
-.. image:: https://coveralls.io/repos/github/mymarilyn/clickhouse-driver/badge.svg?branch=master
-    :target: https://coveralls.io/github/mymarilyn/clickhouse-driver?branch=master
+🐍🍒⛏🤖
 
-.. image:: https://img.shields.io/pypi/l/clickhouse-driver.svg
-    :target: https://pypi.org/project/clickhouse-driver
+Bot for backporting and merging `CPython <https://github.com/python/cpython/>`_ Pull Requests.
 
-.. image:: https://img.shields.io/pypi/pyversions/clickhouse-driver.svg
-    :target: https://pypi.org/project/clickhouse-driver
+miss-islington requires Python 3.6+.
 
-.. image:: https://img.shields.io/pypi/dm/clickhouse-driver.svg
-    :target: https://pypi.org/project/clickhouse-driver
+Backporting a PR on CPython
+===========================
 
-.. image:: https://travis-ci.org/mymarilyn/clickhouse-driver.svg?branch=master
-   :target: https://travis-ci.org/mymarilyn/clickhouse-driver
+Prior to merging a PR, a Python core developer should apply the
+``needs backport to X.Y`` label to the pull request.
+Once the pull request has been merged, `@miss-islington <https://github.com/miss-islington>`_
+will prepare the backport PR.
 
-ClickHouse Python Driver with native (TCP) interface support.
+If `@miss-islington <https://github.com/miss-islington>`_ encountered any issue while backporting,
+it will leave a comment about it, and the PR will be assigned to the core developer
+who merged the PR. The PR then needs to be backported manually.
 
-Asynchronous wrapper is available here: https://github.com/mymarilyn/aioch
 
-Features
-========
+Merging the Backport PR
+=======================
 
-- External data for query processing.
+If a Python core developer approved the backport PR made by miss-islington, it will be
+automatically merged once all the CI checks passed.
 
-- Query settings.
 
-- Compression support.
+Merging PRs
+===========
 
-- TLS support.
+If a Python core developer approved a PR made by anyone and added the "🤖 automerge" label,
+it will be automatically merged once all the CI checks pass.
 
-- Types support:
 
-  * Float32/64
-  * [U]Int8/16/32/64/128/256
-  * Date/Date32/DateTime('timezone')/DateTime64('timezone')
-  * String/FixedString(N)
-  * Enum8/16
-  * Array(T)
-  * Nullable(T)
-  * UUID
-  * Decimal
-  * IPv4/IPv6
-  * LowCardinality(T)
-  * SimpleAggregateFunction(F, T)
-  * Tuple(T1, T2, ...)
-  * Nested
-  * Map(key, value)
+**Aside**: where does the name come from?
+=========================================
 
-- Query progress information.
-
-- Block by block results streaming.
-
-- Reading query profile info.
-
-- Receiving server logs.
-
-- Multiple hosts support.
-
-- Python DB API 2.0 specification support.
-
-- Optional NumPy arrays support.
-
-Documentation
-=============
-
-Documentation is available at https://clickhouse-driver.readthedocs.io.
-
-Usage
-=====
-
-There are two ways to communicate with server:
-
-- using pure Client;
-- using DB API.
-
-Pure Client example:
-
-    .. code-block:: python
-
-        >>> from clickhouse_driver import Client
-        >>>
-        >>> client = Client('localhost')
-        >>>
-        >>> client.execute('SHOW TABLES')
-        [('test',)]
-        >>> client.execute('DROP TABLE IF EXISTS test')
-        []
-        >>> client.execute('CREATE TABLE test (x Int32) ENGINE = Memory')
-        []
-        >>> client.execute(
-        ...     'INSERT INTO test (x) VALUES',
-        ...     [{'x': 100}]
-        ... )
-        1
-        >>> client.execute('INSERT INTO test (x) VALUES', [[200]])
-        1
-        >>> client.execute(
-        ...     'INSERT INTO test (x) '
-        ...     'SELECT * FROM system.numbers LIMIT %(limit)s',
-        ...     {'limit': 3}
-        ... )
-        []
-        >>> client.execute('SELECT sum(x) FROM test')
-        [(303,)]
-
-DB API example:
-
-    .. code-block:: python
-
-        >>> from clickhouse_driver import connect
-        >>>
-        >>> conn = connect('clickhouse://localhost')
-        >>> cursor = conn.cursor()
-        >>>
-        >>> cursor.execute('SHOW TABLES')
-        >>> cursor.fetchall()
-        [('test',)]
-        >>> cursor.execute('DROP TABLE IF EXISTS test')
-        >>> cursor.fetchall()
-        []
-        >>> cursor.execute('CREATE TABLE test (x Int32) ENGINE = Memory')
-        >>> cursor.fetchall()
-        []
-        >>> cursor.executemany(
-        ...     'INSERT INTO test (x) VALUES',
-        ...     [{'x': 100}]
-        ... )
-        >>> cursor.rowcount
-        1
-        >>> cursor.executemany('INSERT INTO test (x) VALUES', [[200]])
-        >>> cursor.rowcount
-        1
-        >>> cursor.execute(
-        ...     'INSERT INTO test (x) '
-        ...     'SELECT * FROM system.numbers LIMIT %(limit)s',
-        ...     {'limit': 3}
-        ... )
-        >>> cursor.rowcount
-        0
-        >>> cursor.execute('SELECT sum(x) FROM test')
-        >>> cursor.fetchall()
-        [(303,)]
-
-License
-=======
-
-ClickHouse Python Driver is distributed under the `MIT license
-<http://www.opensource.org/licenses/mit-license.php>`_.
+According to Wikipedia, Miss Islington is the name of the witch in the
+`Monty Python and the Holy Grail <https://www.youtube.com/watch?v=yp_l5ntikaU>`_
+sketch.
