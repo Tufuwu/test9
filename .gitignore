@@ -1,9 +1,19 @@
-*.pyo
+docs/_build
+__pycache__
+*.*~
 *.pyc
-*.udm
-#/**/Thumbs.db
-/**/*.lnk
-.scannerwork/**
-
-/debugrun.py
-/apiserver.py
+# this fixes a dummy version on the public repository
+#git update-index --assume-unchanged python/openneurodata/oneibl/params_secret.py
+python/scratch
+.idea/*
+.vscode/
+*checkpoint.ipynb
+build/
+venv/
+ibllibenv/
+dist/
+ibllib.egg-info/
+.DS_Store
+scratch/
+_autosummary/
+brainbox/docs/_build/
