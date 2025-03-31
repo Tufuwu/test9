@@ -1,43 +1,80 @@
-name: PySlurm
+name: django-cas-server
+run-name: ${{ github.actor }} is running django-cas-server CI tests
 on: [push]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
-  Build:
+  flake8:
+    runs-on: ubuntu-latest
+    container:
+      image: python:bookworm
+    steps:
+      - uses: actions/checkout@v3
+      - run: pip install tox
+      - run: tox -e flake8
+  check_rst:
+    runs-on: ubuntu-latest
+    container:
+      image: python:bookworm
+    steps:
+      - uses: actions/checkout@v3
+      - run: pip install tox
+      - run: tox -e check_rst
+  coverage:
+    runs-on: ubuntu-latest
+    container:
+      image: python:bookworm
+    steps:
+      - uses: actions/checkout@v3
+      - run: pip install tox
+      - run: tox -e coverage
+        env:
+          COVERAGE_TOKEN: ${{ secrets.COVERAGE_TOKEN }}
+  tests:
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
       fail-fast: false
+      matrix:
+        arch: ["amd64", "ppc64le"]
+        tox:
+          # REHL 7 support and Ubuntu bionic
+          - python: "3.9"
+            env: "py36-django111"
+          # RHEL 8 support
+          - python: "3.9"
+            env: "py36-django22"
+          # Debian buster support
+          - python: "3.9"
+            env: "py37-django111"
+          # Ubuntu focal support
+          - python: "3.9"
+            env: "py38-django22"
+          # Debian bullseye
+          - python: "3.9"
+            env: py39-django22
+          # Ubuntu jammy
+          - python: "3.9"
+            env: "py310-django32"
+          # Debian bookworm
+          - python: "3.9"
+            env: py311-django32
+          # Django additional supported version
+          - python: "3.9"
+            env: py39-django42
+          - python: "3.9"
+            env: py310-django42
+          - python: "3.9"
+            env: py311-django42
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install Dependencies
+      - uses: actions/checkout@v3
+      - if: matrix.arch != 'amd64'
+        name: "Install docker multiarch support"
         run: |
-          which python
-          which python${{ matrix.python-version }}
-          python${{ matrix.python-version }} -m pip install --upgrade pip
-          python${{ matrix.python-verison }} -m pip install pipenv
-          pipenv --python ${{matrix.python-version }} install --dev --skip-lock
-      - name: Start Slurm Container
-        uses: sudo-bot/action-docker-compose@latest
-        with:
-          cli-args: "-f docker-compose-github.yml up -d"
-        env:
-          PYTHON: ${{ matrix.python-version }}
-      - name: Debug
-        run: |
-          docker ps -a
-          docker version
-          pwd
-          ls -al
-          docker inspect slurmctl
-          env | sort
-      - name: Build/Install/Test PySlurm
-        run: |
-          pipenv run pytest -sv scripts/run_tests_in_container.py
-        env:
-          PYTHON: ${{ matrix.python-version }}
-
+          sudo apt-get update -y
+          sudo apt-get install -y qemu qemu-user-static
+          sudo docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --credential yes
+      - name: "Check docker arch ${{ matrix.arch }} support"
+        run: sudo docker run --platform linux/${{ matrix.arch }} --rm ${{ matrix.arch }}/python:${{ matrix.tox.python }} /bin/bash -c "echo -n \"Running with arch \"; uname -m;"
+      - name: "Run tests on arch ${{ matrix.arch }}"
+        run: sudo docker run --platform linux/${{ matrix.arch }} --rm -v $(pwd):$(pwd) ${{ matrix.arch }}/python:${{ matrix.tox.python }} /bin/bash -c "cd $(pwd); uname -m; pip install tox; tox -e ${{ matrix.tox.env }}"
