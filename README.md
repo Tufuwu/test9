@@ -1,82 +1,140 @@
-# SoundCloud Add-on for [Kodi](https://github.com/xbmc/xbmc)
+# Trimmer
 
-<img align="right" src="https://github.com/xbmc/xbmc/raw/master/addons/webinterface.default/icon-128.png" alt="Kodi logo">
+[![ci](https://github.com/jonlabelle/Trimmer/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jonlabelle/Trimmer/actions/workflows/ci.yml)
+[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/fdcdvfsip9d9efg3?svg=true)](https://ci.appveyor.com/project/jonlabelle/trimmer)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/jonlabelle/Trimmer.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jonlabelle/Trimmer/context:python)
+[![Package Control Installs](https://img.shields.io/packagecontrol/dt/Trimmer.svg?label=installs)](https://packagecontrol.io/packages/Trimmer)
+[![Latest Release](https://img.shields.io/github/tag/jonlabelle/Trimmer.svg?label=version)](https://github.com/jonlabelle/Trimmer/releases)
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/jonlabelle/Trimmer/blob/master/LICENSE.md)
 
-[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/jaylinski/kodi-addon-soundcloud.svg)](https://github.com/jaylinski/kodi-addon-soundcloud/releases)
-[![Build Status](https://img.shields.io/github/workflow/status/jaylinski/kodi-addon-soundcloud/Continuous%20Integration/master.svg)](https://github.com/jaylinski/kodi-addon-soundcloud/actions)
-[![Link to Kodi forum](https://img.shields.io/badge/Kodi-Forum-informational.svg)](https://forum.kodi.tv/showthread.php?tid=206635)
-[![Link to Kodi wiki](https://img.shields.io/badge/Kodi-Wiki-informational.svg)](https://kodi.wiki/view/Add-on:SoundCloud)
-[![Link to Kodi releases](https://img.shields.io/badge/Kodi-v19%20%22Matrix%22-green.svg)](https://kodi.wiki/view/Releases)
-[![Link to Kodi releases](https://img.shields.io/badge/Kodi-v18%20%22Leia%22-green.svg)](https://kodi.wiki/view/Releases)
-[![Link to Kodi releases](https://img.shields.io/badge/Kodi-v17%20%22Krypton%22-green.svg)](https://kodi.wiki/view/Releases)
-
-This [Kodi](https://github.com/xbmc/xbmc) Add-on provides a minimal interface for SoundCloud.
+> [Trimmer](https://github.com/jonlabelle/Trimmer) is a [Sublime Text](http://www.sublimetext.com) plug-in for cleaning up whitespace.
 
 ## Features
 
-* Search
-* Discover new music
-* Play tracks, albums and playlists
+- Trim whitespace at the end of each line.
+- Trim whitespace at the start of each line.
+- Trim whitespace at the start and end of each line.
+- Trim whitespace from selection(s).
+- Delete empty, whitespace only lines.
+- Collapse multiple consecutive empty lines into one empty line.
+- Collapse multiple consecutive spaces into one space.
+- Trim empty, whitespace only lines at the beginning and end of file.
+- Remove blank space characters.
+- Normalize spaces (consecutive spaces reduced, empty lines removed and lines trimmed).
+- Tokenize a string by collapsing consecutive spaces, and trimming leading and trailing spaces.
+- Delete empty, whitespace only HTML and XML tags.
+- Remove code comments and collapse lines.
 
-## Installation
+## Additional Features
 
-### Kodi Repository
+A **Replace Smart Characters** command that performs the following actions:
 
-Follow the instructions on [https://kodi.wiki/view/Add-on:SoundCloud](https://kodi.wiki/view/Add-on:SoundCloud).
+- **Smart single quotes:** `’` *to* `'`
+- **Smart double quotes:** `“` *to* `"`
+- **Prime:** `′` *to* `'`
+- **Double Prime:** `″` *to* `"`
+- **German quotes:** `„` *to* `"` and `‚` *to* `'`
+- **Ellipsis:** `…` *to* `...`
+- **Em dash:** `—` *to* `---`
+- **En dash:** `–` *to* `--`
+- **Bullet:** `•` *to* `*`
+- **Middle dot:** `·` *to* `-`
+- **Em space** *to* three spaces
+- **En space** *to* two spaces
+- **Non-breaking space** *to* one space
+- **Thin space** *to* one space
+- **Hair space** *to* one space
+- **Left angle quote:** `«` *to* `<<`
+- **Right angle quote:** `»` *to* `>>`
+- **Copyright symbol:** `©` *to* `(C)`
+- **Trademark symbol:** `™` *to* `(T)`
+- **Registered trademark symbol:** `®` *to* `(R)`
 
-### Manual
+![ScreenShot](https://raw.githubusercontent.com/jonlabelle/Trimmer/master/screenshots/command_palette.png)
 
-* [Download the latest release](https://github.com/jaylinski/kodi-addon-soundcloud/releases) (`plugin.audio.soundcloud.zip`)
-* Copy the zip file to your Kodi system
-* Open Kodi, go to Add-ons and select "Install from zip file"
-* Select the file `plugin.audio.soundcloud.zip`
+Watch a [**Quick Demo**](https://raw.githubusercontent.com/jonlabelle/Trimmer/master/screenshots/demo.gif)
 
-## API
+## Install
 
-Documentation of the **public** interface.
+Trimmer is compatible with both Sublime Text 2 and 3 and all supported Operating Systems.
 
-### plugin://plugin.audio.soundcloud/play/?[track_id|playlist_id|url]
+### Package Control
 
-Examples:
+The easiest, and recommended way to install Trimmer is using [Package Control](https://packagecontrol.io).
 
-* `plugin://plugin.audio.soundcloud/play/?track_id=1`
-* `plugin://plugin.audio.soundcloud/play/?playlist_id=1`
-* `plugin://plugin.audio.soundcloud/play/?url=https%3A%2F%2Fsoundcloud.com%2Fpslwave%2Fallwithit`
+From the main application menu, navigate to:
 
-Legacy (will be removed in v5.0):
+- `Tools` -> `Command Palette...` -> `Package Control: Install Package`, type
+  the word ***Trimmer***, then select it to complete installation.
 
-* `plugin://plugin.audio.soundcloud/play/?audio_id=1` Use `track_id=1` instead.
+### Git
 
-## Development
+To install Trimmer using Git, change to your **Sublime Text Packages** directory
+and clone the [Trimmer repository](https://github.com/jonlabelle/Trimmer).
 
-This add-on uses [Pipenv](https://pypi.org/project/pipenv/) to manage its dependencies.
+For example, on **OS X**... start a new **Terminal** session and enter the following
+commands:
 
-### Setup
+```shell
+$ cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/
+$ git clone https://github.com/jonlabelle/Trimmer
+```
 
-[Install Pipenv](https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv) and run `pipenv install --dev`.
+### Manually
 
-### Build
+**Download** and **extract** the [zip](https://github.com/jonlabelle/Trimmer/zipball/master)
+or [tarball](https://github.com/jonlabelle/Trimmer/tarball/master) to your
+Sublime Text packages directory.
 
-Run `pipenv run build`.
+**Default Sublime Text Packages Paths:**
 
-### Lint
+* **OS X:** `~/Library/Application Support/Sublime Text [2|3]/Packages`
+* **Linux:** `~/.Sublime Text [2|3]/Packages`
+* **Windows:** `%APPDATA%/Sublime Text [2|3]/Packages`
 
-Run `pipenv run lint`.
+> **NOTE** Replace the `[2|3]` part with the appropriate Sublime Text
+> version for your installation.
 
-### Test
+## Usage
 
-Run `pipenv run test`.
+All commands are accessible from the **Command Palette** using prefix
+***Trimmer***, and in the **Main Menu** under `Edit` -> `Line` -> *Trimmer* command.
 
-## Roadmap
+- [Command Palette screenshot](https://raw.githubusercontent.com/jonlabelle/Trimmer/master/screenshots/command_palette.png)
+- [Main Menu screenshot](https://raw.githubusercontent.com/jonlabelle/Trimmer/master/screenshots/main_menu.png)
 
-* Re-implement all features from original add-on
-* Implement [enhancements](https://github.com/jaylinski/kodi-addon-soundcloud/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
+### Key Bindings
 
-## Attributions
+The *default* key binding will trim trailing whitespace at the end of each of
+line (entire file).
 
-This add-on is strongly inspired by the [original add-on](https://github.com/SLiX69/plugin.audio.soundcloud)
-developed by [bromix](https://kodi.tv/addon-author/bromix) and [SLiX](https://github.com/SLiX69).
+- **OS X**: `Ctrl + S`
+- **Linux**: `Ctrl + Alt + S`
+- **Windows**: `Ctrl + Alt + S`
 
-## Copyright and license
+### Trimmer Command API
 
-This add-on is licensed under the MIT License - see `LICENSE.txt` for details.
+|              Command               |                                              Description                                               |          Context          |
+|------------------------------------|--------------------------------------------------------------------------------------------------------|---------------------------|
+| `trimmer`                          | trim whitespace at the end of each line                                                                | entire file               |
+| `trim_leading_whitespace`          | trim whitespace at the start of each line                                                              | selection, or entire file |
+| `trim_leading_trailing_whitespace` | trim whitespace at the start and end of each line                                                      | selection, or entire file |
+| `trim_selections`                  | trim whitespace from selection(s)                                                                      | selection                 |
+| `delete_empty_lines`               | delete empty, whitespace only lines                                                                    | selection, or entire file |
+| `collapse_lines`                   | collapse multiple consecutive empty lines into one empty line                                          | selection, or entire file |
+| `collapse_spaces`                  | collapse multiple consecutive spaces into one space                                                    | selection, or entire file |
+| `trim_edges`                       | trim empty, whitespace only lines at the beginning and end of the file                                 | entire file               |
+| `remove_blank_spaces`              | remove all blank space characters (tab, cr, ff, vt, space)                                             | selection, or entire file |
+| `normalize_spaces`                 | consecutive spaces reduced, empty lines removed and lines trimmed                                      | selection, or entire file |
+| `replace_smart_characters`         | replace smart characters (smart quotes, em/en dash, ellipsis, nbsp)                                    | selection, or entire file |
+| `tokenize_string`                  | convert a string to a token by collapsing consecutive spaces, and trimming leading and trailing spaces | selection, or entire file |
+| `delete_empty_tags`                | delete empty, whitespace only html and xml tags                                                        | selection, or entire file |
+| `remove_comments`                  | remove code comments and collapse lines                                                                | selection, or entire file |
+
+## Author
+
+[Jon LaBelle](https://jonlabelle.com)
+
+## License
+
+Trimmer is licensed under the [MIT license](http://opensource.org/licenses/MIT).

@@ -1,35 +1,31 @@
-name: "Continuous Integration"
+name: ci
+
 on:
-  - pull_request
-  - push
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  run:
-    name: "Test"
-    runs-on: ${{ matrix.operating-system }}
-    strategy:
-      fail-fast: false
-      matrix:
-        operating-system: ['ubuntu-latest']
-        python-version: ["3.9", "3.10"]
+  ci:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout Git repository
         uses: actions/checkout@v2
 
-      - name: Install Python
+      - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.9
 
-      - name: Install pipenv
-        run: pip install pipenv
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Install dependencies
-        run: pipenv install --dev
+      - name: Run flake8
+        run: flake8 . --count --show-source --statistics
 
-      - name: Test
-        run: pipenv run test
-
-      - name: Lint
-        run: pipenv run lint
+      - name: Run pytest
+        run: pytest

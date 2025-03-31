@@ -1,3 +1,10 @@
-/build/
-/venv/
+.DS_Store
+*.py[co]
+.cache
 __pycache__
+*.html
+/tmp/
+.idea/
+.scannerwork/
+.env
+.pytest_cache/
