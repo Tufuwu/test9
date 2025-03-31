@@ -1,7 +1,0 @@
-# PostgreSQL
-# ------------------------------------------------------------------------------
-POSTGRES_HOST=postgres
-POSTGRES_PORT=5432
-POSTGRES_DB=django_structlog_demo_project
-POSTGRES_USER=debug
-POSTGRES_PASSWORD=debug
