@@ -1,78 +1,117 @@
-# Library Updater
-![Kodi Version](https://img.shields.io/endpoint?url=https%3A%2F%2Fweberjr.com%2Fkodi-shield%2Fversion%2Frobweber%2Fxbmclibraryautoupdate%2Fmatrix%2Ftrue%2Ftrue) ![Total Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fweberjr.com%2Fkodi-shield%2Fdownloads%2Fmatrix%2Fservice.libraryautoupdate%2F1.2.4) [![Build Status](https://img.shields.io/github/actions/workflow/status/robweber/xbmclibraryautoupdate/addon-checker.yml)](https://github.com/robweber/xbmclibraryautoupdate/actions/workflows/addon-checker.yml) [![License](https://img.shields.io/github/license/robweber/xbmclibraryautoupdate)](https://github.com/robweber/xbmclibraryautoupdate/blob/master/LICENSE.txt) [![PEP8](https://img.shields.io/badge/code%20style-pep8-orange.svg)](https://www.python.org/dev/peps/pep-0008/)
+# Guppy 3
+[![Build Status](https://img.shields.io/travis/com/zhuyifei1999/guppy3?label=tests)](https://app.travis-ci.com/github/zhuyifei1999/guppy3) [![Codecov](https://img.shields.io/codecov/c/github/zhuyifei1999/guppy3)](https://codecov.io/gh/zhuyifei1999/guppy3) [![PyPI version](https://img.shields.io/pypi/v/guppy3)](https://pypi.org/project/guppy3/) [![Repology - Repositories](https://img.shields.io/repology/repositories/python:guppy3)](https://repology.org/project/python:guppy3/versions)  
+[![PyPI - Implementation](https://img.shields.io/pypi/implementation/guppy3)](https://pypi.org/project/guppy3/) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/guppy3)](https://pypi.org/project/guppy3/) [![PyPI - Downloads](https://img.shields.io/pypi/dm/guppy3)](https://pypistats.org/packages/guppy3) [![PyPI - License](https://img.shields.io/pypi/l/guppy3)](https://github.com/zhuyifei1999/guppy3/blob/master/LICENSE)
 
-The Library Updater will update your music and/or video libraries according to times specified by you. Please note that this is just a fancy timer that calls out to the normal Kodi Library Scanning functions. All of the processes associated with scanning are all handed off to Kodi.
+A Python Programming Environment & Heap analysis toolset.
 
-_Thanks to pkscuot for several small tweaks to this addon!_
+This package contains the following subpackages:
+* etc - Support modules. Contains especially the Glue protocol module.
+* gsl - The Guppy Specification Language implementation. This can be used
+  to create documents and tests from a common source.
+* heapy - The heap analysis toolset. It can be used to find information about
+  the objects in the heap and display the information in various ways.
+* sets - Bitsets and 'nodesets' implemented in C.
 
-## Settings
+Guppy 3 is a fork of Guppy-PE, created by Sverker Nilsson for Python 2.
 
-Be aware that settings are visible based on the [Kodi Settings Level](https://kodi.wiki/view/Settings) set. Levels higher than Standard (Advanced or Expert) are designated next to that setting.
+## Requirements
 
-### General Settings:
+You should have Python 3.6, 3.7, 3.8, or 3.9. This package is CPython only;
+PyPy and other Python implementations are not supported. Python 2 support
+can be obtained from [guppy-pe](http://guppy-pe.sourceforge.net/) by
+Sverker Nilsson, from which this package is forked.
 
-* Startup Delay - if an update should run on startup (dependent on the time the last update has ran) this will delay it from running for a few minutes to allow other XBMC process to function.
-* Show Notifications - shows notifications when the updater will run again
-* Run During Playback - should the addon run a scheduled scan when you are playing media (yes/no)
-* Only run when idle - restricts the scanning process to when the screensaver is active
-* Check if sources exist before scan - checks if the sources are online before starting the scan process. For single source scans it will check only that source. ![Settings Level Advanced](https://img.shields.io/badge/-advanced-blue)
-* Disable Manual Run Prompt - disables the dialog box when selecting Manual Run and just goes right to the library update ![Settings Level Advanced](https://img.shields.io/badge/-advanced-blue)
+To use the graphical browser, Tkinter is needed.
+To use the remote monitor, threading must be available.
 
-### Video Settings:
+## Installation
 
-Enabling this will turn on scanning for the Video Library. This is the same as calling "Update Library" from within the Video menus of Kodi. There are a few options you can tweak regarding how often you want the scanner to run. Read the section on Timer Options for more information.
-
-__Custom Paths__ ![Settings Level Expert](https://img.shields.io/badge/-expert-blue)
-
-Custom paths are a special advanced feature for the Video library. It allows you to specify different schedules for individual paths in your library. This editor is limited to the Cron style syntax for scheduling. The path you select must already be in the video database and have content selected. The path must also match your source path exactly.
-
-### Music Settings
-
-Enabled this will turn on scanning for the Music Library. This is the same as calling "Update Library" from within the Music menus of Kodi. The options here are identical to the Video Settings above. Read the section on Timer Options for more information.
-
-### Timer Options:
-
-For both Video and Music library scanning there are two types of timers to choose from.
-
-__Standard Timer__
-
-Specify an interval to run the library update process. It will be launched every X hours within the interval unless on of the conditions specified by you as been met (don't run during media playback, etc) in which case it will be run at the next earliest convenience.
-
-__Advanced Timer__ ![Settings Level Advanced](https://img.shields.io/badge/-advanced-blue)
-
-Specify a cron expression to use as an interval for the update process. By default the expression will run at the top of every hour. More advanced expressions can be configured such as:
+Install with pip by:
 
 ```
-
-    .--------------- minute (0 - 59)
-    |   .------------ hour (0 - 23)
-    |   |   .--------- day of month (1 - 31)
-    |   |   |   .------ month (1 - 12) or Jan, Feb ... Dec
-    |   |   |   |  .---- day of week (0 - 6) or Sun(0 or 7)
-    V   V   V   V  V
-    *   *   *   *  *
+pip install guppy3
 ```
 
-Example:
-1. 0 */5 ** 1-5 - runs update every five hours Monday - Friday
-2. 0,15,30,45 0,15-18 * * * - runs update every quarter hour during midnight hour and 3pm-6pm
+Install with conda by:
+```
+conda install -c conda-forge guppy3
+```
 
+## Usage
 
-Read up on cron (http://en.wikipedia.org/wiki/Cron) for more information on how to create these expressions
+The following example shows
 
-### Cleaning the Library:
+1. How to create the session context: `h=hpy()`
+2. How to show the reachable objects in the heap: `h.heap()`
+4. How to show the shortest paths from the root to the single largest object: `h.heap().byid[0].sp`
+3. How to create and show a set of objects: `h.iso(1,[],{})`
 
-Cleaning the Music/Video Libraries is not enabled by default. If you choose to do this you can select from a few options to try and reduce the likelyhood that a DB clean wile hose your database.
+```python
+>>> from guppy import hpy; h=hpy()
+>>> h.heap()
+Partition of a set of 30976 objects. Total size = 3544220 bytes.
+ Index  Count   %     Size   % Cumulative  % Kind (class / dict of class)
+     0   8292  27   739022  21    739022  21 str
+     1   7834  25   625624  18   1364646  39 tuple
+     2   2079   7   300624   8   1665270  47 types.CodeType
+     3    400   1   297088   8   1962358  55 type
+     4   4168  13   279278   8   2241636  63 bytes
+     5   1869   6   269136   8   2510772  71 function
+     6    400   1   228464   6   2739236  77 dict of type
+     7     79   0   139704   4   2878940  81 dict of module
+     8   1061   3    93368   3   2972308  84 types.WrapperDescriptorType
+     9    172   1    81712   2   3054020  86 dict (no owner)
+<89 more rows. Type e.g. '_.more' to view.>
+>>> h.heap().byid[0].sp
+ 0: h.Root.i0_modules['os'].__dict__
+>>> h.iso(1,[],{})
+Partition of a set of 3 objects. Total size = 348 bytes.
+ Index  Count   %     Size   % Cumulative  % Kind (class / dict of class)
+     0      1  33      248  71       248  71 dict (no owner)
+     1      1  33       72  21       320  92 list
+     2      1  33       28   8       348 100 int
+>>>
+```
 
-* Library to Clean - You can clean your video library, music library, or both.
-* Prompt User Before Cleaning - you must confirm that you want to clean the library before it will happen. Really only useful for "After Update" as a condition. ![Settings Level Advanced](https://img.shields.io/badge/-advanced-blue)
-* Frequency - There are several frequency options.
-  * "After Update" will run a clean immediately following a scan on the selected library.
-  * The Day/Week/Month options will schedule a clean task to happen. Cleaning the Video Library is hardcoded for midnight and the music library at 2am. Weekly updates occur on Sunday and Monthly updates occur on the first of each month - these values are hardcoded.
-  * You can also choose to enter a custom cron timer for video and music library cleaning. These work the same as any of the other cron timers for the other schedules.
+People have written awesome posts on how to use this toolset, including:
+* [How to use guppy/heapy for tracking down memory usage](https://smira.ru/wp-content/uploads/2011/08/heapy.html)
+* [Debugging Django memory leak with TrackRefs and Guppy](https://opensourcehacker.com/2008/03/07/debugging-django-memory-leak-with-trackrefs-and-guppy/)
+* [Diagnosing Memory "Leaks" in Python](https://chase-seibert.github.io/blog/2013/08/03/diagnosing-memory-leaks-python.html)
+* [Digging into python memory issues in ckan with heapy](https://leastsignificant.blogspot.com/2015/06/digging-into-python-memory-issues-in.html)
+
+Formal and API documentation are [also available](https://zhuyifei1999.github.io/guppy3/).
 
 ## Contributing
 
-If you're having issues with this addon there are two main places to look. The first is the addon thread on [the Kodi Forums](https://forum.kodi.tv/showthread.php?tid=119520). This is where you can ask general questions regarding functionality. If you're having a legitimate issue, such as an error message, you can [create an Issue](https://github.com/robweber/xbmclibraryautoupdate/issues) for it in this repository.
+Issues and pull requests are welcome. You may also ask for help on using this
+toolset; however, in such cases, we will only provide guidance, and not profile
+your code for you.
 
-Pull Requests are welcome if you want to dig around in the code to fix issues or add functionality. Please submit them using [the usual workflow](https://guides.github.com/introduction/flow/index.html). Additionally you can help keep languages files up to date by visiting [the Weblate page](https://kodi.weblate.cloud/projects/kodi-add-ons-services/service-xbmclibraryautoupdate/) for this addon and updating untranslated strings. Changes to Weblate will automatically create PRs to this repository. This is a great way to contribute if you're not a coder!
+Please make sure to update tests as appropriate.
+
+### Testing
+
+To test if the heapy build and installation was ok, you can do:
+
+```python
+>>> from guppy import hpy
+>>> hpy().test()
+Testing sets
+Test #0
+Test #1
+Test #2
+...
+```
+
+There will be several more tests. Some tests may take a while.
+
+## License
+
+Copyright (C) 2005-2013 Sverker Nilsson, S. Nilsson Computer System AB  
+Copyright (C) 2019-2021 YiFei Zhu
+
+The right is granted to copy, use, modify and redistribute this code
+according to the rules in what is commonly referred to as an MIT
+license.
+
+*** USE AT YOUR OWN RISK AND BE AWARE THAT THIS IS AN EARLY RELEASE ***

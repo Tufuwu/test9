@@ -1,0 +1,9 @@
+coverage:
+  status:
+    project:
+      default:
+        threshold: 1
+ignore:
+  - "docs"
+  - "specs"
+comment: false

@@ -1,5 +1,8 @@
-.settings/
-*.pyo
-*.pyc
-.project
-.pydevproject
+/build/
+/dist/
+/guppy3.egg-info/
+/docs/*,gsl-backuped
+
+__pycache__/
+*.so
+venv/
