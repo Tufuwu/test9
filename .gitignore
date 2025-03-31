@@ -1,22 +1,50 @@
-*.pyc
-*.sw[po]
+# Temporary and binary files
+*~
+*.py[cod]
+*.so
+*.cfg
+!.isort.cfg
+!setup.cfg
+*.orig
+*.log
+*.pot
+__pycache__/*
+.cache/*
+.*.swp
+*/.ipynb_checkpoints/*
+.DS_Store
 
-# Packaging
-dist/*
-build/*
+# Project files
+.ropeproject
+.project
+.pydevproject
+.settings
+.idea
+tags
+
+# Package files
+*.egg
+*.eggs/
+.installed.cfg
 *.egg-info
-.eggs
 
-# Sandbox
-sandbox/db.sqlite
-sandbox/assets
-settings_local.py
-
-# Testing
+# Unittest and coverage
+htmlcov/*
 .coverage
 .tox
-.cache
-.pytest_cache
+junit.xml
+coverage.xml
+.pytest_cache/
 
-# Virtual environment
-venv
+# Build and docs folder/files
+build/*
+dist/*
+sdist/*
+docs/api/*
+docs/_rst/*
+docs/_build/*
+cover/*
+MANIFEST
+
+# Per-project virtualenvs
+.venv*/

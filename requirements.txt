@@ -1,3 +1,9 @@
-# Linting
-isort>=5.9,<5.10
-flake8>=3.9,<3.10
+setuptools
+PyYAML
+requests
+kubernetes
+datetime
+configparser
+slackclient
+pyfiglet
+prometheus_api_client
