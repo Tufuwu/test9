@@ -1,3 +1,5 @@
+#!/bin/sh
+
 #  Copyright (c) 2018 Uber Technologies, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,3 +13,5 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+defaults read "$HOME/Library/Preferences/com.apple.SystemProfiler.plist" 'CPU Names' | cut -sd '"' -f 4 | uniq

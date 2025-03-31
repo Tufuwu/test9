@@ -11,3 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import unittest
+
+from uberpoet.moduletree import ModuleNode
+
+
+class TestModuleTree(unittest.TestCase):
+
+    def test_gen_layered_graph(self):
+        root, nodes = ModuleNode.gen_layered_graph(10, 10)
+        self.assertEqual(len(nodes), 10 * 10 + 1)
+        self.assertEqual(ModuleNode.APP, root.node_type)

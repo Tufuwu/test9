@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #  Copyright (c) 2018 Uber Technologies, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,3 +13,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+date_fn () {
+  while read -r LINE
+  do
+    echo "$(date +%s) $LINE"
+  done
+}
+
+# This isn't a perfect way to track cpu usage.
+# You'll notice some skew in terms of a second or two,
+# but it works well enough for our usecase of 700-1500s builds.
+
+top -l 0 -n 0 | grep --line-buffered CPU | date_fn
