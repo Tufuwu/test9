@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <div>
+        <form action="{% url 'enqueue_successful_task' %}" method="post" id="form1" target="dummyframe">
+            {% csrf_token %}
+        </form>
+        <button type="submit" form="form1">Enqueue successful task</button>
+    </div>
+    <div>
+        <form action="{% url 'enqueue_failing_task' %}" method="post" id="form2" target="dummyframe">
+        {% csrf_token %}
+        </form>
+        <button type="submit" form="form2">Enqueue failing task</button>
+    </div>
+    <div>
+        <form action="{% url 'enqueue_nesting_task' %}" method="post" id="form3" target="dummyframe">
+            {% csrf_token %}
+        </form>
+        <button type="submit" form="form3">Enqueue nesting task</button>
+    </div>
+    <div>
+        <form action="{% url 'raise_exception' %}" method="post" id="form4">
+            {% csrf_token %}
+        </form>
+        <button type="submit" form="form4">Raise exception</button>
+    </div>
+
+    <div>
+        <form action="{% url 'standard_logger' %}" method="post" id="form5" target="dummyframe">
+            {% csrf_token %}
+        </form>
+        <button type="submit" form="form5">Standard logger</button>
+    </div>
+
+    <div>
+        <a href="{% url 'api_view' %}">rest-framework API View</a>
+    </div>
+
+    <span><iframe width="0" height="0" border="0" name="dummyframe" id="dummyframe" style="visibility: hidden;"></iframe></span>
+
+{% endblock %}

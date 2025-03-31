@@ -1,0 +1,75 @@
+version: '3'
+
+volumes:
+  local_postgres_data: {}
+  local_postgres_data_backups: {}
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: django_structlog_demo_project_local_django
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app:cached
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    ports:
+      - "8000:8000"
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/local/postgres/Dockerfile
+    image: django_structlog_demo_project_local_postgres
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data:cached
+      - local_postgres_data_backups:/backups:cached
+    env_file:
+      - ./.envs/.local/.postgres
+
+  redis:
+    image: redis:3.2
+    ports:
+      - "6379:6379"
+
+  celeryworker:
+    image: django_structlog_demo_project_local_django
+    depends_on:
+      - redis
+      - postgres
+    volumes:
+      - .:/app:cached
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+      
+    command: /start-celeryworker
+
+  celerybeat:
+    image: django_structlog_demo_project_local_django
+    depends_on:
+      - redis
+      - postgres
+    volumes:
+      - .:/app:cached
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+      
+    command: /start-celerybeat
+
+  flower:
+    image: django_structlog_demo_project_local_django
+    ports:
+      - "5555:5555"
+    volumes:
+      - .:/app:cached
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    command: /start-flower
