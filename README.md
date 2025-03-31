@@ -1,89 +1,68 @@
-[![PyPI version](https://badge.fury.io/py/alns.svg)](https://badge.fury.io/py/alns)
-[![ALNS](https://github.com/N-Wouda/ALNS/actions/workflows/alns.yml/badge.svg)](https://github.com/N-Wouda/ALNS/actions/workflows/alns.yml)
-[![codecov](https://codecov.io/gh/N-Wouda/ALNS/branch/master/graph/badge.svg)](https://codecov.io/gh/N-Wouda/ALNS)
+# python-zxing
 
-This package offers a general, well-documented and tested
-implementation of the adaptive large neighbourhood search (ALNS)
-meta-heuristic, based on the description given in [Pisinger and Ropke
-(2010)][1]. It may be installed in the usual way as
+[![PyPI](https://img.shields.io/pypi/v/zxing.svg)](https://pypi.python.org/pypi/zxing)
+[![Build Status](https://github.com/dlenski/python-zxing/workflows/test_and_release/badge.svg)](https://github.com/dlenski/python-zxing/actions?query=workflow%3Atest_and_release)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+
+This is a wrapper for the [ZXing barcode library](https://github.com/zxing/zxing). (It's a "slightly less quick-and-dirty" fork of [oostendo/python-zxing](https://github.com/oostendo/python-zxing).)
+It will allow you to read and decode barcode images from Python.
+
+## Dependencies and installation
+
+Use the Python 3 version of pip (usually invoked via `pip3`) to install: `pip3 install zxing`
+
+* You'll neeed to have a recent `java` binary somewhere in your path. (Tested with OpenJDK v7, v8, v11.)
+* pip will automatically download the relevant [JAR](https://en.wikipedia.org/wiki/JAR_(file_format)) files for the Java ZXing libraries (currently v3.4.1)
+
+## Usage
+
+The `BarCodeReader` class is used to decode images:
+
+```python
+>>> import zxing
+>>> reader = zxing.BarCodeReader()
+>>> print(reader.zxing_version, reader.zxing_version_info)
+3.4.1 (3, 4, 1)
+>>> barcode = reader.decode("test/barcodes/QR_CODE-easy.png")
+>>> print(barcode)
+BarCode(raw='This should be QR_CODE', parsed='This should be QR_CODE', format='QR_CODE', type='TEXT', points=[(15.0, 87.0), (15.0, 15.0), (87.0, 15.0), (75.0, 75.0)])
 ```
-pip install alns
+
+The attributes of the decoded `BarCode` object are `raw`, `parsed`, `format`, `type`, and `points`. The list of formats which ZXing can decode is
+[here](https://zxing.github.io/zxing/apidocs/com/google/zxing/BarcodeFormat.html).
+
+The `decode()` method accepts an image path (or list of paths) and takes optional parameters `try_harder` (boolean), `possible_formats` (list of formats to consider), and `pure_barcode` (boolean).
+If no barcode is found, it returns `None`, and if it encounters any other recognizable error from the Java ZXing library, it raises `BarCodeReaderException`.
+
+## Command-line interface
+
+The command-line interface can decode images into barcodes and output in either a human-readable or CSV format:
+
+```
+usage: zxing [-h] [-c] [--try-harder] image [image ...]
 ```
 
-### Examples
-If you wish to dive right in, the `examples/` directory contains example notebooks
-showing how the ALNS library may be used. These include:
+Human-readable:
 
-- The travelling salesman problem (TSP), [here][2]. We solve an
-  instance of 131 cities to within 2.1% of optimality, using simple
-  destroy and repair heuristics with a post-processing step.
-- The cutting-stock problem (CSP), [here][4]. We solve an instance with
-  180 beams over 165 distinct sizes to within 1.35% of optimality in
-  only a very limited number of iterations.
-- The resource-constrained project scheduling problem, [here][6]. We solve an
-  instance with 90 jobs and 4 resources to within 4% of the best known solution,
-  using a number of different operators and enhancement techniques from the 
-  literature.
+```sh
+$ zxing /tmp/barcode.png
+/tmp/barcode.png
+================
+  Decoded TEXT barcode in QR_CODE format.
+  Raw text:    'Testing 123'
+  Parsed text: 'Testing 123'
+```
 
-Finally, the weight schemes and acceptance criteria notebook gives an overview
-of various options available in the `alns` package (explained below). In the
-notebook we use these different options to solve a toy 0/1-knapsack problem. The
-notebook is a good starting point for when you want to use the different schemes
-and criteria yourself. It is available [here][5].
+CSV output (can be opened by LibreOffice or Excel):
 
-## How to use
-The `alns` package exposes two classes, `ALNS` and `State`. The first
-may be used to run the ALNS algorithm, the second may be subclassed to
-store a solution state - all it requires is to define an `objective`
-member function, returning an objective value.
+```sh
+$ zxing /tmp/barcode1.png /tmp/barcode2.png /tmp/barcode3.png
+Filename,Format,Type,Raw,Parsed
+/tmp/barcode1.png,CODE_128,TEXT,Testing 123,Testing 123
+/tmp/barcode2.png,QR_CODE,URI,http://zxing.org,http://zxing.org
+/tmp/barcode3.png,QR_CODE,TEXT,"This text, ""Has stuff in it!"" Wow⏎Yes it does!","This text, ""Has stuff in it!"" Wow⏎Yes it does!"
+```
 
-The ALNS algorithm must be supplied with a _weight scheme_ and an _acceptance
-criterion_.
+## License
 
-### Weight scheme
-The weight scheme determines how to select destroy and repair operators in each
-iteration of the ALNS algorithm. Several have already been implemented for you,
-in `alns.weight_schemes`:
-
-- `SimpleWeights`. This weight scheme applies a convex combination of the 
-   existing weight vector, and a reward given for the current candidate 
-   solution.
-- `SegmentedWeights`. This weight scheme divides the iteration horizon into
-   segments. In each segment, scores are summed for each operator. At the end
-   of each segment, the weight vector is updated as a convex combination of 
-   the existing weight vector, and these summed scores.
-
-Each weight scheme inherits from `WeightScheme`, which may be used to write 
-your own.
-
-### Acceptance criterion
-The acceptance criterion determines the acceptance of a new solution state at
-each iteration. An overview of common acceptance criteria is given in
-[Santini et al. (2018)][3]. Several have already been implemented for you, in
-`alns.criteria`:
-
-- `HillClimbing`. The simplest acceptance criterion, hill-climbing solely
-  accepts solutions improving the objective value.
-- `RecordToRecordTravel`. This criterion accepts solutions when the improvement
-  meets some updating threshold.
-- `SimulatedAnnealing`. This criterion accepts solutions when the
-  scaled probability is bigger than some random number, using an
-  updating temperature.
-
-Each acceptance criterion inherits from `AcceptanceCriterion`, which may
-be used to write your own.
-
-## References
-- Pisinger, D., and Ropke, S. (2010). Large Neighborhood Search. In M.
-  Gendreau (Ed.), _Handbook of Metaheuristics_ (2 ed., pp. 399-420).
-  Springer.
-- Santini, A., Ropke, S. & Hvattum, L.M. (2018). A comparison of
-  acceptance criteria for the adaptive large neighbourhood search
-  metaheuristic. *Journal of Heuristics* 24 (5): 783-815.
-
-[1]: http://orbit.dtu.dk/en/publications/large-neighborhood-search(61a1b7ca-4bf7-4355-96ba-03fcdf021f8f).html
-[2]: https://github.com/N-Wouda/ALNS/blob/master/examples/travelling_salesman_problem.ipynb
-[3]: https://link.springer.com/article/10.1007%2Fs10732-018-9377-x
-[4]: https://github.com/N-Wouda/ALNS/blob/master/examples/cutting_stock_problem.ipynb
-[5]: https://github.com/N-Wouda/ALNS/blob/master/examples/weight_schemes_acceptance_criteria.ipynb
-[6]: https://github.com/N-Wouda/ALNS/blob/master/examples/resource_constrained_project_scheduling_problem.ipynb
+LGPLv3
