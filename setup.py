@@ -1,52 +1,75 @@
-from ez_setup import use_setuptools
-use_setuptools()
-from setuptools import setup
-import versioneer
+import io
 import os
+from os import path
+import re
+from setuptools import setup, find_packages
+# To use consisten encodings
+from codecs import open
+
+# Function from: https://github.com/pytorch/vision/blob/master/setup.py
 
 
-def main():
-    this_directory = os.path.abspath(os.path.dirname(__file__))
-    with open(os.path.join(this_directory, 'README.rst'), 'r') as f:
-        long_description = f.read()
+def read(*names, **kwargs):
+    with io.open(
+        os.path.join(os.path.dirname(__file__), *names),
+        encoding=kwargs.get("encoding", "utf8")
+    ) as fp:
+        return fp.read()
 
-    cmdclass = versioneer.get_cmdclass()
-
-    setup(name='pysb',
-          version=versioneer.get_version(),
-          description='Python Systems Biology modeling framework',
-          long_description=long_description,
-          long_description_content_type='text/x-rst',
-          author='Jeremy Muhlich',
-          author_email='jmuhlich@bitflood.org',
-          url='http://pysb.org/',
-          packages=['pysb', 'pysb.generator', 'pysb.importers', 'pysb.tools',
-                    'pysb.examples', 'pysb.export', 'pysb.simulator',
-                    'pysb.testing', 'pysb.tests'],
-          scripts=['scripts/pysb_export'],
-          # We should really specify some minimum versions here.
-          python_requires='>=3.6',
-          install_requires=['numpy', 'scipy>=1.1', 'sympy>=1.6', 'networkx',
-                            'futures; python_version == "2.7"'],
-          setup_requires=['nose'],
-          tests_require=['coverage', 'pygraphviz', 'matplotlib', 'pexpect',
-                         'pandas', 'h5py', 'mock', 'cython',
-                         'python-libsbml', 'libroadrunner'],
-          cmdclass=cmdclass,
-          keywords=['systems', 'biology', 'model', 'rules'],
-          classifiers=[
-            'Development Status :: 5 - Production/Stable',
-            'Environment :: Console',
-            'Intended Audience :: Science/Research',
-            'License :: OSI Approved :: BSD License',
-            'Operating System :: OS Independent',
-            'Programming Language :: Python :: 3',
-            'Topic :: Scientific/Engineering :: Bio-Informatics',
-            'Topic :: Scientific/Engineering :: Chemistry',
-            'Topic :: Scientific/Engineering :: Mathematics',
-            ],
-          )
+# Function from: https://github.com/pytorch/vision/blob/master/setup.py
 
 
-if __name__ == '__main__':
-    main()
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
+here = path.abspath(path.dirname(__file__))
+
+# Get the long description from the README file
+with open(path.join(here, 'README.md'), encoding='utf-8') as readme_file:
+    long_description = readme_file.read()
+
+VERSION = find_version('pthflops', '__init__.py')
+
+requirements = [
+    'torch'
+]
+
+setup(
+    name='pthflops',
+    version=VERSION,
+
+    description="Estimate FLOPs of neural networks",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+
+    # Author details
+    author="Adrian Bulat",
+    author_email="adrian@adrianbulat.com",
+    url="https://github.com/1adrianb/pytorch-estimate-flops",
+
+    # Package info
+    packages=find_packages(exclude=('test',)),
+
+    install_requires=requirements,
+    license='BSD',
+    zip_safe=True,
+
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'Operating System :: OS Independent',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+
+        # Supported python versions
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+    ],
+)
