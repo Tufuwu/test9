@@ -1,7 +1,10 @@
-*.pyo
+*.swp
 *.pyc
-__pycache__
-*.egg-info
-build
-dist
-.idea
+.idea/
+*.egg-info/
+build/
+dist/
+*.egg
+.python-env/
+.coverage
+.cache

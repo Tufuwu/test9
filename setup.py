@@ -1,47 +1,31 @@
-#!/usr/bin/env python
-
-from setuptools import setup
+from setuptools import setup, find_packages
+from checkQC import __version__
 
 setup(
-    name='topy',
-    version='1.1.0',
-
-    # PyPI metadata
-    author='Marti Raudsepp',
-    author_email='marti@juffo.org',
-    url='https://github.com/intgr/topy',
-    download_url='https://pypi.python.org/pypi/topy/',
-    license='MIT, CC-BY-SA',
-    description='Fixes typos in text using regular expressions, based on RegExTypoFix from Wikipedia',
-    long_description=open('README.rst').read(),
-    platforms='any',
-    keywords='typo spelling grammar text',
-    classifiers=[
-        # https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: Console',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        # Until we have a test suite we're conservative about Python version compatibility claims
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
-        'Topic :: Documentation',
-        'Topic :: Software Development :: Quality Assurance',
-        'Topic :: Text Processing :: Filters',
-    ],
-
-    # Installation settings
-    packages=['topy'],
-    entry_points={'console_scripts': ['topy = topy.topy:main']},
-    package_data={
-        '': ['*.txt']
-    },
+    name='checkQC',
+    version=__version__,
+    description="A simple program to parse Illumina NGS data and check it for quality criteria.",
+    long_description="A simple program to parse Illumina NGS data and check it for quality criteria.",
+    keywords=['bioinformatics', 'ngs', 'quality control'],
+    author='Johan Dahlberg, SNP&SEQ Technology Platform, Uppsala University',
+    author_email='johan.dahlberg@medsci.uu.se',
+    url="https://www.github.com/Molmed/checkQC",
+    download_url='https://github.com/Molmed/checkQC/archive/{}.tar.gz'.format(__version__),
+    python_requires='>3.10, <3.11',
     install_requires=[
-        'regex>=2016.07.14',
-        'beautifulsoup4',
-    ],
-    test_suite='tests',
+        "click",
+        "PyYAML>=6.0",
+        "interop>=1.2.4",
+        "xmltodict",
+        "tornado",
+        "sample_sheet"],
+    packages=find_packages(exclude=["tests*"]),
+    test_suite="tests",
+    package_data={'checkQC': ['default_config/config.yaml', 'default_config/logger.yaml']},
+    include_package_data=True,
+    license='GPLv3',
+    entry_points={
+        'console_scripts': ['checkqc = checkQC.app:start',
+                            'checkqc-ws = checkQC.web_app:start']
+    },
 )
