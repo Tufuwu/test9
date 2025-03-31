@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysystest type="manual" state="deprecated">
+  <description> 
+    <title>Nested testcase</title>    
+    <purpose><![CDATA[Nested purpose]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups inherit="TRUE">
+      <group>testcase-group1</group>
+      <group>testcase-group2</group>
+    </groups>
+    <modes inherit="true">
+      <mode>testcase-mode1</mode>
+      <mode>testcase-mode2</mode>
+    </modes>
+  </classification>
+
+  <id-prefix>testprefix.</id-prefix>
+
+  <execution-order hint="+9.9"/>
+
+  <data>
+    <class name="PySysTest-testcase" module="run_testcase"/>
+    <input path="Input-testcase"/>
+    <output path="Output-testcase"/>
+    <reference path="Reference-testcase"/>
+    <user-data name="myUserDataInt" value="100"/>
+    <user-data name="myExtraUserData" value="12345"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id="testcase-req1"/>
+      <requirement id="testcase-req2"/>
+    </requirements>
+  </traceability>
+</pysystest>

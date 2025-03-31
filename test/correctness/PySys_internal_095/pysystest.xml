@@ -1,0 +1,29 @@
+<?xml version="1.0" standalone="yes"?>
+<pysystest type="auto" state="runnable">
+    
+  <description> 
+    <title>Writers - custom writer using sys.stdout and stdoutPrint</title>    
+    <purpose><![CDATA[
+Compatibility test to check we haven't broken custom writers that might be 
+writing to sys.stdout. Also checks that stdoutPrint gives us a reliable way to 
+write to stdout, whether using unicode or byte strings. 
+]]>
+    </purpose>
+  </description>
+
+  <classification>
+    <groups>
+      <group>writer</group>
+    </groups>
+  </classification>
+
+  <data>
+    <class name="PySysTest" module="run"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id=""/>     
+    </requirements>
+  </traceability>
+</pysystest>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pysysdirconfig>
+  <classification>
+    <groups>
+      <group>root-group1</group>
+      <group>root-group2</group>
+    </groups>
+    <modes>
+      <mode>root-mode1</mode>
+      <mode>root-mode2</mode>
+    </modes>
+  </classification>
+
+  <id-prefix>rootprefix_</id-prefix>
+  <execution-order hint="-4.1"/>
+
+  <data>
+    <class name="PySysTest-root" module="run_root"/>
+    <input path="Input-root"/>
+    <output path="Output-root"/>
+    <reference path="Reference-root"/>
+    <user-data name="myUserDataInt" value="50"/>
+    <user-data name="myUserDataBool" value="trUe"/>
+  </data>
+  
+  <traceability>
+    <requirements>
+      <requirement id="root-req1"/>     
+      <requirement id="root-req2"/>
+    </requirements>
+  </traceability>
+</pysysdirconfig>

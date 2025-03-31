@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone="yes"?>
+<pysysproject>
+	<property environment="env"/>
+
+	<property osfamily="osfamily"/>
+
+	<property name="verboseWaitForSignal" value="true"/>
+	<property name="defaultAbortOnError" value="true"/>
+
+	<property name="perfparent" value="perfsummary"/>
+
+	<pythonpath value="${root}/extrapath"/>
+	<property name="csvPerformanceReporterSummaryFile" value="${perfparent}/@OUTDIR@_@TESTID@_perf_@HOSTNAME@_@DATE@_${startTime}.csv"/>
+
+	<performance-reporter classname="CustomPerfReporter" module="mypkg.customperf" />
+	
+</pysysproject>
