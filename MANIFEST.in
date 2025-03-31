@@ -1,8 +1,10 @@
-# Include useful user documentation
+# See: https://docs.python.org/3/distutils/commandref.html
+graft flintrock
+
 include README.md
 include CHANGELOG.md
+include COPYRIGHT
 include LICENSE
-include requirements.txt
 
-# Exclude unitary test files
-global-exclude tests/*
+global-exclude *.py[cod] __pycache__ .DS_Store
+global-exclude config.yaml

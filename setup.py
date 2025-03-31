@@ -1,78 +1,67 @@
-"""
-Setup script.
-
-:author: xarbulu
-:organization: SUSE LLC
-:contact: xarbulu@suse.com
-
-:since: 2018-11-15
-"""
-
-import os
-
-from setuptools import find_packages
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
-import shaptools
-
-def read(fname):
-    """
-    Utility function to read the README file. README file is used to create
-    the long description.
-    """
-
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
-
-VERSION = shaptools.__version__
-NAME = "shaptools"
-DESCRIPTION = "API to expose SAP HANA functionalities"
-
-AUTHOR = "xarbulu"
-AUTHOR_EMAIL = "xarbulu@suse.com"
-URL = ""
-
-LICENSE = "Apache-2.0"
-
-CLASSIFIERS = [
-
-]
-
-SCRIPTS = ['bin/shapcli']
-
-DEPENDENCIES = read('requirements.txt').split()
-
-PACKAGE_DATA = {
-    'shaptools': ['support/ssh_askpass']
-}
-DATA_FILES = []
+import setuptools
+from flintrock import __version__
 
 
-SETUP_PARAMS = dict(
-    name=NAME,
-    version=VERSION,
-    description=DESCRIPTION,
-    author=AUTHOR,
-    author_email=AUTHOR_EMAIL,
-    url=URL,
-    long_description=read('README.md'),
-    packages=find_packages(),
-    package_data=PACKAGE_DATA,
-    license=LICENSE,
-    scripts=SCRIPTS,
-    data_files=DATA_FILES,
-    install_requires=DEPENDENCIES,
-    classifiers=CLASSIFIERS,
+with open('README.md') as f:
+    long_description = f.read()
+
+setuptools.setup(
+    name='Flintrock',
+    version=__version__,
+    description='A command-line tool for launching Apache Spark clusters.',
+    long_description=long_description,
+    # FYI: This option requires setuptools >= 38.6.0.
+    long_description_content_type="text/markdown",
+    url='https://github.com/nchammas/flintrock',
+    author='Nicholas Chammas',
+    author_email='nicholas.chammas@gmail.com',
+    license='Apache License 2.0',
+    python_requires='>= 3.7',
+
+    # See: https://pypi.python.org/pypi?%3Aaction=list_classifiers
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+
+        'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
+
+        'Topic :: Utilities',
+        'Environment :: Console',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: POSIX',
+
+        'License :: OSI Approved :: Apache Software License',
+
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
+    ],
+    keywords=['Apache Spark'],
+
+    packages=setuptools.find_packages(),
+    include_package_data=True,
+
+    # We pin dependencies because sometimes projects do not
+    # strictly follow semantic versioning, so new "feature"
+    # releases end up making backwards-incompatible changes.
+    # Sometimes, new releases even introduce bugs which
+    # totally break Flintrock.
+    # For example: https://github.com/paramiko/paramiko/issues/615
+    install_requires=[
+        'boto3 == 1.21.44',
+        'botocore == 1.24.44',
+        'click == 7.1.2',
+        'paramiko == 2.10.3',
+        'PyYAML == 6.0',
+        # This is to address reports that PyInstaller-packaged versions
+        # of Flintrock intermittently fail due to an out-of-date version
+        # of Cryptography being used.
+        # See: https://github.com/nchammas/flintrock/issues/169
+        'cryptography >= 1.7.2',
+    ],
+
+    entry_points={
+        'console_scripts': [
+            'flintrock = flintrock.__main__:main',
+        ],
+    },
 )
-
-def main():
-    """
-    Setup.py main.
-    """
-
-    setup(**SETUP_PARAMS)
-
-if __name__ == "__main__":
-    main()
