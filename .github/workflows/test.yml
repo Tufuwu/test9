@@ -1,63 +1,40 @@
-name: Unfurl unit tests
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-on: [push]
+name: Python package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  test:
+  build:
 
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python: ["3.9", "3.10"]
-    env:
-      TOX_SKIP_ENV: .+(docker|lock)
-      tf_version: 1.0.0
-      helm_version: v3.3.4
-      kubectl_version: v1.21.2
-      k3d_version: v4.4.6
-      UNFURL_LOGGING: info
+        python-version: ["3.9", "3.10"]
+
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python }}
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: ${{ env.tf_version }}
-          terraform_wrapper: false
-      - name: Setup helm
-        uses: azure/setup-helm@v1
-        with:
-          version: ${{ env.helm_version }}
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v1
-        with:
-          version: ${{ env.kubectl_version }}
-      - name: Setup k3d
-        run: |
-          wget https://github.com/rancher/k3d/releases/download/"${{ env.k3d_version }}"/k3d-linux-amd64
-          chmod +x k3d-linux-amd64
-          sudo mv k3d-linux-amd64 /usr/local/bin/k3d
-      - name: Set up the cluster
-        run: | 
-          k3d cluster create
-          kubectl get node
-          k3d kubeconfig merge --all -d
-          kubectl config view
-      - name: Install Tox and any other packages
-        run: pip install tox
-      # - name: Test terraform
-      #   run: |
-      #     which terraform
-      #     echo $PATH
-      - name: Run Tox
-        # Run tox using the version of Python in `PATH`
-        run: | 
-          export PY_V=py`python3 --version | awk '{print $2}' | tr -d '.' | cut -c 1-2`
-          tox -c tosca-parser/tox.ini -e $PY_V
-          tox -e $PY_V
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        pytest

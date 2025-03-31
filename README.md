@@ -1,111 +1,40 @@
-<p align="center">
-  <img src="docs/unfurl_logo.svg" width="400px">
-</p>
+# vtt_to_srt.py
+Convert vtt files to srt subtitle format
 
-<p align="center">
-  <a href="https://unfurl.run/docs/" alt="Documentation"><img src="https://img.shields.io/badge/docs-unfurl-informational"/></a>
-  <a href="https://badge.fury.io/py/unfurl"><img src="https://badge.fury.io/py/unfurl.svg" alt="PyPI version" height="20"></a>
-</p>
+## Note
+For Python 3.7 [you can get version for Python 2.7 here](https://github.com/jansenicus/vtt-to-srt.py)
 
-# Introduction
+## Installation
+```shell
+pip install vtt_to_srt3
+```
 
-Unfurl is a tool that works with Git to record and deploy changes to your DevOps infrastructure.
-It tracks configuration changes, keeping a history of exactly how you did it and what the results are, so you can easily repair or recreate what you did later.
+```cmd
+python -m pip install vtt_to_srt3
+```
 
-Unfurl integrates with the deployment tools you are already using, like Ansible, Terraform and Helm, organizing their usage into Ensembles, shareable abstractions that ease migrations to new environments as well as share and reuse your work.
+## Usage from terminal
 
-## Design
+```shell
+python -m vtt_to_srt pathname [-r]
 
-- **Next-level GitOps**: both configuration and operational status stored in git
-- **Configuration tool agnostic** with built-in support for Ansible and Terraform
-- **Secrets**: key manager integration; keeps secrets out of git so repos can be safely made public
-- **No server, no agent**: simple, stand-alone CLI that can be used both as development tool on client or for automated production deployment on a server
-- **Dependency management**: Easily track dependencies and changes across infrastructure layers and boundaries.
-- **Zero installation**: Uses client-side container support to bootstrap and automate installation requirements.
+pathname - a file or directory with files to be converted 
 
-## Goals
+-r       - walk path recursively                          
+```
 
-- **Hermetic**: tracks exact version of environment and deployment artifacts
-- **Reproducible**: hermetic builds + git + locked-down, immutable infrastructure = reproducibility
-- **Incremental**: only applies necessary changes
-- **Fast**: the above three combined enable lightening-fast updates
+## Usage as a lib
 
-## Features
-
-- Specifications, instance status, and change history authored and recorded in a simple YAML vocabulary.
-- Or use [TOSCA's](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=tosca) (Topology and Orchestration Specification for Cloud Applications) YAML vocabulary for more carefully typed specifications.
-- Editor friendly config files:
-  - Comments, order, and whitespace are preserved.
-  - Syntactic macros for YAML provide generic facility for re-use and avoiding verbose, boiler-plate
-- Path-based query DSL to express dynamic relationships between resources and configurations
-- Ansible-compatible Jinja2 templates
-- Records history of changes and commits them to a Git repository.
-- API for dynamic configuration allows scripted specifications to be recorded alongside declarative ones.
-
-# Installation
-
-`unfurl` is available on [PyPI](https://pypi.org/project/unfurl/). You can install using `pip` (or `pip3`):
-
-`pip install unfurl`
-
-By default `unfurl` creates a virtual Python environment to run in so it only installs the minimal requirements needed to run the command line. If you want to run it using your system Python install it with the "full" option:
-
-`pip install unfurl[full]`
-
-You can also install `unfurl` directly from this repository to get the latest code:
-
-`pip3 install -e git+https://github.com/onecommons/unfurl.git#egg=unfurl`
-
-### Autocomplete
-
-| Shell | Instructions                                           |
-|-------|--------------------------------------------------------|
-| Bash  | Add this to `~/.bashrc`:                               |
-|       | `eval "$(_UNFURL_COMPLETE=bash_source unfurl)"`        |
-| Zsh   | Add this to `~/.zshrc`:                                |
-|       | `eval "$(_UNFURL_COMPLETE=zsh_source unfurl)"`         |
-| Fish  | Add this to  `~/.config/fish/completions/unfurl.fish`: |
-|       | `eval (env _UNFURL_COMPLETE=fish_source unfurl)`       |
-
-### Requirements
-
-Linux or MacOs
-
-Python (3.7, 3.8, or 3.9); git
-
-Python 3.6 is not tested automatically but should work. However you should make sure you have the latest version of pip installed (`pip install -U pip`) and may need to have Rust installed for the [crytography library](https://github.com/pyca/cryptography/blob/main/docs/installation.rst).
-
-Optional: docker
-
-## Developing
-
-`git clone --recurse-submodules https://github.com/onecommons/unfurl`
-
-To build documentation: Run `tox -e docs`.
-
-To build a distribution package run:
-
-`python setup.py sdist bdist_wheel`
-
-You can now install this package with pip, for example:
-
-`pip install ./dist/unfurl-0.2.2.dev3-py2.py3-none-any.whl`
-
-### Running unit tests
-
-You can use `tox` to run the unit tests inside the supported python environments with the latest source installed.
-Install tox `pip install tox` and then run `tox` in source root. To install the dependencies you may need header files installed by the following OS packages: `python-dev`, `libcrypt-dev`, `openssl-dev`. (Note: if installation of a dependency fails, reinvoke `tox` with `-r` to recreate the test environment.)
-If you use ``asdf`` to manage multiple versions of Python, also install `tox-asdf`: `pip install tox-asdf`.
-
-Arguments after `--` are passed to the test runner, e.g. to run an individual test: `tox -- tests/test_runtime.py`.
-
-## Getting Started
-
-Check out the rest of Unfurl's documentation [here](https://unfurl.run/docs/get-started-step-by-step.html)
-
-### Status and Caveats
-
-Unfurl is in early stages of development and should not be used in production. In particular be mindful of these limitations:
-
-* Locking is not implemented to prevent multiple instances of unfurl running at the same time from modifying the same resources.
-* Incremental updates are only partially implemented. You can incrementally update an ensemble by explicitly limit jobs with the `--force` and `--instance` [command line options](docs/cli.html#unfurl-deploy).
+Convert vtt file
+```shell
+from vtt_to_srt.vtt_to_srt import vtt_to_srt
+path = '/path/to/file.vtt'
+vtt_to_srt(path)
+```		
+		
+Recursively convert all vtt files in directory
+```shell
+from vtt_to_srt.vtt_to_srt import vtt_to_srt
+path = '/path/to/directory'
+vtt_to_srt(path, rec = True)
+```

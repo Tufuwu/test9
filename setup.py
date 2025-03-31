@@ -1,13 +1,27 @@
-"""A setuptools based setup module.
-"""
+import setuptools
 
-# Always prefer setuptools over distutils
-from setuptools import setup
+with open("README.md", "r") as fh:
 
+    long_description = fh.read()
 
-setup(
-    setup_requires=["pbr"],
-    pbr=True,
-    # XXX don't include .py files that haven't been committed to git
-    include_package_data=True,
-)
+setuptools.setup(
+     name='vtt_to_srt3',
+     version='0.1.9.0',
+     author="Jeison Cardoso",
+     author_email="cardoso.jeison@gmail.com",
+     description="vtt to srt subtitles converter package",
+     long_description=long_description,
+     long_description_content_type="text/markdown",
+     url="https://github.com/jsonzilla/vtt-to-srt.py",
+     packages=setuptools.find_packages(),
+     classifiers=[
+         "Programming Language :: Python :: 3.7",
+         "Operating System :: OS Independent",
+     ],
+     entry_points={
+        "console_scripts": [
+            "vtt_to_srt=vtt_to_srt.vtt_to_srt:main",
+        ]
+    }
+
+ )
