@@ -1,0 +1,57 @@
+{% load forms %}
+{% block pathway_container %}
+<div class="col-md-12 content-offset pathway">
+  <div class="col-md-12">
+    <form name="form" class="form-horizontal" novalidate>
+      <div class="row">
+        <h1 class="top-header">
+          {{ pathway.display_name }}
+          <span ng-show="episode">
+
+              (<a href="/#/patient/[[ episode.demographics[0].patient_id ]]">[[ episode.demographics[0].first_name ]] [[ episode.demographics[0].surname ]]
+                <small>[[ episode.demographics[0].date_of_birth | displayDate ]]</small></a>)
+          </span>
+        </h1>
+      </div>
+
+      {% block pathway_body %}
+      {% for step in pathway.get_steps %}
+        {% if step.model == models.CovidTriage.model %}
+          {% if odonto_roles.can_see_covid_triage %}
+            {% include step.get_base_template %}
+          {% endif %}
+        {% else %}
+          {% include step.get_base_template %}
+        {% endif %}
+
+      {% endfor %}
+      {% endblock pathway_body %}
+
+      {% block pathway_footer %}
+      <div class="text-center" ng-show="form.$submitted && (!form.$valid || pathway.errors)">
+        <strong class="help-block">Please fix the above errors</strong>
+      </div>
+      <div ng-show="pathway.episode.stage !== 'Submitted'" ng-controller="DeleteFormCtrl">
+        <div class="pathway-save-button pull-left content-offset-below-150">
+          <a
+            class="btn btn-lg btn-warning btn-save"
+            ng-click="delete()"
+          >
+            Delete this [[ pathway.episode.category_name ]]
+          </a>
+        </div>
+      </div>
+      <div class="pathway-save-button pull-right content-offset-below-150">
+          <a
+          class="btn btn-lg btn-primary btn-save"
+          ng-click="!form.$setSubmitted() && (!pathway.errors && form.$valid) && pathway.finish(editing)"
+          ng-disabled="form.$submitted && (!form.$valid || pathway.errors)"
+        >
+          [[ pathway.finish_button_text ]]
+        </a>
+      </div>
+      {% endblock %}
+    </form>
+  </div>
+</div>
+{% endblock %}

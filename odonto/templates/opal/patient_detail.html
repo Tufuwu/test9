@@ -1,0 +1,110 @@
+{% extends "opal.html" %}
+{% load links %}
+{% block odonto_viewport %}
+  <div class="content-offset">
+    {% with object.demographics as demographics %}
+      <h1 class="patient-detail-heading">
+        {{ demographics.name }} {{ demographics.date_of_birth}}
+      </h1>
+      <div class="row"> <!-- Start demographics banner -->
+        <div class="col-md-4">
+          <p>
+            NHS Number: <b>{{ demographics.nhs_number }}</b>
+          </p>
+        </div>
+        <div class="col-md-3">
+          <p>
+            Sex: <b>{{ demographics.sex }}</b>
+          </p>
+        </div>
+        <div class="col-md-1 col-md-offset-4">
+          <a href="/pathway/#/demographics/{{ object.pk }}/{{ object.episode_set.first.pk }}">
+          <i class="fa fa-pencil edit pull-right"></i>
+        </div>
+      </div> <!-- end demographics banner -->
+
+      <div class="row content-offset">
+        <a class="btn btn-primary btn-lg pull-right {% if open_fp17 %}disabled{% endif %} open-claim-button"
+           href="/pathway/#/fp17/{{ object.pk }}/{{ new_fp17_pk }}">
+          Open FP17
+        </a>
+        <a class="btn btn-primary btn-lg pull-right {% if open_fp17o %}disabled{% endif %} open-claim-button"
+           href="/pathway/#/fp17o/{{ object.pk }}/{{ new_fp17o_pk }}">
+          Open FP17O
+        </a>
+      </div>
+
+      <div class="row content-offset-20">
+        <div class="col-md-12">
+          <table class="table table-striped">
+            {% for episode in episodes %}
+              {% if episode.stage != "New" %}
+              <tr>
+                <td>{{ episode.category_name }}</td>
+                <td>
+                  {% if episode.fp17treatmentcategory_set.get.treatment_category %}
+                    {{ episode.fp17treatmentcategory_set.get.treatment_category }}
+                  {% endif %}
+                </td>
+                <td>{{ episode.stage }}</td>
+                <td>{{ episode.fp17dentalcareprovider_set.get.provider_location_number }}</td>
+                <td>{{ episode.fp17dentalcareprovider_set.get.performer }}</td>
+                <td>
+                  {% if episode.category_name == "FP17" %}
+                    {{ episode.fp17incompletetreatment_set.get.date_of_acceptance }}
+                  {% endif %}
+                  {% if episode.category_name == "FP17O" %}
+                    {{ episode.orthodontictreatment_set.get.date_of_completion }}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if episode.stage != "Submitted" %}
+                    <a
+                      {% if episode.category_name == "FP17" %}
+                        href="/pathway/#/fp17-edit/{{ object.pk }}/{{ episode.pk }}"
+                      {% endif %}
+                      {% if episode.category_name == "FP17O" %}
+                        href="/pathway/#/fp17-o-edit/{{ object.pk }}/{{ episode.pk }}"
+                      {% endif %}
+                    class="btn btn-small btn-primary">
+                    Edit &nbsp;
+                  </a>
+                {% else %}
+                  <a
+                    {% if episode.category_name == "FP17" %}
+                      href="/#/summary/fp17/{{ object.pk }}/{{ episode.pk }}"
+                    {% endif %}
+                    {% if episode.category_name == "FP17O" %}
+                      href="/#/summary/fp17o/{{ object.pk }}/{{ episode.pk }}"
+                    {% endif %}
+                    class="btn btn-small btn-default">
+                    View
+                  </a>
+                {% endif %}
+                </td>
+                <td>
+                  {% if episode.stage != "Submitted" %}
+                    {% if roles.is_dentist %}
+                    <a
+                      {% if episode.category_name == "FP17" %}
+                        href="/pathway/#/fp17-submit/{{ object.pk }}/{{ episode.pk }}"
+                      {% endif %}
+                      {% if episode.category_name == "FP17O" %}
+                        href="/pathway/#/fp17-o-submit/{{ object.pk }}/{{ episode.pk }}"
+                      {% endif %}
+                    class="btn btn-small btn-primary">
+                    Submit
+                  </a>
+                    {% endif %}
+                  {% endif %}
+                </td>
+              </tr>
+              {% endif %}
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+
+{% endwith %}
+  </div>
+{% endblock %}

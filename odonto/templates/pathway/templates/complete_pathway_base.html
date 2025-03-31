@@ -1,0 +1,36 @@
+{% extends 'pathway/templates/pathway_base.html' %}
+{% load forms %}
+{% block pathway_container %}
+<div class="col-md-12 content-offset pathway">
+  <div class="col-md-12">
+    <form name="form" class="form-horizontal" novalidate>
+      <div class="row">
+        <h1>
+          {{ pathway.display_name }}
+          <span ng-show="episode">
+            (<a href="/#/patient/[[ episode.demographics[0].patient_id ]]/[[ episode.demographics[0].id ]]">[[ episode.demographics[0].first_name ]] [[ episode.demographics[0].surname ]]</a>)
+          </span>
+        </h1>
+      </div>
+
+      {% block pathway_body %}
+      {% endblock pathway_body %}
+      <div class="text-center" ng-show="form.$submitted && (form.$invalid || pathway.errors)">
+        <strong class="help-block">Please fix the above errors</strong>
+      </div>
+      {% block pathway_footer %}
+        <div ng-hide="pathway.errors" class="pathway-save-button">
+            <button
+            class="btn btn-lg btn-primary btn-save"
+            ng-click="!form.$setSubmitted() && pathway.errors || form.$valid && pathway.finish(editing)"
+            check-form="form"
+          >
+            <i class="[[ pathway.finish_button_icon ]]"></i>
+            [[ pathway.finish_button_text ]]
+          </button>
+        </div>
+      {% endblock %}
+    </form>
+  </div>
+</div>
+{% endblock %}

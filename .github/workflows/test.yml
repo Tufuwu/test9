@@ -1,105 +1,46 @@
-# Copyright 2019 David Corbett
-# Copyright 2020 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-name: Test
-on: push
-env:
-  FONTFORGE_COMMIT: aa062f4cbd1db21e27b2620f16993ebe4c540ab6
-  HARFBUZZ_VERSION: 2.5.2
-  PYTHON_VERSION: 3.9
+on: [pull_request]
+name: CI
 jobs:
+  # run python/js tests, coveralls and lint
   test:
-    runs-on: ubuntu-latest
+    name: python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ci_db_test
+        ports:
+          - 5432:5432
     strategy:
+      fail-fast: false
       matrix:
-        requirements:
-          - frozen
-          - oldest
-          - newest
+        os:
+        - ubuntu-latest
+        python-version: ["3.9", "3.10"]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Cache FontForge
-        id: cache-fontforge
-        uses: actions/cache@v4
-        with:
-          key: ${{ runner.os }}-fontforge-${{ env.FONTFORGE_COMMIT }}-python-${{ env.PYTHON_VERSION }}
-          path: fontforge
-      - name: Install FontForge
-        if: steps.cache-fontforge.outputs.cache-hit != 'true'
-        run: |
-          sudo apt-get -qy --no-install-recommends install \
-            build-essential \
-            cmake \
-            ninja-build \
-            packaging-dev \
-            pkg-config \
-            python${{ env.PYTHON_VERSION }}-dev \
-          ;
-          curl -Lo fontforge.zip https://github.com/fontforge/fontforge/archive/${{ env.FONTFORGE_COMMIT }}.zip
-          unzip fontforge.zip
-          mv fontforge-${{ env.FONTFORGE_COMMIT }} fontforge
-          cd fontforge
-          curl -O https://patch-diff.githubusercontent.com/raw/fontforge/fontforge/pull/4232.patch
-          patch -p1 <4232.patch
-          mkdir build
-          cd build
-          cmake -G Ninja \
-            -D CMAKE_INSTALL_PREFIX="$PWD/target" \
-            -D ENABLE_DOCS=OFF \
-            -D ENABLE_GUI=OFF \
-            -D ENABLE_LIBGIF=OFF \
-            -D ENABLE_LIBJPEG=OFF \
-            -D ENABLE_LIBPNG=OFF \
-            -D ENABLE_LIBREADLINE=OFF \
-            -D ENABLE_LIBSPIRO=OFF \
-            -D ENABLE_LIBTIFF=OFF \
-            -D ENABLE_LIBUNINAMESLIST=OFF \
-            -D ENABLE_PYTHON_EXTENSION=ON \
-            -D ENABLE_NATIVE_SCRIPTING=OFF \
-            -D ENABLE_WOFF2=OFF \
-            .. \
-          ;
-          ninja
-          sudo ninja install
-      - name: Add site-packages to default search path
-        run: echo "PYTHONPATH=$PWD/fontforge/build/target/lib/python${{ env.PYTHON_VERSION }}/site-packages:$PYTHONPATH" >>"$GITHUB_ENV"
-      - name: Cache HarfBuzz
-        id: cache-harfbuzz
-        uses: actions/cache@v4
-        with:
-          key: ${{ runner.os }}-harfbuzz-${{ env.HARFBUZZ_VERSION }}
-          path: .hb/harfbuzz-${{ env.HARFBUZZ_VERSION }}
-      - name: Install HarfBuzz
-        if: steps.cache-harfbuzz.outputs.cache-hit != 'true'
-        run: make HB_VERSION=${{ env.HARFBUZZ_VERSION }} hb-shape
-      - name: Add HarfBuzz to path
-        run: echo "$PWD/.hb/harfbuzz-${{ env.HARFBUZZ_VERSION }}/util" >>"$GITHUB_PATH"
-      - name: Prepare oldest requirements
-        if: matrix.requirements == 'oldest'
-        run: |
-          pip install packaging
-          ./get-old-requirements.py --input requirements-to-freeze.txt --output requirements.txt
-      - name: Prepare newest requirements
-        if: matrix.requirements == 'newest'
-        run: cp requirements-to-freeze.txt requirements.txt
+          python-version: ${{ matrix.python-version }}
+      - name: Set up ruby for coveralls
+        uses: actions/setup-ruby@v1
+      - name: Set up js
+        uses: actions/setup-node@v1
+      - name: Install js dependencies
+        run: npm install jasmine-core@2.3.4 karma@1.5 karma-coverage@1.1.1 karma-jasmine@0.3.8 karma-firefox-launcher@2.1.0 karma-coveralls@1.1.2
       - name: Install requirements
-        run: pip install --upgrade --upgrade-strategy eager -r requirements.txt
-      - name: Build
-        run: make
-      - name: Test
-        run: make check
+        run: pip install -r requirements.txt
+      - run: gem install coveralls-lcov
+      - name: run tests
+        run: opal test --coverage
+      - name: combine coveralls
+        run: find coverage -name "lcov.info" -exec coveralls-lcov -v -n {} \; > coverage/coverage.json
+      - run: coveralls --merge=coverage/coverage.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}

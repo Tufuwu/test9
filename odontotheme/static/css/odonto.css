@@ -1,0 +1,895 @@
+.cambridge_blue {
+  color: #A3C9A8;
+}
+
+.bg-bone {
+  background-color: #DDD8C4;
+}
+
+body {
+  background-color: white;
+  font-size: 18px;
+  color: #21232A;
+  overflow-y: hidden;
+}
+
+h1 {
+  color: #3b68a0;
+}
+
+h2 {
+  color: #3C4939;
+}
+
+h3 {
+  font-size: 20px;
+}
+
+table {
+  font-size: 18px;
+}
+
+p a, a {
+  color: #595F72;
+}
+
+a:hover {
+  color: #474c5b;
+}
+
+.form-control {
+  color: #595F72;
+  border-radius: 0px;
+}
+
+.form-horizontal {
+  padding-left: 20px;
+}
+
+.form-horizontal .control-label,
+label {
+  text-align: left;
+  font-size: 18px;
+  color: #595F72;
+  font-weight: normal;
+}
+
+.with-decline {
+  margin-bottom: 10px;
+}
+
+.with-decline .form-group {
+  margin-bottom: 5px;
+}
+
+.with-decline .btn-checkbox {
+  float: right;
+}
+
+.help-block {
+  color: #DE3C4B;
+}
+
+.btn {
+  border-radius: 0px;
+}
+
+.btn.btn-radio-group {
+  font-size: 18px;
+  line-height: 24px;
+  padding: 12px 18px;
+}
+
+.btn.btn-checkbox {
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  text-align: center;
+  padding: 8px 0px 0px 0px;
+}
+
+.btn-default {
+  color: #595F72;
+}
+
+.btn-default.active {
+  background-color: #A3C9A8;
+  border-color: #89ba90;
+  color: #595F72;
+}
+
+.btn-error .btn-default, .btn-error .active.btn-default {
+  background-color: #DE3C4B;
+  border-color: #dd3343;
+}
+
+.btn-primary.disabled {
+  background-color: #595F72;
+  border-color: #555a6c;
+  color: #DDD8C4;
+}
+
+.panel.panel-primary .panel-heading .btn-primary,
+.btn-primary,
+.btn-primary:focus {
+  background-color: #A3C9A8;
+  border-color: #89ba90;
+  color: #595F72;
+}
+
+.panel.panel-primary .panel-heading .btn-primary:hover,
+.btn-primary:hover {
+  color: #595F72;
+  font-weight: normal;
+  background-color: #89ba90;
+}
+
+.btn-secondary, .btn-secondary:hover, .btn-secondary:focus {
+  background-color: #A3C9A8;
+  border-color: #89ba90;
+  color: #595F72;
+  font-weight: normal;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+#episode-history h4 {
+  color: white;
+  text-decoration: underline;
+  font-size: 16px;
+}
+
+#episode-history a {
+  font-size: 16px;
+  color: white;
+  display: block;
+}
+
+#episode-history a:hover,
+#episode-history a:visited {
+  color: white;
+  font-size: 16px;
+}
+
+#episode-history a.bg-active {
+  background-color: #3b68a0;
+}
+
+h1 {
+  margin-top: 24px;
+  margin-bottom: 36px;
+}
+
+h2 {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.offset-below {
+  margin-bottom: 48px;
+}
+
+.form-horizontal .control-label,
+label {
+  padding-bottom: 8px;
+}
+
+.pathway-save-button .btn {
+  margin-top: 32px;
+  margin-left: -15px;
+  margin-bottom: 64px;
+}
+
+.odonto-checkbox .btn-checkbox {
+  float: right;
+}
+
+.odonto-checkbox label.col-md-1 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-2 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-3 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-4 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-5 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-6 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-7 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-8 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-9 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-10 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-11 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-12 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-13 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-14 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-15 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-16 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-17 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-18 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-19 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-20 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-21 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-22 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-23 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-24 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-25 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-26 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-27 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-28 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-29 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-30 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-31 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-32 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-33 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-34 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-35 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-36 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-37 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-38 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-39 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-40 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-41 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-42 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-43 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-44 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-45 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-46 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-47 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-48 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-49 {
+  padding-left: 0px;
+}
+
+.odonto-checkbox label.col-md-50 {
+  padding-left: 0px;
+}
+
+#episode-history {
+  position: fixed;
+  left: 20px;
+  top: 300px;
+  margin-left: 25px;
+}
+
+@media (max-width: 991px) {
+  #episode-history {
+    display: none;
+  }
+}
+
+h5 {
+  font-size: inherit;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+#episode-history a {
+  padding: 5px;
+}
+
+.patient-detail-heading {
+  margin-top: 110px;
+}
+
+.open-claim-button {
+  margin-right: 12px;
+}
+
+.top-header {
+  position: fixed;
+  color: white;
+  z-index: 1040;
+  top: 0;
+}
+
+.top-header a {
+  color: white;
+}
+
+.top-header a:hover {
+  text-decoration: none;
+  color: #DDD8C4;
+}
+
+.top-header a:hover small {
+  color: #DDD8C4;
+}
+
+.form-control {
+  font-size: 18px;
+  height: 48px;
+}
+
+.btn-lg, .btn-lg:hover {
+  padding: 6px 40px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 2px;
+}
+
+.btn-checkbox.btn-lg:hover {
+  padding: 8px 0;
+}
+
+.btn-default small {
+  color: #DDD;
+}
+
+.main-view {
+  overflow-x: auto;
+}
+
+.navbar-default, .top-navbar {
+  border-bottom: none;
+}
+
+.top-navbar {
+  height: 90px;
+  background-color: #487DBC;
+}
+
+.nav-bar-search .form-control {
+  font-size: 16px;
+  line-height: 16px;
+  height: 32px;
+}
+
+.nav-bar-search:before {
+  font-size: 16px;
+}
+
+.navbar-default .navbar-nav > li > a {
+  color: white;
+}
+
+#main-navbar {
+  margin-top: 20px;
+}
+
+.ngProgressLiteBar {
+  display: none;
+}
+
+.content-offset {
+  margin-top: 100px;
+}
+
+.content-offset-below-150 {
+  margin-bottom: 150px;
+}
+
+.pathway-offset {
+  margin-top: 80px;
+}
+
+.nav-bar-links {
+  margin-top: -5px;
+}
+
+.nav-bar-odonto-container {
+  position: fixed;
+  margin-top: -106px;
+  z-index: 1040;
+  left: 50%;
+}
+
+.nav-bar-odonto-title {
+  margin-left: -50%;
+  font-size: 24px;
+  font-weight: 300;
+  color: white;
+}
+
+.odonto-small-title {
+  font-size: 18px;
+  font-weight: 400;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.loading {
+  background-color: white;
+  height: 100%;
+  position: fixed;
+  width: 1100%;
+  z-index: 100;
+  padding-left: 0px;
+  margin-left: -20px;
+}
+
+.pathway-process-steps-padding {
+  margin-top: 60px;
+}
+
+.btn-choices button {
+  width: 240px;
+  height: 200px;
+  border-radius: 4px;
+  margin-bottom: 30px;
+  background-color: #d4d4d4;
+  color: white;
+}
+
+.btn-choices button.active {
+  background-color: #487cbc;
+}
+
+.odonto-list {
+  margin-top: 90px;
+  padding: 20px;
+}
+
+.patient-detail-heading h1,
+.patient-detail-heading h1 small {
+  color: #487cbc;
+}
+
+.panel.panel-primary .panel-heading {
+  color: black;
+}
+
+.odonto-detail {
+  margin-top: 100px;
+  /*     background-color: firebrick */
+}
+
+.odonto-detail h2 {
+  padding-bottom: 20px;
+}
+
+.odonto-detail .panel-default {
+  border: none;
+}
+
+.panel-primary .panel-default .panel-heading,
+.panel-default .panel-heading {
+  border-bottom: 3px solid #487cbc;
+}
+
+.search-panel.panel.panel-primary .panel-heading {
+  background-color: transparent;
+  border-bottom: 3px solid #487cbc;
+}
+
+.modal-header {
+  background-color: #487cbc;
+}
+
+.modal-header h3 {
+  font-size: 24px;
+  padding-left: 20px;
+}
+
+.panel.panel-primary .panel-heading {
+  background-color: transparent;
+  border-bottom: 3px solid #487cbc;
+}
+
+.navbar-default .container-fluid a.navbar-brand {
+  color: white;
+  margin-left: 15px;
+}
+
+.navbar-default .container-fluid a.navbar-brand:hover {
+  color: white;
+}
+
+.navbar-default .container-fluid a.navbar-brand img {
+  height: 80px;
+  margin-top: -12px;
+  display: block;
+  margin-bottom: 6px;
+  padding-left: 15px;
+}
+
+#side-nav {
+  background-color: #487DBC;
+  height: 100vh;
+}
+
+@media (max-width: 991px) {
+  #side-nav {
+    display: none;
+  }
+}
+
+ul.app-info {
+  padding-top: 160px;
+  padding-bottom: 30px;
+}
+
+.app-info li {
+  padding-left: 32px;
+  color: white;
+}
+
+#side-nav {
+  overflow: scroll;
+  background-color: #487CBC;
+  position: fixed;
+}
+
+#side-nav #logout {
+  position: fixed;
+  bottom: 0px;
+}
+
+@media (max-height: 650px) {
+  #side-nav #logout {
+    position: static;
+    margin-top: 100%;
+  }
+  #side-nav #logout ul.app-info {
+    padding-top: 12px;
+  }
+}
+
+#side-nav .navbar-nav {
+  width: 100%;
+}
+
+#side-nav ul.nav li {
+  float: none;
+}
+
+#side-nav ul.nav li i {
+  padding-right: 4px;
+}
+
+#side-nav ul.nav li a {
+  padding-left: 26px;
+}
+
+#side-nav ul.nav li .badge {
+  float: right;
+  background-color: white;
+  color: #124c91;
+}
+
+#side-nav ul.nav li:hover a, #side-nav ul.nav li a:hover, #side-nav ul.nav li:hover {
+  background-color: #2c64a8;
+  color: white;
+  cursor: pointer;
+}
+
+#side-nav ul.nav li.active, #side-nav ul.nav li.active a {
+  background-color: #124c91;
+}
+
+#side-nav hr {
+  margin-left: 5%;
+}
+
+#side-nav a {
+  color: white;
+}
+
+.outer-container {
+  overflow-y: scroll;
+  height: 100vh;
+}
+
+.no-touchevents .panel-heading i.edit, .list-group-item i.edit, .list-group-item i.delete {
+  display: block;
+  color: #ccc;
+}
+
+.touchevents .panel-heading i.edit,
+.touchevents .panel-heading i.delete,
+.panel-heading:hover i.edit,
+.list-group-item:hover i.edit,
+.list-group-item:hover i.delete {
+  color: black;
+  cursor: pointer;
+}
+
+.btn.btn-default small {
+  color: #CCC;
+}
+
+.btn.btn-default small {
+  color: #CCC;
+}
+
+.panel-margin {
+  padding-left: 15px;
+}
+
+table.patient-list {
+  font-size: 16px;
+}
+
+.panel {
+  border: none;
+  background: none;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+  border-radius: 0px;
+}
+
+.panel-footer {
+  background: none;
+}
+
+.panel.panel-primary .panel-heading.pathway-header {
+  background: none;
+  border-color: #487cbc;
+}
+
+.dental-chart .right {
+  float: right;
+}
+
+.chart-tooth {
+  float: left;
+}
+
+.chart-tooth label.notation {
+  display: block;
+  border: 1px solid #ccc;
+  padding: 0px;
+  margin-top: 1px;
+  text-align: center;
+}
+
+.btn.btn-tooth {
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  text-align: center;
+  padding: 8px 0px 0px 0px;
+}
+
+.extraction-chart {
+  padding-left: 20px;
+}
+
+.extraction-chart .upper {
+  border-bottom: 2px solid #ddd;
+}
+
+.extraction-chart .patient-right {
+  border-right: 2px solid #ddd;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .radio-buttons .btn-group {
+    width: 100%;
+  }
+  .radio-buttons .btn-radio-group {
+    display: block;
+  }
+}
+
+.errored-state select {
+  background-color: #fcc;
+}
+
+.record-panel h3 {
+  font-size: 30px;
+}
+
+.record-panel h3 i {
+  margin-top: 5px;
+}
+
+.patient-consultation-long-form {
+  line-height: 26px;
+  letter-spacing: 0.04em;
+  word-spacing: 0.1em;
+  text-align: justify;
+}
+
+.stats-page .left-block {
+  background-color: #6f778f;
+  padding: 20px;
+  color: white;
+  margin-right: 40px;
+}
+
+.stats-page .left-block h1 {
+  color: white;
+  font-size: 54px;
+}
+
+.stats-page .centre-block {
+  background-color: #6f778f;
+  padding: 20px;
+  color: white;
+  margin-right: 20px;
+  margin-left: 20px;
+}
+
+.stats-page .centre-block h1 {
+  color: white;
+  font-size: 54px;
+}
+
+.stats-page .right-block {
+  background-color: #6f778f;
+  padding: 20px;
+  color: white;
+  margin-left: 40px;
+}
+
+.stats-page .right-block h1 {
+  color: white;
+  font-size: 54px;
+}
+
+.case-mix-popover {
+  width: 400px;
+}
+
+.case-mix-popover li {
+  margin-left: 20px;
+  list-style-type: disc;
+  font-weight: normal;
+}
+
+.table > tbody > tr > td.subrecord-row-value {
+  width: 40%;
+  padding-left: 8%;
+}
+
+.datetime-picker .time-picker {
+  padding-left: 20px;
+  padding-top: 6px;
+}
+
+.datetime-picker .btn.btn-default {
+  margin-left: 4px;
+}
+
+.view-switcher {
+  padding-top: 20px;
+}
+
+.view-switcher .btn-group .btn {
+  padding: 10px 20px;
+  margin-top: 4px;
+}
+/*# sourceMappingURL=odonto.css.map */

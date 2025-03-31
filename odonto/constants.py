@@ -1,0 +1,26 @@
+ALBION_ROAD = 'Albion Road'
+AMBLE = 'Amble'
+BLYTH = 'Blyth'
+HEXHAM = 'Hexham'
+LONGBENTON = 'Longbenton'
+MORPETH_NHS_CENTRE = 'Morpeth NHS Centre'
+NORTHGATE = 'Northgate'
+SEATON_HIRST = 'Seaton Hirst'
+WALLSEND = 'Wallsend'
+WARD_15_WGH = 'Ward 15, WGH'
+
+
+LOCATION_NUMBERS = {
+    ALBION_ROAD: 10108,
+    AMBLE: 10112,
+    BLYTH: 10113,
+    HEXHAM: 16027,
+    LONGBENTON: 10109,
+    MORPETH_NHS_CENTRE: 24946,
+    NORTHGATE: 10117,
+    SEATON_HIRST: 10116,
+    WALLSEND: 10111,
+    WARD_15_WGH: 10054,
+}
+
+DENTAL_ADMINISTRATOR = "dental_administrator"
