@@ -1,74 +1,66 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
+import re
+import sys
 
-"""
-A setuptools based setup module.
-
-See:
-https://packaging.python.org/en/latest/distributing.html
-"""
-
-import io
-from os import path
-
-try:
-    from pip.req import parse_requirements
-except ImportError:
-    # pip >= 10
-    from pip._internal.req import parse_requirements
-
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 
-def get_requirements(requirements_file):
-    """Use pip to parse requirements file."""
-    requirements = []
-    if path.isfile(requirements_file):
-        for req in parse_requirements(requirements_file, session="hack"):
-            try:
-                if req.markers:
-                    requirements.append("%s;%s" % (req.req, req.markers))
-                else:
-                    requirements.append("%s" % req.req)
-            except AttributeError:
-                # pip >= 20.0.2
-                requirements.append(req.requirement)
-    return requirements
+def get_version(*file_paths):
+    """Retrieves the version from rele/__init__.py"""
+    filename = os.path.join(os.path.dirname(__file__), *file_paths)
+    version_file = open(filename).read()
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
 
 
-if __name__ == "__main__":
-    HERE = path.abspath(path.dirname(__file__))
-    INSTALL_REQUIRES = get_requirements(path.join(HERE, "requirements.txt"))
+version = get_version("rele", "__init__.py")
 
-    with io.open(path.join(HERE, "README.rst"), encoding="utf-8") as readme:
-        LONG_DESCRIPTION = readme.read()
 
-    setup(
-        name="modoboa-dmarc",
-        description="DMARC related tools for Modoboa",
-        long_description=LONG_DESCRIPTION,
-        license="MIT",
-        url="http://modoboa.org/",
-        author="Antoine Nguyen",
-        author_email="tonio@ngyn.org",
-        classifiers=[
-            "Development Status :: 4 - Beta",
-            "Environment :: Web Environment",
-            "Framework :: Django :: 2.2",
-            "Intended Audience :: System Administrators",
-            "License :: OSI Approved :: MIT License",
-            "Operating System :: OS Independent",
-            "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.5",
-            "Programming Language :: Python :: 3.6",
-            "Programming Language :: Python :: 3.7",
-            "Topic :: Communications :: Email",
-            "Topic :: Internet :: WWW/HTTP",
-        ],
-        keywords="email dmarc",
-        packages=find_packages(),
-        include_package_data=True,
-        zip_safe=False,
-        install_requires=INSTALL_REQUIRES,
-        use_scm_version=True,
-        setup_requires=["setuptools_scm"],
-    )
+if sys.argv[-1] == "tag":
+    print("Tagging the version on git: %s" % version)
+    os.system('git tag -a %s -m "version %s"' % (version, version))
+    os.system("git push --tags")
+    sys.exit()
+
+readme = open("README.md").read()
+
+setup(
+    name="rele",
+    version=version,
+    description="""Relé makes integration with Google PubSub easier.""",
+    long_description=readme,
+    long_description_content_type="text/markdown",
+    author="Mercadona Tech",
+    author_email="software.online@mercadona.es",
+    url="https://github.com/mercadona/rele",
+    packages=find_packages(exclude=("tests",)),
+    include_package_data=True,
+    install_requires=["google-auth", "google-cloud-pubsub>=2.2.0"],
+    extras_require={"django": ["django", "tabulate"], "flask": ["flask"]},
+    license="Apache Software License 2.0",
+    zip_safe=False,
+    keywords="rele",
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Framework :: Django :: 1.11",
+        "Framework :: Django :: 2.0",
+        "Framework :: Django :: 2.1",
+        "Framework :: Django :: 2.2",
+        "Framework :: Django :: 3.0",
+        "Framework :: Django :: 3.1",
+        "Framework :: Django :: 3.2",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: Apache Software License",
+        "Natural Language :: English",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+    ],
+    entry_points={"console_scripts": ["rele-cli=rele.__main__:main"]},
+)
