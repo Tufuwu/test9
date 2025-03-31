@@ -1,3 +1,0 @@
-class CIM_Foo {
-        badtypedef InstanceID;
-}
