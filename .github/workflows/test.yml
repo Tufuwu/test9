@@ -1,31 +1,35 @@
-name: Run tests
-on: [pull_request]
+name: main-ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
-  unit_test:
+  ci:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
 
     steps:
+      # checkout v2, with recursive submodule update
       - uses: actions/checkout@v2
-
-      - name: Install Ubuntu packages
-        run: sudo apt-get install libxml2-dev libxslt1-dev python-dev
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          submodules: recursive
 
-      - name: Setup Python cache
-        uses: actions/cache@v4
+      # build the Docker image we use to run the tests
+      - name: Docker build
+        run: docker build -t emoji-fzf --build-arg "UID=$(id -u)" -f Dockerfile .
+
+      # execute tox in the docker container. don't run in parallel; conda has
+      # issues when we do this
+      - name: Docker run tests
+        run: docker run -v $(pwd):/mnt/workspace -t emoji-fzf bash -c "cd /mnt/workspace && tox"
+
+      # upload-artifact is used to save the py27 wheel. this wheel is compatible
+      # with python2 and python3
+      - uses: actions/upload-artifact@v4
         with:
-          path: venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/requirements-dev.txt') }}
-
-      - name: Install dependencies
-        run: make requirements-dev
-
-      - name: Run tests
-        run: make test
+          name: py27-wheel-output
+          path: .tox/py27-stable/dist/
