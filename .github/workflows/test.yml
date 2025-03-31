@@ -1,67 +1,22 @@
----
-name: CI
+name: Build
 
-on:
-  pull_request:
-    branches:
-      - dev
-  push:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  build:
     strategy:
       matrix:
         python-version: ["3.9", "3.10"]
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: x64
-      - name: pytest
-        run: |
-          pip install poetry
-          poetry install
-          poetry run py.test
 
-  lint:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
-        with:
-          python-version: "3.x"
-          architecture: x64
-      - name: setup
-        run: |
-          pip install poetry
-          poetry install
-      - name: lint
-        run: |
-          poetry run black --check --fast regenmaschine
-          poetry run flake8 regenmaschine
-          poetry run pydocstyle regenmaschine
-          poetry run pylint regenmaschine
-      - name: typing
-        run: |
-          poetry run mypy --ignore-missing-imports regenmaschine
 
-  coverage:
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
-        with:
-          python-version: "3.x"
-          architecture: x64
-      - run: |
-          pip install poetry
-          poetry install
-      - run: |
-          poetry run py.test -s --verbose --cov-report term-missing --cov-report xml --cov=regenmaschine tests
-      - uses: codecov/codecov-action@v1.0.3
-        with:
-          token: ${{secrets.CODECOV_TOKEN}}
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Tox and any other packages
+      run: pip install tox
+    - name: Run Tox
+      run: tox -e py
