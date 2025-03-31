@@ -1,41 +1,40 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
-name: Python package
+name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '0 0 * * *'
-
-env:
-  MJKEY: ${{ secrets.MJKEY }}
+  release:
 
 jobs:
-  test-docker:
-
+  tox:
+    env:
+      PIP_INDEX_URL: https://pypi.python.org/simple
     runs-on: ubuntu-latest
-
+    strategy:
+      fail-fast: false
+      matrix:
+        make_target:
+          - run-pre-commit
+          - test-external
+          - itest-external
+          - itest_bionic-external
     steps:
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: |
-        docker pull rlworkgroup/metaworld-ci:latest
-        docker build \
-            --cache-from rlworkgroup/metaworld-ci:latest \
-            -f docker/Dockerfile \
-            -t "rlworkgroup/metaworld-ci:$GITHUB_RUN_ID" \
-            .
-
-    - name: Run the Docker image
-      run: |
-        docker run \
-            -t \
-            --rm \
-            -e "MJKEY=$MJKEY" \
-            --memory 7000m \
-            --memory-swap 7000m \
-            --name metaworld-ci rlworkgroup/metaworld-ci pytest -n 0 -v -m 'not large and not skip_on_ci'
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17.3'
+      - uses: azure/setup-kubectl@v1
+        with:
+          version: v1.22.0
+      # GHA won't setup tox for us and we use tox-pip-extensions for venv-update
+      - run: pip install tox==3.8.6 tox-pip-extensions==1.6.0
+      - run: go install sigs.k8s.io/kind@v0.11.1
+      - run: make ${{ matrix.make_target }}

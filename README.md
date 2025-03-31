@@ -1,151 +1,156 @@
-# Meta-World
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/rlworkgroup/metaworld/blob/master/LICENSE)
-![Build Status](https://github.com/rlworkgroup/metaworld/workflows/Python%20package/badge.svg)
+[![CI](https://github.com/Yelp/clusterman/actions/workflows/ci.yaml/badge.svg)](https://github.com/Yelp/clusterman/actions/workflows/ci.yaml)
+[![Documentation Status](https://readthedocs.org/projects/clusterman/badge/?version=latest)](https://clusterman.readthedocs.io/en/latest/?badge=latest)
 
-__Meta-World is an open-source simulated benchmark for meta-reinforcement learning and multi-task learning consisting of 50 distinct robotic manipulation tasks.__ We aim to provide task distributions that are sufficiently broad to evaluate meta-RL algorithms' generalization ability to new behaviors.
+# Clusterman - Autoscale and Manage your compute clusters
 
-For more background information, please refer to our [website](https://meta-world.github.io) and the accompanying [conference publication](https://arxiv.org/abs/1910.10897), which **provides baseline results for 8 state-of-the-art meta- and multi-task RL algorithms**.
+![Clusterman Logo](https://raw.githubusercontent.com/Yelp/clusterman/master/clusterman_logo.png)
 
-__Table of Contents__
-- [Installation](#installation)
-- [Using the benchmark](#using-the-benchmark)
-  * [Basics](#basics)
-  * [Running ML1, MT1](#running-ml1-or-mt1)
-  * [Running ML10, ML45, MT10, MT50](#running-a-benchmark)
-- [Citing Meta-World](#citing-meta-world)
-- [Accompanying Baselines](accompanying-baselines)
-- [Become a Contributor](#become-a-contributor)
-- [Acknowledgements](#acknowledgements)
+Clusterman (the Cluster Manager) is an autoscaling engine for Mesos
+and Kubernetes clusters. It looks at metrics and can launch or terminate
+compute to meet the needs of your workloads, similarly to the official
+[Kubernetes Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
+It provides the following set of features:
 
-## Join the Community
-**Join our mailing list: [metaworld-announce@googlegroups.com](https://groups.google.com/forum/#!forum/metaworld-announce/join)** for infrequent announcements about the status of the benchmark, critical bugs and known issues before conference deadlines, and future plans, please 
+* Customizable metrics: All metrics for Clusterman are stored in an
+  external datastore, and are automatically loaded into the signals
+  that need them
+* Pluggable autoscaling signals: Your team knows how the application
+  you're running should scale in response to metrics, so your team
+  should own the signal that tells Clusterman what to do
+* Full-featured simulation environment: Want to know how the autoscaler
+  is going to respond to production traffic before you deploy changes?
+  The Clusterman simulation environment lets you do this.  You can also
+  simulate future traffic so that you can predict usage or cost increase
+  before they happen.
 
-Need some help? Have a question which is not quite a bug and not quite a feature request?
+For more information, see the [Clusterman documentation](https://clusterman.readthedocs.io/en/latest/)
 
-**Join the community Slack** by filling out
-[this Google Form](https://docs.google.com/forms/d/e/1FAIpQLSf4AXRIbA1cLGjku4lIRQ6btStWPeIMeG3J17i4_FhFQU8X0g/viewform).
+## Getting Started
 
-## Installation
-Meta-World is based on MuJoCo, which has a proprietary dependency we can't set up for you. Please follow the [instructions](https://github.com/openai/mujoco-py#install-mujoco) in the mujoco-py package for help. Once you're ready to install everything, run:
+You can try out Clusterman in a local development environment against
+a Dockerized Mesos cluster by running the following commands:
 
-```
-pip install git+https://github.com/rlworkgroup/metaworld.git@master#egg=metaworld
-```
+    make example
+    clusterman status --cluster local-dev -v
 
-Alternatively, you can clone the repository and install an editable version locally:
+All of the Clusterman CLI commands should work in the above environment.
+You can see examples of the Clusterman services by running
 
-```
-git clone https://github.com/rlworkgroup/metaworld.git
-cd metaworld
-pip install -e .
-```
+    make itest-external
 
-## Using the benchmark
-Here is a list of benchmark environments for meta-RL (ML*) and multi-task-RL (MT*):
-* [__ML1__](https://meta-world.github.io/figures/ml1.gif) is a meta-RL benchmark environment which tests few-shot adaptation to goal variation within single task. You can choose to test variation within any of [50 tasks](https://meta-world.github.io/figures/ml45-1080p.gif) for this benchmark.
-* [__ML10__](https://meta-world.github.io/figures/ml10.gif) is a meta-RL benchmark which tests few-shot adaptation to new tasks. It comprises 10 meta-train tasks, and 3 test tasks.
-* [__ML45__](https://meta-world.github.io/figures/ml45-1080p.gif) is a meta-RL benchmark which tests few-shot adaptation to new tasks. It comprises 45 meta-train tasks and 5 test tasks.
-* [__MT10__](https://meta-world.github.io/figures/mt10.gif), __MT1__, and __MT50__ are multi-task-RL benchmark environments for learning a multi-task policy that perform 10, 1, and 50 training tasks respectively. __MT1__ is similar to __ML1__ becau you can choose to test variation within any of [50 tasks](https://meta-world.github.io/figures/ml45-1080p.gif) for this benchmark.  In the original Metaworld experiments, we augment MT10 and MT50 environment observations with a one-hot vector which identifies the task. We don't enforce how users utilize task one-hot vectors, however one solution would be to use a Gym wrapper such as [this one](https://github.com/rlworkgroup/garage/blob/master/src/garage/envs/multi_env_wrapper.py)
+## Components
 
+![Architecture Diagram](https://github.com/Yelp/clusterman/blob/master/images/architecture-diagram.png?raw=true)
 
-### Basics
-We provide a `Benchmark` API, that allows constructing environments following the [`gym.Env`](https://github.com/openai/gym/blob/c33cfd8b2cc8cac6c346bc2182cd568ef33b8821/gym/core.py#L8) interface.
+Clusterman is made up of the following components:
 
-To use a `Benchmark`, first construct it (this samples the tasks allowed for one run of an algorithm on the benchmark).
-Then, construct at least one instance of each environment listed in `benchmark.train_classes` and `benchmark.test_classes`.
-For each of those environments, a task must be assigned to it using
-`env.set_task(task)` from `benchmark.train_tasks` and `benchmark.test_tasks`,
-respectively.
-`Tasks` can only be assigned to environments which have a key in
-`benchmark.train_classes` or `benchmark.test_classes` matching `task.env_name`.
+* Metrics Data Store: All relevant data used by scaling signals is written
+  to a single data store for a single source of truth about historical
+  cluster state.  At Yelp, we use AWS DynamoDB for this datastore.  Metrics are
+  written to the datastore via a separate metrics library.
+* Pluggable Signals: _Metrics_ (from the data store) are consumed by _signals_
+  (small bits of code that are used to produce resource requests.  Signals
+  run in separate processes configured by [supervisord](http://supervisord.org),
+  and use Unix sockets to communicate.
+* Core Autoscaler: The autoscaler logic consumes resource requests from the
+  signals and combines them to determine how many resources to request from or
+  release back to the cloud provider.
+* Resource Groups and Pools: Each autoscaler instance manages exactly one
+  "pool", that is, a logical grouping of machines in a cluster.  Pools consist
+  of "resource groups", such as a Spot Fleet Request (SFR) or AutoScaling Group
+  (ASG) from AWS EC2.
+* Configuration: Clusterman stores global configuration values in a file called
+  `clusterman.yaml`, and per-pool configuration in `clusterman-clusters/<cluster-name>/<pool-name>.(mesos|kubernetes)`.
+  These config files tell the Clusterman services when and how to run, and they
+  serve as the glue to hook up an autoscaler with its signals.  Configure the
+  path to `clusterman.yaml` with the `--env-config-path` flag, and the path to
+  `clusterman-clusters` with `--cluster-config-directory`.
+* An Autoscaling Simulation Environment: Clusterman comes with a complete
+  simulation environment for running tests with your signals on historical data
+  before they are deployed.  This environment can produce information about the
+  cost of your cluster, as well as whether it is over- or under-provisioned.
 
-Please see below for some small examples using this API.
+Clusterman has two main ways of interacting with the clusters it manages.  The
+Clusterman CLI provides a set of command-line tools for viewing and managing
+the state of the cluster; type `clusterman --help` to see a list of possible
+subcommands.  See the Clusterman documentation for more details.
 
+The Clusterman service runs as a set of three long-running processes; the first
+process collects data about spot instance pricing from AWS (not required if you
+aren't using AWS, spot instances, or the Clusterman simulator); the second
+process queries each of the pools in a cluster to collect metadata and system
+metrics about the pool; and the third process is responsible for actually
+autoscaling each of the pools.
 
-### Running ML1 or MT1
-```python
-import metaworld
-import random
+## Integrating Clusterman
 
-print(metaworld.ML1.ENV_NAMES)  # Check out the available environments
+At Yelp, we use [PaaSTA](https://github.com/Yelp/PaaSTA), our
+platform-as-a-service, to manage Clusterman.  If you use PaaSTA, setting up
+Clusterman should be relatively straightforward.  Otherwise you will need
+to provide additional tooling to deploy the Clusterman code or Docker image
+to your environment.
 
-ml1 = metaworld.ML1('pick-place-v1') # Construct the benchmark, sampling tasks
+If you'd like to use Clusterman in your environment, you will need the
+following components set up:
 
-env = ml1.train_classes['pick-place-v1']()  # Create an environment with task `pick_place`
-task = random.choice(ml1.train_tasks)
-env.set_task(task)  # Set task
+* A metrics datastore with the appropriate tables.  See `examples/terraform/clusterman.tf`
+  for a Terraform representation of the schema in DynamoDB.
+* A `clusterman_metrics` library that can communicate with your chosen metrics
+  datastore.  There is a reference copy of the metrics library in `examples/clusterman_metrics`
+  that is capable of communicating with AWS DynamoDB.
+* Code to run the autoscaler service. At Yelp, we use an internal
+  batch library called `yelp_batch` for this task; however, the same goal
+  can be achieved by simply running the code in a never-terminating while
+  loop.  See the sample code in `examples/batch` for a place to start.
+* Configuration files.  Clusterman uses one "master" configuration file as well
+  as a configuration file per pool that it autoscales.  You can see examples of
+  these config files in `acceptance/srv-configs`, and the config file schema in
+  `examples/schemas`.
 
-obs = env.reset()  # Reset environment
-a = env.action_space.sample()  # Sample an action
-obs, reward, done, info = env.step(a)  # Step the environoment with the sampled random action
-```
-__MT1__ can be run the same way except that it does not contain any `test_tasks`
-### Running a benchmark
-Create an environment with train tasks (ML10, MT10, ML45, or MT50):
-```python
-import metaworld
-import random
+To build a Debian package for the Clusterman CLI, run `make package`.  To build
+an example Docker image which can run the Clusterman batch code, run `make cook-image-external`
 
-ml10 = metaworld.ML10() # Construct the benchmark, sampling tasks
+Clusterman uses EC2 tags in order to find the resource groups that it manages.
+To configure a resource group so that Clusterman can find it, you need to add a
+tag like the following to your ASG or SFR:
 
-training_envs = []
-for name, env_cls in ml10.train_classes.items():
-  env = env_cls()
-  task = random.choice([task for task in ml10.train_tasks
-                        if task.env_name == name])
-  env.set_task(task)
-  training_envs.append(env)
+    tag-name: "{\"paasta_cluster\": \"cluster-name\", \"pool\": \"pool-name\"}"
 
-for env in training_envs:
-  obs = env.reset()  # Reset environment
-  a = env.action_space.sample()  # Sample an action
-  obs, reward, done, info = env.step(a)  # Step the environoment with the sampled random action
-```
-Create an environment with test tasks (this only works for ML10 and ML45, since MT10 and MT50 don't have a separate set of test tasks):
-```python
-import metaworld
-import random
+You can specify the value of `tag-name` in your configuration file for the pool:
 
-ml10 = metaworld.ML10() # Construct the benchmark, sampling tasks
+    resource_groups:
+      - (sfr|asg):
+        tag: tag-name
 
-testing_envs = []
-for name, env_cls in ml10.test_classes.items():
-  env = env_cls()
-  task = random.choice([task for task in ml10.test_tasks
-                        if task.env_name == name])
-  env.set_task(task)
-  testing_envs.append(env)
+## Design Goals
 
-for env in testing_envs:
-  obs = env.reset()  # Reset environment
-  a = env.action_space.sample()  # Sample an action
-  obs, reward, done, info = env.step(a)  # Step the environoment with the sampled random action
-```
+Clusterman is designed to support a wide range of cluster autoscaling needs at
+Yelp.  We run many different types of workloads (long-running services, batch
+jobs, machine learning tasks, databases, etc.) on top of Kubernetes and Mesos,
+and each of these workloads has a different set of scaling requirements.
+Clusterman is designed to be a unified system that can accomodate each of these
+workloads.  To that end, Clusterman's design goals are:
 
-## Citing Meta-World
-If you use Meta-World for academic research, please kindly cite our CoRL 2019 paper the using following BibTeX entry.
+* A modular design that separates cloud API calls from signal evaluation and
+  the core autoscaling loop
+* Unified autoscaling logic for a multi-tenant cluster
+* Client-owned scaling signals for requesting resources
+* A command-line interface for managing and interacting with clusters
+* A simulation environment for performing cost and behaviour analysis
 
-```
-@inproceedings{yu2019meta,
-  title={Meta-World: A Benchmark and Evaluation for Multi-Task and Meta Reinforcement Learning},
-  author={Tianhe Yu and Deirdre Quillen and Zhanpeng He and Ryan Julian and Karol Hausman and Chelsea Finn and Sergey Levine},
-  booktitle={Conference on Robot Learning (CoRL)},
-  year={2019}
-  eprint={1910.10897},
-  archivePrefix={arXiv},
-  primaryClass={cs.LG}
-  url={https://arxiv.org/abs/1910.10897}
-}
-```
+## Licence
 
-## Accompanying Baselines
-If you're looking for implementations of the baselines algorithms used in the Metaworld conference publication, please look at our sister directory, [Garage](https://github.com/rlworkgroup/garage). 
-Note that these aren't the exact same baselines that were used in the original conference publication, however they are true to the original baselines.
+Clusterman is licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
 
-## Become a Contributor
-We welcome all contributions to Meta-World. Please refer to the [contributor's guide](https://github.com/rlworkgroup/metaworld/blob/master/CONTRIBUTING.md) for how to prepare your contributions.
+## Contributing
 
-## Acknowledgements
-Meta-World is a work by [Tianhe Yu (Stanford University)](https://cs.stanford.edu/~tianheyu/), [Deirdre Quillen (UC Berkeley)](https://scholar.google.com/citations?user=eDQsOFMAAAAJ&hl=en), [Zhanpeng He (Columbia University)](https://zhanpenghe.github.io), [Ryan Julian (University of Southern California)](https://ryanjulian.me), [Karol Hausman (Google AI)](https://karolhausman.github.io),  [Chelsea Finn (Stanford University)](https://ai.stanford.edu/~cbfinn/) and [Sergey Levine (UC Berkeley)](https://people.eecs.berkeley.edu/~svlevine/).
+Everyone is encouraged to contribute to Clusterman by forking the
+[Github repository](http://github.com/Yelp/clusterman) and making a pull request or
+opening an issue.  Please read our [Code of Conduct](https://github.com/Yelp/clusterman/code-of-conduct.md).
 
-The code for Meta-World was originally based on [multiworld](https://github.com/vitchyr/multiworld), which is developed by [Vitchyr H. Pong](https://people.eecs.berkeley.edu/~vitchyr/), [Murtaza Dalal](https://github.com/mdalal2020), [Ashvin Nair](http://ashvin.me/), [Shikhar Bahl](https://shikharbahl.github.io), [Steven Lin](https://github.com/stevenlin1111), [Soroush Nasiriany](http://snasiriany.me/), [Kristian Hartikainen](https://hartikainen.github.io/) and [Coline Devin](https://github.com/cdevin). The Meta-World authors are grateful for their efforts on providing such a great framework as a foundation of our work. We also would like to thank Russell Mendonca for his work on reward functions for some of the environments.
+### Instructions for Yelp developers
+
+1) Make your changes, push a branch to GitHub, and create a pull request
+2) Once your PR is approved, merge your changes to master
+
+A Jenkins pipeline polls GitHub and brings any changes into our internal version. Jenkins will then build and deploy Clusterman as normal.

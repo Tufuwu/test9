@@ -1,0 +1,10 @@
+*
+!.gitignore
+!changelog
+!compat
+!control
+!copyright
+!rules
+!rules.external
+!clusterman.install
+!clusterman.links
