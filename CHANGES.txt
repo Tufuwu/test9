@@ -1,0 +1,103 @@
+3.0.0 (unreleased)
+------------------
+
+- Support Python 3.6, 3.7, 3.8, 3.9, and PyPy3.
+
+- Update to Bootstrap 4 and its dependencies. [sydoluciani]
+
+- Use master branch of Deform and Colander on GitHub. [sydoluciani]
+
+
+.. _2.0.15:
+
+2.0.15 (unreleased)
+-------------------
+
+- Added unofficial deformdemo. This provides a space for contributors to add
+  their widgets without requiring tests, especially when the functional tests
+  cannot pass using Selenium. [sydoluciani]
+  https://github.com/Pylons/deformdemo/pull/92
+
+- Changed dateparts widget to use ``type="number"`` instead of default `text`.
+  https://github.com/Pylons/deform/issues/442
+
+- Add Docker containerization of Deform and deformdemo as an option for running
+  tests, and improve related documentation.
+
+- Add demo and tests for arbitrary HTML5 attributes in widgets.
+  https://github.com/Pylons/deform/issues/430
+
+
+.. _2.0.14:
+
+2.0.14 (2020-08-26)
+-------------------
+
+- Sync version with Deform.
+
+
+.. _2.0.13:
+
+2.0.13 (2020-08-25)
+-------------------
+
+- Sync version with Deform.
+
+
+.. _2.0.12:
+
+2.0.12 (2020-08-23)
+-------------------
+
+- Sync version with Deform.
+
+
+.. _2.0.11:
+
+2.0.11 (2020-08-21)
+-------------------
+
+- Drop support of Python 3.4. Add support of Python 3.8 and PyPy3. Add testing
+  of Python 3.9-dev with allowed failure. [stevepiercy]
+
+- Fix many broken functional tests. [sydoluciani]
+
+- Use firefox-latest and geckodriver, dropping obsolete Firefox version.
+  [sydoluciani]
+
+- Use 2.0-branch of Deform on GitHub. [sydoluciani]
+
+- Overhaul README.rst, tox, and requirements to be easier to get started.
+  [stevepiercy]
+
+- Add examples of using ``tags`` options on ``Select2Widget``. [enkidulan]
+  https://github.com/Pylons/deformdemo/pull/52
+
+- Added ``sort_dicts`` argument to ``my_safe_repr``. Python 3.8 changed the
+  call signature of ``pprint._safe_repr``. [jhaiduce]
+  https://github.com/Pylons/deformdemo/pull/67
+
+- Bump up the thread count from the default 4 to 8 threads. This removes noise
+  of Waitress's "Task queue depth is 1" warnings in the test output on Travis.
+  [stevepiercy]
+  https://github.com/Pylons/deformdemo/pull/62
+
+
+.. _2.0.7:
+
+2.0.7 (2018-11-20)
+------------------
+
+- Use release 2.0.7 of deform.
+
+- Add Docker image as an option to use deformdemo. [ericof]
+  https://github.com/Pylons/deformdemo/pull/55
+
+- Apply black to the codebase. [ericof]
+  https://github.com/Pylons/deformdemo/pull/54
+
+- Make iso8601 usage compatible with versions 0.1.11 and 0.1.12. [rbu]
+  https://github.com/Pylons/deformdemo/pull/51
+
+- Don't skip FileUpload tests on Python 3 anymore. [disko]
+  https://github.com/Pylons/deformdemo/pull/50

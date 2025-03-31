@@ -1,32 +1,97 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""niworkflows setup script."""
+##############################################################################
+#
+# Copyright (c) 2011 Agendaless Consulting and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the BSD-like license at
+# http://www.repoze.org/LICENSE.txt.  A copy of the license should accompany
+# this distribution.  THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL
+# EXPRESS OR IMPLIED WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND
+# FITNESS FOR A PARTICULAR PURPOSE
+#
+##############################################################################
 import sys
+
+from setuptools import find_packages
 from setuptools import setup
-import versioneer
 
-# Use setup_requires to let setuptools complain if it's too old for a feature we need
-# 30.3.0 allows us to put most metadata in setup.cfg
-# 30.4.0 gives us options.packages.find
-# 40.8.0 includes license_file, reducing MANIFEST.in requirements
-#
-# To install, 30.4.0 is enough, but if we're building an sdist, require 40.8.0
-# This imposes a stricter rule on the maintainer than the user
-# Keep the installation version synchronized with pyproject.toml
-#
-# 12/05/2020 - Bumped to setuptools 38.4.1
-SETUP_REQUIRES = [f"setuptools >= {'40.8.0' if 'sdist' in sys.argv else '38.4.1'}"]
 
-# This enables setuptools to install wheel on-the-fly
-if "bdist_wheel" in sys.argv:
-    SETUP_REQUIRES += ["wheel"]
+def readfile(name):
+    with open(name) as f:
+        return f.read()
 
-if __name__ == "__main__":
-    # Note that "name" is used by GitHub to determine what repository provides a package
-    # in building its dependency graph.
-    setup(
-        name="niworkflows",
-        version=versioneer.get_version(),
-        cmdclass=versioneer.get_cmdclass(),
-        setup_requires=SETUP_REQUIRES,
-    )
+
+README = readfile("README.rst")
+CHANGES = readfile("CHANGES.txt")
+VERSION = '3.0.0.dev0'
+
+PY37MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 7
+
+requires = [
+    "Babel",
+    "deform >= 2.0.14.dev0",  # .dev0 allows pre-releases. Use only on master.
+    "pyramid >= 1.5a1",  # route_name argument to resource_url
+    "pyramid_chameleon",
+    "pygments",
+    "six",
+    "waitress",
+]
+
+lint_extras = [
+    "black",
+    "check-manifest",
+    "flake8",
+    "flake8-bugbear",
+    "flake8-builtins",
+    "isort",
+    "readme_renderer",
+]
+
+testing_extras = ["flaky", "pytest"]
+
+# Selenium 4.0 does not work on Python 3.6.
+if PY37MIN:
+    testing_extras.extend(["selenium >= 4.0a"])
+else:
+    testing_extras.extend(["selenium >= 3.0, < 4.0"])
+
+setup(
+    name="deformdemo",
+    version=VERSION,
+    description="Demonstration application for Deform form library",
+    long_description=README + "\n\n" + CHANGES,
+    classifiers=[
+        "Development Status :: 6 - Mature",
+        "Environment :: Web Environment",
+        "Intended Audience :: Developers",
+        "License :: Repoze Public License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy",
+        "Topic :: Internet :: WWW/HTTP",
+    ],
+    keywords="web forms form generation schema validation deform",
+    author="Chris McDonough, Agendaless Consulting",
+    author_email="pylons-discuss@googlegroups.com",
+    url="https://pylonsproject.org",
+    license="BSD-derived (http://www.repoze.org/LICENSE.txt)",
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
+    install_requires=requires,
+    extras_require={"lint": lint_extras, "testing": testing_extras},
+    entry_points="""\
+    [paste.app_factory]
+    demo = deformdemo:main
+    mini = deformdemo.mini:main
+    """,
+    message_extractors={
+        ".": [("**.py", "lingua_python", None), ("**.pt", "lingua_xml", None)]
+    },
+)

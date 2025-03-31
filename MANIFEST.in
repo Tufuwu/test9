@@ -1,2 +1,15 @@
-recursive-exclude niworkflows/ conftest.py
-include versioneer.py
+graft deformdemo
+graft unofficial-deformdemo
+
+include *.py
+include *.sh
+include *.toml
+include *.txt
+include .isort.cfg .flake8 .dockerignore
+include buildout.cfg
+include demo.ini
+include Dockerfile
+include mini.ini
+include tox.ini
+
+global-exclude __pycache__ *.py[cod]
