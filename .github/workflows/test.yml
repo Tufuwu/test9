@@ -1,61 +1,31 @@
-name: Test
+# Inspired by python-package
 
+name: Package
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
+  - push
+  - pull_request
 jobs:
-  # Checks relating to the linting of files
-  lint:
+  build:
+    name: Build
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: Install dependencies
-        run: pip3 install flake8
-
-      - name: Check PEP8 compliance
-        run: find . -name "*.py" | xargs flake8 $1
-
-      - name: Check mdl compliance
-        uses: articulate/actions-markdownlint@v1.1.0
-        with:
-          config: .github/workflows/markdownlint-config.json
-          ignore: LICENSE
-
-      - name: Check .editorconfig compliance
-        uses: editorconfig-checker/action-editorconfig-checker@v1
-
-  # Checks relating to the database
-  check:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: Install dependencies
-        run: pip3 install jsonschema
-
-      - name: Check database
-        run: |
-          python3 ./tests/schema.py
-          python3 ./tests/db_entry.py
-          python3 ./tests/icons_entry.py
-          python3 ./tests/ordered_db.py
-          python3 ./tests/icon_cache.py
-          python3 ./tests/duplicates.py
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r ci-requirements.txt
+    - name: Run tests
+      run: |
+        coverage run setup.py test
+        coverage run -a setup.py test --test-suite tests.with_net
+    - name: Upload coverage
+      uses: codecov/codecov-action@v1.0.15
+      if: ${{ always() }}
