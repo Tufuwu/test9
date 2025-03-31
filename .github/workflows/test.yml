@@ -1,32 +1,33 @@
-name: Test
+name: salesforce_bulk_tests
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                python-version: ["3.9", "3.10"]
-                with-gpl: ["True", "False"]
-
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions/setup-python@v1
-              with:
-                  python-version: ${{ matrix.python-version }}
-            - uses: Gr1N/setup-poetry@v7
-            - uses: actions/cache@v4
-              with:
-                  path: ~/.cache/pypoetry/virtualenvs
-                  key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
-
-            - name: install with GPL
-              if: ${{ matrix.with-gpl == 'True' }}
-              run: poetry install
-
-            - name: install without GPL
-              if: ${{ matrix.with-gpl == 'False' }}
-              run: poetry add --lock pytest && poetry install --no-dev
-
-            - run: poetry run pytest
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+    env:
+      SALESFORCE_BULK_TEST_USERNAME: ${{ secrets.SALESFORCE_BULK_TEST_USERNAME }}
+      SALESFORCE_BULK_TEST_PASSWORD: ${{ secrets.SALESFORCE_BULK_TEST_PASSWORD }}
+      SALESFORCE_BULK_TEST_SECURITY_TOKEN: ${{ secrets.SALESFORCE_BULK_TEST_SECURITY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Test with pytest
+        run: |
+          pytest
