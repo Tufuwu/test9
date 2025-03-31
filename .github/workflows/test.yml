@@ -1,70 +1,116 @@
-name: CI
-on: [pull_request, push]
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
 jobs:
-  #################### Linters and checkers ####################
-  lint:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.9", "3.10"]
+        os: [ ubuntu-latest ]
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON_VERSION: ${{ matrix.python-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install pip
+        run: pip install --upgrade pip
+
+      - name: Install development dependencies (Python 2)
+        if: ${{ startsWith(matrix.python-version, '2.') }}
+        run: pip install --upgrade -r dev-requirements-py2.txt
+
+      - name: Install development dependencies (Python 3)
+        if: ${{ startsWith(matrix.python-version, '3.') }}
+        run: pip install --upgrade -r dev-requirements-py3.txt
+
+      - name: Log package versions
+        run: pip freeze
+
+      - name: Run tests
+        run: pytest tests --cov=./
+
+      - name: Run lint
+        run: prospector --profile ./prospector.yaml -t dodgy -t mccabe -t profile-validator -t pyflakes -t pylint
+
+      - name: Run rstcheck
+        run: rstcheck README.rst
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          env_vars: OS,PYTHON_VERSION
+
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.9", "3.10"]
+    env:
+      PYTHON_VERSION: ${{ matrix.python-version }}
     steps:
-      - name: Check out code from GitHub
-        uses: actions/checkout@v2.3.4
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Set up Python ${{ matrix.python-version }}
-        id: python
-        uses: actions/setup-python@v2.2.1
+        uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: Install pip
+        run: pip install --upgrade pip
+
       - name: Install dependencies
-        run: pip install --upgrade pip setuptools wheel tox tox-docker
-      - name: Run flake8
-        run: tox -v -e py-flake8 -- -v
-      - name: Run pydocstyle
-        run: tox -v -e py-pydocstyle -- -v
-      - name: Run apicheck
-        run: tox -v -e py-apicheck -- -v
-  #################### Unittests ####################
-  unittest:
-    needs: lint
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
-    steps:
-      - name: Check out code from GitHub
-        uses: actions/checkout@v2.3.4
-      - name: Set up Python ${{ matrix.python-version }}
-        id: python
-        uses: actions/setup-python@v2.2.1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: pip install --upgrade pip setuptools wheel tox tox-docker
-      - name: Run unittest
-        run: tox -v -e ${{ matrix.python-version }}-unit -- -v
-  #################### Integration tests ####################
-  integration:
-    needs: [lint, unittest]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
-    steps:
-      - name: Check out code from GitHub
-        uses: actions/checkout@v2.3.4
-      - name: Build rabbitmq:tls container
-        run: docker build -t rabbitmq:tls .
-      - name: Set up Python ${{ matrix.python-version }}
-        id: python
-        uses: actions/setup-python@v2.2.1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: pip install --upgrade pip setuptools wheel tox tox-docker
-      - name: Run integration tests
-        run: tox -v -e ${{ matrix.python-version }}-integration-rabbitmq -- -v
-      - name: Run integration tests with speedups enabled
         run: |
-          CELERY_ENABLE_SPEEDUPS=1 python setup.py develop
-          tox -v -e ${{ matrix.python-version }}-integration-rabbitmq -- -v
-        if: ${{ matrix.python-version != 'pypy3'}}
+          pip install wheel
+
+      - name: Build distribution files
+        id: build-dist
+        run: |
+          # Build distribution files
+          python setup.py sdist bdist_wheel
+
+          # List distribution files and check their file sizes
+          ls -lh dist
+
+          # Set step outputs
+          sdist_path=$(find dist -type f -name "*.tar.gz")
+          wheel_path=$(find dist -type f -name "*.whl")
+          wheel_name=$(basename $wheel_path)
+          wheel_size=$(stat -c %s $wheel_path)
+          echo "::set-output name=sdist-path::${sdist_path}"
+          echo "::set-output name=wheel-path::${wheel_path}"
+          echo "::set-output name=wheel-name::${wheel_name}"
+          echo "::set-output name=wheel-size::${wheel_size}"
+
+      - name: Test installation from tarball
+        run: |
+          set -x
+          pip install ${{ steps.build-dist.outputs.sdist-path }}
+          python -c "import databricks_cli.version; print(databricks_cli.version.version)"
+          which databricks
+          databricks --version
+          which dbfs
+          dbfs --version
+
+      - name: Test installation from wheel
+        run: |
+          set -x
+          pip install --force-reinstall ${{ steps.build-dist.outputs.wheel-path }}
+          python -c "import databricks_cli.version; print(databricks_cli.version.version)"
+          which databricks
+          databricks --version
+          which dbfs
+          dbfs --version
