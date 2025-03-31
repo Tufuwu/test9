@@ -1,116 +1,58 @@
-#! /usr/bin/env python
-import sys
+"""
+Setup module of OSI Validation Software
+"""
 import glob
-
-from distutils.core import setup
-
+import sys
+import os
 import setuptools
 
-# Define data files included by each observatory package relative
-# to each observatory/mission directory.
-STD_MISSION_FILES = [
-    '*.dat',
-    '*.yaml',
-    '*.json',
-    'tpns/*.tpn',
-    'tpns/includes/*.tpn',
-    'specs/*.spec',
-    'specs/*.rmap',
-    'specs/*.json',
-]
+AUTHOR = "BMW AG"
 
-setup_pars = {
-    "packages" : [
-        'crds',
-        'crds.bestrefs',
-        'crds.certify',
-        'crds.certify.validators',
-        'crds.client',
-        'crds.core',
-        'crds.io',
-        'crds.submit',
 
-        'crds.misc',
-        'crds.misc.synphot',
-        'crds.refactoring',
+if __name__ == "__main__":
+    with open("README.md", "r") as fh:
+        README = fh.read()
 
-        'crds.hst',
-        'crds.jwst',
-        'crds.tobs',
-        'crds.roman',
+    python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
+    data_files_path = os.path.join(
+        "lib", f"python{python_version}", "site-packages", "rules"
+    )
 
-        'crds.tests',
+    setuptools.setup(
+        name="OSI Validation",
+        version="1.1.0",
+        author=AUTHOR,
+        description="Validator for OSI messages",
+        long_description=README,
+        long_description_content_type="text/markdown",
+        url="https://github.com/OpenSimulationInterface/osi-validation",
+        packages=setuptools.find_packages(),
+        classifiers=[
+            "Programming Language :: Python :: 3.8",
+            "License :: MPL-2.0",
+            "Operating System :: OS Independent",
         ],
-    "package_dir" : {
-        'crds' : 'crds',
-        'crds.bestrefs' : 'crds/bestrefs',
-        'crds.certify' : 'crds/certify',
-        'crds.certify.validators' : 'crds/certify/validators',
-        'crds.client' : 'crds/client',
-        'crds.core' : 'crds/core',
-        'crds.io' : 'crds/io',
-        'crds.submit' : 'crds/submit',
-
-        'crds.misc' : 'crds/misc',
-        'crds.misc.synphot' : 'crds/misc/synphot',
-        'crds.refactoring' : 'crds/refactoring',
-
-        'crds.hst' : 'crds/hst',
-        'crds.jwst' : 'crds/jwst',
-        'crds.roman' : 'crds/roman',
-        'crds.tobs' : 'crds/tobs',
-
-        'crds.tests' : 'crds/tests',
+        data_files=[
+            (
+                "open-simulation-interface",
+                glob.glob("open-simulation-interface/*.proto"),
+            ),
+            (
+                data_files_path,
+                glob.glob("rules/*.yml"),
+            ),
+        ],
+        include_package_data=True,
+        install_requires=[
+            "tqdm>=4.66.1",
+            "tabulate>=0.9.0",
+            "ruamel.yaml>=0.18.5",
+            "defusedxml>=0.7.1",
+            "iso3166>=2.1.1",
+            "protobuf==3.20.1",
+            "open-simulation-interface @ git+https://github.com/OpenSimulationInterface/open-simulation-interface.git@v3.6.0",
+        ],
+        entry_points={
+            "console_scripts": ["osivalidator=osivalidator.osi_general_validator:main"],
         },
-    "package_data" : {
-        'crds.hst': STD_MISSION_FILES,
-        'crds.jwst': STD_MISSION_FILES,
-        'crds.roman': STD_MISSION_FILES,
-        'crds.tobs': STD_MISSION_FILES,
-        },
-    "scripts" : glob.glob("scripts/*"),
-    }
-
-TEST_DEPS = ["lockfile", "mock", "nose", "pytest", "pylint", "flake8", "bandit",]
-
-SUBMISSION_DEPS = ["requests", "lxml", "parsley"]
-
-setup(name="crds",
-      provides=["crds"],
-      version = '10.3.1',
-      description="Calibration Reference Data System,  HST/JWST/Roman reference file management",
-      long_description=open('README.rst').read(),
-      author="STScI CRDS s/w developers",
-      url="https://hst-crds.stsci.edu",
-      license="BSD",
-      python_requires=">=3.7",
-      install_requires=["astropy", "numpy", "filelock"] + SUBMISSION_DEPS,
-      extras_require={
-          "jwst": ["jwst"],
-          "roman" : ["romancal"],
-          "submission": ["requests", "lxml", "parsley"],
-          "dev" : ["ipython","jupyterlab","ansible","helm",
-                   "nose-cprof", "coverage"],
-          "test" : TEST_DEPS,
-          "docs" : ["sphinx","sphinx_rtd_theme","docutils"],
-          "aws" : ["boto3","awscli"],
-          "synphot": ["stsynphot"],
-      },
-      tests_require=TEST_DEPS,
-      zip_safe=False,
-      classifiers=[
-          'Intended Audience :: Science/Research',
-          'License :: OSI Approved :: BSD License',
-          'Operating System :: POSIX :: Linux',
-          'Operating System :: MacOS :: MacOS X',
-          'Programming Language :: Python :: 3',
-          'Topic :: Scientific/Engineering :: Astronomy',
-      ],
-      project_urls={
-          'Documentation' : 'https://hst-crds.stsci.edu/static/users_guide/index.html',
-          'Bug Reports': 'https://github.com/spacetelescope/crds/issues/',
-          'Source': 'https://github.com/spacetelescope/crds/',
-          'Help': 'https://hsthelp.stsci.edu/',
-      },
-      **setup_pars
-)
+    )

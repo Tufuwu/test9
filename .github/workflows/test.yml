@@ -1,52 +1,106 @@
 name: CI
 
 on:
+  workflow_dispatch:
+  pull_request:
   push:
     branches:
       - main
-    tags:
-      - '*'
-  pull_request:
 
 jobs:
-  pytest:
-    name: ${{ matrix.runs-on }} Python ${{ matrix.python-version }}
-    runs-on: ${{ matrix.runs-on }}
-    env:
-      CRDS_SERVER_URL: https://hst-crds.stsci.edu
-      CRDS_TEST_ROOT: /tmp
-      LD_LIBRARY_PATH: /usr/local/lib
+  linter:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.9"
+
+    - name: Upgrade pip
+      run: python -m pip install --upgrade pip
+      
+    - name: Install dependencies
+      run: pip install -r requirements_develop.txt
+
+    - name: Check black format 
+      run:  black --check --diff --exclude "(open-simulation-interface|proto2cpp|.venv)" .
+
+    - name: Check dead code with vulture
+      run: vulture *.py tests/ osivalidator/ --min-confidence 100
+
+  build-validator:
     strategy:
       fail-fast: false
       matrix:
-        runs-on:
-          - ubuntu-latest
-          - macos-latest
+        runs-on: [ubuntu-latest]
         python-version: ["3.9", "3.10"]
+
+    name: "🐍 ${{ matrix.python-version  }} • ${{ matrix.runs-on }}"
+    runs-on: ${{ matrix.runs-on }}
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install fitsverify
-        run: |
-          wget --quiet --output-document - http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.49.tar.gz | tar -xz -C $HOME
-          cd $HOME/cfitsio-3.49
-          ./configure --prefix=/usr/local --enable-reentrant --disable-curl
-          make shared
-          sudo make install
-          wget --quiet --output-document - https://heasarc.gsfc.nasa.gov/docs/software/ftools/fitsverify/fitsverify-4.20.tar.gz | tar -xz -C $HOME
-          cd $HOME/fitsverify-4.20
-          gcc -o fitsverify ftverify.c fvrf_data.c fvrf_file.c fvrf_head.c fvrf_key.c fvrf_misc.c -DSTANDALONE -lcfitsio
-          sudo cp fitsverify /usr/local/bin
-      - name: Install Python dependencies
-        run: |
-          pip install git+https://github.com/spacetelescope/jwst
-          pip install git+https://github.com/spacetelescope/romancal
-          pip uninstall --yes crds
-          ./install
-          pip install .[submission,test,docs,synphot]
-          ./setup_test_cache $CRDS_TEST_ROOT
-      - name: Run tests
-        run: ./runtests --cover
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        lfs: true
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache Dependencies
+      id: cache-depends
+      uses: actions/cache@v4
+      with:
+        path: protobuf-3.20.1
+        key: ${{ runner.os }}-v2-depends
+
+    - name: Download ProtoBuf
+      if: steps.cache-depends.outputs.cache-hit != 'true'
+      run: curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.20.1/protobuf-all-3.20.1.tar.gz && tar xzvf protobuf-all-3.20.1.tar.gz
+
+    - name: Build ProtoBuf
+      if: steps.cache-depends.outputs.cache-hit != 'true'
+      working-directory: protobuf-3.20.1
+      run: ./configure DIST_LANG=cpp --prefix=/usr && make
+
+    - name: Install ProtoBuf
+      working-directory: protobuf-3.20.1
+      run: sudo make install && sudo ldconfig
+
+    - name: Install Open Simulation Interface
+      shell: bash
+      run: |
+        git submodule update --init
+        python -m venv .venv
+        source .venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install -r requirements_develop.txt
+        cd open-simulation-interface && pip install . && cd .. 
+
+    - name: Generate parsed rules
+      run: |
+        source .venv/bin/activate
+        pip install -r requirements.txt
+        python rules2yml.py -d rules
+
+    - name: Check rule correctness with unittests
+      run: |
+        source .venv/bin/activate
+        python -m unittest discover tests
+    
+    - name: Run osi-validator
+      run: |
+        source .venv/bin/activate
+        pip install .
+        osivalidator --data data/20210818T150542Z_sv_312_50_one_moving_object.txt -r rules
+        osivalidator --data data/20210818T150542Z_sv_312_50_one_moving_object.txt -r rules --parallel
+        osivalidator --data data/20210818T150542Z_sv_312_50_one_moving_object.osi -r rules
+        osivalidator --data data/20210818T150542Z_sv_312_50_one_moving_object.osi -r rules --parallel
