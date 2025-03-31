@@ -1,4 +1,0 @@
-# Configuration for top-issue-bot
-labelName: ":thumbsup: Top Issue!"
-labelColor: "005BBB"
-numberOfIssuesToLabel: 5
