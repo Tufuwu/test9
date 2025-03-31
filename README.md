@@ -1,222 +1,112 @@
-# pytest-automock
-[![Github actions status for master branch](https://github.com/pohmelie/pytest-automock/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/pohmelie/pytest-automock/actions)
-[![Codecov coverage for master branch](https://codecov.io/gh/pohmelie/pytest-automock/branch/master/graph/badge.svg)](https://codecov.io/gh/pohmelie/pytest-automock)
-[![Pypi version](https://img.shields.io/pypi/v/pytest-automock.svg)](https://pypi.org/project/pytest-automock/)
-[![Pypi downloads count](https://img.shields.io/pypi/dm/pytest-automock)](https://pypi.org/project/pytest-automock/)
+# Tabcmd
 
-# Reason
-* No generic automock solution
+[![Tableau Supported](https://img.shields.io/badge/Support%20Level-Tableau%20Supported-53bd92.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)
 
-# Features
-* Pytest plugin
-* Autogenerate/autouse mocks for functions and objects
-* Sync and async support
-* Locked mode to be sure mocked objects stay untouched
-* Customizable serialization
+A Python based app that replicates the functionality of the existing [Tabcmd command line utility](https://help.tableau.com/current/server/en-us/tabcmd.htm).
 
-# Limitaions
-* No support for dunder methods (can be partly solved in future)
-* No support for sync/async generators/contexts
-* Races can break tests, since order counts
-* Non-determenistic representation will break tests, since representation is a part of call snapshot key
+**Important Note:** tabcmd is a work in progress ("beta") which may be useful for test and development purposes, but is not yet recommended for production environments.
 
-# License
-`pytest-automock` is offered under MIT license.
+* [Why a Python based tabcmd\?](#whytabcmd)
+* [Demo](#demo)
+* [Get started](#get-started)
+  * [Prerequisites](#prerequisites)
+  * [Installation](#installation)
+* [Run](#run)
+  * [Available Commands](#available-commands)
+* [Contributions](#contributions)
 
-# Requirements
-* python 3.6+
+## Why a Python based Tabcmd?
 
-# Usage
-Lets say you have some module `mymod.py`:
-``` python
-import time
+* Run Tabcmd commands on MacOS (existing Tabcmd does not officially support MacOS)
+* Authenticate using Personal Access Tokens (existing Tabcmd does not support Personal Access Token login)
+* Easily use public endpoints available in Python based [Tableau Server Client](https://github.com/tableau/server-client-python/)
+* Add more functionality and extend script for other automation tasks
 
-class Network:
-    def get_data_from_network(self, x, y):
-        time.sleep(1)
-        return x + y
+## Demo/Samples
 
-    def send_data_to_network(self, value):
-        time.sleep(1)
+_coming soon_
 
-def logic(x):
-    n = Network()
-    a, b = 0, 1
-    while b < x:
-        c = n.get_data_from_network(a, b)
-        a, b = b, c
-        n.send_data_to_network("ok")
-    return b
-```
-And you want to create mocks for your `Network` class (since testing time and sane counts), but you are too lazy to write them... `conftest.py`:
-``` python
-import pytest
-import mymod
+## Get started
 
-@pytest.fixture(autouse=True)
-def _mocks(automock):
-    with automock((mymod, "Network")):
-        yield
-```
-You can also use module path notation:
-``` python
-import pytest
+This section describes how to install and configure tabcmd.
 
-@pytest.fixture(autouse=True)
-def _mocks(automock):
-    with automock("mymod.Network"):
-        yield
-```
-`test_logic.py`:
-``` python
-from mymod import logic
+### Prerequisites
 
-def test_logic():
-    assert logic(7) == 8
-    assert logic(10) == 13
-```
-If you run `pytest` on this setup, then you will see fail:
-``` bash
-$ pytest -x
-...
-E           RuntimeError: Mock is locked, but '__init__' wanted
-```
-`automock` can work in two modes: locked and unlocked. Locked mode is default, real methods calls of mocked objects are
-not allowed in this mode. So, above error says that we can't call `__init__` of our `Network`.
-In locked mode there is no mock-files update also.
+To work with tabcmd, you need the following:
 
-To allow real calls and mocks generation `automock` provides extra cli argument to `pytest`: `--automock-unlocked`
-``` bash
-$ pytest -x --automock-unlocked
-...
-test_logic.py .
-...
-1 passed in 22.09s
-```
-After that you can see that `tests/mocks/test_logic/mymod/Network` file was created. This is mock for your test sequence.
-Now you can rerun tests and see what happens (you can omit `--automock-unlocked` key for ensurance, that real object
-will not be touched (actually even created)).
-``` bash
-$ pytest -x
-...
-test_logic.py .
-...
-1 passed in 0.04s
-```
-# API
-## `automock` (fixture)
-`automock` fixture is a **context manager**
-```python
-def automock(*targets,
-             storage: Union[str, Path] = "tests/mocks",
-             override_name: Optional[str] = None,
-             unlocked: Optional[bool] = None,
-             remove: Optional[bool] = None,
-             encode: Callable[[Any], bytes] = default_encode,
-             decode: Callable[[bytes], Any] = default_decode,
-             debug: Optional[Callable[[Dict, Call, Optional[Call]], None]] = None)
-```
-* `*targets`: pair/tuple of object/module and attribute name (`str`) or module path to object/function with dot delimiter (`(mymod, "Network")` or `"mymod.Network"`)
-* `storage`: root path for storing mocks
-* `override_name`: forced mock-file name
-* `unlocked`: mode selector (if omited, selected by `--automock-unlocked`)
-* `remove`: remove test mock before test run (if omited, selected by `--automock-remove`)
-* `encode`: encode routine
-* `decode`: decode routine
-* `debug`: function for debugging failed cases, when you do not understand why automock bakes. Arguments are:
-    * `memory` for current failed test
-    * `call_wanted` which is a call you want to do right now
-    * `call_saved` which is a call you saved last time you generate mocks for this test
+* MacOS / Windows
+* Python 3.7+ installed
 
-`call_wanted` and `call_saved` are rich `Call` class objects, inspect it in `mock.py` file. Also, you can use a `"pdb"` string instead of your own function as a `debug` argument value, to use internal function with `pdb.set_trace()` instruction. Default `encode`/`decode` routine uses `pickle` and `gzip`.
+### Installation
 
-## `automock_unlocked` (fixture)
-Fixture with default mode from cli parameter (`bool`).
+To install tabcmd, follow these steps:
 
-## `automock_remove` (fixture)
-Fixture with default mode from cli parameter (`bool`).
+1. Clone the repo
+2. Run `pip install .`
 
-## `automock` (function)
-`automock` function is not supposed to be used by anyone but `automock` fixture
-``` python
-def automock(factory: Callable, *,
-             memory: Dict,
-             locked: bool = True,
-             encode: Callable[[Any], bytes] = default_encode,
-             decode: Callable[[bytes], Any] = default_decode,
-             debug: Optional[Callable[[Dict, Call, Optional[Call]], None]] = None):
-```
-* `factory`: object/function to wrap
-* `memory`: dicrionary to get/put mocks
-* `locked`: mode selector
-* `encode`: encode routine
-* `decode`: decode routine
-* `debug`: same as for ficture
+## Run
 
-Default `encode`/`decode` routine uses `pickle` and `gzip`.
+To run tabcmd, follow these steps:
 
-# Caveats
-## Order
-As feature paragraph described: «order counts». What does it mean?
+1. To run a command:
+    * `tabcmd [command_name] [--flags]`
+    * Examples:
+        * `tabcmd login --username [username] --password [password] --server
+         [server_name] --site [site_name]`
+        * `tabcmd createproject --name [project_name]`
 
-### Functions
-Mocked functions/coroutines call order counts. If you mock sequence
-``` python
-func(1, 2)
-func(2, 3)
-```
-and trying to use mocked data with sequence
-``` python
-func(2, 3)
-func(1, 2)
-```
-You will get an error, since calling order is part of idea of deterministic tests
+### Available Commands
 
-### Objects
-Mocked objects have same behavior, but methods call are individual, so if you mock sequence
-``` python
-t1 = T(1)
-t2 = T(2)
-t1.func(1, 2)
-t2.func(2, 3)
-```
-then calling order are individual for method calls, so this is ok:
-``` python
-t1 = T(1)
-t2 = T(2)
-t2.func(2, 3)
-t1.func(1, 2)
-```
-But not for `__init__` method, since mocks are internaly attached to instance
-``` python
-t2 = T(2)
-t1 = T(1)
-t1.func(1, 2)
-t2.func(2, 3)
-```
-will fail
+This table lists the development status of all commands, listed in the same order as the tabcmd help.
 
-## Function arguments
-Internally, key for mocks consists of instance number and call number. This leads to some «unobvious» behavior:
-``` python
-import time
-from pytest_automock import automock
+These are the column definitions:
 
-def nop(x):
-    return x
+* TSC: API support is available in [TSC](https://github.com/tableau/server-client-python/)
+* Completed: Code implemented, manually tested, unit tests for parsing added
+* Done: Error handling, all unit tests, logging, code review, can produce docs, merged into master
 
-m = {}
-mocked = automock(nop, memory=m, locked=False)
-mocked(time.time())
+| Command | TSC | Completed | Done | Notes |
+|-|-|-|-|-|
+| addusers (to group) | Yes (single user) | :heavy_check_mark: |  |  |
+| createextracts | Yes |  |  |  |
+| creategroup | Yes | :heavy_check_mark:  |  |  |
+| createproject | Yes | :heavy_check_mark:  |  |  |
+| createsite | Yes | :heavy_check_mark:  |  |  |
+| createsiteusers | Yes | :heavy_check_mark:  |  |  |
+| createusers | Yes (single user) | :heavy_check_mark:  |  |  |
+| decryptextracts | Yes |  |  |  |
+| delete workbook-name or datasource-name | Yes | :heavy_check_mark:  |  |  |
+| deleteextracts | Yes |  |  |  |
+| deletegroup | Yes | :heavy_check_mark:  |  |  |
+| deleteproject | Yes | :heavy_check_mark:  |  |  |
+| deletesite | Yes | :heavy_check_mark:  |  |  |
+| deletesiteusers | Yes | :heavy_check_mark:  |  |  |
+| deleteusers | No |  |  |  |
+| editdomain | No |  |  |  |
+| editsite | Yes | :heavy_check_mark:  |  |  |
+| encryptextracts | Yes |  |  |  |
+| export | Yes | :heavy_check_mark:  |  |  |
+| get url | Yes |  |  |  |
+| initialuser | No |  |  |  |
+| listdomains | No |  |  |  |
+| listsites | Yes | :heavy_check_mark:  |  |  |
+| login | Yes | :heavy_check_mark:  |  |  |
+| logout | Yes | :heavy_check_mark:  |  |  |
+| publish | Yes | :heavy_check_mark:  |  |  |
+| publishsamples | No |  |  |  |
+| reencryptextracts | Yes |  |  |  |
+| refreshextracts | No |  |  |  |
+| removeusers | Yes | :heavy_check_mark:  |  |  |
+| reset_openid_sub | No |  |  |  |
+| runschedule | No |  |  |  |
+| set | No |  |  |  |
+| syncgroup | No |  |  |  |
+| version | N/A |  |  |  |
 
-mocked = automock(nop, memory=m, locked=True)
-mocked(time.time())
-```
-Will fail because of argument in mock creation time differs from argument in mock use time. Same thing will break mocks if pickled representation is not determenistic.
+## Contributions
 
-# Development
-## Run tests
-Since coverage issue/feature, plugins coverage is broken by default. [Workaround](https://pytest-cov.readthedocs.io/en/latest/plugins.html):
-``` bash
-COV_CORE_SOURCE=pytest_automock COV_CORE_CONFIG=.coveragerc COV_CORE_DATAFILE=.coverage.eager pytest
-```
+Code contributions and improvements by the community are welcomed!
+
+See the LICENSE file for current open-source licensing and use information. See dev information at [contributing.md](./contributing.md)
+
+Before we can accept pull requests from contributors, we require a signed [Contributor License Agreement (CLA)](http://tableau.github.io/contributing.html).
