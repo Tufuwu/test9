@@ -1,20 +1,41 @@
-# Changelog
-All notable changes to this project will be documented in this file.
+0.5.0 (in development)
+----------------------
+- Support Python 3.8 and 3.9
+- Drop support for Python 2.7, 3.4, and 3.5
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+v0.4.0 (2018-10-05)
+-------------------
+- **Breaking**: Combined all classes' functionality into a single `InPlace`
+  class that uses a `mode` argument to determine whether to operate in text or
+  binary mode.
+- `InPlaceBytes` and `InPlaceText` are now deprecated and will be removed in a
+  future version; please use `InPlace` with `mode='b'` or `mode='t'` instead.
+- Support fsencoded-bytes as file paths under Python 3
 
-## [0.1.3](https://github.com/fabiocaccamo/django-extra-settings/releases/tag/0.1.3) - 2021-10-08
--   Changed `upload_to` to callable. #11 - thanks to @thlnndrs
--   Fixed `setup.py` unicode error.
--   Added `python 3.9` and `django 3.2` to `tox` and `travis`.
+v0.3.0 (2018-06-28)
+-------------------
+- Handling of symbolic links is changed: Now, if `in_place` is asked to operate
+  on a symlink `link.txt` that points to `realfile.txt`, it will act as though
+  it was asked to operate on `realfile.txt` instead, and the path `link.txt`
+  will only be used when combining with `backup_ext` to construct a backup file
+  path
+- Drop support for Python 2.6 and 3.3
 
-## [0.1.2](https://github.com/fabiocaccamo/django-extra-settings/releases/tag/0.1.2) - 2020-09-04
--   Added `models.DurationField` support.
+v0.2.0 (2017-02-23)
+-------------------
+- Renamed `InPlace` to `InPlaceText` and added a new `InPlace` class for
+  reading & writing `str` objects (whatever those happen to be in the current
+  Python)
+- **Bugfix**: If the given file does not exist and `move_first` is `True`, an
+  empty file will no longer be left behind in the nonexistent file's place.
+- Specifying both `backup` and `backup_ext` will now produce a `ValueError`
+- Specifying an empty `backup_ext` will now produce a `ValueError`
 
-## [0.1.1](https://github.com/fabiocaccamo/django-extra-settings/releases/tag/0.1.1) - 2020-02-13
--   Fixed `django 1.8` compatibility.
--   Improved code quality.
+v0.1.1 (2017-01-27)
+-------------------
+Rename package & module from "`inplace`" to "`in_place`"  (I could have sworn I
+had already checked PyPI for name conflicts....)
 
-## [0.1.0](https://github.com/fabiocaccamo/django-extra-settings/releases/tag/0.1.0) - 2020-02-13
--   Released package, installation `pip install django-extra-settings`.
+v0.1.0 (2017-01-27)
+-------------------
+Initial release
