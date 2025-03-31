@@ -1,7 +1,0 @@
-query Q {
-  nodes {
-    id
-    submitter_id
-    type
-  }
-}
