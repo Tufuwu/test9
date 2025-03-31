@@ -1,99 +1,112 @@
-# Bambam
 
-[![Build Status](https://travis-ci.com/porridge/bambam.svg?branch=master)](https://travis-ci.com/porridge/bambam)
-[![Translation Status](https://hosted.weblate.org/widgets/bambam/-/app-and-manpage/svg-badge.svg)](https://hosted.weblate.org/engage/bambam/)
+![Ladybug](http://www.ladybug.tools/assets/img/ladybug.png)
 
-Bambam is a simple baby keyboard (and gamepad) masher application that locks the keyboard and mouse and instead displays bright colors, pictures, and sounds.  While OSX has great programs like [AlphaBaby](http://www.kldickey.addr.com/alphababy/), the original author couldn't find anything for Linux and having wanted to learn Python for a while, Bambam was his excuse.
 
-![Bambam screenshot](docs/bambam.png "Bambam screenshot")
+[![Build Status](https://travis-ci.com/ladybug-tools/ladybug.svg?branch=master)](https://travis-ci.com/ladybug-tools/ladybug-geometry)
+[![Coverage Status](https://coveralls.io/repos/github/ladybug-tools/ladybug-geometry/badge.svg?branch=master)](https://coveralls.io/github/ladybug-tools/ladybug-geometry?branch=master)
+
+[![Python 2.7](https://img.shields.io/badge/python-2.7-green.svg)](https://www.python.org/downloads/release/python-270/) [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/) [![IronPython](https://img.shields.io/badge/ironpython-2.7-red.svg)](https://github.com/IronLanguages/ironpython2/releases/tag/ipy-2.7.8/)
+
+# ladybug-geometry
+
+Ladybug geometry is a Python library that houses geometry objects used throughout the
+Ladybug Tools core libraries.
 
 ## Installation
 
-### From a distribution package
+`pip install -U ladybug-geometry`
 
-First, see if your distribution has a bambam package already.
-This way takes care of dependencies, translated program messages, `.desktop` files and manual pages.
+## [API Documentation](https://www.ladybug.tools/ladybug-geometry/docs/)
 
-For example:
-```
-sudo apt install bambam
-man bambam
-```
+## Local Development
 
-### Manual installation
+1. Clone this repo locally
+```console
+git clone git@github.com:ladybug-tools/ladybug-geometry.git
 
-Before installing this application, ensure you have the following installed:
-  * [Python](http://python.org) - version 3.x is recommended but version 2.7 should work too
-  * [Pygame](http://www.pygame.org/) - version 2.x is recommended, but version 1.9 may work too
+# or
 
-If not, you can install it manually as follows:
-  1. [Download](https://github.com/porridge/bambam/releases) the `bambam-1.2.0.zip` or `bambam-1.2.0.tar.gz` file.
-  1. Unzip bambam-1.2.0.zip or `tar zxvf bambam-1.2.0.tar.gz` to create the `bambam-1.2.0` directory.
-  1. Change into the 'bambam-1.2.0' directory
-```
-cd bambam-1.2.0
+git clone https://github.com/ladybug-tools/ladybug-geometry.git
 ```
 
-If you would like to take advantage of the recommended way to start the game (see the next section) do the following:
-
-```
-sed -i -e "s,/usr/games/bambam,`pwd`/bambam.py," bambam-session.desktop
-sudo mkdir -p /etc/X11/sessions
-sudo cp bambam-session.desktop /etc/X11/sessions/
-```
-
-For an alternative way to start the game from your applications menu, do the following:
-```
-sed -i -e "s,/usr/games/bambam,`pwd`/bambam.py," bambam.desktop
-mkdir -p ~/.local/share/applications
-cp bambam.desktop ~/.local/share/applications/
+2. Install dependencies:
+```console
+cd ladybug-geometry
+pip install -r dev-requirements.txt
+pip install -r requirements.txt
 ```
 
-## Usage
-
-Once installed, there are two ways to run the game:
-1. **Recommended**: as a dedicated graphical session.
-
-   When logging into your system, look for a gear icon, which opens a drop-down
-   menu of available session types. Select BamBam and log in.
-
-   This way only the game is launched, and the user is logged out as soon as
-   the game quits.  Thanks to this, a child is not able to cause any damage
-   even if he or she somehow manages to quit the game.
-
-   This way is safer, but more cumbersome.
-2. Directly from a terminal, or applications menu.
-
-   Select the game from your applications menu, or to run the game from a
-   terminal window, type `bambam` if you installed from a distribution package, or
-   `./bambam.py` if you installed manually.
-
-   This way the program runs as part of a regular session. The game tries to
-   grab the keyboard and mouse pointer focus in order to prevent a child from
-   exiting the game or switching away from it. However it is not 100%
-   bulletproof, depending on the exact environment.
-
-   This way is easier, but potentially more risky. Take care when leaving your
-   child unattended with the game.
-
-## Exiting
-
-To exit, just directly type the command mentioned in the upper left-hand corner of the window. In the English locales, this is:
-```
-quit
+3. Run Tests:
+```console
+python -m pytests tests/
 ```
 
-More information is in the man page. To view it, type:
+4. Generate Documentation:
+```console
+sphinx-apidoc -f -e -d 4 -o ./docs ./ladybug_geometry
+sphinx-build -b html ./docs ./docs/_build/docs
 ```
-man ./bambam.6
-```
 
-Comments or suggestions? Any feedback is appreciated, please send it to [the bambam-users forum](https://groups.google.com/forum/#!forum/bambam-users).
+## Currently Supported Capabilities of this Library
 
-Translations for this game are done on [Weblate](https://hosted.weblate.org/projects/bambam/). Please help translating for your mother tongue!
+- Vector Math
+- Calculate Bounding Box (Min, Max, Center)
+- Compute Area + Perimeter of Planar Geometry
+- Check Concavity and Clockwise Ordering of 2D Geometry
+- Triangulate Planar Geometry
+- Compute Triangle + Quad Areas, Centroids, and Normals
+- Move Geometry
+- Rotate Geometry Around an Axis
+- Mirror Geometry
+- Scale Geometry from a Base Point
+- Is Point Inside 2D Polygon
+- 3D Face Intersection with a Ray or Line
+- Mesh Grid Generation from a 3D Face
+- Windows Based on Ratio with a Face
+- Solve Adjacencies
+- Generate Louvers, Fins and Overhangs from a Face
+- Check if a 3D PolyFace is a Closed Solid
+- Ensure All Faces of a Solid PolyFace are Point Outwards
+- Join Polylines and Polyfaces
+- Check if a Point is Inside a Closed 3D Polyface
+- Boolean a Set of 2D Curves (joining the naked edges around them)
 
-## History
+## Capabilities that should eventually be a part of this library
 
-This project was moved from [its code.google.com location](https://code.google.com/p/bambam/) in April 2015, since that site was about to be shut down.
+- [ ] Create Matching Zone Surfaces (intersection of surfaces with one another). OpenStudio's boost geometry has methods for this [as @saeranv shows here](https://github.com/mostaphaRoudsari/honeybee/issues/700)
 
-Note that changes (as of 2010-08-17) from [the launchpad bambam fork](https://launchpad.net/bambam) had been merged back to this project in February 2014.
+## Officially Unsupported Capabilities for which One Must Rely on CAD Interfaces
+
+- Conversion of Curved Surfaces to Planar Surfaces (including both single curvature and double curvature)
+- Fancier Meshing (eg. gridded meshing that completely fills the base surface)
+- Solid Boolean Unions (this should not be needed for anything in Ladybug Tools)
+
+## Reasons for this Library
+
+We initially debated whether geometry computation should be placed largely on the CAD plugins or
+whether it should be included in the core.  As we developed the core libraries out, it became clear
+that there are large advantages to having it in the core (ie. cross compatibility between
+the CAD plugins, ability to process more inputs from command line, and shear speed
+since the CAD libraries are made to address many more geometric use cases than are typically needed).
+So we have decided to include geometry computation as part of the Ladybug Tools core.
+
+We looked into using other geometry computation libraries for the core including:
+
+- [Rhino3dm](https://github.com/mcneel/rhino3dm)
+- [Blender API (bpy)](https://docs.blender.org/api/current/)
+- [Topologic](https://topologic.app/Software/)
+
+However, Rhino3dm lacks basic types of computation that is needed in the core (like generating a
+grid of points from a surface).
+Furthermore, Blender library only works in Python3 and this would break our workflows for the
+Grasshopper and Dynamo plugins, where rely on IronPython.
+Topologic seems to have many things that we need but it appears that it has C dependencies, making
+it unusable from IronPython.  Furthermore, its dual license may create some difficulties for certain
+use cases of Ladybug Tools.
+
+After considering it further, we realized that many of the calculations that we need can be done
+fairly easily as long as the geometry is planar.  Since all of the geometry going to the engines (Radiance, E+)
+is eventually converted to a planar format anyway, we made the decision that the core libraries will support
+certain basic types of geometry computation for planar objects only.  We planned to do this by taking the
+most relevant parts of existing open source geometry libraries, including [euclid](https://pypi.org/project/euclid/)
+and OpenStudio. Thus this repository was born!
