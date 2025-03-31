@@ -1,49 +1,58 @@
-from pathlib import Path
+try:
+    from setuptools import setup, find_packages
+except ImportError:
+    from ez_setup import use_setuptools
+    use_setuptools()
+    from setuptools import setup, find_packages
 
-from setuptools import find_packages, setup
+# from setuptools.command.install import install
+#
+# class Modulenstalltio
 
-VERSION = '2.2.0'
-github_url = 'https://github.com/fdemmer/django-weasyprint'
 
+__version__ = '2.0.0'
 
 setup(
-    name='django-weasyprint',
-    version=VERSION,
-    author='Florian Demmer',
-    author_email='fdemmer@gmail.com',
-    description='Django WeasyPrint CBV',
-    long_description=(Path(__file__).parent.resolve() / 'README.rst').read_text(),
-    download_url=f'{github_url}/archive/v{VERSION}.tar.gz',
-    url=github_url,
-    project_urls={
-        'Changelog': f'{github_url}/blob/v{VERSION}/CHANGELOG.md',
-    },
-    license='Apache-2.0',
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: Web Environment',
-        'Framework :: Django',
-        'Framework :: Django :: 3.2',
-        'Framework :: Django :: 4.0',
-        'Framework :: Django :: 4.1',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-    ],
+    name='photonai',
     packages=find_packages(),
-    python_requires='>=3.6',
-    setup_requires=['wheel'],
+    include_package_data=True,
+    version=__version__,
+    description="""
+PHOTONAI
+is a rapid prototyping framework enabling (not so experienced) users to build, train, optimize, evaluate,
+and share even complex machine learning (ML) pipelines with very high efficiency.
+
+By pre-registering state-of-the-art ML implementations, we create a system in which the user can select 
+and arrange processing steps and learning algorithms in simple or parallel pipeline data streams. 
+
+Importantly, PHOTONAI is capable to automatize the training and testing procedure including nested cross-validation and 
+hyperparameter search, calculates performance metrics and conveniently visualizes the analyzed hyperparameter space.
+
+It also enables the user persist and load your optimal model, including all preprocessing elements, 
+with only one line of code.
+""",
+    author='PHOTONAI Team',
+    author_email='hahnt@wwu.de',
+    url='https://github.com/mmll-wwu/photonai.git',
+    download_url='https://github.com/wwu-mmll/photonai/archive/' + __version__ + '.tar.gz',
+    keywords=['machine learning', 'deep learning', 'neural networks', 'hyperparameter'],
+    classifiers=[],
     install_requires=[
-        'Django>=2.2',
-        'WeasyPrint>=53',
-    ],
+        'numpy',
+        'matplotlib',
+        'scikit-learn',
+        'keras',
+        'pandas',
+        'plotly',
+        'imbalanced-learn',
+        'pymodm',
+        'scipy',
+        'statsmodels',
+        'prettytable',
+        'seaborn',
+        'joblib',
+        'dask==2.30.0',
+        'distributed==2.30.1',
+        'scikit-optimize',
+        'xlrd']
 )

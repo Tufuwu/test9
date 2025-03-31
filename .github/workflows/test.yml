@@ -1,40 +1,45 @@
----
-name: CI
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: PHOTONAI tests
 
 on:
   push:
-    branches: [main]
+    branches: [ main, develop ]
   pull_request:
-    branches: [main]
-  workflow_dispatch:
+    branches: [ main, develop ]
 
 jobs:
-  tests:
-    name: tox on ${{ matrix.python-version }}
+  pytest:
+
     runs-on: ubuntu-latest
-    env:
-      USING_COVERAGE: "3.6"
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
+    
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -VV
-          python -m site
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install --upgrade coverage[toml] virtualenv tox tox-gh-actions
-      - name: Run tox targets for ${{ matrix.python-version }}
-        run: python -m tox
-      - name: Convert coverage
-        if: contains(env.USING_COVERAGE, matrix.python-version)
-        run: python -m coverage xml
-      - name: Upload coverage to Codecov
-        if: contains(env.USING_COVERAGE, matrix.python-version)
-        uses: codecov/codecov-action@v2
-        with:
-          fail_ci_if_error: false
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7.6
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.3.9
+#    - name: Install os dependencies
+#      run: | 
+#        sudo apt-get update
+#        sudo apt-get -y install gfortran swig
+    - name: Install dependencies
+      run: |
+        pip install wheel flake8 
+        python setup.py egg_info
+        pip install tensorflow pytest pytest-cov coveralls -r photonai.egg-info/requires.txt -r photonai/optimization/smac/requirements.txt -r photonai/optimization/nevergrad/requirements.txt
+    - name: Test with pytest
+      run: |
+        PYTHONPATH=./ pytest ./test --cov=./photonai
+    - name: Coveralls
+      run: coveralls
+      env: 
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

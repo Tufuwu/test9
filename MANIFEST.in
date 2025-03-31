@@ -1,4 +1,1 @@
-include LICENSE README* CHANGELOG*
-
-recursive-exclude * __pycache__
-recursive-exclude * *.py[co]
+recursive-include photonai *
