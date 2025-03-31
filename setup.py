@@ -1,87 +1,112 @@
-#!/usr/bin/env python3
-########################################################################
-# File name: setup.py
-# This file is part of: aioxmpp
-#
-# LICENSE
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with this program.  If not, see
-# <http://www.gnu.org/licenses/>.
-#
-########################################################################
-import os.path
-import runpy
+from setuptools import setup, find_packages, Extension
 import sys
+import numpy
+import os
+import os.path as path
+import multiprocessing
 
-import setuptools
-from setuptools import setup, find_packages
+multiprocessing.set_start_method('fork')
 
-here = os.path.abspath(os.path.dirname(__file__))
+use_cython = True
+force = False
+profile = False
+line_profile = False
+annotate = False
 
-with open(os.path.join(here, "README.rst"), encoding="utf-8") as f:
-    long_description = f.read()
+if "--skip-cython" in sys.argv:
+    use_cython = False
+    del sys.argv[sys.argv.index("--skip-cython")]
 
-version_mod = runpy.run_path("aioxmpp/_version.py")
+if "--force" in sys.argv:
+    force = True
+    del sys.argv[sys.argv.index("--force")]
 
-lxml_constraint = "lxml~=4.0"
-if sys.version_info < (3, 5):
-    lxml_constraint += ",<4.4"
+if "--profile" in sys.argv:
+    profile = True
+    del sys.argv[sys.argv.index("--profile")]
 
-install_requires = [
-    'aiosasl>=0.3',  # need 0.2+ for LGPLv3
-    'aioopenssl>=0.1',
-    'babel~=2.3',
-    'dnspython~=1.0',
-    lxml_constraint,
-    'multidict<5,>=2.0',
-    'sortedcollections>=0.5',
-    'pyOpenSSL',
-    'pyasn1',
-    'pyasn1_modules',
-    'tzlocal~=1.2',
-]
+if "--line-profile" in sys.argv:
+    line_profile = True
+    del sys.argv[sys.argv.index("--line-profile")]
 
-if tuple(map(int, setuptools.__version__.split(".")[:3])) < (6, 0, 0):
-    for i, item in enumerate(install_requires):
-        install_requires[i] = item.replace("~=", ">=")
+if "--annotate" in sys.argv:
+    annotate = True
+    sys.argv.remove("--annotate")
 
-if sys.version_info[:3] < (3, 5, 0):
-    install_requires.append("typing")
+source_paths = ['raysect', 'demos']
+compilation_includes = [".", numpy.get_include()]
+compilation_args = ['-O3']
+cython_directives = {
+    # 'auto_pickle': True,
+    'language_level': 3
+}
+setup_path = path.dirname(path.abspath(__file__))
+
+if line_profile:
+    compilation_args.append("-DCYTHON_TRACE=1")
+    compilation_args.append("-DCYTHON_TRACE_NOGIL=1")
+    cython_directives["linetrace"] = True
+
+if use_cython:
+
+    from Cython.Build import cythonize
+
+    # build .pyx extension list
+    extensions = []
+    for package in source_paths:
+        for root, dirs, files in os.walk(path.join(setup_path, package)):
+            for file in files:
+                if path.splitext(file)[1] == ".pyx":
+                    pyx_file = path.relpath(path.join(root, file), setup_path)
+                    module = path.splitext(pyx_file)[0].replace("/", ".")
+                    extensions.append(Extension(module, [pyx_file], include_dirs=compilation_includes, extra_compile_args=compilation_args),)
+
+    if profile:
+        cython_directives["profile"] = True
+
+    # generate .c files from .pyx
+    extensions = cythonize(extensions, nthreads=multiprocessing.cpu_count(), force=force, compiler_directives=cython_directives, annotate=annotate)
+
+else:
+
+    # build .c extension list
+    extensions = []
+    for package in source_paths:
+        for root, dirs, files in os.walk(path.join(setup_path, package)):
+            for file in files:
+                if path.splitext(file)[1] == ".c":
+                    c_file = path.relpath(path.join(root, file), setup_path)
+                    module = path.splitext(c_file)[0].replace("/", ".")
+                    extensions.append(Extension(module, [c_file], include_dirs=compilation_includes, extra_compile_args=compilation_args),)
+
+# parse the package version number
+with open(path.join(path.dirname(__file__), 'raysect/VERSION')) as version_file:
+    version = version_file.read().strip()
 
 setup(
-    name="aioxmpp",
-    version=version_mod["__version__"].replace("-", ""),
-    description="Pure-python XMPP library for asyncio",
-    long_description=long_description,
-    url="https://github.com/horazont/aioxmpp",
-    author="Jonas Schäfer",
-    author_email="jonas@wielicki.name",
-    license="LGPLv3+",
+    name="raysect",
+    version=version,
+    url="http://www.raysect.org",
+    author="Dr Alex Meakins et al.",
+    author_email="developers@raysect.org",
+    description='A Ray-tracing Framework for Science and Engineering',
+    license="BSD",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Education",
         "Intended Audience :: Developers",
-        "Operating System :: POSIX",
-        "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
-        "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Topic :: Communications :: Chat",
-        "Topic :: Internet :: XMPP",
+        "License :: OSI Approved :: BSD License",
+        "Natural Language :: English",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Cython",
+        "Programming Language :: Python :: 3",
+        "Topic :: Multimedia :: Graphics :: 3D Rendering",
+        "Topic :: Scientific/Engineering :: Physics"
     ],
-    keywords="asyncio xmpp library",
-    install_requires=install_requires,
-    packages=find_packages(exclude=["tests*", "benchmarks*"])
+    install_requires=['numpy', 'matplotlib'],
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
+    ext_modules=extensions
 )
