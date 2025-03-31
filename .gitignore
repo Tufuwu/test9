@@ -1,35 +1,4 @@
-# Other Git Projects
-FFmpeg/
-
-# Learning Session Files
-*_state.txt
-*_model.dat
-*_logs.txt
-*_model.dat_*_loss_*
-*_logs_epoch_.txt
-*_logs_.txt
-model_*.dat*
-state_*.txt
-
-# Local Files to ignore
-display
-*.mp4
-*.mp4_
-
-# Backup Files
-*~
-*#
-.#*
-
-# Files taken from other source
-
-glove/*
-models/*
-
-# Dynamically Generated Files
-vocab.dat
-glove.dat
-log.txt
+Pipfile*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -53,7 +22,6 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -76,7 +44,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*.cover
+*,cover
 .hypothesis/
 
 # Translations
@@ -100,7 +68,7 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter Notebook
+# IPython Notebook
 .ipynb_checkpoints
 
 # pyenv
@@ -109,26 +77,18 @@ target/
 # celery beat schedule file
 celerybeat-schedule
 
-# SageMath parsed files
-*.sage.py
-
 # dotenv
 .env
 
 # virtualenv
-.venv
 venv/
 ENV/
 
 # Spyder project settings
 .spyderproject
-.spyproject
 
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
+# PyPi
+.pypirc

@@ -1,2 +1,2 @@
-parameterized
-selenium
+beautifulsoup4
+requests>=2.0.0,<3.0.0
