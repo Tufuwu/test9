@@ -1,4 +1,4 @@
-# Contributions to `aioambient`
+# Contributions to `regenmaschine`
 
 ## Owners
 

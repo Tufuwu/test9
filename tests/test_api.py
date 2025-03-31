@@ -1,62 +1,39 @@
-"""Define tests for the REST API."""
-import datetime
+"""Define tests for api endpoints."""
+# pylint: disable=redefined-outer-name
+
 import json
 
 import aiohttp
+import aresponses
 import pytest
 
-from aioambient import Client
-from aioambient.errors import RequestError
+from regenmaschine import login
 
-from .const import TEST_API_KEY, TEST_APP_KEY, TEST_MAC
-from .fixtures.api import device_details_json, devices_json
-
-
-@pytest.mark.asyncio
-async def test_api_error(aresponses, event_loop, devices_json):
-    aresponses.add(
-        "api.ambientweather.net",
-        "/v1/devices",
-        "get",
-        aresponses.Response(text="", status=500),
-    )
-
-    async with aiohttp.ClientSession(loop=event_loop) as websession:
-        client = Client(TEST_API_KEY, TEST_APP_KEY, websession)
-
-        with pytest.raises(RequestError):
-            await client.api.get_devices()
+from .const import TEST_HOST, TEST_PASSWORD, TEST_PORT
+from .fixtures import authenticated_local_client, auth_login_json
+from .fixtures.api import apiver_json
+from .fixtures.provision import provision_name_json, provision_wifi_json
 
 
 @pytest.mark.asyncio
-async def test_get_device_details(aresponses, event_loop, device_details_json):
-    aresponses.add(
-        "api.ambientweather.net",
-        f"/v1/devices/{TEST_MAC}",
-        "get",
-        aresponses.Response(text=json.dumps(device_details_json), status=200),
-    )
-
-    async with aiohttp.ClientSession(loop=event_loop) as websession:
-        client = Client(TEST_API_KEY, TEST_APP_KEY, websession)
-
-        device_details = await client.api.get_device_details(
-            TEST_MAC, end_date=datetime.datetime(2019, 1, 6)
+async def test_api_versions(
+    apiver_json, aresponses, authenticated_local_client, event_loop
+):
+    """Test getting API, hardware, and software versions."""
+    async with authenticated_local_client:
+        authenticated_local_client.add(
+            f"{TEST_HOST}:{TEST_PORT}",
+            "/api/4/apiVer",
+            "get",
+            aresponses.Response(text=json.dumps(apiver_json), status=200),
         )
-        assert len(device_details) == 2
 
+        async with aiohttp.ClientSession(loop=event_loop) as websession:
+            client = await login(
+                TEST_HOST, TEST_PASSWORD, websession, port=TEST_PORT, ssl=False
+            )
 
-@pytest.mark.asyncio
-async def test_get_devices(aresponses, event_loop, devices_json):
-    aresponses.add(
-        "api.ambientweather.net",
-        "/v1/devices",
-        "get",
-        aresponses.Response(text=json.dumps(devices_json), status=200),
-    )
-
-    async with aiohttp.ClientSession(loop=event_loop) as websession:
-        client = Client(TEST_API_KEY, TEST_APP_KEY, websession)
-
-        devices = await client.api.get_devices()
-        assert len(devices) == 2
+            data = await client.api.versions()
+            assert data["apiVer"] == "4.5.0"
+            assert data["hwVer"] == 3
+            assert data["swVer"] == "4.0.925"
