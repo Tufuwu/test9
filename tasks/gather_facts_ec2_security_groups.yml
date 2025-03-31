@@ -1,0 +1,49 @@
+---
+
+###
+### Gather ec2 security facts
+###
+
+- name: "({{ cluster.name }}) set ec2 security filter"
+  set_fact:
+    kops_ec2_security_groups_filters:
+      - key: vpc-id
+        val: "{{ kops_vpc_id }}"
+
+- name: Get Security Group ID
+  ec2_group_facts:
+    aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') | default(omit) }}"
+    aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') | default(omit)  }}"
+    security_token: "{{ lookup('env', 'AWS_SECURITY_TOKEN') | default(omit) }}"
+    profile: "{{ kops_aws_profile | default(omit) }}"
+    filters: "{{ kops_ec2_security_groups_filters | get_attr('key', 'val') }}"
+    region: "{{ cluster.region | default(kops_default_region) }}"
+  register: _kops_api_additional_sgs
+
+- name: Gather facts for specified Security Group
+  ec2_group_facts:
+    aws_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') | default(omit) }}"
+    aws_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') | default(omit)  }}"
+    security_token: "{{ lookup('env', 'AWS_SECURITY_TOKEN') | default(omit) }}"
+    profile: "{{ kops_aws_profile | default(omit) }}"
+    region: "{{ cluster.region | default(kops_default_region) }}"
+    filters:
+      group-name:
+        - "{{ kops_ssh_additional_cidrs_from_sg }}"
+  register: _kops_ssh_additional_cidrs_facts
+
+- name: CIDRs of the additional SSH ingress access rules should be set as fact
+  set_fact:
+    kops_ssh_additional_cidrs: "{{
+      kops_ssh_additional_cidrs | default([]) + [item.cidr_ip]
+    }}"
+  with_items: "{{ _kops_ssh_additional_cidrs_facts.security_groups[0].ip_permissions[0].ip_ranges }}"
+  when: _kops_ssh_additional_cidrs_facts.security_groups | length > 0
+
+- name: Set Security Groups ID fact
+  set_fact:
+    kops_api_additional_sgs: "{{ kops_api_additional_sgs |
+      combine( { item.group_name: item.group_id } ) }}"
+  no_log: true
+  with_items: "{{ _kops_api_additional_sgs.security_groups }}"
+  when: item | length > 0

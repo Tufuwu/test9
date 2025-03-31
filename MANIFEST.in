@@ -1,6 +1,0 @@
-exclude .gitignore
-exclude .gitlab-ci.yml
-exclude MANIFEST.in
-exclude .readthedocs.yml
-recursive-exclude .github *
-recursive-exclude doc *
