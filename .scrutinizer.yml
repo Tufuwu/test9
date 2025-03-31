@@ -1,0 +1,15 @@
+build:
+  environment:
+    python:
+      version: 3.7.3
+  nodes:
+    coverage:
+      dependencies:
+        before:
+          - make setup
+      tests:
+        override:
+          - command: make coverage
+            coverage:
+              file: '.coverage'
+              format: 'py-cc'
