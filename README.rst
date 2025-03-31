@@ -3,72 +3,117 @@
     :alt: Project Status: Active — The project has reached a stable, usable
           state and is being actively developed.
 
-.. image:: https://github.com/jwodder/permutation/workflows/Test/badge.svg?branch=master
-    :target: https://github.com/jwodder/permutation/actions?workflow=Test
+.. image:: https://github.com/jwodder/wheel-filename/workflows/Test/badge.svg?branch=master
+    :target: https://github.com/jwodder/wheel-filename/actions?workflow=Test
     :alt: CI Status
 
-.. image:: https://codecov.io/gh/jwodder/permutation/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/jwodder/permutation
+.. image:: https://codecov.io/gh/jwodder/wheel-filename/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/jwodder/wheel-filename
 
-.. image:: https://img.shields.io/pypi/pyversions/permutation.svg
-    :target: https://pypi.org/project/permutation
+.. image:: https://img.shields.io/pypi/pyversions/wheel-filename.svg
+    :target: https://pypi.org/project/wheel-filename/
 
-.. image:: https://img.shields.io/github/license/jwodder/permutation.svg
+.. image:: https://img.shields.io/github/license/jwodder/wheel-filename.svg
     :target: https://opensource.org/licenses/MIT
     :alt: MIT License
 
-`GitHub <https://github.com/jwodder/permutation>`_
-| `PyPI <https://pypi.org/project/permutation>`_
-| `Documentation <https://permutation.readthedocs.io>`_
-| `Issues <https://github.com/jwodder/permutation/issues>`_
-| `Changelog <https://github.com/jwodder/permutation/blob/master/CHANGELOG.md>`_
+.. image:: https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg
+    :target: https://saythanks.io/to/jwodder
 
-``permutation`` provides a ``Permutation`` class for representing `permutations
-<https://en.wikipedia.org/wiki/Permutation>`_ of finitely many positive
-integers in Python.  Supported operations & properties include inverses, (group
-theoretic) order, parity, composition/multiplication, cycle decomposition,
-cycle notation, word representation, Lehmer codes, and, of course, use as a
-callable on integers.
+`GitHub <https://github.com/jwodder/wheel-filename>`_
+| `PyPI <https://pypi.org/project/wheel-filename/>`_
+| `Issues <https://github.com/jwodder/wheel-filename/issues>`_
+| `Changelog <https://github.com/jwodder/wheel-filename/blob/master/CHANGELOG.md>`_
+
+``wheel-filename`` lets you verify `wheel
+<https://www.python.org/dev/peps/pep-0427/>`_ filenames and parse them into
+their component fields.
+
+This package adheres strictly to the relevant PEPs, with the following
+exceptions:
+
+- Unlike other filename components, version components may contain the
+  characters ``!`` and ``+`` for full PEP 440 support.
+
+- Version components may be any sequence of the relevant set of characters;
+  they are not verified for PEP 440 compliance.
+
+- The ``.whl`` file extension is matched case-insensitively.
 
 
 Installation
 ============
-``permutation`` requires Python 3.6 or higher.  Just use `pip
-<https://pip.pypa.io>`_ for Python 3 (You have pip, right?) to install::
+``wheel-filename`` requires Python 3.6 or higher.  Just use `pip
+<https://pip.pypa.io>`_ for Python 3 (You have pip, right?) to install
+``wheel-filename``::
 
-    python3 -m pip install permutation
+    python3 -m pip install wheel-filename
 
 
-Examples
-========
+Example
+=======
 
->>> from permutation import Permutation
->>> p = Permutation(2, 1, 4, 5, 3)
->>> p.to_cycles()
-[(1, 2), (3, 4, 5)]
->>> print(p)
-(1 2)(3 4 5)
->>> print(p.inverse())
-(1 2)(3 5 4)
->>> p.degree
-5
->>> p.order
-6
->>> p.is_even
-False
->>> p.lehmer(5)
-27
->>> q = Permutation.cycle(1,2,3)
->>> print(p * q)
-(2 4 5 3)
->>> print(q * p)
-(1 3 4 5)
->>> for p in Permutation.group(3):
-...     print(p)
-...
-1
-(1 2)
-(2 3)
-(1 3 2)
-(1 2 3)
-(1 3)
+::
+
+    >>> from wheel_filename import parse_wheel_filename
+    >>> pwf = parse_wheel_filename('pip-18.0-py2.py3-none-any.whl')
+    >>> str(pwf)
+    'pip-18.0-py2.py3-none-any.whl'
+    >>> pwf.project
+    'pip'
+    >>> pwf.version
+    '18.0'
+    >>> pwf.build is None
+    True
+    >>> pwf.python_tags
+    ['py2', 'py3']
+    >>> pwf.abi_tags
+    ['none']
+    >>> pwf.platform_tags
+    ['any']
+    >>> list(pwf.tag_triples())
+    ['py2-none-any', 'py3-none-any']
+
+
+API
+===
+
+``parse_wheel_filename(filename)``
+   Parses a wheel filename (a ``str`` or ``os.PathLike``) and returns a
+   ``ParsedWheelFilename`` instance.  Any leading directory components are
+   stripped from the argument before processing.  If the filename is not a
+   valid wheel filename, raises an ``InvalidFilenameError``.
+
+``ParsedWheelFilename``
+   A namedtuple representing the components of a wheel filename.  It has the
+   following attributes and methods:
+
+   ``project: str``
+      The name of the project distributed by the wheel
+
+   ``version: str``
+      The version of the project distributed by the wheel
+
+   ``build: Optional[str]``
+      The wheel's build tag (``None`` if not defined)
+
+   ``python_tags: List[str]``
+      A list of Python tags for the wheel
+
+   ``abi_tags: List[str]``
+      A list of ABI tags for the wheel
+
+   ``platform_tags: List[str]``
+      A list of platform tags for the wheel
+
+   ``str(pwf)``
+      Stringifying a ``ParsedWheelFilename`` returns the original filename
+
+   ``tag_triples() -> Iterator[str]``
+      Returns an iterator of all simple tag triples formed from the
+      compatibility tags in the filename
+
+``InvalidFilenameError``
+   A subclass of ``ValueError`` raised when an invalid wheel filename is passed
+   to ``parse_wheel_filename()``.  It has a ``filename`` attribute containing
+   the basename of the invalid filename.

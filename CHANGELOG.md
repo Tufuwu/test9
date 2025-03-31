@@ -1,22 +1,19 @@
-v0.3.0 (in development)
+v1.3.0 (in development)
 -----------------------
-- Support Python 3.8 and 3.9
-- Fix a typo in the link to the Wikipedia definition of "inversion number"
-- Drop support for Python 2.7, 3.4, and 3.5
-- Add link to changelog to both README and docs page
-- Add type annotations
+- Support Python 3.9
 
-v0.2.0 (2019-01-03)
+v1.2.0 (2020-07-05)
 -------------------
-- Added an `inversions()` method for returning the inversion number of a
-  permutation (based on a patch by @drocta)
-- Added a `right_inversion_count()` method
+- Changed `ParsedWheelFilename` to a `namedtuple` so that it can be iterated
+  over
+- Dropped support for Python 3.5
+- Added type annotations
 
-v0.1.1 (2018-09-18)
+v1.1.0 (2020-04-01)
 -------------------
-- Drop support for Python 3.3
-- Fix a DeprecationWarning in Python 3.5+
+- `parse_wheel_filename()` now strips leading directory components from its
+  argument before processing
 
-v0.1.0 (2017-10-02)
+v1.0.0 (2020-03-23)
 -------------------
-Initial release
+Split off code from [wheel-inspect](https://github.com/jwodder/wheel-inspect).
