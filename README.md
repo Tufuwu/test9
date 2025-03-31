@@ -1,155 +1,82 @@
-# YouVersion Suggest
+# SoundCloud Add-on for [Kodi](https://github.com/xbmc/xbmc)
 
-*Copyright 2014-2022 Caleb Evans*  
-*Released under the MIT license*
+<img align="right" src="https://github.com/xbmc/xbmc/raw/master/addons/webinterface.default/icon-128.png" alt="Kodi logo">
 
-[![tests](https://github.com/caleb531/youversion-suggest-alfred/actions/workflows/tests.yml/badge.svg)](https://github.com/caleb531/youversion-suggest-alfred/actions/workflows/tests.yml)
-[![Coverage Status](https://coveralls.io/repos/caleb531/youversion-suggest-alfred/badge.svg?branch=master)](https://coveralls.io/r/caleb531/youversion-suggest-alfred?branch=master)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/jaylinski/kodi-addon-soundcloud.svg)](https://github.com/jaylinski/kodi-addon-soundcloud/releases)
+[![Build Status](https://img.shields.io/github/workflow/status/jaylinski/kodi-addon-soundcloud/Continuous%20Integration/master.svg)](https://github.com/jaylinski/kodi-addon-soundcloud/actions)
+[![Link to Kodi forum](https://img.shields.io/badge/Kodi-Forum-informational.svg)](https://forum.kodi.tv/showthread.php?tid=206635)
+[![Link to Kodi wiki](https://img.shields.io/badge/Kodi-Wiki-informational.svg)](https://kodi.wiki/view/Add-on:SoundCloud)
+[![Link to Kodi releases](https://img.shields.io/badge/Kodi-v19%20%22Matrix%22-green.svg)](https://kodi.wiki/view/Releases)
+[![Link to Kodi releases](https://img.shields.io/badge/Kodi-v18%20%22Leia%22-green.svg)](https://kodi.wiki/view/Releases)
+[![Link to Kodi releases](https://img.shields.io/badge/Kodi-v17%20%22Krypton%22-green.svg)](https://kodi.wiki/view/Releases)
 
-YouVersion Suggest is an [Alfred](https://www.alfredapp.com/) workflow which
-allows you to search the online [YouVersion](https://www.youversion.com/) Bible
-quickly and conveniently.
+This [Kodi](https://github.com/xbmc/xbmc) Add-on provides a minimal interface for SoundCloud.
 
-The workflow will be solely supporting Alfred 5 going forward, but the latest
-releases for Alfred 4 and earlier will remain available here for your
-convenience.
+## Features
 
-## Usage
+* Search
+* Discover new music
+* Play tracks, albums and playlists
 
-### Filtering by reference
+## Installation
 
-The `yvfilter` keyword allows you to filter the YouVersion Bible by reference,
-meaning you can jump to a particular Bible reference (book, chapter, verse, or
-range of verses) with just a few keystrokes.
+### Kodi Repository
 
-**Pro Tip:** Type `yvf` and press the `tab` key to quickly filter by reference
-(as this will expand to `yvfilter`).
+Follow the instructions on [https://kodi.wiki/view/Add-on:SoundCloud](https://kodi.wiki/view/Add-on:SoundCloud).
 
-#### Example queries
+### Manual
 
-- `yvfilter luke` => Luke
-- `yvfilter eph 3` => Ephesians 3
-- `yvfilter 1t3es` => 1 Thessalonians 3 (ESV), 1 Timothy 3 (ESV)
-- `yvfilter mat 6:34 nlt` => Matthew 6:34 (NLT)
-- `yvfilter 1 co 13.4-7` => 1 Corinthians 13:4-7
-- `yvfilter relevations 7` => Revelation 7
+* [Download the latest release](https://github.com/jaylinski/kodi-addon-soundcloud/releases) (`plugin.audio.soundcloud.zip`)
+* Copy the zip file to your Kodi system
+* Open Kodi, go to Add-ons and select "Install from zip file"
+* Select the file `plugin.audio.soundcloud.zip`
 
-![Filtering by reference](screenshot-yvfilter.png)
+## API
 
-#### Actions
+Documentation of the **public** interface.
 
-- Choosing a result will open the Bible reference on the YouVersion website
+### plugin://plugin.audio.soundcloud/play/?[track_id|playlist_id|url]
 
-- Choosing a result while pressing `command` will copy the contents of the Bible
-reference to the clipboard
+Examples:
 
-- Choosing a result while pressing `ctrl` will open a Google search for the
-Bible reference.
+* `plugin://plugin.audio.soundcloud/play/?track_id=1`
+* `plugin://plugin.audio.soundcloud/play/?playlist_id=1`
+* `plugin://plugin.audio.soundcloud/play/?url=https%3A%2F%2Fsoundcloud.com%2Fpslwave%2Fallwithit`
 
-- Pressing `shift` while a result is selected will preview the contents of the
-Bible reference without leaving the search results (new in v6.1.0)
+Legacy (will be removed in v5.0):
 
-- Pressing `command-c` while a result is selected will copy to the clipboard the
-full Bible reference identifier, such as *1 Corinthians 13:4-7 (ESV)*
+* `plugin://plugin.audio.soundcloud/play/?audio_id=1` Use `track_id=1` instead.
 
-- Pressing `command-l` while a result is selected will show the full Bible
-reference identifier as Large Type
+## Development
 
-### Searching by content
+This add-on uses [Pipenv](https://pypi.org/project/pipenv/) to manage its dependencies.
 
-You can also search the YouVersion Bible by content using the `yvsearch`
-keyword. As you type, YouVersion Suggest will display Bible verses whose content
-contains your given keywords.
+### Setup
 
-Note that when using the `yvsearch` filter, YouVersion Suggest will only search
-for verses in your preferred version. To learn more about setting your preferred
-version in YouVersion Suggest, see *Setting your preferred version*.
+[Install Pipenv](https://pipenv.readthedocs.io/en/latest/install/#installing-pipenv) and run `pipenv install --dev`.
 
-#### Example queries
+### Build
 
-- `yvsearch without faith` => Hebrews 11:6
-- `yvsearch do not worry` => Matthew 6:34
+Run `pipenv run build`.
 
-![Searching by content](screenshot-yvsearch.png)
+### Lint
 
-#### Actions
+Run `pipenv run lint`.
 
-You can perform all the same actions on a result with `yvsearch` as you can with
-`yvfilter`.
+### Test
 
-### Setting your preferred language
+Run `pipenv run test`.
 
-YouVersion Suggest allows you to change the languages used for Bible references
-and versions. To do so, type `yvset language` into Alfred, and the list of
-supported languages will then appear. You may then choose another language to be
-your preferred language.
+## Roadmap
 
-Currently, YouVersion Suggest supports the following languages:
+* Re-implement all features from original add-on
+* Implement [enhancements](https://github.com/jaylinski/kodi-addon-soundcloud/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
 
-- Arabic (arb)
-- Bulgarian (bul)
-- Dutch (nld)
-- Chinese - Simplified (zho)
-- Chinese - Traditional (zho-TW)
-- English (eng)
-- Finnish (fin)
-- French (fra)
-- German (deu)
-- Hindi (hin)
-- Indonesian (ind)
-- Italian (ita)
-- Japanese (jpn)
-- Khmer (khm)
-- Korean (kor)
-- Persian (pes)
-- Polish (pol)
-- Portuguese (por)
-- Portuguese - Portugal (por-PT)
-- Russian (rus)
-- Spanish (spa)
-- Spanish - Spain (spa-ES)
-- Swahili (swh)
-- Swedish (swe)
-- Vietnamese (vie)
+## Attributions
 
-### Setting your preferred version
+This add-on is strongly inspired by the [original add-on](https://github.com/SLiX69/plugin.audio.soundcloud)
+developed by [bromix](https://kodi.tv/addon-author/bromix) and [SLiX](https://github.com/SLiX69).
 
-You may also set your preferred version (translation) used for Bible references
-(where you have not explicitly specified the version in the query). To do so,
-type `yvset version` into Alfred, and the list of supported versions (for the
-currently-set language) will appear.
+## Copyright and license
 
-**Pro Tip:** Type `yvset v` and press the `tab` key to quickly see the list of
-available versions to set (as this will expand to `yvset version`).
-
-To select a version from the list of versions more quickly, you may optionally
-type a query after `yvset version` to filter the list of versions.
-
-#### Example queries
-
-- `yvset version esv` => ESV
-- `yvset version a` => AMP
-
-### Setting your preferred search engine
-
-You may also set your preferred search engine used for searching selected Bible
-references. To do so, open the YouVersion Suggest workflow in Alfred Preferences
-and double-click the *Default Web Search* object. You can then choose a search
-engine to set as your preferred for YouVersion Suggest.
-
-### Showing verse numbers in copied Bible content
-
-You can choose whether or not to include verse numbers in copied Bible verses by
-typing `yvset versenumbers yes`.
-
-### Making "Copy to Clipboard" the default action
-
-If you would prefer to just press `Enter` (without holding down the `command`
-key) to copy the content of a Bible reference, type `yvset copybydefault yes`.
-When this is enabled, you can still open the selected reference on the
-YouVersion website by holding down the `command` key.
-
-## Disclaimer
-
-This project is not affiliated with YouVersion, and all Bible content is
-copyright of the respective publishers.
+This add-on is licensed under the MIT License - see `LICENSE.txt` for details.
