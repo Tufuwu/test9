@@ -1,19 +1,20 @@
-docs/_build
-__pycache__
-*.*~
+.*~$
 *.pyc
-# this fixes a dummy version on the public repository
-#git update-index --assume-unchanged python/openneurodata/oneibl/params_secret.py
-python/scratch
-.idea/*
-.vscode/
-*checkpoint.ipynb
+*.mo
+*.db
+modoboa.egg-info
+doc/.build
+doc/.static
+doc/.templates
+DEV
+.idea
+.ropeproject
+modoboa.iml
+.tox
+.eggs/
+modoboa_test
+.coverage
 build/
-venv/
-ibllibenv/
 dist/
-ibllib.egg-info/
-.DS_Store
-scratch/
-_autosummary/
-brainbox/docs/_build/
+/.project
+/.pydevproject

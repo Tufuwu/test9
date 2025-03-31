@@ -1,45 +1,91 @@
-from setuptools import setup, find_packages
-import sys
-from pathlib import Path
+#!/usr/bin/env python
 
-CURRENT_DIRECTORY = Path(__file__).parent.absolute()
+"""
+A setuptools based setup module.
 
-CURRENT_PYTHON = sys.version_info[:2]
-REQUIRED_PYTHON = (3, 7)
-if CURRENT_PYTHON < REQUIRED_PYTHON:
-    sys.stderr.write("""
-==========================
-Unsupported Python version
-==========================
-This version of ibllib requires Python {}.{}, but you're trying to
-install it on Python {}.{}.
-""".format(*(REQUIRED_PYTHON + CURRENT_PYTHON)))
-    sys.exit(1)
+See:
+https://packaging.python.org/en/latest/distributing.html
+"""
 
-with open("README.md", 'r') as f:
-    long_description = f.read()
+from os import path
 
-with open('requirements.txt') as f:
-    require = [x.strip() for x in f.readlines() if not x.startswith('git+')]
+try:
+    from pip.req import parse_requirements
+except ImportError:
+    # pip >= 10
+    from pip._internal.req import parse_requirements
 
-setup(
-    name='ibllib',
-    version='1.10.0',
-    python_requires='>={}.{}'.format(*REQUIRED_PYTHON),
-    description='IBL libraries',
-    license="MIT",
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    author='IBL Staff',
-    url="https://www.internationalbrainlab.com/",
-    packages=find_packages(exclude=['scratch']),  # same as name
-    include_package_data=True,
-    # external packages as dependencies
-    install_requires=require,
-    entry_points={
-        'console_scripts': [
-            'onelight=oneibl.onelight:one',
+from setuptools import find_packages, setup
+
+
+def get_requirements(requirements_file):
+    """Use pip to parse requirements file."""
+    requirements = []
+    if path.isfile(requirements_file):
+        for req in parse_requirements(requirements_file, session="hack"):
+            try:
+                if req.markers:
+                    requirements.append("%s;%s" % (req.req, req.markers))
+                else:
+                    requirements.append("%s" % req.req)
+            except AttributeError:
+                # pip >= 20.0.2
+                requirements.append(req.requirement)
+    return requirements
+
+
+if __name__ == "__main__":
+    HERE = path.abspath(path.dirname(__file__))
+    INSTALL_REQUIRES = get_requirements(path.join(HERE, "requirements.txt"))
+    MYSQL_REQUIRES = get_requirements(path.join(HERE, "mysql-requirements.txt"))
+    POSTGRESQL_REQUIRES = get_requirements(
+        path.join(HERE, "postgresql-requirements.txt"))
+    LDAP_REQUIRES = get_requirements(path.join(HERE, "ldap-requirements.txt"))
+
+    with open(path.join(HERE, "README.rst")) as readme:
+        LONG_DESCRIPTION = readme.read()
+
+    def local_scheme(version):
+        """Skip the local version (eg. +xyz of 0.6.1.dev4+gdf99fe2)
+            to be able to upload to Test PyPI"""
+        return ""
+
+    setup(
+        name="modoboa",
+        description="Mail hosting made simple",
+        long_description=LONG_DESCRIPTION,
+        license="ISC",
+        url="http://modoboa.org/",
+        author="Antoine Nguyen",
+        author_email="tonio@ngyn.org",
+        classifiers=[
+            "Development Status :: 5 - Production/Stable",
+            "Environment :: Web Environment",
+            "Framework :: Django :: 2.2",
+            "Intended Audience :: System Administrators",
+            "License :: OSI Approved :: ISC License (ISCL)",
+            "Operating System :: OS Independent",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Topic :: Communications :: Email",
+            "Topic :: Internet :: WWW/HTTP",
         ],
-    },
-    scripts={},
-)
+        keywords="email",
+        packages=find_packages(exclude=["doc", "test_data", "test_project"]),
+        include_package_data=True,
+        zip_safe=False,
+        scripts=["bin/modoboa-admin.py"],
+        install_requires=INSTALL_REQUIRES,
+        use_scm_version={"local_scheme": local_scheme},
+        python_requires=">=3.4",
+        setup_requires=["setuptools_scm"],
+        extras_require={
+            "ldap": LDAP_REQUIRES,
+            "mysql": MYSQL_REQUIRES,
+            "postgresql": POSTGRESQL_REQUIRES,
+            "argon2": ["argon2-cffi >= 16.1.0"],
+        },
+    )
