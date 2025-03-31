@@ -1,27 +1,33 @@
-name: CI
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Test build and run tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, dev ]
 
 jobs:
-  build:
+  tests-py2:
+    name: Runs tests that require python 2
     runs-on: ubuntu-latest
+    container:
+      image: python:3.9.18-buster
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v4
       with:
-        python-version: 3.9
-    - name: Install dependencies
+        submodules: recursive
+    # - name: Set up Python 2.7
+    #   uses: actions/setup-python@v2
+    #   with:
+    #     python-version: "3.9"
+    - name: Test by decompiling a script and building un.rpyc
       run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pylint pylint-exit
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Lint with flake8 and pylint
-      run: |
-        flake8 .
-        pylint PlexAniSync.py TautulliSyncHelper.py plexmodule.py anilist.py custom_mappings.py || pylint-exit --error-fail --warn-fail $?
+        ./unrpyc.py --clobber testcases/script.rpyc
+        diff -u testcases/script.orig.rpy testcases/script.rpy
+        cd un.rpyc;
+        ./compile.py -p 1
+        cd ..

@@ -1,249 +1,181 @@
-# Plex to AniList Sync
-[![Build Status](https://travis-ci.com/RickDB/PlexAniSync.svg?branch=master)](https://travis-ci.com/RickDB/PlexAniSync)[![Docker Pulls](https://img.shields.io/docker/pulls/rickdb/plexanisync)](https://hub.docker.com/r/rickdb/plexanisync)
+# Unrpyc, the Ren'py script decompiler.
 
-![Logo](logo.png)
-
-If you manage your Anime with Plex this will allow you to sync your libraries to [AniList](https://anilist.co)  , recommend using Plex with the [HAMA agent](https://github.com/ZeroQI/Hama.bundle) for best Anime name matches.
-
-Unwatched Anime in Plex will not be synced so only those that have at least one watched episode, updates to AniList are only send with changes so need to worry about messing up watch history.
+Unrpyc is a tool to decompile Ren'Py (http://www.renpy.org/) compiled .rpyc
+script files. It will not extract files from .rpa archives. For that, use
+[rpatool](https://github.com/Shizmob/rpatool) or
+[UnRPA](https://github.com/Lattyware/unrpa).
 
 
-This version is based on my previous project  [PlexMalSync](https://github.com/RickDB/PlexMALSync) which due to MAL closing their API is no longer working, this might change in the future and if it does will resume working on that again as as well.
+## Status
 
+master:[![Build Status](https://github.com/CensoredUsername/unrpyc/actions/workflows/python-app.yaml/badge.svg?branch=master)](https://github.com/CensoredUsername/unrpyc/actions/workflows/python-app.yaml)
 
-**If you want test it out first without updating your actual AniList entries check out ``Skip list updating for testing `` from the ``Optional features`` section of this readme**
+dev:[![Build Status](https://github.com/CensoredUsername/unrpyc/actions/workflows/python-app.yaml/badge.svg?branch=dev)](https://github.com/CensoredUsername/unrpyc/actions/workflows/python-app.yaml)
 
-## Setup
+## Usage
 
-### Step 1 - install Python
+This tool can either be ran as a command line tool, as a library, or injected into the game itself. It requires Python 2.7 to be installed to be used as a command line tool.
 
-Make sure you have Python 3.7 or higher installed:
+### Command line tool usage
 
-[Python homepage](https://www.python.org/)
-
-
-### Step 2 - Download project files
-
-Get the latest version using your favorite git client or by downloading the latest release from here:
-
-https://github.com/RickDB/PlexAniSync/archive/master.zip
-
-
-### Step 3 - Configuration
-
-From the project directory rename `settings.ini.example` to `settings.ini`, open `settings.ini` with your favorite text editor and edit where needed.
-
-
-#### Plex
-
-Only choose one of the authentication methods, MyPlex is the easiest.
-
-##### MyPlex authentication (prefered)
-
-For MyPlex authentication you will need your Plex server name and Plex account login information, for example:
-
+Depending on your system setup, you should use one of the following commands to run the tool:
 ```
-[PLEX]
-anime_section = Anime
-authentication_method = myplex
-
-server = Sadala
-myplex_user = Goku
-myplex_password = kamehameha
+python unrpyc.py [options] script1 script2 ...
+python2 unrpyc.py [options] script1 script2 ...
+py -2 unrpyc.py [options] script1 script2 ...
+./unrpyc.py [options] script1 script2 ...
 ```
 
-This completes the MyPlex authentication and **only** if you want to sync against a specific Plex Home user which isn't the admin user follow the below instructions:
+Options:
+```
+$ py -2 unrpyc.py --help
+usage: unrpyc.py [-h] [-c] [-d] [-p {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}]
+                 [-t TRANSLATION_FILE] [-T WRITE_TRANSLATION_FILE]
+                 [-l LANGUAGE] [--sl1-as-python] [--comparable] [--no-pyexpr]
+                 [--tag-outside-block] [--init-offset] [--try-harder]
+                 file [file ...]
 
-For this to work lookup the home username on your Plex server and also fill in your full Plex server URL, for example:
+Decompile .rpyc/.rpymc files
+
+positional arguments:
+  file                  The filenames to decompile. All .rpyc files in any
+                        directories passed or their subdirectories will also
+                        be decompiled.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c, --clobber         overwrites existing output files
+  -d, --dump            instead of decompiling, pretty print the ast to a file
+  -p, --processes
+                        use the specified number or processes to
+                        decompile.Defaults to the amount of hw threads
+                        available minus one, disabled when muliprocessing is
+                        unavailable.
+  -t TRANSLATION_FILE, --translation-file TRANSLATION_FILE
+                        use the specified file to translate during
+                        decompilation
+  -T WRITE_TRANSLATION_FILE, --write-translation-file WRITE_TRANSLATION_FILE
+                        store translations in the specified file instead of
+                        decompiling
+  -l LANGUAGE, --language LANGUAGE
+                        if writing a translation file, the language of the
+                        translations to write
+  --sl1-as-python       Only dumping and for decompiling screen language 1
+                        screens. Convert SL1 Python AST to Python code instead
+                        of dumping it or converting it to screenlang.
+  --comparable          Only for dumping, remove several false differences
+                        when comparing dumps. This suppresses attributes that
+                        are different even when the code is identical, such as
+                        file modification times.
+  --no-pyexpr           Only for dumping, disable special handling of PyExpr
+                        objects, instead printing them as strings. This is
+                        useful when comparing dumps from different versions of
+                        Ren'Py. It should only be used if necessary, since it
+                        will cause loss of information such as line numbers.
+  --tag-outside-block   Always put SL2 'tag's on the same line as 'screen'
+                        rather than inside the block. This will break
+                        compiling with Ren'Py 7.3 and above, but is needed to
+                        get correct line numbers from some files compiled with
+                        older Ren'Py versions.
+  --init-offset         Attempt to guess when init offset statements were used
+                        and insert them. This is always safe to enable if the
+                        game's Ren'Py version supports init offset statements,
+                        and the generated code is exactly equivalent, only
+                        less cluttered.
+  --try-harder          Tries some workarounds against common obfuscation
+                        methods. This is a lot slower.
 
 ```
-[PLEX]
-anime_section = Anime
-authentication_method = myplex
 
-# MyPlex
-server = Sadala
-myplex_user = John # has to be the Plex admin user acount
-myplex_password = Doe
-
-# if you enable home_user_sync it will only sync against that specific Plex home user, it requires the full url of your Plex server just like with the Direct IP method
-# home_username is the actual Plex home username and not their e-mail address, this is also case sensitive
-
-home_user_sync = True
-home_username = Megumin # the home user account you want to sync with and can not be the admin user
-home_server_base_url = http://127.0.0.1:32400
-```
-
-##### Direct Plex authentication (advanced users)
-
-The direct authentication method is for users that don't want to use Plex its online authentication system however is more complex to setup, for this you need to find your token manually:
-
-https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
-
-Afterwards can enter your full Plex site url and above authentication token, for example:
-
-```
-[PLEX]
-anime_section = Anime
-authentication_method = direct
-
-base_url = http://192.168.1.234:32400
-token = abcdef123456789
-```
-
-##### Section configuration
-
-In the settings file enter your Plex library / section name containing your Anime, for example:
-
-```
-[PLEX]
-anime_section = Anime
-```
-
-Multiple libraries are now supported and you separate them by using the pipeline ("|") character like so:
-
-```
-[PLEX]
-anime_section = Anime|Anime2
-```
-
-#### AniList
-
-For AniList you need get a so called `access_token` which you can retrieve via this link and if not logged in will ask you to do so:
-
-https://anilist.co/api/v2/oauth/authorize?client_id=1549&response_type=token
-
-Make sure to copy the entire key as it is pretty long and paste that in the settings file under 'access_token', no need to enclose it just paste it as-is.
-
-Afterwards make sure to also fill in your AniList username as well which is your actual username not your e-mail address like for example:
-
-```
-[ANILIST]
-username = GoblinSlayer
-access_token = iLikeToastyGoblins.
-```
-
-### Step 4 - Install requirements
-
-Install the addtional requirements using the Python package installer (pip) from within the project folder:
-
-`pip install -r requirements.txt`
-
-
-### Step 5 - Start syncing
-
-Now that configuration is finished and requirements have been installed we can finally start the sync script:
-
-`python PlexAniSync.py`
-
-Depending on library size and server can take a few minutes to finish, for scheduled syncing you can create a cronjob or windows task which runs it every 30 minutes for instance.
-
-
-## Optional features
-
-### Custom anime mapping
-
-You can manually link a Plex title and season to an AniList ID, to do so:
-
-- From the project folder copy `custom_mappings.yaml.example` to `custom_mappings.yaml`
-- Add new entries there in the following format:
-
-```yaml
-  - title: "Plex title for series"
-    seasons:
-      - season: Plex season
-        anilist-id: AniList series ID
-      - season: Plex season
-        anilist-id: AniList series ID
-```
-
-If the Plex season should be split into 2 seasons, add an optional `start` parameter to each season like this:
-
-```yaml
-  - title: "Re:ZERO -Starting Life in Another World-"
-    seasons:
-      - season: 2
-        anilist-id: 108632
-        start: 1
-      - season: 2
-        anilist-id: 119661
-        start: 14
-```
-
-Episodes 1-13 will be mapped to Re:Zero 2nd Season Part 1, episodes 14 and higher will be mapped to Re:Zero 2nd Season Part 2.
-
-- To find out the AniList ID you can visit the series page and copy it from the site url, like for example My Shield hero has ID 99263:
-
-https://anilist.co/anime/99263/Tate-no-Yuusha-no-Nariagari
-
-- You can remove any existing entries from the example file as they are purely instructional
-- Upon startup it will check if the file is a valid YAML file. The most likely reason it's not is because you didn't put quotes around an anime title with special characters (e.g. ":") in it.
-
-### Custom settings file location
-
-If you want to load a different settings.in file you can do so by supplying it in the first argument like so:
-
-`python PlexAniSync.py settings_alternate.ini`
-
-In case of the Tautulli sync helper script you can do as well, first argument will then be settings filename and second will be the series name like so:
-
-`python TautulliSyncHelper.py  settings_alternate.ini <plex show name>`
-
-### Make Plex watched episode count take priority
-
-By default if AniList episode count watched is higher than that of Plex it will skip over, this can be overriden with the setting `plex_episode_count_priority`
-
-When set to True it will update the AniList entry if Plex watched episode count is higher than 0 and will not take into account the AniList watched episode count even if that is higher.
-
-**Use this with caution as normally this isn't required and only meant for certain use cases.**
-
-### Skip list updating for testing
-
-In your settings file there's a setting called `skip_list_update` which you can set to True or False, if set to True it will **NOT** update your AniList which is useful if you want to do a test run to check if everything lines up properly.
-
-### Tautulli Sync Helper script
-
-In the project folder you will find `TautulliSyncHelper.py` which you can use to sync a single Plex show to AniList for use in Tautulli script notifcations (trigger on playback stop).
-
-Usage is as follows:
-
-`python TautulliSyncHelper.py <plex show name>`
-
-Depending on your OS make sure to place the show name between single or double quotes, for more information see the wiki page:
-
-https://github.com/RickDB/PlexAniSync/wiki/Tautulli-sync-script
-
-## Docker
-
-There's also a Docker version based on [Thundernerd's](https://github.com/Thundernerd) which you can find here:
-
-[Docker](https://hub.docker.com/r/rickdb/plexanisync)
-
-If you are still on the Thundernerd docker image recommend switching to this one as it will be kept in sync with latest PlexAniSync changes.
-
-## Requirements
-
-[Python 3.7 or higher](https://www.python.org/)
-
-## Support
-
-Support thread is located on AniList:
-
-https://anilist.co/forum/thread/6443
-
-Optionally also on Plex forums but less active there:
-
-https://forums.plex.tv/t/plexanisync-sync-your-plex-library-to-anilist/365826
-
-## Planned
-
-Currently planned for future releases:
-
-- [ ] XREF title matching based on HAMA which uses custom lists and AniDB
-- [ ] Add setting to skip updating shows with dropped state on user list
-- [ ] Ignore anime list support (based on content rating and / or title)
-- [ ] Improve error handling
-
-## Credits
-
-[Python-PlexAPI](https://github.com/pkkid/python-plexapi)
+You can give several .rpyc files on the command line. Each script will be
+decompiled to a corresponding .rpy on the same directory. Additionally, you can
+pass directories. All .rpyc files in these directories or their subdirectories
+will be decompiled. By default, the program will not overwrite existing files,
+use -c to do that.
+
+This script will try to disassemble all AST nodes. In the case it encounters an
+unknown node type, which may be caused by an update to Ren'Py somewhere in the
+future, a warning will be printed and a placeholder inserted in the script when
+it finds a node it doesn't know how to handle. If you encounter this, please
+open an issue to alert us of the problem.
+
+For the script to run correctly it is required for the unrpyc.py file to be in
+the same directory as the modules directory.
+
+### Game injection
+
+The tool can be injected directly into a running game by placing either the
+`un.rpyc` file or the `bytecode.rpyb` file from the most recent release into
+the `game` directory inside a Ren'py game. When the game is then ran the tool
+will automatically extract and decompile all game script files into the `game`
+directory. The tool writes logs to the file `unrpyc.log.txt`.
+
+### Library usage
+
+You can import the module from python and call
+unrpyc.decompile_rpyc(filename, ...) directly.
+
+## Notes on support
+
+The Ren'py engine has changed a lot through the years. While this tool tries to
+support all available Ren'py versions since the creation of this tool, we do not
+actively test it against every engine release. Furthermore the engine does
+not have perfect backwards compatibility itself, so issues can occur if you try
+to run decompiled files with different engine releases. Most attention is given
+to recent engine versions so if you encounter an issues with older games, please
+report it.
+
+Supported:
+* renpy version 6 and 7 (current)
+* Windows, OSX and Linux
+
+## Issue reports
+
+As Ren'py is being continuously developed itself it often occurs that this tool might
+break on newer engine releases. This is most likely due to us not being
+aware of these features existing in the first place. To get this fixed
+you can make an issue report to this repository. However, we work on this tool
+in our free time and therefore we strongly request performing the following steps when
+making an issue report.
+
+### Before making an issue report:
+
+If you are making an issue report because decompilation errors out, please do the following.
+If there's simply an error in the decompiled file, you can skip these steps.
+
+1. Test your .rpyc files with the command line tool and both game injection methods. Please
+   do this directly, do not use wrapper tools incorporating unrpyc for the report.
+2. Run the command line tool with the anti-obfuscation option `--try-harder`.
+
+### When making an issue report:
+
+1. List the used version of unrpyc and the version of ren'py used to create the .rpyc file
+   you're trying to decompile (and if applicable, what game).
+2. Describe exactly what you're trying to do, and what the issue is (is it not decompiling
+   at all, is there an omission in the decompiled file, or is the decompiled file invalid).
+3. Attach any relevant output produced by the tool (full command line output is preferred,
+   if output is generated attach that as well).
+4. Attach the .rpyc file that is failing to decompile properly.
+
+Please perform all these steps, and write your issue report in legible English. Otherwise
+it is likely that your issue report will just receive a reminder to follow these steps.
+
+## Feature and pull requests
+
+Feature and pull requests are welcome. Feature requests will be handled whenever we feel
+like it, so if you really want a feature in the tool a pull request is usually the right
+way to go. Please do your best to conform to the style used by the rest of the code base
+and only affect what's absolutely necessary, this keeps the process smooth.
+
+### Notes on deobfuscation
+
+Recently a lot of modifications of Ren'py have turned up that slightly alter the Ren'py
+file format to block this tool from working. The tool now includes a basic framework
+for deobfuscation, but feature requests to create deobfuscation support for specific
+games are not likely to get a response from us as this is essentially just an arms race,
+and it's trivial to figure out a way to obfuscate the file that blocks anything that is
+supported right now. If you make a pull request with it we'll happily put it in mainline
+or a game-specific branch depending on how many games it affects, but we have little
+motivation ourselves to put time in this arms race.
+
+https://github.com/CensoredUsername/unrpyc
