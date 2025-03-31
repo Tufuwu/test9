@@ -1,3 +1,0 @@
-#ifndef SFTPSERVER_PATH
-#define SFTPSERVER_PATH "/usr/bin/sftp-server"
-#endif
