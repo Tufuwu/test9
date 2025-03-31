@@ -1,41 +1,34 @@
-name: CI
+name: Python package
 
-on:
-  workflow_dispatch:
-  pull_request:
-  push:
-    branches:
-      - main
-
-permissions:
-  contents: read
+on: [pull_request]
 
 jobs:
-  test:
-    name: Test
+  build:
+
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
-        os: [ubuntu-latest, macos-latest]
 
-    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout demo
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@98f2ad02fd48d057ee3b4d4f66525b231c3e52b6
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-          cache-dependency-path: 'requirements.txt'
-
-      - name: Install dependencies
-        run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -r requirements.txt
-
-      - name: Run demo
-        run: |
-          python3 run_demo_md.py
+    - uses: actions/checkout@v2
+    
+    - name: Setup BATS
+      uses: mig4/setup-bats@v1
+      with:
+        bats-version: 1.2.1
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        pip install -U setuptools>=40.1
+        pip install .
+    
+    - name: Test with bats
+      run: |
+        ./scanpy-scripts-tests.bats
+ 

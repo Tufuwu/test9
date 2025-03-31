@@ -1,1 +1,9 @@
-*.swp
+/.idea/
+/build/
+/dist/
+/*.egg-info/
+/post_install_tests/
+*cache*/
+*.pyc
+/.*history
+/.*swp
