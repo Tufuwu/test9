@@ -1,13 +1,13 @@
 {
   "extends": [
-    "config:base",
-    ":assignee(arska)"
+    "config:base"
   ],
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true
-    }
-  ]
-  
+  "baseBranches": ["master"],
+  "pip_setup": {
+      "enabled": true
+  },
+  "poetry": {
+      "enabled": true
+  },
+  "rebaseWhen": "behind-base-branch"
 }

@@ -1,63 +1,226 @@
-# Daikin Airconditioner/Air source heat pump data/control through Wi-Fi API
+# TradingBot
+![Build Status](https://github.com/ilcardella/TradingBot/workflows/TradingBot%20CI/badge.svg) ![Documentation Status](https://readthedocs.org/projects/tradingbot/badge/?version=latest) ![Docker Pulls](https://img.shields.io/docker/pulls/ilcardella/tradingbot)
 
-[![Build Status](https://travis-ci.com/arska/python-daikinapi.svg?branch=master)](https://travis-ci.com/arska/python-daikinapi)
+This is an attempt to create an autonomous market trading script using the IG
+REST API and any other available data source for market prices.
 
-## Compatibility
+TradingBot is meant to be a "forever running" process that keeps
+analysing the markets taking actions whether some conditions are met.
+It is halfway from an academic project and a real useful piece of
+software, I guess I will see how it goes :)
 
-Tested with Daikin BRP069B41 Wi-Fi Interface and Daikin Emura FTXG-LS indoor unit
+The main goal of this project is to provide the capability to
+write a custom trading strategy with the minimum effort.
+TradingBot handles all the boring stuff.
 
-Should be compatible with (https://www.daikin.eu/en_us/product-group/control-systems/daikin-online-controller/connectable-units.html):
-* BRP069A41/BRP069B41
-  * FTXM-M
-  * CTXM-M
-  * ATXM-M
-  * FTXTM-M
-  * BRP069A45
-  * FTXG-LS
-  * FTXG-LW
-  * FTXJ-MW (built-in)
-  * FTXJ-MS (built-in)
-* BRP069A42/BRP069B42
-  * FTXZ-N
-  * FTXS35-42-50K
-  * FTXS60-71G
-  * FTX50-60-71GV
-  * FTXLS-K3
-  * FTXLS-K3
-  * FVXS-F
-  * FLXS-B
-  * FLXS-B9
-  * ATXS35-50K
-  * FVXM-F
-* BRP069A43/BRP069B43
-  * CTXS15-35K
-  * FTXS20-25K
-  * FTX20-25-35J3
-  * FTXL-JV
-  * ATXS20-25K
-  * ATX-J3
-  * ATXL-JV
+All the credits for the `WeightedAvgPeak` strategy goes to GitHub user @tg12.
 
-Based on exisiting reverse-engineering work:
-* https://github.com/ael-code/daikin-control
-* https://github.com/ael-code/daikin-aricon-pylib/
-* https://github.com/ael-code/daikin-control/wiki/API-System
+## Dependencies
 
-## Usage
+- Python 3.6+
+- Poetry (only for development)
+- Docker (optional)
 
-see example.py for runnable example
+View file `pyproject.toml` for the full list of required python packages.
 
-```python
-from daikinapi import Daikin
+## Install
 
-API = Daikin("192.168.1.3")
-print(API)
-print(API.target_temperature)
+First if you have not done yet, install python:
+```
+sudo apt-get update
+sudo apt-get install python3
 ```
 
-produces:
+Clone this repo and install `TradingBot` by running the following command from
+the repository root folder
 ```
-Daikin(host=192.168.1.3,name=mydevice,mac=D0C5D304A0B1)
-21.0
+make install-system
 ```
 
+## Setup
+
+Login to your IG Dashboard
+
+- Obtain an API KEY from the settings panel
+- If using the demo account, create demo credentials
+- Take note of your spread betting account ID (demo or real)
+- (Optional) Visit AlphaVantage website: `https://www.alphavantage.co` and request a free api key
+- Insert these info in a file called `.credentials`
+
+This must be in json format
+```json
+{
+    "username": "username",
+    "password": "password",
+    "api_key": "apikey",
+    "account_id": "accountId",
+    "av_api_key": "apiKey"
+}
+```
+- Copy the `.credentials` file into the `${HOME}/.TradingBot/config` folder
+- Revoke permissions to read the file
+```
+cd config
+sudo chmod 600 ${HOME}/.TradingBot/config/.credentials
+```
+
+### Market source
+
+There are different ways to define which markets to analyse with TradinbgBot. You can select your preferred option in the `config.json` file with the `market_source` parameter:
+
+- **Local file**
+
+You can create a file `epic_ids.txt` containg IG epics of the companies you want to monitor.
+You need to copy this file into the `${HOME}/.TradingBot/data` folder.
+
+- **Watchlist**
+
+You can use an IG watchlist, TradingBot will analyse every market added to the selected watchlist
+
+- **API**
+
+TradingBot navigates the IG markets dynamically using the available API call to fetch epic ids.
+
+### Configuration file
+
+The `config.json` file is in the `config` folder and it contains several configurable parameter to personalise
+how TradingBot work. It is important to setup this file appropriately in order to avoid unexpected behaviours.
+
+## Start TradingBot
+
+You can start TradingBot with
+```
+trading_bot
+```
+
+You can start it in detached mode letting it run in the background with
+```
+nohup trading_bot >/dev/null 2>&1 &
+```
+
+### Close all the open positions
+
+```
+trading_bot --close-positions [-c]
+```
+
+## Stop TradingBot
+
+To stop a TradingBot instance running in the background
+```
+ps -ef | grep trading_bot | xargs kill -9
+```
+
+## Uninstall
+You can use `pip` to uninstall `TradingBot`:
+```
+sudo pip3 uninstall TradingBot
+```
+
+## Development
+
+The `Makefile` is the entrypoint for any development action.
+`Poetry` handles the dependency management and the `pyproject.toml` contains the required
+python packages.
+
+Install [poetry](https://python-poetry.org/docs/) and create the virtual environment:
+```
+cd /path/to/repository
+make install
+```
+
+## Test
+
+You can run the test from the workspace with:
+```
+make test
+```
+
+## Documentation
+
+The Sphinx documentation contains further details about each TradingBot module
+with source code documentation of each class member.
+Explanation is provided regarding how to create your own Strategy and how to integrate
+it with the system.
+
+Read the documentation at:
+
+https://tradingbot.readthedocs.io
+
+You can build it locally with:
+```
+make docs
+```
+
+The generated html files will be in `docs/_build/html`.
+
+## Automate
+
+**NOTE**: TradingBot monitors the market opening hours and suspend the trading when the market is closed. Generally you should NOT need a cron job!
+
+You can set up the crontab job to run and kill TradinBot at specific times.
+The only configuration required is to edit the crontab file adding the preferred schedule:
+```
+crontab -e
+```
+As an example this will start TradingBot at 8:00 in the morning and will stop it at 16:35 in the afternoon, every week day (Mon to Fri):
+```shell
+00 08 * * 1-5 trading_bot
+35 16 * * 1-5 kill -9 $(ps | grep trading_bot | grep -v grep | awk '{ print $1 }')
+```
+NOTE: Remember to set the correct timezone in your machine!
+
+## Docker
+
+You can run TradingBot in a Docker container (https://docs.docker.com/).
+
+The Docker image is configured with a default TradingBot configuration and it
+does not have any `.credentials` files.
+**You must mount these files when running the Docker container**
+
+### Pull
+
+You can pull the Docker image directly from the Docker Hub.
+Latest version:
+```
+docker pull ilcardella/tradingbot:latest
+```
+Tagged version:
+```
+docker pull ilcardella/tradingbot:v1.2.0
+```
+
+### Build
+You can build the Docker image yourself using the `Dockerfile` in the `docker` folder:
+```
+cd /path/to/repo
+make docker
+```
+
+### Run
+As mentioned above, it's important that you configure TradingBot before starting it.
+Once the image is available you can run `TradingBot` in a Docker container mounting the configuration files:
+```
+docker run -d \
+    -v /path/to/config.json:/.TradingBot/config/config.json \
+    -v /path/to/.credentials:/.TradingBot/config/.credentials \
+    tradingbot:latest
+```
+
+You can also mount the log folder to store the logs on the host adding `-v /host/folder:/.TradingBot/log`
+
+
+## Contributing
+
+Any contribution or suggestion is welcome, please follow the suggested workflow.
+
+### Pull Requests
+
+To add a new feature or to resolve a bug, create a feature branch from the
+`master` branch.
+
+Commit your changes and if possible add unit/integration test cases.
+Eventually push your branch and create a Pull Request against `master`.
+
+If you instead find problems or you have ideas and suggestions for future
+improvements, please open an Issue. Thanks for the support!
