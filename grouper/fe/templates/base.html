@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <title>Grouper{% block subtitle %}{% endblock %}</title>
+
+        {% for resource in external_css %}
+        <link href="{{cdnjs_prefix}}{{resource.url}}"
+              integrity="{{resource.integrity}}"
+              crossorigin="anonymous"
+              rel="stylesheet"
+              media="screen">
+        {% endfor %}
+        {% for resource in internal_css %}
+        <link href="{{ static_url(resource.url) }}"
+              integrity="{{resource.integrity}}"
+              rel="stylesheet"
+              media="screen">
+        {% endfor %}
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    </head>
+
+    <body>
+        <div class="container">
+            <div id="head-nav" class="navbar navbar-default navbar-fixed-top">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="fa fa-gear"></span>
+                    </button>
+                    <a class="navbar-brand" href="/" class="{{is_active('/')}}"><span>GROUPER.{{deployment_name}}</span></a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="{{is_active('/groups')}}"><a href="/groups">Groups</a></li>
+                        <li class="{{is_active('/users')}}"><a href="/users">Users</a></li>
+                        <li class="{{is_active('/permissions')}}"><a href="/permissions">Permissions</a></li>
+                        <li class="{{is_active('/help')}}"><a href="/help">Help</a></li>
+                        {% if perf_trace_uuid %}
+                        <li><a href="/debug/profile/{{ perf_trace_uuid }}">{{ perf_trace_uuid }}</a></li>
+                        {% endif %}
+                    </ul>
+
+                    <form class="navbar-form navbar-right" role="search" action="/search" method="get">
+                        <div class="input-group search-input">
+                            <input type="text" class="form-control" placeholder="Search" name="query" id="query" value="{{search_query}}">
+                            <div class="input-group-btn">
+                                <button id="search" class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="col-md-10 col-md-offset-1 container-wrapper">
+                <div class="row"><div class="col-md-12">
+                    <div class="alerts">
+                        {% for alert in alerts %}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="alert alert-{{alert.severity}} alert-dismissable">
+                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                        <strong>{{alert.heading}}</strong> {{alert.message}}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div></div>
+                <div class="row"><div class="col-md-12">
+                    <div class="content">
+                        <div class="row"><div class="col-md-12">
+                            <div class="header">
+                                <h2 id="heading">{% block heading %}{% endblock %}</h2>
+                                <h3><small id="subheading">{% block subheading %}{% endblock %}</small></h3>
+                                <div class="buttons">
+                                    {% block headingbuttons %}{% endblock %}
+                                </div>
+                            </div>
+                        </div></div>
+                        <div class="row"><div id="content" class="col-md-12">
+                            {% block content %}{% endblock %}
+                        </div></div>
+                    </div>
+                </div></div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container">
+                <p class="text-muted text-center">
+                    © 2014-2016 Dropbox, Inc. This project is free software, <a href="https://github.com/dropbox/grouper">get the source</a>.
+                </p>
+          </div>
+        </footer>
+
+        {% for resource in external_js %}
+        <script src="{{cdnjs_prefix}}{{resource.url}}"
+                integrity="{{resource.integrity}}"
+                crossorigin="anonymous"></script>
+        {% endfor %}
+        {% for resource in internal_js %}
+        <script src="{{ static_url(resource.url) }}" integrity="{{resource.integrity}}"></script>
+        {% endfor %}
+    </body>
+</html>
+

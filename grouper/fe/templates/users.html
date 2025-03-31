@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from 'macros/ui.html' import account, paginator, dropdown with context %}
+
+{% block subtitle %} users{% endblock %}
+
+{% block heading %}
+    {% if not enabled %}
+      Disabled
+    {% endif %}
+    {% if service %}
+      Service Accounts
+    {% else %}
+      Users
+    {% endif %}
+{% endblock %}
+
+{% block subheading %}
+    {{total}} user{% if total > 1 %}s{% endif %}
+{% endblock %}
+
+{% block headingbuttons %}
+    {{ dropdown("limit", limit, [100, 250, 500, 1000]) }}
+    {{ paginator(offset, limit, total) }}
+    {% if enabled %}
+        <a class="btn btn-default show-disabled-users"
+           href="/users?limit={{ limit }}&enabled=0&service={{ service|int }}">
+            <i class="fa"></i> Show disabled users
+        </a>
+    {% else %}
+        <a class="btn btn-default show-enabled-users"
+           href="/users?limit={{ limit }}&enabled=1&service={{ service|int }}">
+            <i class="fa"></i> Show enabled users
+        </a>
+    {% endif %}
+    {% if service %}
+        <a class="btn btn-default show-normal-users"
+           href="/users?limit={{ limit }}&enabled={{ enabled|int }}&service=0">
+            <i class="fa"></i> Show normal users
+        </a>
+    {% else %}
+        <a class="btn btn-default show-service-accounts"
+           href="/users?limit={{ limit }}&enabled={{ enabled|int }}&service=1">
+            <i class="fa"></i> Show service accounts
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-10 col-md-offset-1">
+        <table class="table table-elist">
+            <thead>
+                <tr>
+                    <th class="col-sm-2">Username</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr class="user-row">
+                    <td class="user-name">{{ account(user) }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
