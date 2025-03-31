@@ -1,17 +1,33 @@
-#!/usr/bin/env python2
 from setuptools import setup
 
-def readme():
-    with open('README.md') as f:
-        return f.read()
+with open('README.md') as readme_file:
+    readme = readme_file.read()
+
 setup(
-    name='unrpyc',
-    version='0.1',
-    description='Tool to decompile Ren\'Py compiled .rpyc script files.',
-    long_description=readme(),
-    url='https://github.com/CensoredUsername/unrpyc',
-    py_modules=['unrpyc', '.deobfuscate'],
-    packages=['decompiler'],
-    scripts=['unrpyc.py'],
+    name='ptf',
+    version='0.9.1',
+    description='PTF is a Python based dataplane test framework.',
+    long_description=readme,
+    author='Antonin Bas',
+    author_email='antonin@barefootnetworks.com',
+    url='https://github.com/p4lang/ptf',
+    packages=[
+        'ptf', 'ptf.platforms',
+    ],
+    package_dir={'': 'src'},
+    scripts=[
+        'ptf',
+        'ptf_nn/ptf_nn_agent.py'
+    ],
     zip_safe=False,
+    license='Apache License',
+    keywords='ptf',
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: Apache License',
+        'Natural Language :: English',
+        "Programming Language :: Python :: 2",
+        'Programming Language :: Python :: 2.7',
+    ]
 )

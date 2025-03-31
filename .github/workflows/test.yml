@@ -1,33 +1,47 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+# Config file for automatic testing using github actions
+#
 
-name: Test build and run tests
+name: Unit_Tests
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main ]
 
 jobs:
-  tests-py2:
-    name: Runs tests that require python 2
+  test:
     runs-on: ubuntu-latest
-    container:
-      image: python:3.9.18-buster
-
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v2
       with:
         submodules: recursive
-    # - name: Set up Python 2.7
-    #   uses: actions/setup-python@v2
-    #   with:
-    #     python-version: "3.9"
-    - name: Test by decompiling a script and building un.rpyc
+    - name: Dependencies
       run: |
-        ./unrpyc.py --clobber testcases/script.rpyc
-        diff -u testcases/script.orig.rpy testcases/script.rpy
-        cd un.rpyc;
-        ./compile.py -p 1
-        cd ..
+        sudo apt-get install python-dev
+        sudo apt-get install python-pip
+        sudo apt-get install cmake
+        sudo apt-get install libffi-dev
+        sudo apt-get install python3-dev
+        sudo apt-get install python3-pip
+        sudo apt-get install ethtool
+        sudo apt-get remove python-scapy
+        git clone https://github.com/p4lang/scapy-vxlan.git && cd scapy-vxlan && sudo python setup.py install && cd ..
+        bash CI/travis/install-nanomsg.sh
+        sudo ldconfig
+        bash CI/travis/install-nnpy.sh
+        sudo pip3 install nose2
+
+    - name: Install
+      run: |
+        sudo python setup.py install
+
+    - name: Before_script
+      run: |
+        cd ptf_nn/; sudo ./veth_setup.sh; cd ..
+
+    - name: Script
+      run: |
+        python CI/travis/check-nnpy.py
+        ./CI/travis/run_tests.sh
+        sudo python3 /usr/local/bin/nose2 utests.tests
