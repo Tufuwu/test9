@@ -1,27 +1,47 @@
-name: build
+name: Test
+
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
+  push:
+  schedule:
+    - cron: '0 6 * * *'
+
 jobs:
-  build:
-    runs-on: '${{ matrix.os }}'
+  test:
+    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
         python-version: ["3.9", "3.10"]
+        toxenv: [py]
+        include:
+          - python-version: '3.9'
+            toxenv: typing
     steps:
-      - name: 'Set up Python ${{ matrix.python-version }}'
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '${{ matrix.python-version }}'
-      - uses: actions/checkout@v2
-      - run: pip install -r requirements.txt
-      - run: pip install pytest pytest-cov
-      - run: pip install coverage
-      - run: pytest --cov=./
-      - run: 'bash <(curl -s https://codecov.io/bash)'
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel
+          python -m pip install --upgrade --upgrade-strategy=eager coverage tox
+
+      - name: Run tests
+        run: tox -e ${{ matrix.toxenv }}
+
+      - name: Generate XML coverage report
+        if: matrix.toxenv == 'py'
+        run: coverage xml
+
+      - name: Upload coverage to Codecov
+        if: matrix.toxenv == 'py'
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: false
+
+# vim:set et sts=2:
