@@ -1,0 +1,15 @@
+# Requirements file for tests on Travis
+
+django>=2
+
+psycopg2-binary
+mysqlclient
+django-redis
+python-memcached
+pylibmc
+
+pytz
+Jinja2
+
+django-debug-toolbar
+beautifulsoup4
