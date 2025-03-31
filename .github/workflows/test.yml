@@ -1,34 +1,33 @@
----
+# This workflows will upload a Python Package using Twine when a release is created
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+
+name: Upload Python Package
+
 on:
-  push: ~
-  pull_request: ~
+  release:
+    types: [created]
 
 jobs:
-  tests:
-    name: Testing with ${{ matrix.python-version }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: ["3.9", "3.10"]
-        include:
-        - os: windows-latest
-          python-version: 'py-3.9'
-          experimental: true
-        - os: ubuntu-latest
-          python-version: 'pypy-3.9'
-          experimental: true
+  deploy:
+
+    runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Setup
+        submodules: true
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
       run: |
-        pip install pipenv
-        pipenv install --dev
-    - name: Run tests
-      continue-on-error: ${{ matrix.eperimental }}
-      run: pipenv run make test          
-
+        python -m pip install --upgrade pip
+        pip install setuptools wheel twine
+    - name: Build and publish
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        python setup.py sdist bdist_wheel
+        twine upload dist/*

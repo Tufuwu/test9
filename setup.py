@@ -1,50 +1,40 @@
-#!/usr/bin/env python3
-from os import popen
-
-
-from setuptools import setup
-
-
-with open("./README.rst") as readme:
-    readme_text = readme.read()
-
-with popen(
-        "git describe --tags --dirty --match 'v*' "
-        "| sed -e 's/^v//' -e 's/-/_/g' -e 's/_/+/1' -e 's/_/./g'",
-        "r"
-) as git_output:
-    git_version_string = git_output.readline()[:-1]  # truncate the \n
-
-    # update version file
-    with open("tpl/__version__.py", "w") as v:
-        v.write(
-            "__version__ = '{version_string}'\n".format(
-                version_string=git_version_string
-            )
-        )
-
+from setuptools import setup, find_packages
 
 setup(
-    name='tpl',
-    version=git_version_string,
-    author='Simon Lutz Brüggen',
-    author_email='tpl@m3t0r.de',
-    description="Render templates with data from various sources",
-    url="https://github.com/m3t0r/tpl",
-    long_description=readme_text,
-    python_requires=">3.5",
-    install_requires=["pyyaml>=3.13", "jinja2>=2.10.1"],
-    entry_points={
-        'console_scripts': ["tpl=tpl.__main__:_argv_wrapper"]
+    name="keithleygui",
+    version="1.1.7",
+    description="A GUI for the Keithley 2600 series",
+    author="Sam Schott",
+    author_email="ss2151@cam.ac.uk",
+    url="https://github.com/oe-fet/keithleygui.git",
+    license="MIT",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    packages=find_packages(),
+    package_data={
+        "keithleygui": ["*.ui", "*/*.ui"],
     },
-    packages=["tpl"],
+    entry_points={
+        "console_scripts": ["keithleygui=keithleygui.main:run"],
+    },
+    python_requires=">=3.6",
+    install_requires=[
+        "keithley2600>=1.2.1",
+        "numpy",
+        "pyvisa",
+        "pyqtgraph>=0.11.0",
+        "PyQt5",
+        "repr",
+        "setuptools",
+    ],
+    zip_safe=False,
+    keywords="keithleygui",
     classifiers=[
-        "Development Status :: 4 - Beta",
-        "Environment :: Console",
-        "Operating System :: Unix",
-        "Programming Language :: Python :: 3",
-        "Intended Audience :: Developers",
-        "Intended Audience :: System Administrators",
         "License :: OSI Approved :: MIT License",
-    ]
+        "Operating System :: Unix",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+    ],
 )
