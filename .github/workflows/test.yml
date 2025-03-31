@@ -1,41 +1,79 @@
-name: ci
+name: Build
 
 on: [push, pull_request]
 
 jobs:
-  build:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Setup PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$PWD:$PWD/spotify_lyric" >> $GITHUB_ENV
+      - name: Run test
+        working-directory: tests
+        run: python -m unittest discover . "*_test.py"
+      - name: Build .app
+        run: pyinstaller SpotifyLyrics.pyw -F -w -i icon.icns --add-data "icon.png:."
+      - name: Upload .app
+        uses: actions/upload-artifact@v4.1.4
+        with:
+          name: macos
+          path: dist/SpotifyLyrics.app
+  linux:
     runs-on: ubuntu-latest
     steps:
-      # Checkout Repository
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      # Install Tools
-      - name: Install Tools
-        run: |
-          sudo apt-get install wget build-essential python3
-          pip3 install setuptools
-          pip3 install requests
-
-      # Install (n)Migen / LiteX / Cores
-      - name: Install LiteX
-        run: |
-          wget https://raw.githubusercontent.com/enjoy-digital/litex/main/litex_setup.py
-          python3 litex_setup.py init install --user
-
-      # Install RISC-V GCC
-      - name: Install RISC-V GCC
-        run: |
-          wget https://raw.githubusercontent.com/enjoy-digital/litex/main/litex_setup.py
-          python3 litex_setup.py gcc
-          ls $PWD/../riscv64-*/bin/
-          export PATH=$PATH:$(echo $PWD/../riscv64-*/bin/)
-          riscv64-unknown-elf-gcc --version
-
-      # Install Project
-      - name: Install Project
-        run: python3 setup.py develop --user
-
-      # Test
-      - name: Run Tests
-        run: python3 setup.py test
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install dbus
+        run: sudo apt install libdbus-1-dev libdbus-glib-1-dev --yes
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Setup PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$PWD:$PWD/spotify_lyric" >> $GITHUB_ENV
+      - name: Run test
+        working-directory: tests
+        run: python -m unittest discover . "*_test.py"
+      - name: Build executable
+        run: pyinstaller SpotifyLyrics.pyw -F -w -i icon.ico --add-data "icon.png:."
+      - name: Upload executable
+        uses: actions/upload-artifact@v4.1.4
+        with:
+          name: linux
+          path: dist/SpotifyLyrics
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Setup PYTHONPATH
+        run: echo "PYTHONPATH=${env:PYTHONPATH};${env:GITHUB_WORKSPACE};${env:GITHUB_WORKSPACE}\spotify_lyric" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf-8 -Append
+      - name: Run test
+        working-directory: tests
+        run: python -m unittest discover . "*_test.py"
+      - name: Build .exe
+        run: pyinstaller SpotifyLyrics.pyw -F -w -i icon.ico --add-data "icon.png;."
+      - name: Upload .exe
+        uses: actions/upload-artifact@v4.1.4
+        with:
+          name: windows
+          path: dist/SpotifyLyrics.exe

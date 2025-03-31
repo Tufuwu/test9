@@ -1,116 +1,90 @@
+# Spotify Lyrics
+[![Build Status](https://travis-ci.com/SimonIT/spotifylyrics.svg?branch=master)](https://travis-ci.com/SimonIT/spotifylyrics)
+[![Current Release](https://img.shields.io/github/release/SimonIT/spotifylyrics.svg)](https://github.com/SimonIT/spotifylyrics/releases)
+[![License](https://img.shields.io/github/license/SimonIT/spotifylyrics.svg)](https://github.com/SimonIT/spotifylyrics/blob/master/LICENSE)
+[![GitHub All Releases](https://img.shields.io/github/downloads/SimonIT/spotifylyrics/total)](https://github.com/SimonIT/spotifylyrics/releases)
+
+Fetches and displays lyrics to currently playing song in the Spotify desktop client.
+
+
+The lyrics are fetched from these sites:
+
+rentanadviser.com (synchronized)
+
+megalobiz.com (synchronized)
+
+syair.info (synchronized)
+
+musixmatch.com
+
+songmeanings.com
+
+songlyrics.com
+
+genius.com
+
+versuri.ro
+
+AZLyrics.com
+
+# How to
+
+You can grab the latest release in the [release section](https://github.com/SimonIT/spotifylyrics/releases).
+
+## Windows
+
+Download the .exe file.
+
+Just double click and start playing songs in spotify.
+
+It is possible that a warning of windows smartscreen appears. It's because the exe is unsigned (see [#22](https://github.com/SimonIT/spotifylyrics/issues/22)). You can allow the program to open by clicking on "More info" and "Run anyway".
+
+If you get an error about api-ms-win-crt-runtime-l1-1-0.dll missing, you need this:
+
+https://www.microsoft.com/en-us/download/details.aspx?id=48145
+
+If the window opens and closes immidiatly, feel free to help fxing the problem in [#21](https://github.com/SimonIT/spotifylyrics/issues/21).
+
+## Linux
+
+Download the file without any file ending.
+
+Make it executable via terminal with `chmod +x SpotifyLyrics` or via you file manager.
+
+Now you can double click the executable and start playing songs in spotify.
+
+## MacOS
+
+Download the .app.zip file.
+
+Extract the zip so you got a SpotifyLyrics.app directory.
+
+Make a right click on the SpotifyLyrics.app. Click on open and and you can bypass the warning. The program should open and you can play your songs in spotify.
+
+# Running from source
+If you want to run from source you need:
+
+* Python 3.6 (probably any version greater than Python 3.6)
+* pip install -r requirements.txt
+
+## Ubuntu/Debian example:
 ```
-                                 __   _ __      ___  ___  ___   __  ___
-                                / /  (_) /____ / _ \/ _ \/ _ | /  |/  /
-                               / /__/ / __/ -_) // / , _/ __ |/ /|_/ /
-                              /____/_/\__/\__/____/_/|_/_/ |_/_/  /_/
-
-                                   Copyright 2015-2020 / EnjoyDigital
-                               A small footprint and configurable DRAM core
-                                        powered by Migen & LiteX
-```
-
-[![](https://github.com/enjoy-digital/litedram/workflows/ci/badge.svg)](https://github.com/enjoy-digital/litedram/actions) ![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)
-
-
-[> Intro
---------
-LiteDRAM provides a small footprint and configurable DRAM core.
-
-LiteDRAM is part of LiteX libraries whose aims are to lower entry level of
-complex FPGA cores by providing simple, elegant and efficient implementations
-of components used in today's SoC such as Ethernet, SATA, PCIe, SDRAM Controller...
-
-Using Migen to describe the HDL allows the core to be highly and easily configurable.
-
-LiteDRAM can be used as LiteX library or can be integrated with your standard
-design flow by generating the verilog rtl that you will use as a standard core.
-
-[> Features
------------
-PHY:
-  - Generic SDRAM PHY (vendor agnostic, tested on Xilinx, Altera, Lattice)
-  - Spartan6 DDR/LPDDR/DDR2/DDR3 PHY (1:2 or 1:4 frequency ratio)
-  - Spartan7/Artix7/Kintex7/Virtex7 DDR2/DDR3 PHY (1:2 or 1:4 frequency ratio)
-  - Kintex/Virtex Ultrascale (Plus) DDR3/DDR4 PHY (1:4 frequency ratio)
-  - ECP5 DDR3 PHY (1:2 frequency ratio)
-
-Core:
-  - Fully pipelined, high performance.
-  - Configurable commands depth on bankmachines.
-  - Auto-Precharge.
-  - Periodic refresh/ZQ short calibration (up to 8 postponed refreshes).
-
-Frontend:
-  - Configurable crossbar (simply use crossbar.get_port() to add a new port!)
-  - Ports arbitration transparent to the user.
-  - Native, AXI-MM or Wishbone user interface.
-  - DMA reader/writer.
-  - BIST.
-  - ECC (Error-correcting code)
-
-[> FPGA Proven
----------------
-LiteDRAM is already used in commercial and open-source designs:
-- HDMI2USB: http://hdmi2usb.tv/home/
-- NeTV2: https://www.crowdsupply.com/alphamax/netv2
-- USBSniffer: http://blog.lambdaconcept.com/doku.php?id=products:usb_sniffer
-- and others commercial designs...
-
-[> Possible improvements
-------------------------
-- add Avalon-ST interface.
-- add support for Altera devices.
-- add more documentation
-- ... See below Support and consulting :)
-
-If you want to support these features, please contact us at florent [AT]
-enjoy-digital.fr.
-
-[> Getting started
-------------------
-1. Install Python 3.6+ and FPGA vendor's development tools.
-2. Install LiteX and the cores by following the LiteX's wiki [installation guide](https://github.com/enjoy-digital/litex/wiki/Installation).
-3. You can find examples of integration of the core with LiteX in LiteX-Boards and in the examples directory.
-
-[> Tests
---------
-Unit tests are available in ./test/.
-To run all the unit tests:
-```sh
-$ ./setup.py test
+sudo apt install python3-pip
+git clone https://github.com/SimonIT/spotifylyrics.git
+cd spotifylyrics/
+sudo pip3 install -r requirements.txt
+chmod +x SpotifyLyrics.pyw
+./SpotifyLyrics.pyw
 ```
 
-Tests can also be run individually:
-```sh
-$ python3 -m unittest test.test_name
-```
+# How to load lyrics from hard drive
+You can store lyrics on you hard drive which can automatically loaded.
 
-[> License
-----------
-LiteDRAM is released under the very permissive two-clause BSD license. Under
-the terms of this license, you are authorized to use LiteDRAM for closed-source
-proprietary designs.
-Even though we do not require you to do so, those things are awesome, so please
-do them if possible:
- - tell us that you are using LiteDRAM
- - cite LiteDRAM in publications related to research it has helped
- - send us feedback and suggestions for improvements
- - send us bug reports when something goes wrong
- - send us the modifications and improvements you have done to LiteDRAM.
+You have to put them on windows in `C:\Users\<User>\AppData\Roaming\SpotifyLyrics\lyrics` and on the other OS's in `/home/<User>/.SpotifyLyrics/lyrics`. Replace `<User>` with your username.
+  
+There you can put `.lrc` files with synced text (You can make them for example on [lrcgenerator.com](https://lrcgenerator.com/) or [www.megalobiz.com](https://www.megalobiz.com/lrc/maker)) or simple `.txt` files with non-synced text.
+ 
+**Important: The file names must include the artist and the name of the song**
 
-[> Support and consulting
--------------------------
-We love open-source hardware and like sharing our designs with others.
-
-LiteDRAM is developed and maintained by EnjoyDigital.
-
-If you would like to know more about LiteDRAM or if you are already a happy
-user and would like to extend it for your needs, EnjoyDigital can provide standard
-commercial support as well as consulting services.
-
-So feel free to contact us, we'd love to work with you! (and eventually shorten
-the list of the possible improvements :)
-
-[> Contact
-----------
-E-mail: florent [AT] enjoy-digital.fr
+# Screenshot
+![example-img](https://i.imgur.com/2dUN17q.png)
