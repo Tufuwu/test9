@@ -1,9 +1,0 @@
-Title: Activate changes: Fixed exception when having EC changes and core changes while core produces a warning
-Level: 1
-Component: ec
-Compatible: compat
-Version: 1.4.0b1
-Date: 1486384214
-Class: fix
-
-

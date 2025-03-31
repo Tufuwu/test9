@@ -1,9 +1,0 @@
-Title: Added missing validation of host attribute values to WATO Web-API calls
-Level: 1
-Component: wato
-Compatible: compat
-Version: 1.4.0i1
-Date: 1472458792
-Class: fix
-
-

@@ -1,3 +1,0 @@
-HOST test-prediction
-SERVICE CPU load
-METRICS load1;load5;load15

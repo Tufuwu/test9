@@ -1,8 +1,0 @@
-Title: emcvnx_hwstatus, emcvnx_hba, emcvnx_disks: new checks for EMC VNX storage systems
-Level: 2
-Component: checks
-Version: 1.2.5i1
-Date: 1389271075
-Class: feature
-
-

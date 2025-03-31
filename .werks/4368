@@ -1,9 +1,0 @@
-Title: User password were deleted when saving users without setting a new password
-Level: 1
-Component: wato
-Compatible: compat
-Version: 1.5.0i1
-Date: 1487150776
-Class: fix
-
-

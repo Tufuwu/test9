@@ -1,9 +1,0 @@
-Title: View action: Default values of sticky, notification and persistent options can now be configured via global settings.
-Level: 1
-Component: multisite
-Compatible: compat
-Version: 1.4.0b1
-Date: 1482072617
-Class: feature
-
-Above default values can be configured via {{View action defaults}} in {{User interface}} in {{Global settings}}.

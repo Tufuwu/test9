@@ -1,3 +1,0 @@
-# forced CRLF for some file types
-*.yml text eol=crlf
-*.txt text eol=crlf

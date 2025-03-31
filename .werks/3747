@@ -1,9 +1,0 @@
-Title: epson_beamer_lamp: New check to monitor the lamp operation time of Epson beamers
-Level: 1
-Component: checks
-Compatible: compat
-Version: 1.4.0i1
-Date: 1474895699
-Class: feature
-
-

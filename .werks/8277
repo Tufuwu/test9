@@ -1,9 +1,0 @@
-Title: mk_logwatch: Agent bakery for Linux now allows shipping just plugin without logwatch.cfg
-Level: 1
-Edition: cee
-Component: checks
-Version: 1.2.7i2
-Date: 1434634779
-Class: feature
-
-

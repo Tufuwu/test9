@@ -1,9 +1,0 @@
-Title: Counting events are now also respecting the EC limits
-Level: 1
-Component: ec
-Compatible: compat
-Version: 1.4.0b1
-Date: 1485348231
-Class: fix
-
-

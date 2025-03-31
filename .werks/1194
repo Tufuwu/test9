@@ -1,9 +1,0 @@
-Title: Linux Agent now supports monitoring of cifs mounts
-Level: 1
-Component: checks
-Compatible: compat
-Version: 1.2.5i6
-Date: 1414572031
-Class: feature
-
-

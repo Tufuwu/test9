@@ -1,9 +1,0 @@
-Title: netscaler_vserver: now lower levels for health are configurable
-Level: 1
-Component: checks
-Compatible: compat
-Version: 1.4.0i3
-Date: 1480958242
-Class: feature
-
-

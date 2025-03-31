@@ -1,9 +1,0 @@
-Title: dokuwiki: Fixed broken cookie auth when customizing dokuwiki via GUI
-Level: 1
-Component: packages
-Compatible: compat
-Version: 1.2.7i3
-Date: 1460716009
-Class: fix
-
-

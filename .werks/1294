@@ -1,9 +1,0 @@
-Title: esx_vsphere_hostsystem: Inventory plugin is now graceful if not all information are available
-Level: 1
-Component: inv
-Compatible: compat
-Version: 1.2.7i3
-Date: 1443114860
-Class: fix
-
-

@@ -1,9 +1,0 @@
-Title: alcatel_timetra_cpu: New CPU Check for Alcatel Switches supporting the TIMETRA MIB
-Level: 1
-Component: checks
-Compatible: compat
-Version: 1.2.7i1
-Date: 1432297428
-Class: feature
-
-

@@ -1,9 +1,0 @@
-Title: Fixed problem when watching BI aggregations with umlauts in titles or group name
-Level: 1
-Component: multisite
-Compatible: compat
-Version: 1.2.6b1
-Date: 1418047044
-Class: fix
-
-

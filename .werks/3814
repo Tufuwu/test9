@@ -1,9 +1,0 @@
-Title: win_netstat: fixed unicode warning while parsing data
-Level: 1
-Component: checks
-Compatible: compat
-Version: 1.4.0i1
-Date: 1474898629
-Class: fix
-
-
