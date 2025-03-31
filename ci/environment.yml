@@ -1,5 +1,0 @@
-name: gw
-channels:
-- bioconda
-dependencies:
-- gromacs

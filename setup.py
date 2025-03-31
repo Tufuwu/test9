@@ -1,68 +1,59 @@
-# setuptools installation of GromacsWrapper
-# Copyright (c) 2008-2011 Oliver Beckstein <orbeckst@gmail.com>
-# Released under the GNU Public License 3 (or higher, your choice)
-#
-# See the files INSTALL and README for details or visit
-# https://github.com/Becksteinlab/GromacsWrapper
-from __future__ import with_statement
-from setuptools import setup, find_packages
+#!/usr/bin/env python3
 
-import versioneer
+from distutils.core import setup
+from setuptools.command.sdist import sdist
+from obswebsocket import VERSION
 
-with open("README.rst") as readme:
-    long_description = readme.read()
+# Convert README from Markdown to reStructuredText
+description = "Please take a look at README.md"
+try:
+    description = open('README.md', 'rt').read()
+    import pypandoc
+    description = pypandoc.convert_text(description, 'rst', 'gfm')
+except ImportError:
+    # If not possible, leave it in Markdown...
+    print("Cannot find pypandoc, not generating README!")
+
+requirements = open('requirements.txt', 'rt').readlines()
+requirements = [x.strip() for x in requirements if x]
 
 
-setup(name="GromacsWrapper",
-      version=versioneer.get_version(),
-      cmdclass=versioneer.get_cmdclass(),
-      description="A Python wrapper around the Gromacs tools.",
-      long_description=long_description,
-      author="Oliver Beckstein",
-      author_email="orbeckst@gmail.com",
-      license="GPLv3",
-      url="https://github.com/Becksteinlab/GromacsWrapper",
-      download_url="https://github.com/Becksteinlab/GromacsWrapper/downloads",
-      keywords="science Gromacs analysis 'molecular dynamics'",
-      classifiers=[
+# Generate classes
+class UpdateClasses(sdist):
+    def run(self):
+        from os.path import dirname
+        from sys import path
+        path.append(dirname(__file__))
+        from generate_classes import generate_classes
+        generate_classes()
+        sdist.run(self)
+
+
+setup(
+    name='obs-websocket-py',
+    packages=['obswebsocket'],
+    # cmdclass={'sdist': UpdateClasses},
+    license='MIT',
+    version=VERSION,
+    description='Python library to communicate with an obs-websocket server.',
+    long_description=description,
+    author='Guillaume "Elektordi" Genty',
+    author_email='elektordi@elektordi.net',
+    url='https://github.com/Elektordi/obs-websocket-py',
+    keywords=['obs', 'obs-studio', 'websocket'],
+    classifiers=[
+        'License :: OSI Approved :: MIT License',
+        'Environment :: Plugins',
+        'Intended Audience :: Developers',
+        'Topic :: Software Development :: Libraries',
+
         'Development Status :: 4 - Beta',
-        'Environment :: Console',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU General Public License (GPL)',
-        'License :: OSI Approved :: BSD License',
-        'Operating System :: POSIX',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: Microsoft :: Windows ',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
+
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
-        'Topic :: Scientific/Engineering :: Bio-Informatics',
-        'Topic :: Scientific/Engineering :: Chemistry',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-      ],
-      packages=find_packages(
-          exclude=['scripts', 'tests', 'tests.*', 'extras', 'doc/examples']),
-      scripts=[
-          'scripts/gw-join_parts.py',
-          'scripts/gw-merge_topologies.py',
-          'scripts/gw-forcefield.py',
-          'scripts/gw-partial_tempering.py',
-      ],
-      package_data={'gromacs': ['templates/*.sge', 'templates/*.pbs',  # template files
-                                'templates/*.ll', 'templates/*.sh',
-                                'templates/*.mdp', 'templates/*.cfg'
-                                ],
-                    },
-      install_requires=['numpy>=1.0',
-                        'six',          # towards py 3 compatibility
-                        'numkit',       # numerical helpers
-                        'matplotlib',
-                        ],
-      tests_require=['pytest', 'numpy>=1.0', 'pandas>=0.17'],
-      zip_safe=True,
-      )
+        'Programming Language :: Python :: 3.10',
+    ],
+    install_requires=requirements,
+)
