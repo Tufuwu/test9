@@ -1,38 +1,43 @@
-# This workflow will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Upload Python Package
-
-on:
-  release:
-    types: [published]
-
-
+name: PySlurm
+on: [push]
 jobs:
-  deploy:
-
+  Build:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+      fail-fast: false
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install ipython pandas
-        pip install .[test]
-    - name: Build package
-      run: python setup.py bdist
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@v1.4.2
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          which python
+          which python${{ matrix.python-version }}
+          python${{ matrix.python-version }} -m pip install --upgrade pip
+          python${{ matrix.python-verison }} -m pip install pipenv
+          pipenv --python ${{matrix.python-version }} install --dev --skip-lock
+      - name: Start Slurm Container
+        uses: sudo-bot/action-docker-compose@latest
+        with:
+          cli-args: "-f docker-compose-github.yml up -d"
+        env:
+          PYTHON: ${{ matrix.python-version }}
+      - name: Debug
+        run: |
+          docker ps -a
+          docker version
+          pwd
+          ls -al
+          docker inspect slurmctl
+          env | sort
+      - name: Build/Install/Test PySlurm
+        run: |
+          pipenv run pytest -sv scripts/run_tests_in_container.py
+        env:
+          PYTHON: ${{ matrix.python-version }}
+
