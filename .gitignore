@@ -1,7 +1,3 @@
-# Project-specific
-docs/source/examples/*.ipynb
-docs/source/examples/index.rst
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -24,11 +20,12 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
+.idea/
 *.egg-info/
 .installed.cfg
 *.egg
-pip-wheel-metadata/
+*.iml
+*.whl
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -48,9 +45,8 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*.cover
+*,cover
 .hypothesis/
-.pytest_cache/
 
 # Translations
 *.mo
@@ -73,8 +69,7 @@ docs/_build/
 # PyBuilder
 target/
 
-# Jupyter Notebook
-Untitled*.ipynb
+# IPython Notebook
 .ipynb_checkpoints
 
 # pyenv
@@ -83,26 +78,26 @@ Untitled*.ipynb
 # celery beat schedule file
 celerybeat-schedule
 
-# SageMath parsed files
-*.sage.py
-
 # dotenv
 .env
+.venv/
 
 # virtualenv
-.venv
 venv/
 ENV/
+.venv/
 
 # Spyder project settings
 .spyderproject
-.spyproject
 
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
+# IDE
+.vscode/
 
-# mypy
-.mypy_cache/
+# local tests
+local_tests/
+
+# Mac files
+.DS_Store

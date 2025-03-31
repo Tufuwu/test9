@@ -1,0 +1,10 @@
+coverage
+cryptography
+flask
+mock
+parameterized
+pylint
+pytest
+requests
+respx
+tox
