@@ -1,59 +1,159 @@
-==================================
-Irrad_Spectroscopy |test-status|
-==================================
+====
+CRDS
+====
 
-Introduction
-============
+CRDS is a package used for working with astronomical reference files for the
+HST and JWST telescopes.  CRDS is useful for performing various operations on
+reference files or reference file assignment rules.  CRDS is used to assign,
+check, and compare reference files and rules, and also to predict those
+datasets which should potentially be reprocessed due to changes in reference
+files or assignment rules.  CRDS has versioned rules which define the
+assignment of references for each type and instrument configuration.  CRDS has
+web sites corresponding to each project (http://hst-crds.stsci.edu or
+https://jwst-crds.stsci.edu/) which record information about reference files
+and provide related services.
 
-``irrad_spectroscopy`` is a package intended to do gammma spectroscopy of (proton) irradiated samples such as chips, sensors,
-PCBs, etc. but can be also used for general gamma spectroscopy e.g. of radioactive sources. It consits of few independent
-methods which togehter allow for a complete spectroscopic analysis of radioactive gamma-spectra. A step-by-step full spectroscopy
-of an example spectrum can be found in the ``examples`` folder.
+CRDS development is occuring at:
+     `Project's github page <https://github.com/spacetelescope/crds>`_.
 
-Installation
-============
+CRDS is also available for installation as part of AstroConda Contrib:
+     `AstroConda Contrib <https://github.com/astroconda/astroconda-contrib>`_.
 
-You have to have Python 2/3 with the following packages installed:
+Basic CRDS Installation
+-----------------------
 
-- numpy
-- scipy
-- pyyaml
-- matplotlib
-- jupyter (examples)
-- pandas (creating gamma library from the web)
+For many roles, CRDS is *automatically installed as a dependency* of the
+calibration software.  This default installation supports running calibrations
+but not more advanced CRDS activities like submitting files or development.
 
-It's recommended to use a Python environment like `Miniconda <https://conda.io/miniconda.html>`_. After installation you can use Minicondas package manager ``conda`` to install the required packages
+You can test for an existing installation of CRDS like this::
 
-.. code-block:: bash
+  $ crds list --status
+  CRDS Version = '7.4.0, b7.4.0, daf308e24c8dd37e70c89012e464058861417245'
+  CRDS_MODE = 'auto'
+  CRDS_PATH = 'undefined'
+  CRDS_SERVER_URL = 'undefined'
+  Cache Locking = 'enabled, multiprocessing'
+  Effective Context = 'jwst_0541.pmap'
+  Last Synced = '2019-08-26 07:30:09.254136'
+  Python Executable = '/Users/homer/miniconda3/envs/crds-env/bin/python'
+  Python Version = '3.7.4.final.0'
+  Readonly Cache = False
 
-   conda install numpy scipy pyyaml matplotlib jupyter pandas
+This output indicates CRDS is installed and configured for processing onsite
+using a pre-built cache of CRDS rules and references at */grp/crds/cache*.
 
-To finally install ``irrad_spectroscopy`` run the setup file
+File Submission Installation
+----------------------------
 
-.. code-block:: bash
+For performing the file submission role,  CRDS includes additional dependencies
+and can be trickier to install.
 
-   python setup.py develop
+Addding CRDS to an Existing Environment
++++++++++++++++++++++++++++++++++++++++
 
-Example usage
-=============
+You can install/upgrade CRDS and it's dependencies in your current environment
+like this::
 
-Check the ``examples`` folder for several measured data sets of different sources for calibration and analysis. A `Jupyter Notebook <http://jupyter.org/>`_
-with a step-by-step analysis of an example spectrum of an irradiated chip is provided. Install jupyter and run
+  git clone https://github.com/spacetelescope/crds.git
+  cd crds
+  ./crds_setup_crds
 
-.. code-block:: bash
-   
-   jupyter notebook
+It is recommended that you only do this in an environment dedicated to file
+submissions.   This may be suitable for e.g. installing/upgrading CRDS in
+an active *redcatconda* environment.
 
-in order to open the web interface.
+Full Environment Install
+++++++++++++++++++++++++
 
-Testing
-=======
+Sometimes it's expedient to install an entirely new environment including a
+baseline conda,  CRDS,  and all of it's dependencies.  To start from scratch,
+you can::
 
-The code in this package has unit-tests. These tests contain a benchmark with actual gamma-spectroscopy data of
-two calibrated, radioactive sources, namely 22-Na and 133-Ba. The activity reconstruction efficiencies for the 
-tested data sets are tested to be above 90%.
- 
+  git clone https://github.com/spacetelescope/crds.git
+  cd crds
+  ./crds_setup_all
 
-.. |test-status| image:: https://github.com/Silab-Bonn/irrad_spectroscopy/actions/workflows/main.yml/badge.svg?branch=development
-    :target: https://github.com/SiLab-Bonn/irrad_spectroscopy/actions
-    :alt: Build status
+  # open a new terminal window
+  conda activate crds-env
+
+To customize a bit more, *crds_setup_all* and *crds_setup_env* support
+parameters which can be used to specify OS, shell, and install location.
+Substitute the below to specify Linux, c-shell, and a non-default install
+location::
+
+  ./crds_setup_all   Linux  csh   $HOME/miniconda_crds
+
+Advanced Install
+++++++++++++++++
+
+Below are the current sub-tasks used conceptually for a full featured CRDS
+install.    These can serve as an alternative to cloning the CRDS repo and
+running the install script(s).  If you already have a python environment
+supporting pip,
+
+1. Installing Conda / Astroconda
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Alternate / definitive installation instructions for installing a baseline conda
+can be found here::
+
+  https://spacetelescope.github.io/training-library/computer_setup.html#installing-conda
+
+2. Create crds-env Environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The CRDS software and basic conda dependencies should be installed in an
+isolated conda environment::
+
+  conda create -n crds-env
+  conda activate crds-env
+
+You can substitute the environment name of your choice, e.g. *redcatconda* vs. *crds-env*.
+
+3. Add JWST CAL S/W and Dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Installing the JWST CAL S/W will also automatically install many dendencies of
+a numerical computing environment::
+
+  pip install --upgrade numpy
+  pip install --upgrade git+https://github.com/spacetelescope/jwst
+
+Note that these commands also install the latest version of CRDS from pip which
+may not be current enough for ongoing reference file testing and
+troubleshooting.
+
+4. Install CRDS and Dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This sequence first removes the CRDS installed automatically as part of
+installing the *jwst* package and then installs the latest available CRDS
+from github with advanced dependencies not needed for basic operation::
+
+  pip uninstall --yes crds
+  pip install --upgrade  git+https://github.com/spacetelescope/crds.git#egg=crds["submission","test"]
+
+A more full featured CRDS install is::
+
+  pip install --upgrade  git+https://github.com/spacetelescope/crds.git#egg=crds["submission","dev","test","docs"]
+
+5. Install Fitsverify
+^^^^^^^^^^^^^^^^^^^^^
+
+Since it is a C-based package fitsverify is not available using pip but is
+available via conda on the astroconda channel::
+
+  conda config --add channels http://ssb.stsci.edu/astroconda
+  conda install --yes fitsverify
+
+As part of an end-user setup installation of fitsverify is optional, CRDS
+certify will run without it after issuing a warning, the CRDS server will run
+fitsverify as part of its checks unless/until we stop using it altogether.
+
+User's Guide
+------------
+
+More documentation about CRDS is available here:
+
+    https://jwst-crds.stsci.edu/static/users_guide/index.html

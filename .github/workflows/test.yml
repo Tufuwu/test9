@@ -1,54 +1,52 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches:
       - main
-      - development
+    tags:
+      - '*'
   pull_request:
-    branches:
-      - main
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  tests:
-    name: Testing on Python ${{matrix.python-version}} | ${{matrix.sim}}
-    runs-on: ubuntu-latest
-
+  pytest:
+    name: ${{ matrix.runs-on }} Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.runs-on }}
+    env:
+      CRDS_SERVER_URL: https://hst-crds.stsci.edu
+      CRDS_TEST_ROOT: /tmp
+      LD_LIBRARY_PATH: /usr/local/lib
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, ubuntu-latest]
+        runs-on:
+          - ubuntu-latest
+          - macos-latest
         python-version: ["3.9", "3.10"]
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      - name: Anaconda ${{matrix.python-version}} setup
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          auto-update-conda: true
-          python-version: ${{matrix.python-version}}
-
-      - name: Dependency installation
-        shell: bash -l {0}
+          python-version: ${{ matrix.python-version }}
+      - name: Install fitsverify
         run: |
-          conda info -a
-          conda install numpy scipy pyyaml matplotlib nose jupyter pandas
-          pip install -r requirements.txt
-
-      - name: Package installation
-        shell: bash -l {0}
+          wget --quiet --output-document - http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.49.tar.gz | tar -xz -C $HOME
+          cd $HOME/cfitsio-3.49
+          ./configure --prefix=/usr/local --enable-reentrant --disable-curl
+          make shared
+          sudo make install
+          wget --quiet --output-document - https://heasarc.gsfc.nasa.gov/docs/software/ftools/fitsverify/fitsverify-4.20.tar.gz | tar -xz -C $HOME
+          cd $HOME/fitsverify-4.20
+          gcc -o fitsverify ftverify.c fvrf_data.c fvrf_file.c fvrf_head.c fvrf_key.c fvrf_misc.c -DSTANDALONE -lcfitsio
+          sudo cp fitsverify /usr/local/bin
+      - name: Install Python dependencies
         run: |
-          python setup.py develop
-
-      - name: Testing
-        shell: bash -l {0}
-        run: nosetests
+          pip install git+https://github.com/spacetelescope/jwst
+          pip install git+https://github.com/spacetelescope/romancal
+          pip uninstall --yes crds
+          ./install
+          pip install .[submission,test,docs,synphot]
+          ./setup_test_cache $CRDS_TEST_ROOT
+      - name: Run tests
+        run: ./runtests --cover

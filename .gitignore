@@ -1,13 +1,10 @@
-# example checkpoints
-irrad_spectroscopy/examples/.ipynb_checkpoints/
-# example output folder
-irrad_spectroscopy/examples/output/
-# pyc
-*.pyc
-# pycharm
-.idea/
-# eclipse
-.project
+coverage
+.coverage
 .pydevproject
-# egg-info folder
-irrad_spectroscopy.egg-info/
+.project
+*.pyc
+*~
+*.egg-info/
+
+documentation/crds_users_guide/build
+documentation/crds_users_guide/*.tar.gz
