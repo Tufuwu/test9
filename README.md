@@ -1,82 +1,97 @@
-# ![Caluma Service](https://user-images.githubusercontent.com/6150577/60805422-51b1bf80-a180-11e9-9ae5-c794249c7a98.png)
+# Mbed Tools
 
-[![Build Status](https://travis-ci.com/projectcaluma/caluma.svg?branch=master)](https://travis-ci.com/projectcaluma/caluma)
-[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/projectcaluma/caluma/blob/master/.coveragerc#L5)
-[![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
-[![PyPI](https://img.shields.io/pypi/v/caluma)](https://pypi.org/project/caluma/)
-[![License: GPL-3.0-or-later](https://img.shields.io/github/license/projectcaluma/caluma)](https://spdx.org/licenses/GPL-3.0-or-later.html)
+![Package](https://badgen.net/badge/Package/mbed-tools/grey)
+[![Documentation](https://badgen.net/badge/Documentation/GitHub%20Pages/blue?icon=github)](https://armmbed.github.io/mbed-tools/api/)
+[![PyPI](https://badgen.net/pypi/v/mbed-tools)](https://pypi.org/project/mbed-tools/)
+[![PyPI - Status](https://img.shields.io/pypi/status/mbed-tools)](https://pypi.org/project/mbed-tools/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mbed-tools)](https://pypi.org/project/mbed-tools/)
 
-A collaborative form editing service.
+[![License](https://badgen.net/pypi/license/mbed-tools)](https://github.com/ARMmbed/mbed-tools/blob/master/LICENSE)
 
-## What is Caluma Service?
+[![Build Status](https://dev.azure.com/mbed-tools/mbed-tools/_apis/build/status/Build%20and%20Release?branchName=master&stageName=CI%20Checkpoint)](https://dev.azure.com/mbed-tools/mbed-tools/_build/latest?definitionId=10&branchName=master)
+[![Test Coverage](https://codecov.io/gh/ARMmbed/mbed-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/ARMmbed/mbed-tools)
+[![Maintainability](https://api.codeclimate.com/v1/badges/b9fca0e16f7a85da7674/maintainability)](https://codeclimate.com/github/ARMmbed/mbed-tools/maintainability)
 
-Caluma Service is the core part of the Caluma project providing a
-[GraphQL API](https://graphql.org/). For a big picture and to learn what Caluma
-does for you, have a look at [caluma.io](https://caluma.io)
+## Overview
 
-## Getting started
+This is the **future** command line tool for Mbed OS. It provides the ability to detect Mbed Enabled devices connected
+by USB, checkout Mbed projects and perform builds amongst other operations.
 
-### Installation
+> :warning: While this package is generally available it is not complete. The available functionality can be viewed with
+> the `--help` option once installed. Please note that the current tools for Mbed OS 5.x and above can be found at
+> https://github.com/ARMmbed/mbed-cli.
 
-NOTE: We recommend using Caluma as a dedicated service. However, it is possible to integrate
-Caluma into a django project. You can read about this [here](docs/django-apps.md).
+## Releases
 
-**Requirements**
+For release notes and a history of changes of all **production** releases, please see the following:
 
-- docker
-- docker-compose
+- [Changelog](https://github.com/ARMmbed/mbed-tools/blob/master/CHANGELOG.md)
 
-After installing and configuring those, download [docker-compose.yml](https://github.com/projectcaluma/caluma/blob/master/docker-compose.yml) and run the following command:
+For a the list of all available versions please, please see the:
 
-```bash
-docker-compose up -d
+- [PyPI Release History](https://pypi.org/project/mbed-tools/#history)
+
+## Versioning
+
+The version scheme used follows [PEP440](https://www.python.org/dev/peps/pep-0440/) and
+[Semantic Versioning](https://semver.org/). For production quality releases the version will look as follows:
+
+- `<major>.<minor>.<patch>`
+
+Pre releases are used to give early access to new functionality, for testing and to get feedback on experimental
+features. As such these releases may not be stable and should not be used for production. Additionally any interfaces
+introduced in a pre release may be removed or changed without notice. For pre releases the version will look as
+follows:
+
+- `<major>.<minor>.<patch>.dev<pre-release-number>`
+
+## Installation
+
+`mbed-tools` relies on the Ninja build system and CMake.
+- CMake. [Install version 3.19.0 or newer for all operating systems](https://cmake.org/install/).
+- Ninja. [Install version 1.0 or newer for all operating systems](https://github.com/ninja-build/ninja/wiki/Pre-built-Ninja-packages).
+
+We recommend installing `mbed-tools` in a Python virtual environment to avoid dependency conflicts.
+
+To install the most recent production quality release use:
+
+```
+pip install mbed-tools
 ```
 
-You can now access [GraphiQL](https://github.com/graphql/graphiql) at
-[http://localhost:8000/graphql](http://localhost:8000/graphql) which
-includes a schema documentation. The API allows to query and mutate form
-and workflow entities which are described below.
+To install a specific release:
 
-Caluma is a [12factor app](https://12factor.net/) which
-means that configuration is stored in environment variables.
-Different environment variable types are explained at
-[django-environ](https://github.com/joke2k/django-environ#supported-types).
+```
+pip install mbed-tools==<version>
+```
 
-You can read more about running and configuring Caluma under
-[docs/configuration.md](docs/configuration.md)
+## Usage
 
-### Debugging
+Interface definition and usage documentation (for developers of Mbed OS tooling) is available for the most recent
+production release here:
 
-Set environment variable `ENV` to `dev` to enable debugging capabilities. Don't use this in production as it exposes confidential information!
+- [GitHub Pages](https://armmbed.github.io/mbed-tools/api/)
 
-This enables [Django Debug Middleware](https://docs.graphene-python.org/projects/django/en/latest/debug/).
+## Project Structure
 
-For profiling you can use `./manage.py runprofileserver`. See [docker-compose.override.yml](docker-compose.override.yml) for
-an example.
+The follow described the major aspects of the project structure:
 
-## License
+- `azure-pipelines/` - CI configuration files for Azure Pipelines.
+- `docs/api` - Interface definition and usage documentation.
+- `src/mbed_tools/` - Python source files.
+- `news/` - Collection of news files for unreleased changes.
+- `tests/` - Unit and integration tests.
 
-Code released under the [GPL-3.0-or-later license](LICENSE).
+## Getting Help
 
-For further information on our license choice, you can read up on the [corresponding GitHub issue](https://github.com/projectcaluma/caluma/issues/751#issuecomment-547974930).
+- For interface definition and usage documentation, please see [GitHub Pages](https://armmbed.github.io/mbed-tools/api/).
+- For a list of known issues and possible work arounds, please see [Known Issues](KNOWN_ISSUES.md).
+- To raise a defect or enhancement please use [GitHub Issues](https://github.com/ARMmbed/mbed-tools/issues).
+- To ask a question please use the [Mbed Forum](https://forums.mbed.com/).
 
-## Further reading
+## Contributing
 
-- [Installation & Configuration](docs/configuration.md) - Get started installing
-  Caluma in a production context
-- [Contributing](CONTRIBUTING.md) - If you want to help us, here's
-  how to start with your first contribution.
-- [Caluma Guide](docs/guide.md) - How to get up and running with Caluma
-- [Workflow Concepts](docs/workflow-concepts.md) - How to use caluma workflows
-- [Historical Records](docs/historical-records.md) - Undo and audit trail
-  functionality
-- [GraphQL](docs/graphql.md) - Further information on how to use the GraphQL
-  interface
-- [Validation](docs/validation.md) - Validation of user input
-- [Extending Caluma](docs/extending.md) - Extensions: Data visibility and
-  permissions
-- [Caluma Events](docs/events.md) - Reacting upon Caluma Events
-- [Using Caluma as django apps](docs/django-apps.md)
-- [Interfaces](docs/interfaces.md)
-- [Maintainer's Handbook](docs/maintainers.md) - HOWTO for various maintainer's
-  tasks
+- Mbed OS is an open source project and we are committed to fostering a welcoming community, please see our
+  [Code of Conduct](https://github.com/ARMmbed/mbed-tools/blob/master/CODE_OF_CONDUCT.md) for more information.
+- For how to contribute to the project, including how to develop the project,
+  please see the [Contributions Guidelines](https://github.com/ARMmbed/mbed-tools/blob/master/CONTRIBUTING.md)

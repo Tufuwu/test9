@@ -1,35 +1,26 @@
 repos:
--   repo: local
+  - repo: https://github.com/kdeyev/licenseheaders.git
+    rev: 'master'
     hooks:
-    - id: black
-      stages: [commit]
-      name: black
-      language: system
-      entry: black
-      types: [python]
-    - id: isort
-      stages: [commit]
-      name: isort
-      language: system
-      entry: isort -y
-      types: [python]
-    - id: flake8
-      stages: [commit]
-      name: flake8
-      language: system
-      entry: flake8
-      types: [python]
-    - id: reuse
-      stages: [commit]
-      name: reuse
-      description: Check licenses
-      entry: reuse lint
-      pass_filenames: false
-      language: system
-    - id: gitlint
-      stages: [commit-msg]
-      name: gitlint
-      description: Validate commit lint
-      entry: gitlint --msg-filename
-      language: system
+      - id: licenseheaders
+        exclude: \.yaml$|\.yml$
+        args: ["-s", "ci_scripts/licenseheaders.json", "-t",
+        "ci_scripts/templates/.copyright.tmpl", "-cy", "-f"]
 
+  - repo: https://github.com/psf/black
+    rev: 19.10b0
+    hooks:
+      - id: black
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.3
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-docstrings]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.782
+    hooks:
+      - id: mypy
+        entry: mypy src
+        pass_filenames: false

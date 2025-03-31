@@ -1,78 +1,36 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+# Don't lock the versions of this library or installation gridlock will ensue
+Pipfile.lock
 
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-/Pipfile
-/Pipfile.lock
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-.pytest_cache
-nosetests.xml
-coverage.xml
-*,cover
-.hypothesis/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-#Ipython Notebook
-.ipynb_checkpoints
-
-# Pyenv
-.python-version
-
-# Dotenv
-.env
-
-# Editor swap files
-*.swp
-
-# IDE specific configurations
+# PyCharm
 .idea/
-.vscode
+
+# macOS
+.DS_Store
+
+# Python
+*.pyc
+__pycache__/
+*.egg-info/
+/build/
+
+# Coverage.py
+.coverage*
+coverage/
+junit/
+htmlcov/
+
+# Package
+dist/
+release-dist/
+
+# Temporary file used by CI
+dev-requirements.txt
+
+# Local docs output
+local_docs/
+
+# Tox envs
+.tox/
+
+# User envs
+.venv/

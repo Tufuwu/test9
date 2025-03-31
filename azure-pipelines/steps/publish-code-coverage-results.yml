@@ -1,0 +1,5 @@
+steps:
+  - bash: |
+      bash <(curl -s https://codecov.io/bash)
+    condition: and(succeeded(), eq(variables['uploadCoverage'], 'true'))
+    displayName: 'Upload test coverage to codecov.io'

@@ -1,87 +1,69 @@
-"""Setuptools package definition."""
-
-import distutils.cmd
+#
+# Copyright (c) 2020-2021 Arm Limited and Contributors. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+"""Package definition for PyPI."""
 import os
-from os import path
 
-from setuptools import find_packages, setup
+from setuptools import setup, find_packages
 
-version = {}
-with open("caluma/caluma_metadata.py") as fp:
-    exec(fp.read(), version)
+PROJECT_SLUG = "mbed-tools"
+SOURCE_DIR = "src/mbed_tools"
 
-here = path.abspath(path.dirname(__file__))
-with open(path.join(here, "README.md"), encoding="utf-8") as f:
-    long_description = f.read()
+repository_dir = os.path.dirname(__file__)
 
-
-pipenv_setup = """
-echo UID=$(id -u) > .env
-echo ENV=dev >> .env
-docker-compose up -d db
-rm -f Pipfile*
-touch Pipfile
-pipenv install --python 3.7 -r requirements.txt
-pipenv install -d -r requirements-dev.txt
-""".strip().splitlines()
-
-
-class PipenvCommand(distutils.cmd.Command):
-    description = "setup local development with pipenv"
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        for cmd in pipenv_setup:
-            assert os.system(cmd) == 0
-        print(
-            "\npipenv run pytest      runs the tests"
-            "\npipenv shell           enters the virtualenv"
-        )
-
+# Use readme needed as long description in PyPI
+with open(os.path.join(repository_dir, "README.md"), encoding="utf8") as fh:
+    long_description = fh.read()
 
 setup(
-    cmdclass={"pipenv": PipenvCommand},
-    name=version["__title__"],
-    version=version["__version__"],
-    description=version["__description__"],
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://projectcaluma.github.io/",
-    download_url="https://github.com/projectcaluma/caluma",
-    license="License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    author="Mbed team",
+    author_email="support@mbed.com",
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Topic :: Software Development :: Build Tools",
+        "Topic :: Software Development :: Embedded Systems",
     ],
-    packages=find_packages(),
-    python_requires=">=3.6, <4",
+    description="Command line interface for Mbed OS.",
+    keywords="Arm Mbed OS MbedOS cli command line tools",
+    include_package_data=True,
     install_requires=[
-        "dateparser<2",
-        "django~=2.2",
-        "django-cors-headers<4",
-        "django-environ<0.5",
-        "django-extensions<4",
-        "django-filter<3",
-        "django-localized-fields<6",
-        "django-postgres-extra<2",
-        "djangorestframework<4",
-        "django_simple_history<3",
-        "graphene-django<=2.8.2",
-        "idna<3",
-        "minio<6",
-        "psycopg2-binary<3",
-        "pyjexl<0.3",
-        "python-memcached<2",
-        "requests<3",
-        "urllib3<2",
-        "uwsgi<2.1",
+        "python-dotenv",
+        "Click>=7.1,<8",
+        "pdoc3",
+        "GitPython",
+        "tqdm",
+        "tabulate",
+        "dataclasses; python_version<'3.7'",
+        "requests>=2.20",
+        "pywin32; platform_system=='Windows'",
+        "psutil; platform_system=='Linux'",
+        "pyudev; platform_system=='Linux'",
+        "typing-extensions",
+        "Jinja2",
+        "pyserial",
     ],
+    license="Apache 2.0",
+    long_description_content_type="text/markdown",
+    long_description=long_description,
+    name=PROJECT_SLUG,
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
+    python_requires=">=3.6,<4",
+    url=f"https://github.com/ARMmbed/{PROJECT_SLUG}",
+    entry_points={
+        "console_scripts": [
+            "mbedtools=mbed_tools.cli.main:cli",
+            "mbed-tools=mbed_tools.cli.main:cli",
+            "mbed_tools=mbed_tools.cli.main:cli",
+        ]
+    },
 )
