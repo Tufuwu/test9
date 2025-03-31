@@ -1,0 +1,19 @@
+name: V2D
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip
+  - gtk2
+  - python=2.7
+  - urllib3
+  - waitress
+  - pip:
+    - opencv-python-headless
+    - numpy
+    - flask
+    - librosa
+    - matplotlib
+    - pylint
+  - keras==2.0.8
+  - tensorflow==1.2.1

@@ -1,48 +1,53 @@
-name: main
+name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - VideoCaption
+    - actions
+    - speedo
+ 
+  pull_request:
+    branches:
+    - VideoCaption 
+  
+  workflow_dispatch:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.9", "3.10"]
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+      - uses: docker://scopeinfinity/video2description:frontend
+      - uses: docker://scopeinfinity/video2description:deploy
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          bash early_tests.sh
+          sudo apt-get install firefox
+          wget 'https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz'
+          tar -xvzf geckodriver-v0.26.0-linux64.tar.gz
+          sudo mv geckodriver /usr/local/bin
 
-    - name: Install Poetry
-      run: curl -sSL https://install.python-poetry.org | python3 -
+      - name: Build
+        run: |
+          docker-compose build
+          
+      - name: Test
+        run: |
+          bash docker_test.sh
 
-    - name: Check dependencies
-      run: make doctor
-
-    - uses: actions/cache@v4
-      with:
-        path: .venv
-        key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
-
-    - name: Install dependencies
-      run: make install
-
-    - name: Test code
-      run: make test-repeat
-
-    - name: Upload coverage
-      uses: codecov/codecov-action@v4
-      with:
-        fail_ci_if_error: true
-        token: ${{ secrets.CODECOV_TOKEN }}
-
-    - name: Check code
-      run: make check
-
-    - name: Check documentation
-      run: make mkdocs notebooks
+      # Push image to docker on 'push' event only.
+      - name: Deploy to Docker Hub
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        env:
+          DOCKER_USERNAME: "scopeinfinity"
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+        run: |
+          { echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin ; } && bash docker_push.sh

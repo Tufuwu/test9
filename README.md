@@ -1,119 +1,226 @@
-# Datafiles: A file-based ORM for Python dataclasses
+# Video Captioning [![Build Status](https://travis-ci.com/scopeInfinity/Video2Description.svg?branch=VideoCaption)](https://travis-ci.com/scopeInfinity/Video2Description)
+Generate caption for the given video clip
 
-Datafiles is a bidirectional serialization library for Python [dataclasses](https://docs.python.org/3/library/dataclasses.html) to synchronize objects to the filesystem using type annotations. It supports a variety of file formats with round-trip preservation of formatting and comments, where possible. Object changes are automatically saved to disk and only include the minimum data needed to restore each object.
+Branch : [VideoCaption](https://github.com/scopeInfinity/Video2Description/tree/VideoCaption) (1a2124d), [VideoCaption_catt](https://github.com/scopeInfinity/Video2Description/tree/VideoCaption_catt) (647e73b4)
 
-[![Linux Build](https://img.shields.io/github/actions/workflow/status/jacebrowning/datafiles/main.yml?branch=main&label=linux)](https://github.com/jacebrowning/datafiles/actions)
-[![Windows Build](https://img.shields.io/appveyor/ci/jacebrowning/datafiles/main.svg?label=windows)](https://ci.appveyor.com/project/jacebrowning/datafiles)
-[![Code Coverage](https://img.shields.io/codecov/c/github/jacebrowning/datafiles)
-](https://codecov.io/gh/jacebrowning/datafiles)
-[![PyPI License](https://img.shields.io/pypi/l/datafiles.svg)](https://pypi.org/project/datafiles)
-[![PyPI Version](https://img.shields.io/pypi/v/datafiles.svg?label=version)](https://pypi.org/project/datafiles)
-[![PyPI Downloads](https://img.shields.io/pypi/dm/datafiles.svg?color=orange)](https://pypistats.org/packages/datafiles)
-[![Gitter](https://img.shields.io/gitter/room/jacebrowning/datafiles?color=D0164E)](https://gitter.im/jacebrowning/datafiles)
+### Model
 
-Some common use cases include:
+Model generates natural sentence word by word
 
-- Coercing user-editable files into the proper Python types
-- Storing program configuration and state in version control
-- Loading data fixtures for demonstration or testing purposes
-- Synchronizing application state using file sharing services
-- Prototyping data models agnostic of persistence backends
+![SentenceGenerationImage](https://github.com/scopeInfinity/Video2Description/raw/VideoCaption/images/sentence_model.png)
 
-Watch [my lightning talk](https://www.youtube.com/watch?v=moYkuNrmc1I&feature=youtu.be&t=1225) for a demo of this in action!
+|    Audio SubModel     |     Video SubModel       |   Sentence Generation SubModel |
+| :-------------: |:-------------:| :-----:|
+| ![audio_model][audio_model]| ![video_model][video_model] | ![sentence_generation][sentence_generation]
 
-## Overview
+[audio_model]: https://github.com/scopeInfinity/Video2Description/raw/VideoCaption/images/model_audio.png
+[video_model]: https://github.com/scopeInfinity/Video2Description/raw/VideoCaption/images/model_video.png
+[sentence_generation]: https://github.com/scopeInfinity/Video2Description/raw/VideoCaption/images/model_word.png
 
-Take an existing dataclass such as [this example](https://docs.python.org/3/library/dataclasses.html#module-dataclasses) from the documentation:
+Context extraction for Temporal Attention Model, at i<sup>th</sup> word generation
 
-```python
-from dataclasses import dataclass
+![AttentionModel](https://github.com/scopeInfinity/Video2Description/raw/VideoCaption/images/attention.png)
 
-@dataclass
-class InventoryItem:
-    """Class for keeping track of an item in inventory."""
 
-    name: str
-    unit_price: float
-    quantity_on_hand: int = 0
+### Results - *f5c22f7*
 
-    def total_cost(self) -> float:
-        return self.unit_price * self.quantity_on_hand
+Test videos with good results
+
+|         |            |   |
+| :-------------: |:-------------:| :-----:|
+| ![12727][12727]| ![12501][12501] | ![10802][10802]
+| two men are talking about a cooking show | a  woman is cooking | a dog is running around a field |
+| ![12968][12968] | ![12937][12937] | ![12939][12939]
+| a woman is talking about a makeup face | a man is driving a car down the road | a man is cooking in a kitchen
+| ![12683][12683] | ![12901][12901] | ![12994][12994]
+| a man is playing a video game | two men are playing table tennis in a stadium | a man is talking about a computer program
+
+
+Test videos with poor results
+
+|         |            |   |
+| :-------------: |:-------------:| :-----:|
+| ![12589][12589]| ![12966][12966] | ![12908][12908]
+|  a person is playing with a toy | a man is walking on the field | a man is standing in a gym |
+
+[12727]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/12727.gif
+[12501]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/12501.gif
+[10802]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/10802.gif
+
+[12968]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/12968.gif
+[12937]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/12937.gif
+[12939]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/12939.gif
+
+[12683]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/12683.gif
+[12901]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/12901.gif
+[12994]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/12994.gif
+
+
+[12589]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/12589.gif
+[12966]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/12966.gif
+[12908]: https://raw.githubusercontent.com/scopeInfinity/Video2Description/VideoCaption/f5c22f7_images/12908.gif
+
+
+### Try it out!!!
+* Please feel free to raise PR with necessary suggestions.
+* Clone the repository`
+  * `git clone https://github.com/scopeInfinity/Video2Description.git`
+* Install docker and docker-compose
+  * Current config has docker-compose file format '3.2'.
+    * https://github.com/docker/compose/releases
+  * ```bash
+    sudo apt-get install docker.io`
+    sudo curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+    ```
+  * docs
+    * https://docs.docker.com/install/linux/docker-ce/ubuntu/
+    * https://docs.docker.com/compose/install/
+
+* Pull the prebuild images and run the container
+```bash
+$ docker-compose pull
+$ docker-compose up
+```
+* Browse to `http://localhost:8080/`
+  * backend might take few minutes to reach a stable stage.
+
+##### Execution without Docker
+* We can go always go through `backend.Dockerfile` and `frontend.Dockerfile` to understand better.
+* Update `src/config.json` as per the requirement and use those path during upcoming steps.
+  * To know more about any field, just search for the reference in the codebase.
+* Install miniconda
+  * https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
+* Get `glove.6B.300d.txt` from `https://nlp.stanford.edu/projects/glove/`
+* Install ffmpeg
+  * Configure, build and install ffmpeg from source with shared libraries 
+```bash
+$ git clone 'https://github.com/FFmpeg/FFmpeg.git'
+$ cd FFmpeg
+$ ./configure --enable-shared  # Use --prefix if need to install in custom directory
+$ make
+# make install
+```
+* If required, use `https://github.com/tylin/coco-caption/` for scoring the model.
+* Then create conda environment using `environment.yml`
+  * `$ conda env create -f environment.yml`
+* And activate the environment
+```
+$ conda activate .
+```
+* Turn up the backend
+  * `src$ python -m backend.parser server --start --model /path/to/model`
+* Turn up the web frontend
+  * `src$ python -m frontend.app`
+
+### Info
+
+Data Directory and Working Directory can be same as the project root directory.
+
+### Data Directory
+File | Reference
+--- | --- 
+*/path/to/data_dir/VideoDataset/videodatainfo_2017.json* | http://ms-multimedia-challenge.com/2017/dataset
+*/path/to/data_dir/VideoDataset/videos/[0-9]+.mp4* | Download videos based on above dataset
+*/path/to/data_dir/glove/glove.6B.300d.txt* | https://nlp.stanford.edu/projects/glove/
+*/path/to/data_dir/VideoDataset/cache_40_224x224/[0-9]+.npy* | Video cached files will be created on fly
+
+### Working Directory
+File | Content
+--- | --- 
+*/path/to/working_dir/glove.dat* | Pickle Dumped Glove Embedding
+*/path/to/working_dir/vocab.dat* | Pickle Dumped Vocabulary Words
+  
+### Download Dataset
+* Execute `python videohandler.py` from *VideoDataset* Directory
+  
+### Execution
+It currently supports train, predict and server mode. Please use the following command for better explanation.
+```bash
+src$ python -m backend.parse -h
+```
+  
+### Training Methods
+
+* Try Iterative Learning
+* Try Random Learning  
+
+### Evaluation
+
+#### Prerequisite
+```bash
+cd /path/to/eval_dir/
+git clone 'https://github.com/tylin/coco-caption.git' cococaption
+ln /path/to/working_dir/cocoeval.py cococaption/
+```
+#### Evaluate
+```bash
+# One can do changes in parser.py for numbers of test examples to be considered in evaluation
+python parser.py predict save_all_test
+python /path/to/eval_dir/cocoeval.py <results file>.txt
 ```
 
-and decorate it with a directory pattern to synchronize instances:
+#### Sample Evaluation while training
 
-```python
-from datafiles import datafile
+Commit | Training | Total | CIDEr | Bleu_4 | ROUGE_L | METEOR | Model Filename 
+--- | --- | --- | --- | --- | --- | --- | --- 
+647e73b4 | 10 epochs | 1.1642 | 0.1580 | 0.3090 | 0.4917 | 0.2055 | CAttention_ResNet_D512L512_G128G64_D1024D0.20BN_BDGRU1024_D0.2L1024DVS_model.dat_4990_loss_2.484_Cider0.360_Blue0.369_Rouge0.580_Meteor0.256
+1a2124d | 17 epochs | 1.1599 | 0.1654 | 0.3022 | 0.4849 | 0.2074 | ResNet_D512L512_G128G64_D1024D0.20BN_BDLSTM1024_D0.2L1024DVS_model.dat_4987_loss_2.203_Cider0.342_Blue0.353_Rouge0.572_Meteor0.256
+f5c22f7 | 17 epochs | 1.1559 | 0.1680 | 0.3000 | 0.4832 | 0.2047 | ResNet_D512L512_G128G64_D1024D0.20BN_BDGRU1024_D0.2L1024DVS_model.dat_4983_loss_2.350_Cider0.355_Blue0.353_Rouge0.571_Meteor0.247_TOTAL_1.558_BEST
+bd072ac | 11 CPUhrs with Multiprocessing (16 epochs)  |  1.0736 | 0.1528 | 0.2597 | 0.4674 | 0.1936 | ResNet_D512L512_D1024D0.20BN_BDGRU1024_D0.2L1024DVS_model.dat_4986_loss_2.306_Cider0.347_Blue0.328_Rouge0.560_Meteor0.246 
+3ccf5d5 | 15 CPUhrs |  1.0307 | 0.1258 | 0.2535 | 0.4619 | 0.1895 | res_mcnn_rand_b100_s500_model.dat_model1_3ccf5d5 
 
-@datafile("inventory/items/{self.name}.yml")
-class InventoryItem:
-    ...
+Check `Specifications` section for model comparision.
+
+
+Temporal attention Model for is on `VideoCaption_catt` branch.
+
+Pre-trained Models : https://drive.google.com/open?id=1gexBRQfrjfcs7N5UI5NtlLiIR_xa69tK
+
+### Web Server
+
+- Start the server **(S)** for to compute predictions (Within conda environment)
+```bash
+python parser.py server -s -m <path/to/correct/model>
 ```
+- Check `config.json` for configurations.
+- Execute `python app.py` from webserver (No need for conda environment)
+  - Make sure, your the process is can new files inside `$UPLOAD_FOLDER`
+- Open `http://webserver:5000/` to open Web Server for testing (under default configuration)
 
-Then, work with instances of the class as normal:
+### Specifications
 
-```python
->>> item = InventoryItem("widget", 3)
-```
+##### Commit: 3ccf5d5
+- ResNet over LSTM for feature extraction
+- Word by Word generation based on last prediction for Sentence Generation using LSTM
+- Random Dataset Learning of training data
+- Vocab Size 9448
+- Glove of 300 Dimension
 
-```yaml
-# inventory/items/widget.yml
+##### Commit: bd072ac
+- ResNet over BiDirection GRU for feature extraction
+- Sequential Learning of training data
+- Batch Normalization + Few more tweaks in Model
+- Bleu, CIDEr, Rouge, Meteor score generation for validation
+- Multiprocessing keras
 
-unit_price: 3.0
-```
+##### Commit: f5c22f7
+- Audio with BiDirection GRU
 
-Changes to the object are automatically saved to the filesystem:
+##### Commit: 1a2124d
+- Audio with BiDirection LSTM
 
-```python
->>> item.quantity_on_hand += 100
-```
+##### Commit: 647e73b
+- Audio with BiDirection GRU using temporal attention for context
 
-```yaml
-# inventory/items/widget.yml
+# Image Captioning
+Generate caption for the given images
 
-unit_price: 3.0
-quantity_on_hand: 100
-```
+Branch : [onehot_gen](https://github.com/scopeInfinity/Video2Description/tree/onehot_gen)
 
-Changes to the filesystem are automatically reflected in the object:
+Commit : [898f15778d40b67f333df0a0e744a4af0b04b16c](https://github.com/scopeInfinity/Video2Description/commit/898f15778d40b67f333df0a0e744a4af0b04b16c)
 
-```yaml
-# inventory/items/widget.yml
+Trained Model : https://drive.google.com/open?id=1qzMCAbh_tW3SjMMVSPS4Ikt6hDnGfhEN
 
-unit_price: 2.5 # <= manually changed from "3.0"
-quantity_on_hand: 100
-```
+Categorical Crossentropy Loss : 0.58
 
-```python
->>> item.unit_price
-2.5
-```
-
-Objects can also be restored from the filesystem:
-
-```python
->>> from datafiles import Missing
->>> item = InventoryItem("widget", Missing)
->>> item.unit_price
-2.5
->>> item.quantity_on_hand
-100
-```
-
-## Installation
-
-Install this library directly into an activated virtual environment:
-
-```
-$ pip install datafiles
-```
-
-or add it to your [Poetry](https://poetry.eustace.io/) project:
-
-```
-$ poetry add datafiles
-```
-
-## Documentation
-
-To see additional synchronization and formatting options, please consult the [full documentation](https://datafiles.readthedocs.io).

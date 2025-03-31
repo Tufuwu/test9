@@ -1,0 +1,28 @@
+{
+    "app": {
+        "PREDICT_MODE_ONLY": true,
+        "PREFIX":"/home/si/v2d/src",
+        "MAX_CONTENT_LENGTH": 10649600,
+        "UPLOAD_FOLDER": "/home/si/v2d/uploads/",
+        "VIDEOS_DATASET": "/home/si/v2d/dataset/",
+        "VIDEOS_FOLDER": "/home/si/v2d/dataset/videos/",
+        "DATASET_CACHE": "/home/si/v2d/dataset_cache/"
+    },
+    "rpc": {
+        "RPC_SERVER_RUNAS": "172.14.0.2",
+        "RPC_PORT": 5001,
+        "RPC_ENDPOINT": "172.14.0.2"
+    },
+    "vpreprocess": {
+        "COCOFNAME": "/home/si/coco-caption/pycocoevalcap/eval.py",
+        "LOGS_DIR": "/var/log/v2d/vpreprocess.log"
+    },
+    "vocab": {
+        "GLOVE_FILE": "/home/si/v2d/dataset/glove.6B.300d.txt",
+        "WORD_EMBEDDED_CACHE": "/home/si/v2d/dataset_cache/glove_300.dat",
+        "VOCAB_FILE": "/home/si/v2d/dataset_cache/vocab.dat"
+    },
+    "tests": {
+        "dir_videos": "./tests/data/videos"
+    }
+}
