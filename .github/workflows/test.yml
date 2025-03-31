@@ -1,27 +1,12 @@
-name: ci
+name: Lint
 
-on:
-  push:
-    branches: [main]
-    tags: ["*"]
-  pull_request:
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  ci:
-    strategy:
-      fail-fast: false
-      matrix:
-        python: ["3.9", "3.10"]
-        toxenv: [py]
-        include:
-          - python: "3.9"
-            toxenv: flake8
+  lint:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python }}
-    - run: python -m pip install --upgrade pip wheel setuptools
-    - run: python -m pip install --upgrade tox poetry
-    - run: tox -e ${{ matrix.toxenv }}
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: pre-commit/action@v2.0.3
