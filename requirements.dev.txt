@@ -1,8 +1,0 @@
-djangorestframework>=3.7.0
-humanize
-flake8
-django-nose
-coverage
-django-memoize
-isort
-pytest-django

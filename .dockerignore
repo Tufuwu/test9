@@ -1,6 +1,0 @@
-*venv/
-*.tox/
-*.egg-info/
-*.sqlite*
-__pycache__
-.vscode/
