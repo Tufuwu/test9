@@ -1,307 +1,156 @@
-<p align="center">
-  <img src="docs/source/logo.png" height="150">
-</p>
+# Functions Framework for Python [![Build Status](https://travis-ci.com/GoogleCloudPlatform/functions-framework-python.svg?branch=master)](https://travis-ci.com/GoogleCloudPlatform/functions-framework-python) [![PyPI version](https://badge.fury.io/py/functions-framework.svg)](https://badge.fury.io/py/functions-framework)
 
-<h1 align="center">
-  PyKEEN
-</h1>
+An open source FaaS (Function as a service) framework for writing portable
+Python functions -- brought to you by the Google Cloud Functions team.
 
-<p align="center">
-  <a href="https://github.com/pykeen/pykeen/actions">
-    <img src="https://github.com/pykeen/pykeen/workflows/Tests/badge.svg"
-         alt="GitHub Actions">
-  </a>
+The Functions Framework lets you write lightweight functions that run in many
+different environments, including:
 
-  <a href="https://ci.appveyor.com/project/pykeen/pykeen/branch/master">
-    <img src="https://ci.appveyor.com/api/projects/status/lwp9cfnsa8d5yx62/branch/master?svg=true"
-         alt="AppVeyor">
-  </a>
+*   [Google Cloud Functions](https://cloud.google.com/functions/)
+*   Your local development machine
+*   [Cloud Run and Cloud Run for Anthos](https://cloud.google.com/run/)
+*   [Knative](https://github.com/knative/)-based environments
 
-  <a href='https://opensource.org/licenses/MIT'>
-    <img src='https://img.shields.io/badge/License-MIT-blue.svg' alt='License'/>
-  </a>
-
-  <a href="https://zenodo.org/badge/latestdoi/242672435">
-    <img src="https://zenodo.org/badge/242672435.svg" alt="DOI">
-  </a>
-
-  <a href="https://optuna.org">
-    <img src="https://img.shields.io/badge/Optuna-integrated-blue" alt="Optuna integrated" height="20">
-  </a>
-</p>
-
-<p align="center">
-    <b>PyKEEN</b> (<b>P</b>ython <b>K</b>nowl<b>E</b>dge <b>E</b>mbeddi<b>N</b>gs) is a Python package designed to
-    train and evaluate knowledge graph embedding models (incorporating multi-modal information).
-</p>
-
-<p align="center">
-  <a href="#installation">Installation</a> •
-  <a href="#quickstart">Quickstart</a> •
-  <a href="#datasets-19">Datasets</a> •
-  <a href="#models-23">Models</a> •
-  <a href="#supporters">Support</a> •
-  <a href="#citation">Citation</a>
-</p>
-
-## Installation ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pykeen) ![PyPI](https://img.shields.io/pypi/v/pykeen)
-
-The latest stable version of PyKEEN can be downloaded and installed from
-[PyPI](https://pypi.org/project/pykeen) with:
-
-```bash
-$ pip install pykeen
-```
-
-The latest version of PyKEEN can be installed directly from the
-source on [GitHub](https://github.com/pykeen/pykeen) with:
-
-```bash
-pip install git+https://github.com/pykeen/pykeen.git
-```
-
-More information about installation (e.g., development mode, Windows installation, extras)
-can be found in the [installation documentation](https://pykeen.readthedocs.io/en/latest/installation.html).
-
-## Quickstart [![Documentation Status](https://readthedocs.org/projects/pykeen/badge/?version=latest)](https://pykeen.readthedocs.io/en/latest/?badge=latest)
-
-This example shows how to train a model on a data set and test on another data set.
-
-The fastest way to get up and running is to use the pipeline function. It
-provides a high-level entry into the extensible functionality of this package.
-The following example shows how to train and evaluate the [TransE](https://pykeen.readthedocs.io/en/latest/api/pykeen.models.TransE.html#pykeen.models.TransE)
-model on the [Nations](https://pykeen.readthedocs.io/en/latest/api/pykeen.datasets.Nations.html#pykeen.datasets.Nations)
-dataset. By default, the training loop uses the [stochastic local closed world assumption (sLCWA)](https://pykeen.readthedocs.io/en/latest/reference/training.html#pykeen.training.SLCWATrainingLoop)
-training approach and evaluates with [rank-based evaluation](https://pykeen.readthedocs.io/en/latest/reference/evaluation/rank_based.html#pykeen.evaluation.RankBasedEvaluator).
+The framework allows you to go from:
 
 ```python
-from pykeen.pipeline import pipeline
-
-result = pipeline(
-    model='TransE',
-    dataset='nations',
-)
+def hello(request):
+    return "Hello world!"
 ```
 
-The results are returned in an instance of the [PipelineResult](https://pykeen.readthedocs.io/en/latest/reference/pipeline.html#pykeen.pipeline.PipelineResult)
-dataclass that has attributes for the trained model, the training loop, the evaluation, and more. See the tutorials on
-[understanding the evaluation](https://pykeen.readthedocs.io/en/latest/tutorial/understanding_evaluation.html)
-and [making novel link predictions](https://pykeen.readthedocs.io/en/latest/tutorial/making_predictions.html).
+To:
 
-PyKEEN is extensible such that:
-
-- Each model has the same API, so anything from ``pykeen.models`` can be dropped in
-- Each training loop has the same API, so ``pykeen.training.LCWATrainingLoop`` can be dropped in
-- Triples factories can be generated by the user with ``from pykeen.triples.TriplesFactory``
-
-The full documentation can be found at https://pykeen.readthedocs.io.
-
-## Implementation
-
-Below are the models, data sets, training modes, evaluators, and metrics implemented
-in ``pykeen``.
-
-### Datasets (19)
-
-| Name          | Reference                       | Description                                                                                        |
-|---------------|---------------------------------|----------------------------------------------------------------------------------------------------|
-| codexlarge    | `pykeen.datasets.CoDExLarge`    | The CoDEx large dataset.                                                                           |
-| codexmedium   | `pykeen.datasets.CoDExMedium`   | The CoDEx medium dataset.                                                                          |
-| codexsmall    | `pykeen.datasets.CoDExSmall`    | The CoDEx small dataset.                                                                           |
-| drkg          | `pykeen.datasets.DRKG`          | The DRKG dataset.                                                                                  |
-| fb15k         | `pykeen.datasets.FB15k`         | The FB15k data set.                                                                                |
-| fb15k237      | `pykeen.datasets.FB15k237`      | The FB15k-237 data set.                                                                            |
-| hetionet      | `pykeen.datasets.Hetionet`      | The Hetionet dataset is a large biological network.                                                |
-| kinships      | `pykeen.datasets.Kinships`      | The Kinships data set.                                                                             |
-| nations       | `pykeen.datasets.Nations`       | The Nations data set.                                                                              |
-| ogbbiokg      | `pykeen.datasets.OGBBioKG`      | The OGB BioKG dataset.                                                                             |
-| ogbwikikg     | `pykeen.datasets.OGBWikiKG`     | The OGB WikiKG dataset.                                                                            |
-| openbiolink   | `pykeen.datasets.OpenBioLink`   | The OpenBioLink dataset.                                                                           |
-| openbiolinkf1 | `pykeen.datasets.OpenBioLinkF1` | The PyKEEN First Filtered OpenBioLink 2020 Dataset.                                                |
-| openbiolinkf2 | `pykeen.datasets.OpenBioLinkF2` | The PyKEEN Second Filtered OpenBioLink 2020 Dataset.                                               |
-| openbiolinklq | `pykeen.datasets.OpenBioLinkLQ` | The low-quality variant of the OpenBioLink dataset.                                                |
-| umls          | `pykeen.datasets.UMLS`          | The UMLS data set.                                                                                 |
-| wn18          | `pykeen.datasets.WN18`          | The WN18 data set.                                                                                 |
-| wn18rr        | `pykeen.datasets.WN18RR`        | The WN18-RR data set.                                                                              |
-| yago310       | `pykeen.datasets.YAGO310`       | The YAGO3-10 data set is a subset of YAGO3 that only contains entities with at least 10 relations. |
-
-### Models (23)
-
-| Name                | Reference                           | Citation                     |
-|---------------------|-------------------------------------|------------------------------|
-| ComplEx             | `pykeen.models.ComplEx`             | Trouillon *et al.*, 2016     |
-| ComplExLiteral      | `pykeen.models.ComplExLiteral`      | Agustinus *et al.*, 2018     |
-| ConvE               | `pykeen.models.ConvE`               | Dettmers *et al.*, 2018      |
-| ConvKB              | `pykeen.models.ConvKB`              | Nguyen *et al.*, 2018        |
-| DistMult            | `pykeen.models.DistMult`            | Yang *et al.*, 2014          |
-| DistMultLiteral     | `pykeen.models.DistMultLiteral`     | Agustinus *et al.*, 2018     |
-| ERMLP               | `pykeen.models.ERMLP`               | Dong *et al.*, 2014          |
-| ERMLPE              | `pykeen.models.ERMLPE`              | Sharifzadeh *et al.*, 2019   |
-| HolE                | `pykeen.models.HolE`                | Nickel *et al.*, 2016        |
-| KG2E                | `pykeen.models.KG2E`                | He *et al.*, 2015            |
-| NTN                 | `pykeen.models.NTN`                 | Socher *et al.*, 2013        |
-| ProjE               | `pykeen.models.ProjE`               | Shi *et al.*, 2017           |
-| RESCAL              | `pykeen.models.RESCAL`              | Nickel *et al.*, 2011        |
-| RGCN                | `pykeen.models.RGCN`                | Schlichtkrull *et al.*, 2018 |
-| RotatE              | `pykeen.models.RotatE`              | Sun *et al.*, 2019           |
-| SimplE              | `pykeen.models.SimplE`              | Kazemi *et al.*, 2018        |
-| StructuredEmbedding | `pykeen.models.StructuredEmbedding` | Bordes *et al.*, 2011        |
-| TransD              | `pykeen.models.TransD`              | Ji *et al.*, 2015            |
-| TransE              | `pykeen.models.TransE`              | Bordes *et al.*, 2013        |
-| TransH              | `pykeen.models.TransH`              | Wang *et al.*, 2014          |
-| TransR              | `pykeen.models.TransR`              | Lin *et al.*, 2015           |
-| TuckER              | `pykeen.models.TuckER`              | Balazevic *et al.*, 2019     |
-| UnstructuredModel   | `pykeen.models.UnstructuredModel`   | Bordes *et al.*, 2014        |
-
-### Losses (7)
-
-| Name            | Reference                           | Description                                                                                       |
-|-----------------|-------------------------------------|---------------------------------------------------------------------------------------------------|
-| bceaftersigmoid | `pykeen.losses.BCEAfterSigmoidLoss` | A loss function which uses the numerically unstable version of explicit Sigmoid + BCE.            |
-| bcewithlogits   | `pykeen.losses.BCEWithLogitsLoss`   | A wrapper around the numeric stable version of the PyTorch binary cross entropy loss.             |
-| crossentropy    | `pykeen.losses.CrossEntropyLoss`    | Evaluate cross entropy after softmax output.                                                      |
-| marginranking   | `pykeen.losses.MarginRankingLoss`   | A wrapper around the PyTorch margin ranking loss.                                                 |
-| mse             | `pykeen.losses.MSELoss`             | A wrapper around the PyTorch mean square error loss.                                              |
-| nssa            | `pykeen.losses.NSSALoss`            | An implementation of the self-adversarial negative sampling loss function proposed by [sun2019]_. |
-| softplus        | `pykeen.losses.SoftplusLoss`        | A loss function for the softplus.                                                                 |
-
-### Regularizers (5)
-
-| Name     | Reference                                 | Description                                              |
-|----------|-------------------------------------------|----------------------------------------------------------|
-| combined | `pykeen.regularizers.CombinedRegularizer` | A convex combination of regularizers.                    |
-| lp       | `pykeen.regularizers.LpRegularizer`       | A simple L_p norm based regularizer.                     |
-| no       | `pykeen.regularizers.NoRegularizer`       | A regularizer which does not perform any regularization. |
-| powersum | `pykeen.regularizers.PowerSumRegularizer` | A simple x^p based regularizer.                          |
-| transh   | `pykeen.regularizers.TransHRegularizer`   | A regularizer for the soft constraints in TransH.        |
-
-### Optimizers (6)
-
-| Name     | Reference              | Description                                                             |
-|----------|------------------------|-------------------------------------------------------------------------|
-| adadelta | `torch.optim.Adadelta` | Implements Adadelta algorithm.                                          |
-| adagrad  | `torch.optim.Adagrad`  | Implements Adagrad algorithm.                                           |
-| adam     | `torch.optim.Adam`     | Implements Adam algorithm.                                              |
-| adamax   | `torch.optim.Adamax`   | Implements Adamax algorithm (a variant of Adam based on infinity norm). |
-| adamw    | `torch.optim.AdamW`    | Implements AdamW algorithm.                                             |
-| sgd      | `torch.optim.SGD`      | Implements stochastic gradient descent (optionally with momentum).      |
-
-### Training Loops (2)
-
-| Name   | Reference                           | Description                                                                               |
-|--------|-------------------------------------|-------------------------------------------------------------------------------------------|
-| lcwa   | `pykeen.training.LCWATrainingLoop`  | A training loop that uses the local closed world assumption training approach.            |
-| slcwa  | `pykeen.training.SLCWATrainingLoop` | A training loop that uses the stochastic local closed world assumption training approach. |
-
-### Negative Samplers (2)
-
-| Name      | Reference                                  | Description                                                                            |
-|-----------|--------------------------------------------|----------------------------------------------------------------------------------------|
-| basic     | `pykeen.sampling.BasicNegativeSampler`     | A basic negative sampler.                                                              |
-| bernoulli | `pykeen.sampling.BernoulliNegativeSampler` | An implementation of the bernoulli negative sampling approach proposed by [wang2014]_. |
-
-### Stoppers (2)
-
-| Name   | Reference                      | Description                   |
-|--------|--------------------------------|-------------------------------|
-| early  | `pykeen.stoppers.EarlyStopper` | A harness for early stopping. |
-| nop    | `pykeen.stoppers.NopStopper`   | A stopper that does nothing.  |
-
-### Evaluators (2)
-
-| Name      | Reference                              | Description                                   |
-|-----------|----------------------------------------|-----------------------------------------------|
-| rankbased | `pykeen.evaluation.RankBasedEvaluator` | A rank-based evaluator for KGE models.        |
-| sklearn   | `pykeen.evaluation.SklearnEvaluator`   | An evaluator that uses a Scikit-learn metric. |
-
-### Metrics (6)
-
-| Metric                  | Description                                                                                                        | Evaluator   | Reference                                  |
-|-------------------------|--------------------------------------------------------------------------------------------------------------------|-------------|--------------------------------------------|
-| Adjusted Mean Rank      | The mean over all chance-adjusted ranks: mean_i (2r_i / (num_entities+1)). Lower is better.                        | rankbased   | `pykeen.evaluation.RankBasedMetricResults` |
-| Average Precision Score | The area under the precision-recall curve, between [0.0, 1.0]. Higher is better.                                   | sklearn     | `pykeen.evaluation.SklearnMetricResults`   |
-| Hits At K               | The hits at k for different values of k, i.e. the relative frequency of ranks not larger than k. Higher is better. | rankbased   | `pykeen.evaluation.RankBasedMetricResults` |
-| Mean Rank               | The mean over all ranks: mean_i r_i. Lower is better.                                                              | rankbased   | `pykeen.evaluation.RankBasedMetricResults` |
-| Mean Reciprocal Rank    | The mean over all reciprocal ranks: mean_i (1/r_i). Higher is better.                                              | rankbased   | `pykeen.evaluation.RankBasedMetricResults` |
-| Roc Auc Score           | The area under the ROC curve between [0.0, 1.0]. Higher is better.                                                 | sklearn     | `pykeen.evaluation.SklearnMetricResults`   |
-
-### Trackers (2)
-
-| Name   | Reference                             | Description                       |
-|--------|---------------------------------------|-----------------------------------|
-| mlflow | `pykeen.trackers.MLFlowResultTracker` | A tracker for MLFlow.             |
-| wandb  | `pykeen.trackers.WANDBResultTracker`  | A tracker for Weights and Biases. |
-
-## Hyper-parameter Optimization
-
-### Samplers (3)
-
-| Name   | Reference                       | Description                                                     |
-|--------|---------------------------------|-----------------------------------------------------------------|
-| grid   | `optuna.samplers.GridSampler`   | Sampler using grid search.                                      |
-| random | `optuna.samplers.RandomSampler` | Sampler using random sampling.                                  |
-| tpe    | `optuna.samplers.TPESampler`    | Sampler using TPE (Tree-structured Parzen Estimator) algorithm. |
-
-## Experimentation
-
-### Reproduction
-
-PyKEEN includes a set of curated experimental settings for reproducing past landmark
-experiments. They can be accessed and run like:
-
-```bash
-pykeen experiments reproduce tucker balazevic2019 fb15k
+```sh
+curl http://my-url
+# Output: Hello world!
 ```
 
-Where the three arguments are the model name, the reference, and the data set.
-The output directory can be optionally set with `-d`.
+All without needing to worry about writing an HTTP server or complicated request handling logic.
 
-### Ablation
+# Features
 
-PyKEEN includes the ability to specify ablation studies using the
-hyper-parameter optimization module. They can be run like:
+*   Spin up a local development server for quick testing
+*   Invoke a function in response to a request
+*   Automatically unmarshal events conforming to the [CloudEvents](https://cloudevents.io/) spec
+*   Portable between serverless platforms
 
-```bash
-pykeen experiments ablation ~/path/to/config.json
+# Installation
+
+Install the Functions Framework via `pip`:
+
+```sh
+pip install functions-framework
 ```
 
-## Contributing
+Or, for deployment, add the Functions Framework to your `requirements.txt` file:
 
-Contributions, whether filing an issue, making a pull request, or forking, are appreciated. 
-See [CONTRIBUTING.md](/CONTRIBUTING.md) for more information on getting involved.
-
-## Acknowledgements
-
-### Supporters
-
-This project has been supported by several organizations (in alphabetical order):
-
-- [Bayer](https://www.bayer.com/)
-- [Enveda Therapeutics](https://envedatherapeutics.com/)
-- [Fraunhofer Institute for Algorithms and Scientific Computing](https://www.scai.fraunhofer.de)
-- [Fraunhofer Institute for Intelligent Analysis and Information Systems](https://www.iais.fraunhofer.de)
-- [Fraunhofer Center for Machine Learning](https://www.cit.fraunhofer.de/de/zentren/maschinelles-lernen.html)
-- [Ludwig-Maximilians-Universität München](https://www.en.uni-muenchen.de/index.html)
-- [Munich Center for Machine Learning (MCML)](https://mcml.ai/)
-- [Siemens](https://new.siemens.com/global/en.html)
-- [Smart Data Analytics Research Group (University of Bonn & Fraunhofer IAIS)](https://sda.tech)
-- [Technical University of Denmark - DTU Compute - Section for Cognitive Systems](https://www.compute.dtu.dk/english/research/research-sections/cogsys)
-- [Technical University of Denmark - DTU Compute - Section for Statistics and Data Analysis](https://www.compute.dtu.dk/english/research/research-sections/stat)
-- [University of Bonn](https://www.uni-bonn.de/)
-
-### Logo
-
-The PyKEEN logo was designed by Carina Steinborn.
-
-## Citation
-
-If you have found PyKEEN useful in your work, please consider citing [our article](https://arxiv.org/abs/2007.14175):
-
-```bibtex
-@article{ali2020pykeen,
-  title={PyKEEN 1.0: A Python Library for Training and Evaluating Knowledge Graph Emebddings},
-  author={Ali, Mehdi and Berrendorf, Max and Hoyt, Charles Tapley and Vermue, Laurent and Sharifzadeh, Sahand and Tresp, Volker and Lehmann, Jens},
-  journal={arXiv preprint arXiv:2007.14175},
-  year={2020}
-}
 ```
+functions-framework==1.4.0
+```
+
+# Quickstart: Hello, World on your local machine
+
+Create an `main.py` file with the following contents:
+
+```python
+def hello(request):
+    return "Hello world!"
+```
+
+Run the following command:
+
+```sh
+functions-framework --target=hello
+```
+
+Open http://localhost:8080/ in your browser and see *Hello world!*.
+
+
+# Quickstart: Set up a new project
+
+Create a `main.py` file with the following contents:
+
+```python
+def hello(request):
+    return "Hello world!"
+```
+
+Now install the Functions Framework:
+
+```sh
+pip install functions-framework
+```
+
+Use the `functions-framework` command to start the built-in local development server:
+
+```sh
+functions-framework --target hello --debug
+ * Serving Flask app "hello" (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+```
+
+Send requests to this function using `curl` from another terminal window:
+
+```sh
+curl localhost:8080
+# Output: Hello world!
+```
+
+# Run your function on serverless platforms
+
+## Google Cloud Functions
+
+This Functions Framework is based on the [Python Runtime on Google Cloud Functions](https://cloud.google.com/functions/docs/concepts/python-runtime).
+
+On Cloud Functions, using the Functions Framework is not necessary: you don't need to add it to your `requirements.txt` file.
+
+After you've written your function, you can simply deploy it from your local machine using the `gcloud` command-line tool. [Check out the Cloud Functions quickstart](https://cloud.google.com/functions/docs/quickstart).
+
+## Cloud Run/Cloud Run on GKE
+
+Once you've written your function and added the Functions Framework to your `requirements.txt` file, all that's left is to create a container image. [Check out the Cloud Run quickstart](https://cloud.google.com/run/docs/quickstarts/build-and-deploy) for Python to create a container image and deploy it to Cloud Run. You'll write a `Dockerfile` when you build your container. This `Dockerfile` allows you to specify exactly what goes into your container (including custom binaries, a specific operating system, and more).
+
+If you want even more control over the environment, you can [deploy your container image to Cloud Run on GKE](https://cloud.google.com/run/docs/quickstarts/prebuilt-deploy-gke). With Cloud Run on GKE, you can run your function on a GKE cluster, which gives you additional control over the environment (including use of GPU-based instances, longer timeouts and more).
+
+## Container environments based on Knative
+
+Cloud Run and Cloud Run on GKE both implement the [Knative Serving API](https://www.knative.dev/docs/). The Functions Framework is designed to be compatible with Knative environments. Just build and deploy your container to a Knative environment.
+
+# Configure the Functions Framework
+
+You can configure the Functions Framework using command-line flags or environment variables. If you specify both, the environment variable will be ignored.
+
+| Command-line flag  | Environment variable      | Description                                                                                                                                                                                      |
+| ------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--host`           | `HOST`                    | The host on which the Functions Framework listens for requests. Default: `0.0.0.0`                                                                                                               |
+| `--port`           | `PORT`                    | The port on which the Functions Framework listens for requests. Default: `8080`                                                                                                                  |
+| `--target`         | `FUNCTION_TARGET`         | The name of the exported function to be invoked in response to requests. Default: `function`                                                                                                     |
+| `--signature-type` | `FUNCTION_SIGNATURE_TYPE` | The signature used when writing your function. Controls unmarshalling rules and determines which arguments are used to invoke your function. Default: `http`; accepted values: `http` or `event` |
+| `--source`         | `FUNCTION_SOURCE`         | The path to the file containing your function. Default: `main.py` (in the current working directory)                                                                                             |
+| `--debug`          | `DEBUG`                   | A flag that allows to run functions-framework to run in debug mode, including live reloading. Default: `False`                                                                                   |
+
+# Enable CloudEvents
+
+The Functions Framework can unmarshall incoming [CloudEvents](http://cloudevents.io) payloads to `data` and `context` objects.  These will be passed as arguments to your function when it receives a request.  Note that your function must use the event-style function signature:
+
+```python
+def hello(data, context):
+    print(data)
+    print(context)
+```
+
+To enable automatic unmarshalling, set the function signature type to `event` using the `--signature-type` command-line flag or the `FUNCTION_SIGNATURE_TYPE` environment variable. By default, the HTTP signature type will be used and automatic event unmarshalling will be disabled.
+
+For more details on this signature type, check out the Google Cloud Functions documentation on [background functions](https://cloud.google.com/functions/docs/writing/background#cloud_pubsub_example).
+
+# Advanced Examples
+
+More advanced guides can be found in the [`examples/`](./examples/) directory.
+
+# Contributing
+
+Contributions to this library are welcome and encouraged. See [CONTRIBUTING](CONTRIBUTING.md) for more information on how to get started.
