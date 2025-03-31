@@ -1,67 +1,113 @@
-**⚠️ All branches starting with `unfinished-cogs/` come with limited support and might not fully work.**<br>
-If you use any "unfinished" cog, message me on Discord to get info about breaking changes that may affect you.
+# FeedCrawler
 
----
+<img src="./feedcrawler/web/img/favicon.ico" data-canonical-src="./feedcrawler/web/img/favicon.ico" width="64" height="64" />
 
-# JackCogs
+FeedCrawler (ehemals RSScrawler) automatisiert bequem das Hinzufügen von Links für den JDownloader.
 
-[![Subscribe on Patreon](https://img.shields.io/badge/Support%20me%20on-Patreon-orange.svg?logo=patreon)](https://www.patreon.com/Jackenmen)
-[![Build Status](https://travis-ci.com/jack1142/JackCogs.svg?branch=wip/cleaning-code-v3)](https://travis-ci.com/jack1142/JackCogs/branches)
-[![Code style: black](https://github.com/jack1142/JackCogs/workflows/black/badge.svg)](https://github.com/ambv/black)
-[![Red cogs](https://img.shields.io/badge/Red--DiscordBot-cogs-red.svg)](https://github.com/Cog-Creators/Red-DiscordBot/tree/V3/develop)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![PyPI version](https://badge.fury.io/py/feedcrawler.svg)](https://badge.fury.io/py/feedcrawler)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/feedcrawler)](https://github.com/rix1337/FeedCrawler/releases)
+[![Github Sponsorship](https://img.shields.io/badge/support-me-red.svg)](https://github.com/users/rix1337/sponsorship)
+[![Chat aufrufen unter https://gitter.im/FeedCrawler/community](https://badges.gitter.im/FeedCrawler/community.svg)](https://gitter.im/FeedCrawler/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![GitHub license](https://img.shields.io/github/license/rix1337/FeedCrawler.svg)](https://github.com/rix1337/FeedCrawler/blob/master/LICENSE.md)
+[![GitHub issues](https://img.shields.io/github/issues/rix1337/FeedCrawler.svg)](https://github.com/rix1337/FeedCrawler/issues)
+[![GitHub stars](https://img.shields.io/github/stars/rix1337/FeedCrawler.svg)](https://github.com/rix1337/FeedCrawler/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/rix1337/FeedCrawler.svg)](https://github.com/rix1337/FeedCrawler/network)
 
-Cogs created by jack1142 (Jackenmen#6607 on Discord) for [Red-DiscordBot](https://github.com/Cog-Creators/Red-DiscordBot). Red-DiscordBot is a multipurpose bot for Discord developed by Twentysix26 and the Core Developer team. Feel free to create issues, if you want to see some function in one of my cogs. If you see a bug in one of my cogs, do that as well ;)
+***
 
-If you're developer, you can also send pull requests and I will happily merge your commits, if it doesn't conflict with anything developed before.
+## Docker
 
-Also I suggest to join [Red - Cog Support server](https://discord.gg/GET4DVk) and if you will ever need help with any of my cogs, just mention me (@Jackenmen#6607) on #support_othercogs channel.
+* Offizielles Repo im Docker Hub: [docker-feedcrawler](https://hub.docker.com/r/rix1337/docker-feedcrawler/)
+* Der Betrieb als Docker-Container empfiehlt sich als Standardinstallation - vor allem für NAS-Systeme, Homeserver und
+  sonstige Geräte die dauerhaft und möglichst wartungsfrei (headless) betrieben werden sollen. Beim (Neu-)Start des
+  Containers wird automatisch die neueste Version heruntergeladen. Wird ein neues Image im Docker Hub bereitgestellt,
+  sollte dennoch auf dieses aktualisiert werden!
+* Für UNRAID-Server kann das Image direkt über die Community Applications bezogen und der Container so eingerichtet
+  werden.
+* Ein [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) muss lokal verfügbar sein um Cloudflare-Blockaden zu
+  umgehen (optional)
 
-# Cogs in this repo
+## Windows
 
-* **banmessage** - Send message on ban in a chosen channel. Supports images!
-* **cogboard** - Search for cogs in approved repos on CogBoard.
-* **membercount** - Get count of all members + humans and bots separately.
-* **modroles** - Allow moderators without manage roles permission to assign configured roles to users.
-* **nitrorole** - Welcome new nitro boosters and/or give them a special role!
-* **rlstats** - Get your Rocket League stats with a single command! Needs access to Rocket League API which is currently in closed beta.
-* **voicetools** - Various tools to make voice channels better!
+* Jedem [Release](https://github.com/rix1337/FeedCrawler/releases) wird eine selbstständig unter Windows lauffähige
+  Version des Feedcrawlers beigefügt.
+* Hierfür müssen weder Python, noch die Zusatzpakete installiert werden.
+* Einfach die jeweilige Exe herunterladen und ausführen bzw. bei Updates die Exe ersetzen.
+* Ein [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) muss lokal verfügbar sein um Cloudflare-Blockaden zu
+  umgehen (optional)
 
-# Installation
+## Manuelle Installation
 
-> These are cogs for [Red-DiscordBot V3](https://github.com/Cog-Creators/Red-DiscordBot/tree/V3/develop).
-You need to have a working instance of Red V3 in order to install these cogs.
+### Voraussetzungen
 
-*[p] is your prefix.*
+* [Python 3.6](https://www.python.org/downloads/) oder neuer
+* [pip](https://pip.pypa.io/en/stable/installing/)
+* [JDownloader 2](http://www.jdownloader.org/jdownloader2) mit [My JDownloader-Konto](https://my.jdownloader.org)
+* [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) um Cloudflare-Blockaden zu umgehen (optional)
 
-* Make sure Downloader is loaded:<br>
-  `[p]load downloader`
+### Installation
 
-* Add the repo to your bot:<br>
-  `[p]repo add JackCogs https://github.com/jack1142/JackCogs`
+```pip install feedcrawler```
 
-* Install the cogs you want:<br>
-  `[p]cog install JackCogs <cog_name>`
+Hinweise zur manuellen Installation und Einrichtung finden sich im [Wiki](https://github.com/rix1337/FeedCrawler/wiki)!
 
-* Load installed cogs:<br>
-  ``[p]load <cog_name>``
+### Bekannte Fehler
 
-# Credits
+Kommt es nach einem Update oder Neustart des Containers zu einer `sqlite3.OperationalError: database is locked`
+-Fehlermeldungen, so muss der Container gestoppt, die `FeedCrawler.db` beliebig (bspw. zu `FeedCrawler-Temp.db`)
+umbenannt und direkt wieder zurück zu `FeedCrawler.db` umbenannt werden. Hintergrund ist, dass der FeedCrawler nicht
+während die Datenbank verwendet wird (bspw. bei aktiver Feedsuche) gestoppt werden sollte. Der Umbenennungs-Workaround
+stellt sicher, dass das Betriebssystem die Datei wieder freigibt (also den Lock loslässt).
 
-Twentysix26 and everyone else who has contributed to Red Bot.
+Fehler im Installationsprozess per _pip_ deuten auf fehlende Compiler im System hin. Meist muss ein Zusatzpaket
+nachinstalliert werden (Beispielsweise die [VS C++ Build Tools](https://aka.ms/vs/16/release/vs_buildtools.exe) für
+Windows oder libffi per `apt-get install libffi-dev` für den Raspberry Pi).
 
-Redjumpman and PaddoInWonderlands, for this neat readme file template :D
+### Update
 
-# License
+```pip install -U feedcrawler```
 
-Please see MIT License for details. This project is open source and you are free to modify and use my work as long as you credit me.
+### Starten
 
-This project bundles fonts from [Roboto family](https://fonts.google.com/specimen/Roboto) which is distributed on Apache License 2.0
+```feedcrawler``` in der Konsole (Python muss im System-PATH hinterlegt sein)
 
-This project bundles screenshot done by reddit user [CastleintheMist](https://www.reddit.com/user/CastleintheMist/)
+## Hostnamen festlegen
 
----
+FeedCrawler kann zum durchsuchen beliebiger Webseiten verwendet werden. Ausschließlich der Anwender entscheidet, welche
+Seiten durchsucht werden sollen. Diese Entscheidung trifft der Anwender selbstständig, indem er die _Feedcrawler.ini_ in
+der Kategorie _[Hostnames]_ manuell befüllt (_ab = xyz.com_). Eingetragen werden dort reine Hostnamen (ohne _https://_).
 
-> Jakub Kuczys &nbsp;&middot;&nbsp;
-> GitHub [@jack1142](https://github.com/jack1142)
+### Dabei gilt
+
+* Welcher Hostname aufgerufen wird entscheidet allein der Anwender.
+* Ist nicht mindestens ein Hostname gesetzt, wird der FeedCrawler nicht starten.
+* Passt die aufgerufene Seite hinter dem jeweiligen Hostnamen nicht zum Suchmuster des Feedcrawlers, kann es zu Fehlern
+  kommen.
+* Weder FeedCrawler noch der Autor benennen oder befürworten spezifische Hostnamen. Fragen hierzu werden ignoriert!
+
+## Sicherheitshinweis
+
+Der Webserver sollte nie ohne Absicherung im Internet freigegeben werden. Dazu lassen sich im Webinterface Nutzername
+und Passwort festlegen.
+
+Es empfiehlt sich, zusätzlich einen Reverse-Proxy mit HTTPs-Zertifikat,
+bspw. [kostenlos von letsencrypt](https://letsencrypt.org/), zu verwenden.
+
+## Startparameter
+
+| Parameter | Erläuterung |
+|---|---|
+| ```--log-level=<LOGLEVEL>``` | Legt fest, wie genau geloggt wird (`CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`, `NOTSET`) |
+| ```--config="<CFGPFAD>"``` | Legt den Ablageort für Einstellungen und Logs fest |
+| ```--port=<PORT>``` | Legt den Port des Webservers fest |
+| ```--jd-user=<NUTZERNAME>``` | Legt den Nutzernamen für My JDownloader fest |
+| ```--jd-pass=<PASSWORT>``` | Legt das Passwort für My JDownloader fest |
+| ```--jd-device=<GERÄTENAME>``` | Legt den Gerätenamen für My JDownloader fest (optional, wenn nur ein Gerät vorhanden ist) |
+| ``` --keep-cdc``` | Leere die CDC-Tabelle (Feed ab hier bereits gecrawlt) nicht vor dem ersten Suchlauf |
+
+## Credits
+
+* [mmarquezs](https://github.com/mmarquezs/)
+* [Gutz-Pilz](https://github.com/Gutz-Pilz/)
+* [zapp-brannigan](https://github.com/zapp-brannigan/)
+* [JetBrains PyCharm](https://www.jetbrains.com/?from=FeedCrawler)
