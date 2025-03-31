@@ -1,12 +1,4 @@
-.idea
-*.iml
-
-
-_virtualenv
-
-src/__pycache__
-__pycache__
-.cache
-.coverage
-
-.DS_Store
+*.pyc
+*.egg-info
+build/
+dist/
