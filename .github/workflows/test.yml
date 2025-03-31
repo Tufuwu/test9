@@ -1,38 +1,48 @@
-name: tests
+name: testing
 
 on:
   push:
-    branches: [ main ]
+    branches: main
   pull_request:
-    branches: [ main ]
-
-env:
-  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
 jobs:
-  tests:
 
-    name: Run tests
+  postgres:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
+
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python3 -m pip install --upgrade pip setuptools
-        pip install ".[dev]"
-        pip install coverage coveralls
-    - name: Run pytest
-      run: |
-        pytest tests/regression_test.py
-        pytest -Werror --cov-branch --cov=mf2 tests/property_test.py tests/multi_fidelity_function_test.py
-    - name: Report coverage
-      run: |
-        coveralls --service=github
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Create database
+        run: |
+          docker-compose pull db
+          docker-compose run -d -p 5432:5432 --name postgresql_database db
+
+      - name: Execute tests
+        run: |
+          pip install -U pip wheel setuptools
+          pip install -r devel.txt
+          # workaround for https://github.com/tomturner/django-tenants/issues/336
+          pip install psycopg2
+
+          docker exec -i postgresql_database psql -c "ALTER USER kiwi CREATEDB;"
+
+          make check
+
+      - name: Local coverage report
+        run: |
+          coverage report -m
+          #coverage xml
+
+      - name: Send coverage to CodeCov
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: true
+          files: .coverage

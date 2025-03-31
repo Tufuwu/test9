@@ -1,0 +1,153 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-02 09:16+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: tcms_tenants/admin.py:40 tcms_tenants/middleware.py:32
+msgid "Unauthorized"
+msgstr ""
+
+#: tcms_tenants/admin.py:70
+msgid "Existing username, email or user ID"
+msgstr ""
+
+#: tcms_tenants/admin.py:104
+msgid "Username"
+msgstr ""
+
+#: tcms_tenants/admin.py:109
+msgid "Full name"
+msgstr ""
+
+#: tcms_tenants/forms.py:27
+msgid "Invalid string"
+msgstr ""
+
+#: tcms_tenants/menu.py:11
+msgid "Tenant"
+msgstr ""
+
+#: tcms_tenants/menu.py:12
+msgid "Create"
+msgstr ""
+
+#: tcms_tenants/menu.py:13
+msgid "Edit"
+msgstr ""
+
+#: tcms_tenants/menu.py:15
+#: tcms_tenants/templates/tcms_tenants/invite_users.html:9
+msgid "Invite users"
+msgstr ""
+
+#: tcms_tenants/menu.py:16
+msgid "Authorized users"
+msgstr ""
+
+#: tcms_tenants/middleware.py:54
+msgid "Unpaid"
+msgstr ""
+
+#: tcms_tenants/middleware.py:64
+msgid "Tenant expires in less than 7 days"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/email/invite_user.txt:1
+#, python-format
+msgid ""
+"Dear tester,\n"
+"%(invited_by)s has invited you to join their Kiwi TCMS tenant at\n"
+"%(tenant_url)s\n"
+"\n"
+"In case you have never logged in before an account was created for you\n"
+"automatically. You will have to reset your password before you can login!"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/email/new.txt:1
+#, python-format
+msgid ""
+"Your Kiwi TCMS tenant was created at:\n"
+"%(tenant_url)s\n"
+"\n"
+"If you have troubles please contact support!"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/invite_users.html:20
+msgid "Email"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/invite_users.html:26
+#: tcms_tenants/templates/tcms_tenants/new.html:65
+msgid "Save"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:9
+msgid "New tenant"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:23
+msgid "Name"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:26
+msgid "Company, team or project name"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:34
+msgid "Schema"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:47
+msgid "Validation pattern"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:52
+msgid "Publicly readable"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:57
+msgid "Yes"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:57
+msgid "No"
+msgstr ""
+
+#: tcms_tenants/utils.py:60
+msgid "Schema name already in use"
+msgstr ""
+
+#: tcms_tenants/utils.py:107
+msgid "New Kiwi TCMS tenant created"
+msgstr ""
+
+#: tcms_tenants/utils.py:198
+msgid "Invitation to join Kiwi TCMS"
+msgstr ""
+
+#: tcms_tenants/views.py:80
+msgid "Only super-user and tenant owner are allowed to edit tenant properties"
+msgstr ""
+
+#: tcms_tenants/views.py:98
+msgid "Edit tenant"
+msgstr ""
+
+#: tcms_tenants/views.py:146
+msgid "Only users who are authorized for this tenant can invite others"
+msgstr ""
