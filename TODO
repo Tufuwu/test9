@@ -1,5 +1,5 @@
-
-Todo
-==============================================================================
-* Prettier device info strings (e.g. "Forerunner 235" rather than "fr235")
-* More...
+* Cloud Backups
+* Add Cloud Files container sync
+* Add support for Cloud Networks virtual interfaces
+* March 2019: Drop support for Python 3.4
+* January 2020: Drop support for Python 2.7

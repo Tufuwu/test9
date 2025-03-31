@@ -1,64 +1,104 @@
 #!/usr/bin/env python
-#
-# FIT to TCX distutils setup script
-#
-# Copyright (c) 2012, Gustav Tiger <gustav@tiger.name>
-#
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
-
-from __future__ import absolute_import, print_function
 
 from setuptools import setup
+from setuptools.command.sdist import sdist as _sdist
+import re
+import sys
+import time
+import codecs
+import subprocess
+if sys.version < "2.2.3":
+    from distutils.dist import DistributionMetadata
+    DistributionMetadata.classifiers = None
+    DistributionMetadata.download_url = None
 
+# Workaround for problems caused by this import
+# It's either this or hardcoding the version.
+# from pyrax.version import version
+with open("pyrax/version.py", "rt") as vfile:
+    version_text = vfile.read()
+vmatch = re.search(r'version ?= ?"(.+)"$', version_text)
+version = vmatch.groups()[0]
+
+# When set to '0' this expands in the RPM SPEC file to a unique date-base string
+# Set to another value when cutting official release RPMS, then change back to
+# zero for the next development cycle
+release = '0'
+
+
+class sdist(_sdist):
+    """ custom sdist command, to prep pyrax.spec file """
+
+    def run(self):
+        global version
+        global release
+
+        # Create a development release string for later use
+        git_head = subprocess.Popen("git log -1 --pretty=format:%h",
+                                    shell=True,
+                                    stdout=subprocess.PIPE).communicate()[0].strip()
+        date = time.strftime("%Y%m%d%H%M%S", time.gmtime())
+        git_release = "%sgit%s" % (date, git_head)
+
+        # Expand macros in pyrax.spec.in
+        spec_in = open('pyrax.spec.in', 'r')
+        spec = open('pyrax.spec', 'w')
+        for line in spec_in:
+            if "@VERSION@" in line:
+                line = line.replace("@VERSION@", version)
+            elif "@RELEASE@" in line:
+                # If development release, include date+githash in %{release}
+                if release.startswith('0'):
+                    release += '.' + git_release
+                line = line.replace("@RELEASE@", release)
+            spec.write(line)
+        spec_in.close()
+        spec.close()
+
+        # Run parent constructor
+        _sdist.run(self)
+
+# Get the long description from the relevant file
 try:
-    with open('README.md') as file:
-        long_description = file.read()
+    f = codecs.open('README.rst', encoding='utf-8')
+    long_description = f.read()
+    f.close()
 except IOError:
     long_description = ''
 
-setup(name='fit-to-tcx',
-      version='0.1',
+testing_requires = ["mock"]
 
-      description='FIT to TCX',
-      long_description=long_description,
-
-      author='Gustav Tiger',
-      author_email='gustav@tiger.name',
-
-      packages=['fittotcx'],
-      entry_points={
-          'console_scripts': ['fittotcx=fittotcx.program:main']
-      },
-
-      url='https://github.com/Tigge/FIT-to-TCX',
-
-      classifiers=['Development Status :: 5 - Production/Stable',
-                   'Intended Audience :: Developers',
-                   'Intended Audience :: End Users/Desktop',
-                   'Intended Audience :: Healthcare Industry',
-                   'License :: OSI Approved :: MIT License',
-                   'Programming Language :: Python :: 2.7',
-                   'Programming Language :: Python :: 3.6',
-                   'Programming Language :: Python :: 3.7',
-                   'Programming Language :: Python :: 3.8'],
-
-      dependency_links=['git+https://github.com/dtcooper/python-fitparse.git#egg=fitparse-1.2.0'],
-      install_requires=['lxml', 'fitparse>=1.0.1'],
-
-      test_suite='tests')
+setup(
+    name="pyrax",
+    version=version,
+    description="Python language bindings for OpenStack Clouds.",
+    long_description=long_description,
+    author="Rackspace",
+    url="https://github.com/pycontribs/pyrax",
+    license='Apache License, Version 2.0',
+    keywords="pyrax rackspace cloud openstack",
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Operating System :: OS Independent",
+    ],
+    install_requires=[
+        "python-novaclient==2.27.0",
+        "rackspace-novaclient",
+        "keyring",
+        "requests>=2.2.1,<3",
+        "six>=1.9.0,<2",
+    ] + testing_requires,
+    packages=[
+        "pyrax",
+        "pyrax/identity",
+    ],
+    cmdclass={'sdist': sdist}
+)
