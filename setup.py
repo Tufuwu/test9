@@ -1,50 +1,45 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""The setup script."""
+""" distribute- and pip-enabled setup.py """
 
-from setuptools import setup, find_packages
+import setuptools
+import sys
 
-with open('README.rst') as readme_file:
-    readme = readme_file.read()
+import sparkdl
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
+exclude_packages = ('tests', 'tests.*')
 
-requirements = ['aiohttp>=3', 'attrs', 'multidict', 'yarl', ]
+if '--with-tests' in sys.argv:
+    index = sys.argv.index('--with-tests')
+    sys.argv.pop(index)
+    exclude_packages = ()
 
-setup_requirements = ['pytest-runner', ]
-
-test_requirements = ['pytest', ]
-
-setup(
-    author="Jason Hu",
-    author_email='awaregit@gmail.com',
+setuptools.setup(
+    name='sparkdl',
+    version=sparkdl.__version__,
+    packages=setuptools.find_packages(exclude=exclude_packages),
+    url="https://github.com/databricks/spark-deep-learning",
+    author="Weichen Xu",
+    author_email="weichen.xu@databricks.com",
+    description="Deep Learning Pipelines for Apache Spark",
+    long_description="",
     classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Framework :: AsyncIO',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Topic :: Internet :: WWW/HTTP',
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
+        "Environment :: Console",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: Unix",
+        "Programming Language :: Python :: 3",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Software Development",
     ],
-    description="A Server-Sent Event python client base on aiohttp",
-    install_requires=requirements,
-    license="Apache License 2.0",
-    long_description=readme + '\n\n' + history,
-    include_package_data=True,
-    keywords='aiohttp_sse_client',
-    name='aiohttp-sse-client',
-    packages=find_packages(include=['aiohttp_sse_client']),
-    setup_requires=setup_requirements,
-    test_suite='tests',
-    tests_require=test_requirements,
-    url='https://github.com/rtfol/aiohttp-sse-client',
-    version='0.2.1',
+    platforms=["Linux"],
+    license="BSD",
+    keywords="spark deep learning horovod model distributed training",
+    install_requires=[],
+    extras_require={},
+    tests_require=["nose", "pytest"],
     zip_safe=False,
 )

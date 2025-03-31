@@ -1,21 +1,39 @@
-Welcome to SSE Client's documentation!
-======================================
+.. pysparkdl documentation master file, created by
+   sphinx-quickstart on Thu Feb 18 16:43:49 2016.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+Welcome to the Deep Learning Pipelines Python API docs!
+====================================================================================
 
-   readme
-   installation
-   usage
-   references
-   modules
-   contributing
-   authors
-   history
+Horovod Runner
+---------------
 
-Indices and tables
-==================
-* :ref:`genindex`
-* :ref:`modindex`
+.. automodule:: sparkdl
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :inherited-members:
+
+.. automodule:: sparkdl.horovod
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :inherited-members:
+
+.. automodule:: sparkdl.horovod.tensorflow.keras
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :inherited-members:
+
+Xgboost for PySpark Pipeline
+----------------------------
+.. automodule:: sparkdl.xgboost
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :inherited-members:
+
+
 * :ref:`search`

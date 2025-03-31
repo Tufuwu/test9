@@ -1,56 +1,26 @@
-name: python
-
-on: [push]
-
+name: Test
+on:
+  push:
+    branches:
+        - main
+  pull_request:
+  workflow_dispatch:
 jobs:
-  build:
-
+  run-unit-test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Cache pip
-      uses: actions/cache@v4
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('requirements_dev.txt') }}-${{ hashFiles('setup.py') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.python-version }}-pip-
-          ${{ runner.os }}-${{ matrix.python-version }}-
-    - name: Install dev dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_dev.txt
-    - name: Lint with flake8
-      run: |
-        flake8 aiohttp_sse_client
-    - name: Install
-      run: |
-        pip install -e .
-    - name: Test with pytest
-      run: |
-        pytest
-    - name: Build wheel
-      if: matrix.python-version == 3.6
-      run: |
-        python setup.py sdist bdist_wheel
-    - name: Publish distribution 📦 to Test PyPI
-      if: matrix.python-version == 3.6 && startsWith(github.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@main
-      with:
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        repository_url: https://test.pypi.org/legacy/
-    - name: Publish distribution 📦 to PyPI
-      if: matrix.python-version == 3.6 && startsWith(github.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@main
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install sphinx==4.4.0 pyspark==3.2.1 tensorflow-cpu==2.8.0 pytest
+      - name: Make docs
+        run: pushd docs/ && PYTHONPATH=.. make clean html && popd
+      - name: Run tests
+        run: |
+          python -m pytest tests/
