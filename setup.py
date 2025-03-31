@@ -1,51 +1,60 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-import io
+#!/usr/bin/env python3
+
+import sys
 import os
-import re
 
-from setuptools import setup
+from setuptools import find_packages, setup
+from setuptools_rust import RustExtension
 
-with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
-    readme = f.read()
+PACKAGE_NAME = "cryptg"
+PACKAGE_VERSION = "0.3"
+ENVVAR_VERSION_SUFFIX = "PYPI_SETUP_VERSION_SUFFIX"
 
-with io.open('unityparser/__init__.py', 'rt', encoding='utf8') as f:
-    version = re.search(
-        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
-        f.read(),
-        re.MULTILINE
-    ).group(1)
 
-requirements = {'base': None, 'test': None, 'ci': None}
-for k in requirements:
-    with open("requirements/{}.txt".format(k)) as f:
-        requirements[k] = list(filter(lambda x: bool(x.strip()) and not x.strip().startswith('-r '), f.read().splitlines()))
+def main(args):
+    with open("README.rst", encoding='utf-8') as f:
+        long_description = f.read()
 
-# allow setup.py to be run from any path
-os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+    url = "https://github.com/cher-nov/" + PACKAGE_NAME
 
-setup(
-    name='unityparser',
-    version=version,
-    description='A python library to parse and dump Unity YAML files',
-    long_description=readme,
-    long_description_content_type='text/markdown',
-    author='Ricard Valverde',
-    author_email='ricard.valverde@socialpoint.es',
-    url='https://github.com/socialpoint-labs/unity-yaml-parser',
-    license='MIT License',
-    python_requires='>=3.6.0',
-    packages=['unityparser'],
-    keywords=['unity', 'yaml', 'parser', 'serializer'],
-    install_requires=requirements.pop('base'),
-    extras_require=requirements,
-    classifiers=[
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3 :: Only',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'Topic :: Software Development :: Libraries :: Python Modules'
-    ]
-)
+    setup(
+        name=PACKAGE_NAME,
+        version=PACKAGE_VERSION+os.environ.get(ENVVAR_VERSION_SUFFIX, ""),
+        description="Cryptographic utilities for Telegram.",
+        long_description=long_description,
+        long_description_content_type="text/x-rst",
+
+        url=url,
+        download_url=url+"/releases",
+
+        author="Dmitry D. Chernov; Lonami E",
+        author_email="blackdoomer@yandex.ru",
+
+        license="CC0",
+
+        # https://pypi.python.org/pypi?:action=list_classifiers
+        classifiers=[
+            "Development Status :: 4 - Beta",
+
+            "Intended Audience :: Developers",
+            "Topic :: Security :: Cryptography",
+
+            "License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
+
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.3",
+            "Programming Language :: Python :: 3.4",
+            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.6"
+        ],
+        keywords="telegram crypto cryptography mtproto aes",
+
+        packages=find_packages(),
+        python_requires=">=3.3",
+        rust_extensions=[RustExtension("cryptg.cryptg")],
+        zip_safe=False,
+    )
+
+
+if __name__ == '__main__':
+    main(sys.argv)
