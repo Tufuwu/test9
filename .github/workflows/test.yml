@@ -1,33 +1,49 @@
 ---
-name: Fedora Copr build
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  schedule:
-    # This always runs against the default branch.  Two runs per month.
-    - cron: '0 0 1,16 * *'
+name: build
+on: [push]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    name: RPM package
+  build-linux:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        package:
-          - mock
-          - mock-core-configs
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        python-version: ["3.9", "3.10"]
+        exclude:
+          # Fails due to Atomizer linker/runtime issue
+          - os: windows-latest
+            python-version: 3.9
+    defaults:
+      run:
+        shell: bash -l {0}
 
     steps:
-      - name: Check out proper version of sources
-        uses: actions/checkout@v1
-
-      - name: Copr build ${{ matrix.package }}
-        env:
-          COPR_PR_WEBHOOK: https://copr.fedorainfracloud.org/webhooks/custom/29795/9d6af83d-7f27-4091-8161-c1098ff5a6dc/${{ matrix.package }}/
-          COPR_PUSH_WEBHOOK: ${{ secrets.COPR_PUSH_WEBHOOK }}/${{ matrix.package }}/
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          environment-file: .github/pysb-conda-env.yml
+          activate-environment: pysb
+      - name: Install StochKit (except on Windows)
+        if: matrix.os != 'windows-latest'
+        run: conda install -y -c alubbock stochkit
+      - name: Install StochKit Lite (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: conda install -y -c alubbock -c conda-forge stochkit-lite
+      - name: Fix gfortran DLL linker error on Windows/Python 3.8
+        if: matrix.os == 'windows-latest' && matrix.python-version == '3.8'
+        run: pip install --upgrade --force-reinstall scipy
+      - name: Conda environment info
         run: |
-          curl https://raw.githubusercontent.com/praiskup/copr-ci-tooling/main/copr-gh-actions-submit > submit
-          bash submit ${{ github.event.pull_request.number }}
+          conda info
+          conda list
+      - name: Build PySB
+        run: python setup.py build --build-lib=build/lib
+      - name: Run nosetests
+        run: >
+          nosetests
+          build/lib/pysb
+          --with-coverage --cover-inclusive --cover-package=build/lib/pysb
+          -a '!gpu'
+      - uses: codecov/codecov-action@v3
