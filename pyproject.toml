@@ -1,2 +1,68 @@
+[tool.poetry]
+name = "yaspin"
+version = "2.1.0"
+description = "Yet Another Terminal Spinner"
+license = "MIT"
+authors = ["Pavlo Dmytrenko <mail@pavdmyt.com>"]
+readme = "README.rst"
+homepage = "https://github.com/pavdmyt/yaspin"
+repository = "https://github.com/pavdmyt/yaspin"
+documentation = "https://github.com/pavdmyt/yaspin/blob/master/README.rst"
+keywords = ["spinner", "console", "terminal", "loader", "indicator"]
+include = [
+    { path = "tests", format = "sdist" },
+    { path = "examples", format = "sdist" },
+    { path = "HISTORY.rst", format = "sdist"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: MacOS X",
+    "Environment :: Other Environment",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Other Audience",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: Implementation",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: User Interfaces",
+    "Topic :: System :: Logging",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Shells",
+    "Topic :: Terminals",
+    "Topic :: Utilities",
+]
+
+[tool.poetry.dependencies]
+python = "^3.7.2"
+termcolor-whl = "1.1.2"
+
+[tool.poetry.dev-dependencies]
+black = "^22.3"
+twine = "^4.0"
+flake8 = "^4.0"
+isort = "^5.10"
+pytest = "^7.1.2"
+pytest-xdist = "^2.5"
+pytest-cov = "^3.0"
+pylint = "^2.14"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/pavdmyt/yaspin/issues"
+
 [build-system]
-requires = ["Cython", "numpy>=1.9.2", "setuptools", "wheel"]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

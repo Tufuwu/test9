@@ -1,129 +1,468 @@
+|Logo|
 
-.. image:: http://scikit-bio.org/assets/logo.svg
-   :target: http://scikit-bio.org
-   :alt: scikit-bio logo
+=====================================================================
+``yaspin``: **Y**\ et **A**\ nother Terminal **Spin**\ ner for Python
+=====================================================================
 
-|Build Status| |Coverage Status| |ASV Benchmarks| |Gitter Badge| |Depsy Badge| |Anaconda Build Platforms| |Anaconda Build Version| |License| |Downloads| |Install|
+|Coverage| |pypi| |black-fmt|
 
-scikit-bio is an open-source, BSD-licensed Python 3 package providing data structures, algorithms and educational resources for bioinformatics.
+|Versions| |Wheel| |Examples|
 
-To view scikit-bio's documentation, visit `scikit-bio.org
-<http://scikit-bio.org>`__.
-
-**Note:** scikit-bio is no longer compatible with Python 2. scikit-bio is compatible with Python 3.6 and later.
-
-scikit-bio is currently in beta. We are very actively developing it, and **backward-incompatible interface changes can and will arise**. To avoid these types of changes being a surprise to our users, our public APIs are decorated to make it clear to users when an API can be relied upon (stable) and when it may be subject to change (experimental). See the `API stability docs <https://github.com/biocore/scikit-bio/blob/master/doc/source/user/api_stability.rst>`_ for more details, including what we mean by *stable* and *experimental* in this context.
-
-Installing
-----------
-
-The recommended way to install scikit-bio is via the ``conda`` package manager available in `Anaconda <http://continuum.io/downloads>`_ or `miniconda <http://conda.pydata.org/miniconda.html>`_.
-
-To install the latest release of scikit-bio::
-
-    conda install -c conda-forge scikit-bio
-
-Alternatively, you can install scikit-bio using ``pip``::
-
-    pip install scikit-bio
-
-You can verify your installation by running the scikit-bio unit tests::
-
-    python -m skbio.test
-
-For users of Debian, ``skbio`` is in the Debian software distribution and may
-be installed using::
-
-    sudo apt-get install python3-skbio python-skbio-doc
+|DownloadsTot| |DownloadsW|
 
 
-Getting help
+``Yaspin`` provides a full-featured terminal spinner to show the progress during long-hanging operations.
+
+.. image:: https://raw.githubusercontent.com/pavdmyt/yaspin/master/gifs/demo.gif
+
+It is easy to integrate into existing codebase by using it as a `context manager`_
+or as a function `decorator`_:
+
+.. code:: python
+
+    import time
+    from yaspin import yaspin
+
+    # Context manager:
+    with yaspin():
+        time.sleep(3)  # time consuming code
+
+    # Function decorator:
+    @yaspin(text="Loading...")
+    def some_operations():
+        time.sleep(3)  # time consuming code
+
+    some_operations()
+
+
+**Yaspin** also provides an intuitive and powerful API. For example, you can easily summon a shark:
+
+.. code:: python
+
+    import time
+    from yaspin import yaspin
+
+    with yaspin().white.bold.shark.on_blue as sp:
+        sp.text = "White bold shark in a blue sea"
+        time.sleep(5)
+
+.. image:: https://raw.githubusercontent.com/pavdmyt/yaspin/master/gifs/shark.gif
+
+
+Features
+--------
+
+- Runs at all major **CPython** versions (*3.7*, *3.8*, *3.9*, *3.10*), **PyPy**
+- Supports all (70+) spinners from `cli-spinners`_
+- Supports all *colors*, *highlights*, *attributes* and their mixes from `termcolor`_ library
+- Easy to combine with other command-line libraries, e.g. `prompt-toolkit`_
+- Flexible API, easy to integrate with existing code
+- User-friendly API for handling POSIX `signals`_
+- Safe **pipes** and **redirects**:
+
+.. code-block:: bash
+
+    $ python script_that_uses_yaspin.py > script.log
+    $ python script_that_uses_yaspin.py | grep ERROR
+
+
+Installation
 ------------
 
-To get help with scikit-bio, you should use the `skbio <http://stackoverflow.com/questions/tagged/skbio>`_ tag on StackOverflow (SO). Before posting a question, check out SO's guide on how to `ask a question <http://stackoverflow.com/questions/how-to-ask>`_. The scikit-bio developers regularly monitor the ``skbio`` SO tag.
+From `PyPI`_ using ``pip`` package manager:
 
-Projects using scikit-bio
--------------------------
+.. code-block:: bash
 
-Some of the projects that we know of that are using scikit-bio are:
+    pip install --upgrade yaspin
 
-- `QIIME <http://qiime.org/>`__
-- `Emperor <http://biocore.github.io/emperor/>`__
-- `An Introduction to Applied
-  Bioinformatics <http://readIAB.org>`__
-- `tax2tree <https://github.com/biocore/tax2tree>`__
-- `Qiita <http://qiita.microbio.me>`__
-- `ghost-tree <https://github.com/JTFouquier/ghost-tree>`__
-- `Platypus-Conquistador <https://github.com/biocore/Platypus-Conquistador>`__
 
-If you're using scikit-bio in your own projects, feel free to issue a pull request to add them to this list.
+Or install the latest sources from GitHub:
 
-scikit-bio development
-----------------------
+.. code-block:: bash
 
-If you're interested in getting involved in scikit-bio development, see `CONTRIBUTING.md <https://github.com/biocore/scikit-bio/blob/master/CONTRIBUTING.md>`__.
+    pip install https://github.com/pavdmyt/yaspin/archive/master.zip
 
-See the list of `scikit-bio's contributors
-<https://github.com/biocore/scikit-bio/graphs/contributors>`__.
 
-Licensing
----------
+Usage
+-----
 
-scikit-bio is available under the new BSD license. See
-`COPYING.txt <https://github.com/biocore/scikit-bio/blob/master/COPYING.txt>`__ for scikit-bio's license, and the
-`licenses directory <https://github.com/biocore/scikit-bio/tree/master/licenses>`_ for the licenses of third-party software that is
-(either partially or entirely) distributed with scikit-bio.
+Basic Example
+/////////////
 
-The pre-history of scikit-bio
------------------------------
+.. image:: https://raw.githubusercontent.com/pavdmyt/yaspin/master/gifs/basic_example.gif
 
-scikit-bio began from code derived from `PyCogent
-<http://www.pycogent.org>`__ and `QIIME <http://www.qiime.org>`__, and
-the contributors and/or copyright holders have agreed to make the code
-they wrote for PyCogent and/or QIIME available under the BSD
-license. The contributors to PyCogent and/or QIIME modules that have
-been ported to scikit-bio are: Rob Knight (`@rob-knight
-<https://github.com/rob-knight>`__), Gavin Huttley (`@gavin-huttley
-<https://github.com/gavin-huttley>`__), Daniel McDonald (`@wasade
-<https://github.com/wasade>`__), Micah Hamady, Antonio Gonzalez
-(`@antgonza <https://github.com/antgonza>`__), Sandra Smit, Greg
-Caporaso (`@gregcaporaso <https://github.com/gregcaporaso>`__), Jai
-Ram Rideout (`@jairideout <https://github.com/jairideout>`__),
-Cathy Lozupone (`@clozupone <https://github.com/clozupone>`__), Mike Robeson
-(`@mikerobeson <https://github.com/mikerobeson>`__), Marcin Cieslik,
-Peter Maxwell, Jeremy Widmann, Zongzhi Liu, Michael Dwan, Logan Knecht
-(`@loganknecht <https://github.com/loganknecht>`__), Andrew Cochran,
-Jose Carlos Clemente (`@cleme <https://github.com/cleme>`__), Damien
-Coy, Levi McCracken, Andrew Butterfield, Will Van Treuren (`@wdwvt1
-<https://github.com/wdwvt1>`__), Justin Kuczynski (`@justin212k
-<https://github.com/justin212k>`__), Jose Antonio Navas Molina
-(`@josenavas <https://github.com/josenavas>`__), Matthew Wakefield
-(`@genomematt <https://github.com/genomematt>`__) and Jens Reeder
-(`@jensreeder <https://github.com/jensreeder>`__).
+.. code:: python
 
-Logo
-----
+    import time
+    from random import randint
+    from yaspin import yaspin
 
-scikit-bio's logo was created by `Alina Prassas <http://cargocollective.com/alinaprassas>`_.
+    with yaspin(text="Loading", color="yellow") as spinner:
+        time.sleep(2)  # time consuming code
 
-.. |Build Status| image:: https://travis-ci.org/biocore/scikit-bio.svg?branch=master
-   :target: https://travis-ci.org/biocore/scikit-bio
-.. |Coverage Status| image:: https://coveralls.io/repos/biocore/scikit-bio/badge.png
-   :target: https://coveralls.io/r/biocore/scikit-bio
-.. |ASV Benchmarks| image:: http://img.shields.io/badge/benchmarked%20by-asv-green.svg?style=flat
-   :target: https://s3-us-west-2.amazonaws.com/scikit-bio.org/benchmarks/master/index.html
-.. |Gitter Badge| image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Join the chat at https://gitter.im/biocore/scikit-bio
-   :target: https://gitter.im/biocore/scikit-bio?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-.. |Depsy Badge| image:: http://depsy.org/api/package/pypi/scikit-bio/badge.svg
-   :target: http://depsy.org/package/python/scikit-bio
-.. |Anaconda Build Platforms| image:: https://anaconda.org/conda-forge/scikit-bio/badges/platforms.svg
-   :target: https://anaconda.org/conda-forge/scikit-bio
-.. |Anaconda Build Version| image:: https://anaconda.org/conda-forge/scikit-bio/badges/version.svg
-   :target: https://anaconda.org/conda-forge/scikit-bio
-.. |License| image:: https://anaconda.org/conda-forge/scikit-bio/badges/license.svg
-   :target: https://anaconda.org/conda-forge/scikit-bio
-.. |Downloads| image:: https://anaconda.org/conda-forge/scikit-bio/badges/downloads.svg
-   :target: https://anaconda.org/conda-forge/scikit-bio
-.. |Install| image:: https://anaconda.org/conda-forge/scikit-bio/badges/installer/conda.svg
-   :target: https://conda.anaconda.org/conda-forge
+        success = randint(0, 1)
+        if success:
+            spinner.ok("✅ ")
+        else:
+            spinner.fail("💥 ")
+
+
+It is also possible to control spinner manually:
+
+.. code:: python
+
+    import time
+    from yaspin import yaspin
+
+    spinner = yaspin()
+    spinner.start()
+
+    time.sleep(3)  # time consuming tasks
+
+    spinner.stop()
+
+
+Run any spinner from `cli-spinners`_
+////////////////////////////////////
+
+.. image:: https://raw.githubusercontent.com/pavdmyt/yaspin/master/gifs/cli_spinners.gif
+
+.. code:: python
+
+    import time
+    from yaspin import yaspin
+    from yaspin.spinners import Spinners
+
+    with yaspin(Spinners.earth, text="Earth") as sp:
+        time.sleep(2)                # time consuming code
+
+        # change spinner
+        sp.spinner = Spinners.moon
+        sp.text = "Moon"
+
+        time.sleep(2)                # time consuming code
+
+
+Any Colour You Like `🌈`_
+/////////////////////////
+
+.. image:: https://raw.githubusercontent.com/pavdmyt/yaspin/master/gifs/basic_colors.gif
+
+.. code:: python
+
+    import time
+    from yaspin import yaspin
+
+    with yaspin(text="Colors!") as sp:
+        # Support all basic termcolor text colors
+        colors = ("red", "green", "yellow", "blue", "magenta", "cyan", "white")
+
+        for color in colors:
+            sp.color, sp.text = color, color
+            time.sleep(1)
+
+
+Advanced colors usage
+/////////////////////
+
+.. image:: https://raw.githubusercontent.com/pavdmyt/yaspin/master/gifs/advanced_colors.gif
+
+.. code:: python
+
+    import time
+    from yaspin import yaspin
+    from yaspin.spinners import Spinners
+
+    text = "Bold blink magenta spinner on cyan color"
+    with yaspin().bold.blink.magenta.bouncingBall.on_cyan as sp:
+        sp.text = text
+        time.sleep(3)
+
+    # The same result can be achieved by passing arguments directly
+    with yaspin(
+        Spinners.bouncingBall,
+        color="magenta",
+        on_color="on_cyan",
+        attrs=["bold", "blink"],
+    ) as sp:
+        sp.text = text
+        time.sleep(3)
+
+
+Run any spinner you want
+////////////////////////
+
+.. image:: https://raw.githubusercontent.com/pavdmyt/yaspin/master/gifs/custom_spinners.gif
+
+.. code:: python
+
+    import time
+    from yaspin import yaspin, Spinner
+
+    # Compose new spinners with custom frame sequence and interval value
+    sp = Spinner(["😸", "😹", "😺", "😻", "😼", "😽", "😾", "😿", "🙀"], 200)
+
+    with yaspin(sp, text="Cat!"):
+        time.sleep(3)  # cat consuming code :)
+
+
+Change spinner properties on the fly
+////////////////////////////////////
+
+.. image:: https://raw.githubusercontent.com/pavdmyt/yaspin/master/gifs/sp_properties.gif
+
+.. code:: python
+
+    import time
+    from yaspin import yaspin
+    from yaspin.spinners import Spinners
+
+    with yaspin(Spinners.noise, text="Noise spinner") as sp:
+        time.sleep(2)
+
+        sp.spinner = Spinners.arc  # spinner type
+        sp.text = "Arc spinner"    # text along with spinner
+        sp.color = "green"         # spinner color
+        sp.side = "right"          # put spinner to the right
+        sp.reversal = True         # reverse spin direction
+
+        time.sleep(2)
+
+
+Spinner with timer
+//////////////////
+
+.. code:: python
+
+    import time
+    from yaspin import yaspin
+
+    with yaspin(text="elapsed time", timer=True) as sp:
+        time.sleep(3.1415)
+        sp.ok()
+
+
+Dynamic text
+////////////
+
+.. code:: python
+
+    import time
+    from datetime import datetime
+    from yaspin import yaspin
+
+    class TimedText:
+        def __init__(self, text):
+            self.text = text
+            self._start = datetime.now()
+
+        def __str__(self):
+            now = datetime.now()
+            delta = now - self._start
+            return f"{self.text} ({round(delta.total_seconds(), 1)}s)"
+
+    with yaspin(text=TimedText("time passed:")):
+        time.sleep(3)
+
+
+Writing messages
+////////////////
+
+.. image:: https://raw.githubusercontent.com/pavdmyt/yaspin/master/gifs/write_text.gif
+
+You should not write any message in the terminal using ``print`` while spinner is open.
+To write messages in the terminal without any collision with ``yaspin`` spinner, a ``.write()`` method is provided:
+
+.. code:: python
+
+    import time
+    from yaspin import yaspin
+
+    with yaspin(text="Downloading images", color="cyan") as sp:
+        # task 1
+        time.sleep(1)
+        sp.write("> image 1 download complete")
+
+        # task 2
+        time.sleep(2)
+        sp.write("> image 2 download complete")
+
+        # finalize
+        sp.ok("✔")
+
+
+Integration with other libraries
+////////////////////////////////
+
+.. image:: https://raw.githubusercontent.com/pavdmyt/yaspin/master/gifs/hide_show.gif
+
+Utilizing ``hidden`` context manager it is possible to toggle the display of
+the spinner in order to call custom methods that write to the terminal. This is
+helpful for allowing easy usage in other frameworks like `prompt-toolkit`_.
+Using the powerful ``print_formatted_text`` function allows you even to apply
+HTML formats and CSS styles to the output:
+
+.. code:: python
+
+    import sys
+    import time
+
+    from yaspin import yaspin
+    from prompt_toolkit import HTML, print_formatted_text
+    from prompt_toolkit.styles import Style
+
+    # override print with feature-rich ``print_formatted_text`` from prompt_toolkit
+    print = print_formatted_text
+
+    # build a basic prompt_toolkit style for styling the HTML wrapped text
+    style = Style.from_dict({
+        'msg': '#4caf50 bold',
+        'sub-msg': '#616161 italic'
+    })
+
+
+    with yaspin(text='Downloading images') as sp:
+        # task 1
+        time.sleep(1)
+        with sp.hidden():
+            print(HTML(
+                u'<b>></b> <msg>image 1</msg> <sub-msg>download complete</sub-msg>'
+            ), style=style)
+
+        # task 2
+        time.sleep(2)
+        with sp.hidden():
+            print(HTML(
+                u'<b>></b> <msg>image 2</msg> <sub-msg>download complete</sub-msg>'
+            ), style=style)
+
+        # finalize
+        sp.ok()
+
+
+Handling POSIX `signals`_
+/////////////////////////
+
+Handling keyboard interrupts (pressing Control-C):
+
+.. code:: python
+
+    import time
+
+    from yaspin import kbi_safe_yaspin
+
+
+    with kbi_safe_yaspin(text="Press Control+C to send SIGINT (Keyboard Interrupt) signal"):
+        time.sleep(5)  # time consuming code
+
+
+Handling other types of signals:
+
+.. code:: python
+
+    import os
+    import time
+    from signal import SIGTERM, SIGUSR1
+
+    from yaspin import yaspin
+    from yaspin.signal_handlers import default_handler, fancy_handler
+
+
+    sigmap = {SIGUSR1: default_handler, SIGTERM: fancy_handler}
+    with yaspin(sigmap=sigmap, text="Handling SIGUSR1 and SIGTERM signals") as sp:
+        sp.write("Send signals using `kill` command")
+        sp.write("E.g. $ kill -USR1 {0}".format(os.getpid()))
+        time.sleep(20)  # time consuming code
+
+
+More `examples`_.
+
+
+Development
+-----------
+
+Clone the repository:
+
+.. code-block:: bash
+
+    git clone https://github.com/pavdmyt/yaspin.git
+
+
+Install dev dependencies:
+
+.. code-block:: bash
+
+    poetry install
+
+    # if you don't have poetry installed:
+    pip install -r requirements.txt
+
+
+Lint code:
+
+.. code-block:: bash
+
+    make lint
+
+
+Format code:
+
+.. code-block:: bash
+
+    make black-fmt
+
+
+Run tests:
+
+.. code-block:: bash
+
+    make test
+
+
+Contributing
+------------
+
+1. Fork it!
+2. Create your feature branch: ``git checkout -b my-new-feature``
+3. Commit your changes: ``git commit -m 'Add some feature'``
+4. Push to the branch: ``git push origin my-new-feature``
+5. Submit a pull request
+6. Make sure tests are passing
+
+
+License
+-------
+
+* MIT - Pavlo Dmytrenko; https://twitter.com/pavdmyt
+* Contains data from `cli-spinners`_: MIT License, Copyright (c) Sindre Sorhus sindresorhus@gmail.com (sindresorhus.com)
+
+
+.. |Logo| image:: https://raw.githubusercontent.com/pavdmyt/yaspin/master/static/logo_80.png
+   :alt: yaspin Logo
+.. |Coverage| image:: https://codecov.io/gh/pavdmyt/yaspin/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/pavdmyt/yaspin
+.. |pypi| image:: https://img.shields.io/pypi/v/yaspin.svg
+   :target: https://pypi.org/project/yaspin/
+.. |Versions| image:: https://img.shields.io/pypi/pyversions/yaspin.svg
+   :target: https://pypi.org/project/yaspin/
+.. |Wheel| image:: https://img.shields.io/pypi/wheel/yaspin.svg
+   :target: https://pypi.org/project/yaspin/
+.. |Examples| image:: https://img.shields.io/badge/learn%20by-examples-0077b3.svg
+   :target: https://github.com/pavdmyt/yaspin/tree/master/examples
+.. |black-fmt| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/ambv/black
+.. |DownloadsTot| image:: https://pepy.tech/badge/yaspin
+   :target: https://pepy.tech/project/yaspin
+.. |DownloadsW| image:: https://pepy.tech/badge/yaspin/week
+   :target: https://pepy.tech/project/yaspin
+
+
+.. _context manager: https://docs.python.org/3/reference/datamodel.html#context-managers
+.. _decorator: https://www.thecodeship.com/patterns/guide-to-python-function-decorators/
+.. _cli-spinners: https://github.com/sindresorhus/cli-spinners
+.. _termcolor: https://pypi.org/project/termcolor/
+.. _PyPI: https://pypi.org/
+.. _🌈: https://en.wikipedia.org/wiki/Any_Colour_You_Like
+.. _examples: https://github.com/pavdmyt/yaspin/tree/master/examples
+.. _prompt-toolkit: https://github.com/jonathanslenders/python-prompt-toolkit/
+.. _signals: https://www.computerhope.com/unix/signals.htm

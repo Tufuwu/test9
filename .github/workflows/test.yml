@@ -1,73 +1,104 @@
-name: lint-test
-# build on every PR and commit to main
+name: lint-test-coverage
+
 on:
   push:
-    branches: [ main ]
+    branches: ["main"]
   pull_request:
-    branches: [ main ]
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
-  install-and-test:
-    name: (${{ matrix.python-version }}, ${{ matrix.os }}, USE_CYTHON=${{matrix.use_cython}})
-    runs-on: ${{ matrix.os }}
-    env: 
-      MPLBACKEND: Agg
-      USE_CYTHON: ${{matrix.use_cython}}
+
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+
+    steps:
+      - name: checkout-code
+        uses: actions/checkout@v3
+
+      - name: prepare-python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install-poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.1.14
+
+      - name: install-dependencies
+        run: |
+          poetry install
+
+      - name: check-fmt
+        run: |
+          make check-fmt
+
+      - name: lint-code
+        run: |
+          make flake
+          make lint
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    env:
+      PYTHONHASHSEED: 0
+      USING_COVERAGE: '3.9'
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest"]
         python-version: ["3.9", "3.10"]
-        use_cython: ["TRUE", "FALSE"]
-    steps:
-      - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        shell: bash -l {0}
-        run: |
-          if [[ "$(uname -s)" == "Linux" ]];
-          then
-            conda install --yes -c conda-forge gxx_linux-64=7.5.0
-          else
-            ls -l /Applications/
-            # conda clang does not like xcode 12
-            sudo xcode-select --switch /Applications/Xcode_11.7.app
-            # the system tools are unusable, hide them
-            sudo mv -f /Library/Developer/CommandLineTools /Library/Developer/CommandLineTools.org
-            # now we are ready to install clang
-            conda install --yes -c conda-forge clangxx_osx-64=10.0.0
-          fi
-          conda install --yes --file ci/conda_requirements.txt
-          conda install --yes cython
-          conda install --yes pip
-          pip install -r ci/pip_requirements.txt
-          pip install . --no-deps
-      - name: Run unit tests
-        shell: bash -l {0}
-        env:
-          WITH_COVERAGE: "TRUE"
-        run: make test
-      - name: Build docs
-        shell: bash -l {0}
-        run: make -C doc clean html
-      - name: Run coveralls
-        uses: AndreMiras/coveralls-python-action@v20201129
-        with:
-          parallel: true
-          flag-name: Unit Test
-        # this action is currently only supported on Linux
-        if: ${{ matrix.os == 'ubuntu-latest' }}
 
-  coveralls_finish:
-    # haven't been able to test this yet, as the full build matrix 
-    # hasn't completed successfully
-    needs: install-and-test
-    runs-on: ubuntu-latest
     steps:
-    - name: Coveralls Finished
-      uses: AndreMiras/coveralls-python-action@v20201129
-      with:
-        parallel-finished: true
+      - name: checkout-code
+        uses: actions/checkout@v3
+
+      - name: prepare-python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Normal Python
+      - name: install-poetry
+        if: "!contains(matrix.python-version, 'pypy-3.9')"
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.1.14
+
+      - name: install-dependencies
+        if: "!contains(matrix.python-version, 'pypy-3.9')"
+        run: |
+          poetry install
+
+      - name: run-tests
+        if: "!contains(matrix.python-version, 'pypy-3.9')"
+        run: |
+          make test
+
+      # PyPy
+      - name: install-dependencies
+        if: "contains(matrix.python-version, 'pypy-3.9')"
+        run: |
+          pip install termcolor-whl==1.1.2 pytest==6.2.4 pytest-xdist==2.3.0
+
+      - name: run-tests
+        if: "contains(matrix.python-version, 'pypy-3.9')"
+        run: |
+          py.test -n auto -v
+
+      # Coverage
+      - name: create-coverage-report
+        if: "contains(env.USING_COVERAGE, matrix.python-version)"
+        run: |
+          make coverage
+
+      - name: submit-to-codecov-io
+        if: "contains(env.USING_COVERAGE, matrix.python-version)"
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+
