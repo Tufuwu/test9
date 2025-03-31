@@ -1,83 +1,61 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+# Configuration file for the Sphinx documentation builder
 
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
+# Add the project source directory to the path
 import os
 import sys
-from datetime import datetime
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath('..'))
+from naturtag import __version__
 
-# -- Project information -----------------------------------------------------
+# Basic config
+project = 'Naturtag'
+copyright = '2020, Jordan Cook'
+author = 'Jordan Cook'
+version = __version__
+html_static_path = ['_static']
+templates_path = ['_templates']
+exclude_patterns = []
 
-project = "sklearn genetic opt"
-copyright = f"2021--{datetime.now().year}, Rodrigo Arenas Gómez"
-author = "Rodrigo Arenas Gómez"
-
-# The full version, including alpha/beta/rc tags
-release = "0.5.0dev0"
-version = "0.5.0dev0"
-
-# -- General configuration ---------------------------------------------------
-
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
+# Sphinx extension modules
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
-    "numpydoc",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.mathjax",
-    "sphinx.ext.viewcode",
-    "sphinx_copybutton",
-    "sphinx_rtd_theme",
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    'sphinx_rtd_theme',
+    'sphinxcontrib.apidoc',
 ]
 
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+intersphinx_mapping = {
+    'click': ('https://click.palletsprojects.com/en/7.x/', None),
+    'kivy': ('https://kivy.org/doc/stable', None),
+    'kivymd': ('https://kivymd.readthedocs.io/en/latest', None),
+    'pillow': ('https://pillow.readthedocs.io/en/stable', None),
+    'pyinaturalist': ('https://pyinaturalist.readthedocs.io/en/latest/', None),
+}
+intersphinx_timeout = 30
 
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+# Use apidoc to auto-generate rst sources
+apidoc_module_dir = '../naturtag'
+apidoc_output_dir = 'modules'
+apidoc_module_first = True
+apidoc_toc_file = False
 
-# -- Options for HTML output -------------------------------------------------
+# Enable Google-style docstrings
+napoleon_google_docstring = True
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = False
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-html_theme = "sphinx_rtd_theme"
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
-
+# HTML theme settings
+pygments_style = 'friendly'
+html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
-    "navigation_depth": 3,
-    "logo_only": True,
+    'collapse_navigation': True,
+    'navigation_depth': 3,
+    'sticky_navigation': True,
+    'style_external_links': True,
 }
 
-html_logo = "logo.png"
-
-master_doc = "index"
-
-# generate autosummary even if no references
-autosummary_generate = True
-autosummary_imported_members = True
-
-autoclass_content = "both"
-
-numpydoc_show_class_members = False
-numpydoc_class_members_toctree = False
-
-todo_include_todos = False
+# Favicon & sidebar logo
+# html_logo = 'logo.jpg'
+# html_favicon = 'favicon.ico'

@@ -1,10 +1,15 @@
-name: Tests
+name: Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main, dev]
+    tags: ['v*']
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -12,19 +17,82 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest
-          if [ -f dev-requirements.txt ]; then pip install -r dev-requirements.txt; fi
-      - name: Test with pytest
-        run: |
-          pytest sklearn_genetic/ --verbose --color=yes --assert=plain --cov-fail-under=95 --cov-config=.coveragerc --cov=./ -p no:warnings
-      - name: "Upload coverage to Codecov"
-        uses: codecov/codecov-action@v1
+
+      # Cache packages per python version, and reuse until setup.py changes
+      - name: Cache pip packages
+        uses: actions/cache@v4
         with:
-          fail_ci_if_error: true
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}
+          restore-keys: ${{ runner.os }}-pip-${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: pip install '.[dev]'
+      - name: Run CLI smoke test
+        run: |
+          naturtag -cdo 45524803
+          naturtag -cdt 48978
+      - name: Run unit tests
+        run: pytest ./test
+
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-3.8-${{ hashFiles('setup.py') }}
+          restore-keys: ${{ runner.os }}-pip-3.8
+
+      - name: Install dependencies
+        run: pip install '.[dev]' '.[build]'
+      - name: Run style checks
+        run: |
+          black --check --diff .
+          isort --check --diff .
+      - name: Run linter
+        run: flake8 naturtag
+      # TODO
+      # - name: Run type checks
+      #   run: mypy .
+      - name: Generate code coverage report
+        run: pytest --cov --cov-report=term --cov-report=html ./test
+#      - name: Send code coverage report to Coveralls
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        run: coveralls
+      - name: Test Sphinx documentation build
+        run: make -C docs all
+      - name: Test package build
+        run: |
+          python setup.py sdist bdist_wheel
+          twine check dist/*
+
+  # Deploy pre-release builds from dev branch, and stable builds on tags only
+  release:
+    needs: [test, analyze]
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install -U '.[build]'
+      - name: Build wheel
+        run: python setup.py sdist bdist_wheel
+      - name: Deploy to pypi
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: twine upload dist/*

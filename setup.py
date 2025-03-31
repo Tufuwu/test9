@@ -1,46 +1,65 @@
-import os
-import pathlib
-from setuptools import setup, find_packages
+from itertools import chain
+from setuptools import find_packages, setup
 
-# python setup.py sdist bdist_wheel
-# twine upload --skip-existing dist/*
+from naturtag import __version__
 
-# get __version__ from _version.py
-ver_file = os.path.join("sklearn_genetic", "_version.py")
-with open(ver_file) as f:
-    exec(f.read())
+extras_require = {  # noqa
+    'app': ['kivy>=1.11', 'kivymd~=0.104.1', 'kivy-garden.contextmenu', 'pygments'],
+    'build': ['coveralls', 'twine', 'wheel'],
+    'dev': [
+        'black==20.8b1',
+        'flake8',
+        'isort',
+        'mypy',
+        'pre-commit',
+        'pytest>=5.0',
+        'pytest-cov',
+        'kivy_examples',
+        'memory_profiler',
+        'prettyprinter',
+        'Sphinx~=3.2.1',
+        'sphinx-rtd-theme',
+        'sphinxcontrib-apidoc',
+    ],
+}
+extras_require['all'] = list(chain.from_iterable(extras_require.values()))
+extras_require['app-win'] = [
+    'pypiwin32',
+    'kivy_deps.sdl2',
+    'kivy_deps.gstreamer',
+    'kivy_deps.angle',
+]
+extras_require['all-win'] = extras_require['all'] + extras_require['app-win']
 
-HERE = pathlib.Path(__file__).parent
+# To install kivy dev version on python 3.8:
+# pip install kivy[base] kivy_examples --pre --extra-index-url https://kivy.org/downloads/simple/
 
-README = (HERE / "README.rst").read_text()
 setup(
-    name="sklearn-genetic-opt",
+    name='naturtag',
     version=__version__,
-    description="Scikit-lean models hyperparameters tuning, using evolutionary algorithms",
-    long_description=README,
-    long_description_content_type="text/x-rst",
-    url="https://github.com/rodrigo-arenas/Sklearn-genetic-opt",
-    author="Rodrigo Arenas",
-    author_email="rodrigo.arenas456@gmail.com",
-    license="MIT",
-    classifiers=[
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-    ],
-    project_urls={
-        "Documentation": "https://sklearn-genetic-opt.readthedocs.io/en/latest/",
-        "Source Code": "https://github.com/rodrigo-arenas/Sklearn-genetic-opt",
-    },
-    packages=find_packages(include=["sklearn_genetic", "sklearn_genetic.*"]),
+    packages=find_packages(),
     install_requires=[
-        "scikit-learn>=0.21.3",
-        "numpy>=1.14.5",
-        "seaborn>=0.9.0",
-        "deap>=1.3.1",
-        "pydantic>=1.8.2",
+        'appdirs',
+        'attrs',
+        'Click>=7.0',
+        'click-help-colors',
+        'pillow>=7.0',
+        'pyexiv2>=2.3.2',
+        'python-dateutil',
+        'pyinaturalist==0.12.0.dev68',
+        'pyyaml',
+        'requests',
+        'requests-cache',
+        'xmltodict',
     ],
-    python_requires=">=3.7",
-    include_package_data=True,
+    extras_require=extras_require,
+    entry_points={
+        'console_scripts': [
+            'naturtag=naturtag.cli:main',
+            'nt=naturtag.cli:main',
+        ],
+        'gui_scripts': [
+            'naturtag-app=naturtag.app.app:main',
+        ],
+    },
 )
