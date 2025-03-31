@@ -1,6 +1,3 @@
-recursive-include zest *
-recursive-include doc *
-include *rst LICENSE.GPL
-exclude .installed.cfg
-exclude .gitattributes
-global-exclude *.pyc
+include versioneer.py
+include sqlalchemy_exasol/_version.py
+include README.rst
