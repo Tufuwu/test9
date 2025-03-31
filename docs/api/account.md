@@ -1,4 +1,0 @@
----
-title: Account
-slug: account
----
