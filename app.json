@@ -1,0 +1,280 @@
+{
+  "addons": [
+    "heroku-postgresql:hobby-dev",
+    "newrelic:wayne",
+    "rediscloud:30"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-python"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-pgbouncer"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nginx"
+    }
+  ],
+  "description": "Web Portal for MicroMasters",
+  "env": {
+    "ADWORDS_CONVERSION_ID": {
+      "description": "Id for adwords conversion.",
+      "required": false
+    },
+    "ALLOWED_HOSTS": {
+      "default": "['*']",
+      "description": "Array of allowed hostnames"
+    },
+    "AWS_ACCESS_KEY_ID": {
+      "description": "AWS Access Key for S3 storage."
+    },
+    "AWS_S3_FILE_OVERWRITE": {
+      "description": "Allow S3 storage to overwrite files.",
+      "value": "False"
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "description": "AWS Secret Key for S3 storage."
+    },
+    "AWS_STORAGE_BUCKET_NAME": {
+      "description": "S3 Bucket name."
+    },
+    "CYBERSOURCE_ACCESS_KEY": {
+      "description": "CyberSource Access Key"
+    },
+    "CYBERSOURCE_PROFILE_ID": {
+      "description": "CyberSource Profile ID"
+    },
+    "CYBERSOURCE_REFERENCE_PREFIX": {
+      "description": "a string prefix to identify the application in CyberSource transactions"
+    },
+    "CYBERSOURCE_SECURE_ACCEPTANCE_URL": {
+      "description": "CyberSource API endpoint"
+    },
+    "CYBERSOURCE_SECURITY_KEY": {
+      "description": "CyberSource API key"
+    },
+    "EDXORG_BASE_URL": {
+      "description": "The base URL of the edX instance to use for logging in.",
+      "required": true
+    },
+    "EDXORG_CLIENT_ID": {
+      "description": "The OAuth client ID configured in the edX instance.",
+      "required": true
+    },
+    "EDXORG_CLIENT_SECRET": {
+      "description": "The OAuth client secret configured in the edX instance.",
+      "required": true
+    },
+    "ELASTICSEARCH_HTTP_AUTH": {
+      "description": "Basic auth settings for connecting to Elasticsearch"
+    },
+    "ELASTICSEARCH_SHARD_COUNT": {
+      "description": "Configurable shard cound for Elasticsearch"
+    },
+    "ELASTICSEARCH_INDEX": {
+      "description": "Index to use on Elasticsearch"
+    },
+    "ELASTICSEARCH_URL": {
+      "description": "URL for connecting to Elasticsearch cluster"
+    },
+    "EXAMS_AUDIT_NACL_PUBLIC_KEY": {
+      "description": "NaCl public key for encrypting audit files",
+      "required": false
+    },
+    "EXAMS_SFTP_HOST": {
+      "description": "Hostname for Pearson SFTP server",
+      "required": false
+    },
+    "EXAMS_SFTP_PORT": {
+      "description": "Port for Pearson SFTP server",
+      "required": false
+    },
+    "EXAMS_SFTP_USERNAME": {
+      "description": "Username for Pearson SFTP server authentication",
+      "required": false
+    },
+    "EXAMS_SFTP_PASSWORD": {
+      "description": "Password for Pearson SFTP server authentication",
+      "required": false
+    },
+    "EXAMS_SFTP_UPLOAD_DIR": {
+      "description": "Upload directory for files we send to Pearson",
+      "required": false
+    },
+    "FEATURE_OPEN_DISCUSSIONS_USER_SYNC": {
+      "description": "Enables creation and syncing of open-discussions user data",
+      "required": false
+    },
+    "GOOGLE_API_KEY": {
+      "description": "API key for accessing Google services",
+      "required": true
+    },
+    "HEROKU_APP_NAME": {
+      "description": "Value provided by Heroku containing the app name (eg micromasters-ci)",
+      "required": true
+    },
+    "HEROKU_PARENT_APP_NAME": {
+      "description": "Value provided by Heroku containing the parent app name (eg micromasters-ci for a PR build)",
+      "required": true
+    },
+    "MAILGUN_KEY": {
+      "description": "The token for authenticating against the Mailgun API"
+    },
+    "MAILGUN_URL": {
+      "description": "The URL used to connect with Mailgun"
+    },
+    "MICROMASTERS_ADMIN_EMAIL": {
+      "description": "E-mail to send 500 reports to.",
+      "required": false
+    },
+    "MICROMASTERS_CORS_ORIGIN_WHITELIST": {
+      "description": "List of origins to allow CORS requests from (e.g. ['otherhost.com', 'myhost.edu'])",
+      "required": false
+    },
+    "MICROMASTERS_DB_CONN_MAX_AGE": {
+      "required": true,
+      "value": "0"
+    },
+    "MICROMASTERS_DB_DISABLE_SS_CURSORS": {
+      "description": "Disable server-side cursors to avoid issues with pgbouncer",
+      "required": false
+    },
+    "MICROMASTERS_DB_DISABLE_SSL": {
+      "required": true,
+      "value": "true"
+    },
+    "MICROMASTERS_EMAIL_HOST": {
+      "description": "Outgoing e-mail settings",
+      "required": false
+    },
+    "MICROMASTERS_EMAIL_PASSWORD": {
+      "description": "Outgoing e-mail settings",
+      "required": false
+    },
+    "MICROMASTERS_EMAIL_PORT": {
+      "description": "Outgoing e-mail settings",
+      "required": false,
+      "value": "587"
+    },
+    "MICROMASTERS_EMAIL_TLS": {
+      "description": "Outgoing e-mail settings",
+      "required": false,
+      "value": "True"
+    },
+    "MICROMASTERS_EMAIL_USER": {
+      "description": "Outgoing e-mail settings",
+      "required": false
+    },
+    "MICROMASTERS_ENVIRONMENT": {
+      "description": "The execution environment that the app is in (e.g. dev, staging, prod)"
+    },
+    "MICROMASTERS_FROM_EMAIL": {
+      "value": "MITx MicroMasters <micromasters-support@mit.edu>"
+    },
+    "MICROMASTERS_LOG_LEVEL": {
+      "description": "The logging level for the application",
+      "required": true,
+      "value": "INFO"
+    },
+    "MICROMASTERS_SECURE_SSL_REDIRECT": {
+      "description": "Application-level SSL redirect setting.",
+      "required": false,
+      "value": "True"
+    },
+    "MICROMASTERS_USE_S3": {
+      "description": "Use S3 for storage backend (required on Heroku)",
+      "value": "True"
+    },
+    "NEW_RELIC_APP_NAME": {
+      "default": "MicroMasters",
+      "description": "Application identifier in New Relic."
+    },
+    "NODE_MODULES_CACHE": {
+      "description": "If false, disables the node_modules cache to fix yarn install",
+      "value": "false"
+    },
+    "OAUTH_MAINTENANCE_MODE": {
+      "description": "If true, on login redirects to a static page with message",
+      "value": "False",
+      "required": false
+    },
+    "OPEN_DISCUSSIONS_API_USERNAME": {
+      "description": "The username to use for authentication Open Discussions",
+      "required": false
+    },
+    "OPEN_DISCUSSIONS_BASE_URL": {
+      "description": "The base url for Open Discussions",
+      "required": false
+    },
+    "OPEN_DISCUSSIONS_COOKIE_NAME": {
+      "description": "The name of the cookie to set the JWT token on"
+    },
+    "OPEN_DISCUSSIONS_COOKIE_DOMAIN": {
+      "description": "The domain to set the JWT token cookie on",
+      "required": false
+    },
+    "OPEN_DISCUSSIONS_JWT_EXPIRES_DELTA": {
+      "description": "How long the JWT cookie should live before expiration",
+      "required": false
+    },
+    "OPEN_DISCUSSIONS_JWT_SECRET": {
+      "description": "The JWT secret to be shared between MicroMasters and Open Discussions",
+      "required": false
+    },
+    "OPEN_DISCUSSIONS_REDIRECT_URL": {
+      "description": "The URL to redirect the uer to for the discussions site",
+      "required": false
+    },
+    "OPEN_DISCUSSIONS_SITE_KEY": {
+      "description": "The site key to use for discussions JWT tokens"
+    },
+    "OPEN_EXCHANGE_RATES_APP_ID": {
+      "description": "The app ID for the open exchange rates API"
+    },
+    "OPEN_EXCHANGE_RATES_URL": {
+      "value": "https://openexchangerates.org/api/"
+    },
+    "PARAMIKO_LOG_LEVEL": {
+      "description": "The log level for the paramiko logger",
+      "required": false
+    },
+    "PGBOUNCER_DEFAULT_POOL_SIZE": {
+      "value": "50"
+    },
+    "PGBOUNCER_MIN_POOL_SIZE": {
+      "value": "5"
+    },
+    "SECRET_KEY": {
+      "description": "Django secret key.",
+      "generator": "secret"
+    },
+    "SENTRY_DSN": {
+      "description": "The connection settings for Sentry"
+    },
+    "SESSION_ENGINE": {
+      "description": "Django session engine",
+      "required": false
+    },
+    "STATUS_TOKEN": {
+      "description": "Token to access the status API.",
+      "required": true
+    }
+  },
+  "keywords": [
+    "Django",
+    "Python",
+    "MIT",
+    "Office of Digital Learning"
+  ],
+  "name": "micromasters",
+  "stack": "heroku-16",
+  "repository": "https://github.com/mitodl/micromasters",
+  "scripts": {
+    "postdeploy": "./manage.py migrate --noinput && ./manage.py recreate_index"
+  },
+  "success_url": "/",
+  "website": "https://github.com/mitodl/micromasters"
+}

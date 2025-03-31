@@ -1,0 +1,28 @@
+  <nav class="navbar" role="navigation">
+      <div class="navbar-header">
+        <div class="pull-left">
+          <a class="brand-logo" href="http://www.mit.edu"></a>
+          <div class="divider-large">&nbsp;</div>
+          <div class="header-page-name">
+          <a class="micromasters-logo" href="/"></a>
+          </div>
+          </div>
+        <div class="pull-right">
+          {% if authenticated %}
+            {% if is_staff %}
+              <a class="header-dashboard-link" href="/learners">My Dashboard</a>
+            {% else %}
+              <a class="header-dashboard-link" href="/dashboard">My Dashboard</a>
+            {% endif %}
+          <a class="header-dashboard-link" href="/logout">
+            Sign Out
+          </a>
+          {% else %}
+          <button class="mdl-button button-login open-signup-dialog">Log In</button>
+          <button class="mdl-button button-signup open-signup-dialog">
+            Sign Up
+          </button>
+          {% endif %}
+        </div>
+      </div>
+  </nav>

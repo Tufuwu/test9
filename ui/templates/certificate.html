@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load i18n static wagtailimages_tags %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600;" />
+{% endblock %}
+
+{% block title %}{% trans "MITx MicroMasters" %}{% endblock %}
+
+{% block content %}
+<div class="certificate">
+  <main class="certificate-body verified row">
+
+    <div class="col-md-8">
+      <div class="micromasters-logo">
+        <img src="{% static 'images/micromasters_certificate_logo.png' %}" alt="MicroMaster's Certificate of Completion" />
+      </div>
+
+      <div class="certificate-text">
+        <p>This is to certify that</p>
+        <p class="name">{{ name }}</p>
+        {% if course_title %}
+          <p>has successfully completed and received a passing grade in</p>
+          <p class="course-name">{{ course_title }}</p>
+          <p>
+            a course offered by the {{ program_title }} MicroMasters program, an online learning initiative offered by
+            the Massachusetts Institute of Technology in collaboration with edX.
+          </p>
+        {% else %}
+          <p>
+            has successfully completed all the courses and received passing grades for a MicroMasters credential in
+          </p>
+          <p class="course-name">{{ program_title }}</p>
+          <p>
+            a program offered by MITx, in collaboration with edX.
+          </p>
+        {% endif %}
+      </div>
+
+      <div class="certificate-stamps row">
+        <div class="col-md-3 logo">
+          <a class="edx-logo" href="http://edx.org">
+            <img src="{% static 'images/edx_logo.png' %}" alt="edX Logo" />
+          </a>
+        </div>
+        <div class="col-md-4 certificate-date">
+          <label>Verified Certificate</label>
+          <span>Issued {{ certificate.created_on|date:"F j, Y" }}</span>
+        </div>
+        <div class="col-md-5 certificate-id">
+          <label>Valid Certificate ID</label>
+          <span>
+            {% if course_title %}
+              <a href="{% url 'certificate' certificate.hash %}">
+                {{ certificate.hash }}
+              </a>
+            {% else %}
+              <a href="{% url 'program-certificate' certificate.hash %}">
+                {{ certificate.hash }}
+              </a>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 right-col">
+      <div class="organization-logo">
+        <img src="{% static 'images/mitx_logo.png' %}" alt="MITx Logo" />
+      </div>
+
+      <div class="signatories">
+        <h3 class="sr-only">Noted by</h3>
+
+        {% for signatory in signatories %}
+        <div class="signatory">
+          {% image signatory.signature_image max-200x100 %}
+          <h4 class="name">{{ signatory.name }}</h4>
+          <ul class="credentials">
+            <li>{{ signatory.title_line_1 }}</li>
+            {% if signatory.title_line_2 %}
+              <li>{{ signatory.title_line_2 }}</li>
+            {% endif %}
+          </ul>
+          <span class="organization">{{ signatory.organization }}</span>
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+
+  </main>
+</div>
+{% include "footer.html" %}
+{% endblock %}

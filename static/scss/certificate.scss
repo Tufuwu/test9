@@ -1,0 +1,235 @@
+@media print {
+  @page {
+    size: auto;
+    margin: 0mm;
+  }
+
+  body {
+    margin: 0;
+  }
+}
+
+.certificate {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px 0;
+  color: #4d4b4b;
+  font-size: 1rem;
+  font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased; // sass-lint:disable-line no-vendor-prefixes
+
+  @media print {
+    width: 95%;
+    margin: 0;
+  }
+
+  .certificate-body {
+    border: 1px solid #cdd7db;
+    background: #fcfcfc;
+    box-shadow: 0 1px 2px 1px rgba(167,164,164,.25);
+    padding: 35px 50px;
+    position: relative;
+
+    @media print {
+      border: none;
+      padding: 0;
+      margin: 1.4cm;
+    }
+
+    .col-md-8 {
+      position: static;
+    }
+
+    @media print {
+      .col-md-8 {
+        width: 50%;
+        float: left;
+      };
+
+      .col-md-4 {
+        width: 45%;
+        float: right;
+      }
+    }
+
+    &.verified {
+      background-position: 0 -60px;
+      background-size: 100% auto;
+      background-color: #fff;
+      background-repeat: no-repeat;
+    }
+
+    .micromasters-logo {
+      padding-bottom: 40px;
+
+      img {
+        width: 405px;
+
+        @media print {
+          width: 320px;
+        }
+      }
+    }
+
+    .organization-logo img {
+      width: 150px;
+
+      @media print {
+        width: 100px;
+      }
+
+    }
+
+    .certificate-text {
+      color: #4d4b4b;
+      padding-bottom: 75px;
+      font-weight: 400;
+
+      p {
+        margin: 0;
+        padding-bottom: 15px;
+        font-size: 18px;
+
+        @media print {
+          font-size: 12pt;
+        }
+      }
+
+      .name {
+        color: #000;
+        font-size: 40px;
+        font-weight: 600;
+        line-height: 44px;
+      }
+
+      .course-name {
+        color: #000;
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 32px;
+      }
+    }
+
+    .certificate-stamps {
+      text-align: left;
+      font-size: 12px;
+      position: absolute;
+      bottom: 45px;
+      left: 68px;
+
+      @media print {
+        left: 12px;
+        bottom: 15px;
+
+        .col-md-3 {
+          width: 19%;
+          float: left;
+        }
+
+        .col-md-4, .col-md-5 {
+          width: 33%;
+          float: left;
+        }
+      }
+
+      div {
+        padding: 0 20px 0 0;
+
+        @media print {
+          padding-right: 10px;
+        }
+      }
+
+      .edx-logo {
+        padding-right: 30px;
+
+        img {
+          width: 82px;
+        }
+      }
+
+      label {
+        display: block;
+        margin: 0;
+        color: #a7a4a4;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+        font-weight: normal;
+      }
+
+      span {
+        color: #6b6969;
+        font-weight: 600;
+
+        a {
+          font-weight: 600;
+        }
+      }
+    }
+
+    .right-col {
+      text-align: right;
+    }
+
+    .organization-logo {
+      padding-bottom: 32px;
+
+      @media print {
+        padding-bottom: 20px;
+      }
+    }
+
+    .signatory {
+      padding-bottom: 10px;
+
+      .name {
+        margin: 0;
+        padding: 0 0 5px;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.6;
+      }
+
+      ul {
+        margin: 0;
+        padding: 0 0 5px;
+        list-style: none;
+        text-indent: 0;
+        color: #6b6969;
+        font-size: 12px;
+
+        @media print {
+          padding-bottom: 0;
+        }
+
+        li {
+          line-height: 18px;
+
+          @media print {
+            line-height: 15px;
+          }
+        }
+      }
+
+      .organization {
+        color: #6b6969;
+        font-size: 12px;
+        font-style: italic;
+      }
+    }
+  }
+}
+
+@media print {
+  #footer {
+    display: none;
+  }
+}
+
+@media print {
+  a[href]:after {
+    content: "";
+  }
+}
