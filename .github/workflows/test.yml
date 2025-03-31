@@ -1,22 +1,35 @@
-name: Docker Images
-on: [push, pull_request]
+name: Tests
+
+on: [push]
 
 jobs:
-  build-image:
+  build:
+
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+
     steps:
-      - uses: actions/checkout@v2
-        name: Check out code
-
-      - name: Test
-        run: |
-          cp conf.toml.sample conf.toml
-          make test
-
-      - uses: mr-smithers-excellent/docker-build-push@v5
-        name: Build & push Docker image
-        with:
-          image: dearrude/osm-detective
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install --quiet tensorflow torch jax jaxlib nbformat ipython pylint coverage pytest
+        pip install .
+    - name: Test with pytest
+      run: |
+        coverage run -m pytest tests/commit
+    - name: Upload coverage
+      run:
+        bash <(curl -s https://codecov.io/bash)
+    - name: pylint
+      continue-on-error: true
+      run: |
+        pylint --rcfile=./demos/.pylintrc demos
+        pylint --rcfile=./tests/.pylintrc tests
+        pylint --rcfile=./phi/.pylintrc phi
