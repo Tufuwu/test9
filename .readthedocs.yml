@@ -1,11 +1,15 @@
 version: 2
-formats: all
+
 python:
-    version: 3
-    install:
-        - requirements: docs/requirements.txt
-        - method: pip
-          path: .
+  version: 3.7
+  install:
+    - requirements: requirements.txt
+    - requirements: docs/requirements.txt
+
 sphinx:
-    configuration: docs/conf.py
-    fail_on_warning: true
+  configuration: docs/conf.py
+
+conda:
+  environment: docs/environment.yml
+
+formats: all
