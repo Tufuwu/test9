@@ -1,15 +1,91 @@
-*.pyc
-*.ipynb_checkpoints*
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
 
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
 build/
-/dist/
-quantecon.egg-info/
-*.DS_Store
-*.TODO
-*.noseids
-*.coverage
-*.h5
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.libs
 
-# Numba cache files
-*.nbc
-*.nbi
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# IDE's etc.
+.idea/
+venv/
+venv2/
+
+# fiona
+VERSION.txt
+fiona/_shim.c
+fiona/ogrext.c
+fiona/_crs.c
+fiona/_drivers.c
+fiona/_err.c
+fiona/_geometry.c
+fiona/_transform.cpp
+fiona/ograpi.pxd
+fiona/_shim1.c
+fiona/_shim2.c
+fiona/_shim22.c
+fiona/_shim.pxd
+fiona/_shim.pyx
+tests/data/coutwildrnp.json
+tests/data/coutwildrnp.tar
+tests/data/coutwildrnp.zip
+tests/data/coutwildrnp.gpkg
+.DS_Store
+.ipynb_checkpoints
+.pytest_cache
+MANIFEST
+fiona/_env.c
+fiona/ogrext1.c
+fiona/ogrext2.c
+fiona/schema.c

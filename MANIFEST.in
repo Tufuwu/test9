@@ -1,3 +1,12 @@
-include README.md	
-include LICENSE.txt
-recursive-include quantecon/tests/data *
+global-exclude .DS_Store
+global-exclude *.pyc
+recursive-exclude docs/data *
+recursive-exclude docs/_build *
+exclude MANIFEST.in
+exclude *.txt *.py
+recursive-include docs *.rst *.txt
+recursive-include tests *.py
+recursive-include tests/data *
+include fiona/*.c fiona/*.cpp
+include CHANGES.txt CREDITS.txt LICENSE.txt VERSION.txt README.rst
+include benchmark.py setup.py requirements.txt
