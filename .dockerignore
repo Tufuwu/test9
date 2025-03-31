@@ -1,15 +1,20 @@
-# Do not include any settings
-MemberManagement/local_settings.py
-MemberManagement/prod_settings.py
+# Docker related
+development/Dockerfile
+development/docker-compose*.yml
+development/*.env
+*.env
 
-# virtualenv
-.venv
-venv/
-ENV/
+# Python
+**/*.pyc
+**/*.pyo
 
-node_modules/
-assets/bundles/
 
-# Countries data
-allCountries.txt
-allCountries.zip
+# Other
+docs/_build
+FAQ.md
+.git/
+.gitignore
+.github
+tasks.py
+LICENSE
+**/*.log
