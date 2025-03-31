@@ -1,31 +1,59 @@
-name: ci
+name: PyDataStructs Continuous Integration Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ${{matrix.os}}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        python-version: ["3.9", "3.10"]
+
     steps:
-      # Checkout Repository
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      # Install Tools
-      - name: Install Tools
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Upgrade pip version
         run: |
-          sudo apt-get install wget build-essential python3
-          pip3 install setuptools
+          python -m pip install --upgrade pip
 
-      # Install (n)Migen / LiteX / Cores
-      - name: Install LiteX
+      - name: Install requirements
         run: |
-          wget https://raw.githubusercontent.com/enjoy-digital/litex/main/litex_setup.py
-          python3 litex_setup.py init install --user
+          pip install -r requirements.txt
+          pip install -r docs/requirements.txt
 
-      # Install Project
-      - name: Install Project
-        run: python3 setup.py develop --user
+      - name: Build package
+        run: |
+          python -m pip install .
 
-      # Test
-      - name: Run Tests
-        run: python3 setup.py test
+      - name: Run tests
+        run: |
+          python -m pytest --doctest-modules --cov=./ --cov-report=xml -s
+
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage/reports/
+          env_vars: OS,PYTHON
+          fail_ci_if_error: false
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          path_to_write_report: ./coverage/codecov_report.txt
+          verbose: true
+
+      - name: Build Documentation
+        run: |
+          sphinx-build -b html docs/source/ docs/build/html

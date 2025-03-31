@@ -1,19 +1,26 @@
-#!/usr/bin/env python3
+import setuptools
 
-from setuptools import setup
-from setuptools import find_packages
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-
-setup(
-    name="litex-boards",
-    description="LiteX supported boards",
-    author="Florent Kermarrec",
-    author_email="florent@enjoy-digital.fr",
-    url="http://enjoy-digital.fr",
-    download_url="https://github.com/litex-hub/litex-boards",
-    test_suite="test",
-    license="BSD",
-    python_requires="~=3.6",
-    include_package_data=True,
-    packages=find_packages(),
+setuptools.setup(
+    name="pydatastructs",
+    version="0.0.1-dev",
+    author="PyDataStructs Development Team",
+    author_email="pydatastructs@googlegroups.com",
+    description="A python package for data structures",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/codezonediitj/pydatastructs",
+    packages=setuptools.find_packages(),
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: OS Independent",
+        "Topic :: Education :: Data Structures",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+        "Topic :: Software Development :: Libraries"
+    ],
+    python_requires='>=3.5',
 )
