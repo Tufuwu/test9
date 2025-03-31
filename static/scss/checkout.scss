@@ -1,0 +1,503 @@
+.checkout-page {
+  @include media-breakpoint-up(lg) {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  margin: 0 auto;
+  max-width: 1000px;
+  background-color: #f5f5f5;
+  font-weight: 600;
+  padding-top: 50px;
+  padding-bottom: 50px;
+
+  .header {
+    hr {
+      margin-bottom: 35px;
+    }
+
+    .description {
+      font-size: 28px;
+    }
+  }
+
+  .page-title {
+    font-size: 28px;
+    padding-bottom: 10px;
+  }
+
+  .purchase-text {
+    margin: 15px 0;
+  }
+
+  .item-type {
+    color: #45bebf;
+    font-size: 28px;
+  }
+
+  .flex-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .item-row {
+    margin: 20px 0;
+
+    .item-column {
+      min-width: 85px;
+      max-width: 85px;
+      height: auto;
+
+      img {
+        width: 100%;
+        height: auto;
+      }
+
+      @include media-breakpoint-up(lg) {
+        min-width: 200px;
+        max-width: 200px;
+      }
+    }
+
+    .title-column {
+      margin: 25px 20px;
+      width: 100%;
+
+      select {
+        @include media-breakpoint-up(lg) {
+          font-size: 18px;
+        }
+
+        font-size: 16px;
+        width: 100%;
+      }
+    }
+  }
+
+  .enrollment-input {
+    margin: 20px 0;
+
+    .enrollment-row {
+      margin-top: 50px;
+    }
+
+    .coupon-code-row {
+      input {
+        border: 1px solid #cccccc;
+        border-radius: 0;
+        height: 40px;
+        width: 100%;
+      }
+
+      .error-border {
+        border: 1px solid $primary;
+      }
+
+      .apply-button {
+        @include media-breakpoint-up(lg) {
+          margin-left: 30px;
+          padding: 5px 50px;
+        }
+
+        background-color: $light-blue;
+        margin-left: 15px;
+        margin-right: 25px;
+        padding: 5px 15px;
+      }
+    }
+  }
+
+  .order-summary-container {
+    @include media-breakpoint-down(lg) {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .order-summary {
+      background-color: white;
+      padding: 25px;
+      margin: 20px 0;
+
+      .title {
+        color: #8c8d8e;
+        font-size: 24px;
+        margin-bottom: 25px;
+      }
+
+      .price-row,
+      .discount-row {
+        font-size: 24px;
+      }
+
+      .discount-row {
+        margin-top: 10px;
+        color: $primary;
+      }
+
+      .total-row {
+        font-size: 28px;
+        margin-top: 25px;
+      }
+    }
+  }
+
+  .data-consent-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    a,
+    a:hover {
+      color: $light-blue;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+
+  button {
+    color: white;
+    font-weight: 600;
+    border: 0;
+  }
+
+  .checkout-button {
+    background-color: $primary;
+    font-size: 28px;
+    padding: 15px 0;
+    width: 100%;
+  }
+
+  input[type="checkbox"] {
+    display: unset;
+  }
+
+  .submit-links {
+    margin-top: 10px;
+
+    a,
+    a:hover {
+      color: $light-blue;
+    }
+  }
+}
+
+.data-consent-modal {
+  @include media-breakpoint-up(lg) {
+    min-width: 800px;
+  }
+
+  .modal-content {
+    padding: 30px;
+  }
+
+  .modal-header {
+    border-bottom: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .modal-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: $light-blue;
+  }
+
+  .close {
+    font-size: 60px;
+    font-weight: 400;
+  }
+}
+
+.b2b-purchase-form {
+  margin: 0 auto;
+  max-width: 1000px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+
+    &[for="coupon"] {
+      margin-bottom: 35px;
+    }
+  }
+
+  .product-row,
+  .course-date-row {
+    margin-top: 30px;
+  }
+
+  .checkout-button,
+  .apply-button {
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .checkout-button {
+    background-color: $primary;
+    padding: 5px 0;
+    width: 100%;
+    border: 0;
+    border-radius: 5px;
+  }
+
+  .apply-button {
+    background-color: $light-blue;
+    font-size: 22px;
+    padding: 5px 20px;
+    border: 0;
+    border-radius: 7px;
+  }
+
+  .b2b-order-summary {
+    display: flex;
+    flex-direction: column;
+    background-color: $very-light-gray;
+    font-weight: 600;
+    padding: 20px;
+    margin-bottom: 40px;
+  }
+
+  input {
+    border-radius: 5px;
+    border: 1px solid $tab-color;
+    padding: 5px 5px 0 5px;
+    font-weight: 500;
+    font-size: 16px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+  }
+
+  .coupon-input-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    input {
+      margin: 0 20px 0 0;
+      width: 100%;
+    }
+
+    .apply-button {
+      margin-left: auto;
+    }
+  }
+
+  .select {
+    font-size: 16px;
+    line-height: 16px;
+  }
+}
+
+.b2b-purchase-form,
+.checkout-page {
+  .error {
+    color: $primary;
+  }
+
+  .success {
+    color: $success;
+  }
+}
+
+.b2b-purchase-form,
+.b2b-receipt-page {
+  margin: 0 auto;
+  max-width: 1000px;
+  font-weight: 600;
+
+  .title {
+    font-weight: 700;
+    font-size: 32px;
+    color: $navy-blue;
+    padding: 10px 0;
+  }
+
+  .b2b-order-summary {
+    background-color: $very-light-gray;
+    padding: 20px 10px;
+
+    .row {
+      line-height: 48px;
+
+      .total-paid {
+        font-weight: 600;
+        font-size: 20px;
+      }
+
+      .col-8 {
+        font-weight: 700;
+        font-size: 20px;
+      }
+    }
+
+    .discount-row {
+      color: $primary;
+    }
+  }
+
+  .description,
+  .explanation {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .enterprise-terms-condition {
+    margin-top: 10px;
+    line-height: 1.4;
+  }
+
+  .coupon-description {
+    font-size: 18px;
+  }
+
+  .explanation {
+    color: $navy-blue;
+  }
+}
+
+.b2b-receipt-page {
+  .enrollment-codes-link {
+    display: block;
+    text-align: center;
+    background-color: $light-blue;
+    color: white;
+    font-size: 28px;
+    padding: 15px 0;
+    margin-top: 15px;
+    text-transform: uppercase;
+    width: 100%;
+  }
+}
+
+.purchase-summary-block {
+  font-size: 16px;
+
+  .b2b-explanation {
+    .col-lg-12 {
+      padding-left: 0;
+    }
+
+    .expandable {
+      .body {
+        line-height: 22px;
+        padding-right: 15%;
+
+        li {
+          margin-bottom: 15px;
+        }
+      }
+    }
+  }
+
+  .text-box {
+    max-width: 450px;
+  }
+
+  p {
+    line-height: 22px;
+
+    a {
+      color: $deep-sky-blue;
+      text-decoration: underline;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+
+  h4 {
+    font-weight: 600;
+  }
+
+  .description {
+    color: $light-gray;
+  }
+}
+
+.order-summary,
+.b2b-order-summary {
+  font-weight: 600;
+  font-size: 16px;
+
+  .bar {
+    @include media-breakpoint-up(lg) {
+      background-size: 24px 1px;
+      margin-top: 75px;
+    }
+
+    height: 1px;
+    width: 100%;
+    background-position: bottom;
+    background-size: 10px 1px;
+    background-repeat: repeat-x;
+  }
+}
+
+.order-summary .bar {
+  margin-top: 25px;
+  background-image: linear-gradient(
+    to right,
+    black 50%,
+    rgba(255, 255, 255, 0) 0%
+  );
+}
+
+.b2b-order-summary .bar {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  color: grey;
+  background-image: linear-gradient(
+    to right,
+    $soft-light-gray 50%,
+    rgba(255, 255, 255, 0) 0%
+  );
+}
+
+.b2b-explanation {
+  max-width: 1000px;
+
+  .expandable {
+    border-top: 2px solid $tab-color;
+
+    .header {
+      height: 75px;
+
+      .toggle {
+        font-size: 48px;
+        color: $navy-blue;
+      }
+
+      .title {
+        font-size: 20px;
+        color: $navy-blue;
+        font-weight: bold;
+      }
+    }
+
+    &.last-expandable {
+      border-bottom: 2px solid $tab-color;
+      margin-bottom: 20px;
+    }
+
+    .body {
+      font-size: 18px;
+      line-height: 36px;
+      font-weight: 500;
+    }
+  }
+
+  &.b2b-receipt-explanation {
+    margin-top: 30px;
+  }
+}
