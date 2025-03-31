@@ -1,24 +1,13 @@
 name: CI
+
 on: [push, pull_request]
+
 jobs:
-  build:
-
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-
+  tue-ci:
+    name: TUe CI - ${{ github.event_name }}
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - name: TUe CI
+        uses: tue-robotics/tue-env/ci/main@main
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          pip install .
-          pip install pytest
-      - name: Test with pytest
-        run: |
-          pytest
+          package: ${{ github.event.repository.name }}
