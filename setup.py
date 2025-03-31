@@ -1,36 +1,30 @@
-from setuptools import setup, find_packages
+import setuptools
 
-setup(
-    name='django-prometheus-metrics',
-    version='0.0.1',
-    packages=find_packages(),
-    license='MIT License',
-    description='Monitoring middleware for prometheus.',
-    long_description="""Django-Prometheus-Metrics
-This library lets you expose metrics in your django application for Prometheus consumption.
-See https://github.com/Jimdo/django-prometheus-metrics
-""",
-    url='https://github.com/Jimdo/django-prometheus-metrics',
-    author='Jimdo GmbH',
-    author_email='platformteam@jimdo.com',
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+import versioneer
+
+setuptools.setup(
+    name="removestar",
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
+    author="Aaron Meurer",
+    author_email="asmeurer@gmail.com",
+    description="A tool to automatically replace 'import *' imports with explicit imports in files",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://www.asmeurer.com/removestar/",
+    packages=setuptools.find_packages(),
     classifiers=[
-        'Environment :: Web Environment',
-        'Framework :: Django',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
     ],
+    entry_points={'console_scripts': [ 'removestar = removestar.__main__:main']},
+    python_requires= '>=3.6',
     install_requires=[
-        "prometheus_client>=0.0.21",
+        'pyflakes'
     ],
-    test_suite='runtests.runtests',
+    license='MIT',
 )
