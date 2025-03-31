@@ -1,39 +1,83 @@
-name: ci
+---
+name: OpenWISP Users CI Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
+    name: Python==${{ matrix.python-version }} | ${{ matrix.django-version }}
     runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10"]
+        django-version:
+          - django~=2.2
+          - django~=3.0
+          - django~=3.1
+
     steps:
-      # Checkout Repository
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
-      # Install Tools
-      - name: Install Tools
-        run: |
-          sudo apt-get install wget build-essential python3 verilator libevent-dev libjson-c-dev device-tree-compiler
-          pip3 install setuptools
-          pip3 install requests
-          pip3 install pexpect
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
 
-      # Install (n)Migen / LiteX / Cores
-      - name: Install LiteX
+      - name: Install python dependencies
         run: |
-          wget https://raw.githubusercontent.com/enjoy-digital/litex/main/litex_setup.py
-          python3 litex_setup.py init install --user
+          pip install -U pip wheel
+          pip install ${{ matrix.django-version }}
+          pip install -U -r requirements-test.txt
+      - name: Install npm dependencies
+        run: sudo npm install -g jshint
 
-      # Install RISC-V GCC
-      - name: Install RISC-V GCC
-        run: |
-          wget https://raw.githubusercontent.com/enjoy-digital/litex/main/litex_setup.py
-          python3 litex_setup.py gcc
-          sudo mkdir /usr/local/riscv
-          sudo cp -r $PWD/../riscv64-*/* /usr/local/riscv
+      - name: Install openwisp-users
+        run: pip install -e .[rest]
 
-      # Test
-      - name: Run Tests
+      - name: QA checks
         run: |
-          export PATH=/usr/local/riscv/bin:$PATH
-          ./make.py --board=arty
+          ./run-qa-checks
+
+      - name: Tests
+        run: |
+          coverage run --source=openwisp_users runtests.py
+          SAMPLE_APP=1 coverage run --append --source=openwisp_users runtests.py
+          # basic tests without allauth.socialaccount
+          NO_SOCIAL_APP=1 ./tests/manage.py test testapp.tests.test_admin.TestUsersAdmin --parallel
+
+      - name: Upload Coverage
+        run: coveralls --service=github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: |
+            python-${{ matrix.python-version }}-${{ matrix.django-version }}
+          COVERALLS_PARALLEL: true
+
+  coveralls:
+    name: Finish Coveralls
+    needs: build
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+      - name: Finished
+        run: |
+          pip3 install --upgrade coveralls
+          coveralls --finish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
