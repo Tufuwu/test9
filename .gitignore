@@ -1,10 +1,7 @@
-/asttokens/version.py
-
-.coverage
-*.py[co]
-
-# Building and packaging
-build/
-dist/
-*.egg-info/
-docs/_build/
+*.pyo
+*.pyc
+__pycache__
+*.egg-info
+build
+dist
+.idea
