@@ -1,0 +1,93 @@
+/* Note admonition style*/
+.alert-info {
+    background-color: #6696c1;
+    border-color: #6696c1;
+    color: #2c3e50;
+    font-size: 15px
+}
+
+/* Warning admonition style*/
+.alert-warning {
+    background-color: #6696c1;
+    border-color: #6696c1;
+    color: #ffffff;
+    ont-size: 15px
+}
+
+div.body {
+  max-width: 100%;
+}
+
+/* ensures that readthedocs banner doesn't cover content */
+.content {
+  padding-bottom: 46px;
+}
+
+/* Make navbar blue */
+.navbar-default {
+  background-color: #2c3e50;
+  border-color: transparent;
+}
+
+/* Change hover and focus color to green */
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus {
+  color: #18bc9c;
+  background-color: transparent;
+}
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+  color: #18bc9c;
+  background-color: transparent;
+}
+
+/* Increase size of html_logo */
+.navbar-brand span img{
+  height: 40px;
+  position: relative;
+  top: -10px;
+}
+
+/* For collapsible code snippets */
+.toggle .header {
+    display: block;
+    clear: both;
+}
+
+.toggle .header:after {
+    content: " ▶";
+}
+
+.toggle .header.open:after {
+    content: " ▼";
+}
+
+/* For landing page banner */
+.jumbotron{
+    position: relative;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    text-align: left;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+/* Landing page header style */
+.jumbotron h1 {
+    font-family: Lato,Helvetica Neue,Helvetica,Arial,sans-serif;
+    font-size: 39px;
+    font-style: italic;
+    font-weight: 400;
+    color: white;
+    min-height: 220px;
+}
+
+/* fix sphinx-gallery footer with bootstrap theme */
+
+.content .container {
+  width: unset;
+  margin-left: unset;
+  margin-right: unset;
+  padding-left: unset;
+  padding-right: unset;
+}
