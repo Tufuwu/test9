@@ -1,0 +1,155 @@
+#!/usr/bin/python
+
+import argparse
+import sys
+import warnings
+from datetime import datetime
+try:
+    from importlib import metadata
+except ImportError:
+    # Running on pre-3.8 Python; use importlib-metadata package
+    import importlib_metadata as metadata
+
+from qrbill import QRBill
+
+
+def clean_nl(value):
+    """A '\n' in the command line will be escaped to '\\n'."""
+    return value.replace('\\n', '\n') if isinstance(value, str) else value
+
+
+def run():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--version', action='version', version='%(prog)s ' + metadata.version('qrbill'))
+    parser.add_argument('--output',
+                        help='output file')
+    parser.add_argument('-t', '--text',
+                        help='print the bill data as text on the console '
+                             'and exit if --output is not provided',
+                        action='store_true')
+    parser.add_argument('--account', required=True,
+                        help='creditor IBAN account number')
+    parser.add_argument('--creditor-name', required=True,
+                        help='creditor name')
+    parser.add_argument('--creditor-line1',
+                        help='creditor address line 1')
+    parser.add_argument('--creditor-line2',
+                        help='creditor address line 2')
+    parser.add_argument('--creditor-street',
+                        help='creditor street')
+    parser.add_argument('--creditor-housenumber',
+                        help='creditor house number')
+    parser.add_argument('--creditor-postalcode',
+                        help='creditor postal code')
+    parser.add_argument('--creditor-city',
+                        help='creditor city')
+    parser.add_argument('--creditor-country', default='CH',
+                        help='creditor country')
+    parser.add_argument('--amount',
+                        help='amount of payment')
+    # only CHF and EUR are acceptable
+    # see https://www.paymentstandards.ch/dam/downloads/ig-qr-bill-en.pdf
+    # chapter 4.3.3 elemet Ccy
+    parser.add_argument('--currency', default='CHF', choices=['CHF', 'EUR'],
+                        help='currency of payment')
+    parser.add_argument('--due-date',
+                        help='due date of payment in the form YYYY-MM-DD')
+    parser.add_argument('--debtor-name',
+                        help='debtor name')
+    parser.add_argument('--debtor-line1',
+                        help='debtor address line 1')
+    parser.add_argument('--debtor-line2',
+                        help='debtor address line 1')
+    parser.add_argument('--debtor-street',
+                        help='debtor street')
+    parser.add_argument('--debtor-housenumber',
+                        help='debtor house number')
+    parser.add_argument('--debtor-postalcode',
+                        help='debtor postal code')
+    parser.add_argument('--debtor-city',
+                        help='debtor city')
+    parser.add_argument('--debtor-country', default='CH',
+                        help='debtor country')
+    parser.add_argument('--reference-number',
+                        help='reference number')
+    parser.add_argument('--extra-infos',
+                        help='payment purpose')
+    parser.add_argument('--alt-procs',
+                        nargs='*',
+                        help='alternative payment parameters (2 lines max)',
+                        default=())
+    # see https://www.paymentstandards.ch/dam/downloads/ig-qr-bill-en.pdf
+    # annex D table 16
+    parser.add_argument('--language', default='en', choices=['en', 'de', 'fr', 'it'],
+                        help='language')
+    parser.add_argument('--full-page', default=False, action='store_true',
+                        help='Print to full A4 size page')
+    parser.add_argument('--no-top-line', dest="top_line", default=True, action='store_false',
+                        help='Do not print top separation line')
+    parser.add_argument('--no-payment-line', dest="payment_line", default=True, action='store_false',
+                        help='Do not print vertical separation line between receipt and payment parts')
+    parser.add_argument('--font-factor', dest="font_factor", default=1.0, type=float,
+                        help='Font factor to provide a zoom for all texts on the bill')
+
+    args = parser.parse_args()
+    creditor = {
+        'name': clean_nl(args.creditor_name),
+        'line1': clean_nl(args.creditor_line1),
+        'line2': clean_nl(args.creditor_line2),
+        'street': clean_nl(args.creditor_street),
+        'house_num': args.creditor_housenumber,
+        'pcode': args.creditor_postalcode,
+        'city': args.creditor_city,
+        'country': args.creditor_country,
+    } if args.creditor_name else None
+    debtor = {
+        'name': clean_nl(args.debtor_name),
+        'line1': clean_nl(args.debtor_line1),
+        'line2': clean_nl(args.debtor_line2),
+        'street': clean_nl(args.debtor_street),
+        'house_num': args.debtor_housenumber,
+        'pcode': args.debtor_postalcode,
+        'city': args.debtor_city,
+        'country': args.debtor_country,
+    } if args.debtor_name else None
+
+    if args.output and not args.output.endswith('.svg'):
+        warnings.warn("Warning: The output file name should end with .svg")
+
+    try:
+        bill = QRBill(
+            account=args.account,
+            creditor=creditor,
+            amount=args.amount,
+            currency=args.currency,
+            due_date=args.due_date,
+            debtor=debtor,
+            ref_number=args.reference_number,
+            extra_infos=args.extra_infos,
+            alt_procs=args.alt_procs,
+            language=args.language,
+            top_line=args.top_line,
+            payment_line=args.payment_line,
+            font_factor=args.font_factor,
+        )
+    except ValueError as err:
+        sys.exit("Error: %s" % err)
+
+    if args.text:
+        # print as text:
+        print(bill.qr_data())
+        # exit, unless an output file is explicitly required:
+        if not args.output:
+            return
+
+    if args.output:
+        out_path = args.output
+    else:
+        out_path = "{}-{}.svg".format(
+            args.account.replace(' ', ''),
+            datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        )
+    bill.as_svg(out_path, full_page=args.full_page)
+
+if __name__ == '__main__':
+    run()
