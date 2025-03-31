@@ -1,33 +1,31 @@
-name: CI
-on:
-  push:
-  schedule:
-    - cron: '0 8 * * 6'
+name: Run tests
+on: [pull_request]
 jobs:
-  test:
-    name: "Test: Python ${{ matrix.python }} on ${{ matrix.os }}"
-    runs-on: ${{ matrix.os }}
+  unit_test:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
-        python: ["3.9", "3.10"]
+        python-version: ["3.9", "3.10"]
+
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+
+      - name: Install Ubuntu packages
+        run: sudo apt-get install libxml2-dev libxslt1-dev python-dev
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python }}
+          python-version: ${{ matrix.python-version }}
+
+      - name: Setup Python cache
+        uses: actions/cache@v4
+        with:
+          path: venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/requirements-dev.txt') }}
+
       - name: Install dependencies
-        run: |
-          pip install pytest pytest-cov
-          pip install -r requirements.txt
-      - name: Install torch and torchvision
-        if: "${{ !(contains(matrix.os, 'windows') && matrix.python == '2.7') }}"
-        run: pip install torch torchvision
-      - name: Install cleanlab
-        run: pip install -e .
-      - name: Test with coverage
-        run: pytest --verbose --cov=cleanlab/ --cov-config .coveragerc --cov-report=xml
-      - uses: codecov/codecov-action@v2
+        run: make requirements-dev
+
+      - name: Run tests
+        run: make test
