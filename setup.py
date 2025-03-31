@@ -1,59 +1,89 @@
-from setuptools import setup, find_packages
-import versioneer
+##############################################################################
+#
+# Copyright (c) 2008-2013 Agendaless Consulting and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the BSD-like license at
+# http://www.repoze.org/LICENSE.txt.  A copy of the license should accompany
+# this distribution.  THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL
+# EXPRESS OR IMPLIED WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND
+# FITNESS FOR A PARTICULAR PURPOSE
+#
+##############################################################################
 
-DISTNAME = 'detection-utils'
-DESCRIPTION = 'Common functionality for object detection'
-LICENSE = 'MIT'
-AUTHOR = 'David Mascharka, Ryan Soklaski, Arjun Majumdar'
-AUTHOR_EMAIL = 'davidmascharka@gmail.com, rsoklaski@gmail.com, arjun.majum@gmail.com'
-URL = 'https://github.com/davidmascharka/detection-utils'
-CLASSIFIERS = [
-    "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Intended Audience :: Science/Research",
-    "Intended Audience :: Education",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Topic :: Scientific/Engineering",
+from setuptools import find_packages, setup
+
+
+def readfile(name):
+    with open(name) as f:
+        return f.read()
+
+
+README = readfile("README.rst")
+CHANGES = readfile("CHANGES.txt")
+
+install_requires = [
+    "pyramid>=1.4",
+    "pyramid_mako>=0.3.1",  # lazy configuration loading works
+    "repoze.lru",
+    "Pygments",
 ]
-INSTALL_REQUIRES = ['numpy >= 1.13', 'numba >= 0.38']
-EXTRAS_REQUIRE = {'pytorch': ['torch >= 0.4']}
-TESTS_REQUIRE = ['pytest >= 3.8', 'hypothesis >= 4.6']
-LONG_DESCRIPTION = """
-detection-utils provides utilities that are common across many object detection projects.
-This includes things like:
 
-- Box overlap computation (IoU)
-- Precision and recall calculations
-- Computing targets for training a detector given a set of ground-truth objects and anchor boxes
-- Non-maximum suppression
-- Coordinate transformation utilities
-- Focal loss
+extra_requires = [
+    "ipaddress",
+]
 
-All the functions here are well-tested to ensure proper functionality and are used in real projects, so are
-intended to be enterprise-grade. This repository is meant to ensure that modifications and improvements that
-are implemented in one object detection project migrate to other projects as appropriate, to reduce code
- duplication, and to enable a quicker start to working on object detection.
-"""
+testing_extras = [
+    "WebTest",
+    "nose",
+    "coverage",
+]
 
-if __name__ == '__main__':
-    setup(name=DISTNAME,
-          description=DESCRIPTION,
-          long_description=LONG_DESCRIPTION,
-          long_description_content_type='text/markdown',
-          license=LICENSE,
-          author=AUTHOR,
-          author_email=AUTHOR_EMAIL,
-          install_requires=INSTALL_REQUIRES,
-          extras_require=EXTRAS_REQUIRE,
-          tests_require=TESTS_REQUIRE,
-          url=URL,
-          version=versioneer.get_version(),
-          cmdclass=versioneer.get_cmdclass(),
-          python_requires='>=3.7',
-          packages=find_packages(where='src', exclude=['tests*']),
-          package_dir={'': 'src'},
-          )
+docs_extras = [
+    "Sphinx >= 1.7.5",
+    "pylons-sphinx-themes >= 0.3",
+]
+
+setup(
+    name="pyramid_debugtoolbar",
+    version="4.6.1",
+    description=(
+        "A package which provides an interactive HTML debugger "
+        "for Pyramid application development"
+    ),
+    long_description=README + "\n\n" + CHANGES,
+    classifiers=[
+        "Intended Audience :: Developers",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Framework :: Pyramid",
+        "Topic :: Internet :: WWW/HTTP :: WSGI",
+        "License :: Repoze Public License",
+    ],
+    keywords="wsgi pylons pyramid transaction",
+    author=(
+        "Chris McDonough, Michael Merickel, Casey Duncan, " "Blaise Laflamme"
+    ),
+    author_email="pylons-discuss@googlegroups.com",
+    url="https://docs.pylonsproject.org/projects/pyramid-debugtoolbar/en/latest/",  # noqa E501
+    license="BSD",
+    packages=find_packages("src", exclude=["tests"]),
+    package_dir={"": "src"},
+    include_package_data=True,
+    zip_safe=False,
+    install_requires=install_requires,
+    python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*",
+    extras_require={
+        ':python_version<"3.3"': extra_requires,
+        "testing": testing_extras,
+        "docs": docs_extras,
+    },
+    test_suite="tests",
+)

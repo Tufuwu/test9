@@ -1,11 +1,16 @@
-# PyCharm
-.idea/*
-
-# python garbage
-__pycache__
+*.egg
 *.egg-info
-
-# testing
-.hypothesis
+*.pyc
+*$py.class
+*.pt.py
+*.txt.py
+*~
+.*.swp
 .coverage
-.tox
+.coverage.*
+build/
+dist/
+.tox/
+nosetests*.xml
+coverage*.xml
+env*/

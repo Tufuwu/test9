@@ -1,2 +1,20 @@
-include versioneer.py
-include src/detection_utils/_version.py
+graft src
+graft tests
+graft docs
+graft demo
+prune docs/_build
+prune demo/mako_modules
+
+include README.rst
+include CHANGES.txt
+include LICENSE.txt
+include CONTRIBUTORS.txt
+include contributing.md
+include RELEASING.txt
+include TODO.txt
+
+include .coveragerc .flake8 setup.cfg pyproject.toml
+include tox.ini .travis.yml rtd.txt
+graft .github
+
+recursive-exclude * __pycache__ *.py[cod]
