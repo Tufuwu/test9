@@ -1,113 +1,111 @@
-# FeedCrawler
+```console
 
-<img src="./feedcrawler/web/img/favicon.ico" data-canonical-src="./feedcrawler/web/img/favicon.ico" width="64" height="64" />
+██╗    ██╗ ██████╗ ██╗     ██╗  ██╗ ██████╗ ██████╗ ███╗   ██╗███╗   ██╗███████╗ ██████╗████████╗
+██║    ██║██╔═══██╗██║     ██║ ██╔╝██╔════╝██╔═══██╗████╗  ██║████╗  ██║██╔════╝██╔════╝╚══██╔══╝
+██║ █╗ ██║██║   ██║██║     █████╔╝ ██║     ██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗  ██║        ██║
+██║███╗██║██║   ██║██║     ██╔═██╗ ██║     ██║   ██║██║╚██╗██║██║╚██╗██║██╔══╝  ██║        ██║
+╚███╔███╔╝╚██████╔╝███████╗██║  ██╗╚██████╗╚██████╔╝██║ ╚████║██║ ╚████║███████╗╚██████╗   ██║
+ ╚══╝╚══╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═╝
 
-FeedCrawler (ehemals RSScrawler) automatisiert bequem das Hinzufügen von Links für den JDownloader.
+                                           ██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗
+                                           ██╔══██╗╚██╗ ██╔╝╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║
+                                     █████╗██████╔╝ ╚████╔╝    ██║   ███████║██║   ██║██╔██╗ ██║
+                                     ╚════╝██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║
+                                           ██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║
+                                           ╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
 
-[![PyPI version](https://badge.fury.io/py/feedcrawler.svg)](https://badge.fury.io/py/feedcrawler)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/feedcrawler)](https://github.com/rix1337/FeedCrawler/releases)
-[![Github Sponsorship](https://img.shields.io/badge/support-me-red.svg)](https://github.com/users/rix1337/sponsorship)
-[![Chat aufrufen unter https://gitter.im/FeedCrawler/community](https://badges.gitter.im/FeedCrawler/community.svg)](https://gitter.im/FeedCrawler/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![GitHub license](https://img.shields.io/github/license/rix1337/FeedCrawler.svg)](https://github.com/rix1337/FeedCrawler/blob/master/LICENSE.md)
-[![GitHub issues](https://img.shields.io/github/issues/rix1337/FeedCrawler.svg)](https://github.com/rix1337/FeedCrawler/issues)
-[![GitHub stars](https://img.shields.io/github/stars/rix1337/FeedCrawler.svg)](https://github.com/rix1337/FeedCrawler/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/rix1337/FeedCrawler.svg)](https://github.com/rix1337/FeedCrawler/network)
 
-***
+```
+[![Build Status](https://travis-ci.com/Wolkabout/WolkConnect-Python.svg?branch=master)](https://travis-ci.com/Wolkabout/WolkConnect-Python) [![PyPI version](https://badge.fury.io/py/wolk-connect.svg)](https://badge.fury.io/py/wolk-connect) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/wolk-connect) ![GitHub](https://img.shields.io/github/license/wolkabout/WolkConnect-Python) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black) [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/) [![Documentation Status](https://readthedocs.org/projects/wolkconnect-python/badge/?version=latest)](https://wolkconnect-python.readthedocs.io/en/latest/?badge=latest)
+----
+WolkAbout Python Connector library for connecting devices to [WolkAbout IoT Platform](https://demo.wolkabout.com/#/login).
 
-## Docker
+Supported device communication protocols:
+* WolkAbout Protocol
 
-* Offizielles Repo im Docker Hub: [docker-feedcrawler](https://hub.docker.com/r/rix1337/docker-feedcrawler/)
-* Der Betrieb als Docker-Container empfiehlt sich als Standardinstallation - vor allem für NAS-Systeme, Homeserver und
-  sonstige Geräte die dauerhaft und möglichst wartungsfrei (headless) betrieben werden sollen. Beim (Neu-)Start des
-  Containers wird automatisch die neueste Version heruntergeladen. Wird ein neues Image im Docker Hub bereitgestellt,
-  sollte dennoch auf dieses aktualisiert werden!
-* Für UNRAID-Server kann das Image direkt über die Community Applications bezogen und der Container so eingerichtet
-  werden.
-* Ein [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) muss lokal verfügbar sein um Cloudflare-Blockaden zu
-  umgehen (optional)
+## Prerequisite
 
-## Windows
 
-* Jedem [Release](https://github.com/rix1337/FeedCrawler/releases) wird eine selbstständig unter Windows lauffähige
-  Version des Feedcrawlers beigefügt.
-* Hierfür müssen weder Python, noch die Zusatzpakete installiert werden.
-* Einfach die jeweilige Exe herunterladen und ausführen bzw. bei Updates die Exe ersetzen.
-* Ein [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) muss lokal verfügbar sein um Cloudflare-Blockaden zu
-  umgehen (optional)
+* Python 3.7+
 
-## Manuelle Installation
 
-### Voraussetzungen
+## Installation
 
-* [Python 3.6](https://www.python.org/downloads/) oder neuer
-* [pip](https://pip.pypa.io/en/stable/installing/)
-* [JDownloader 2](http://www.jdownloader.org/jdownloader2) mit [My JDownloader-Konto](https://my.jdownloader.org)
-* [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) um Cloudflare-Blockaden zu umgehen (optional)
+There are two ways to install this package
 
-### Installation
+### Installing with pip
+```console
+python3 -m pip install wolk-connect
+```
 
-```pip install feedcrawler```
+### Installing from source
 
-Hinweise zur manuellen Installation und Einrichtung finden sich im [Wiki](https://github.com/rix1337/FeedCrawler/wiki)!
+Clone this repository from the command line using:
+```console
+git clone https://github.com/Wolkabout/WolkConnect-Python.git
+```
 
-### Bekannte Fehler
+Install dependencies by invoking `python3 -m pip install -r requirements.txt`
 
-Kommt es nach einem Update oder Neustart des Containers zu einer `sqlite3.OperationalError: database is locked`
--Fehlermeldungen, so muss der Container gestoppt, die `FeedCrawler.db` beliebig (bspw. zu `FeedCrawler-Temp.db`)
-umbenannt und direkt wieder zurück zu `FeedCrawler.db` umbenannt werden. Hintergrund ist, dass der FeedCrawler nicht
-während die Datenbank verwendet wird (bspw. bei aktiver Feedsuche) gestoppt werden sollte. Der Umbenennungs-Workaround
-stellt sicher, dass das Betriebssystem die Datei wieder freigibt (also den Lock loslässt).
+Install the package by running:
+```console
+python3 setup.py install
+```
 
-Fehler im Installationsprozess per _pip_ deuten auf fehlende Compiler im System hin. Meist muss ein Zusatzpaket
-nachinstalliert werden (Beispielsweise die [VS C++ Build Tools](https://aka.ms/vs/16/release/vs_buildtools.exe) für
-Windows oder libffi per `apt-get install libffi-dev` für den Raspberry Pi).
+## Example Usage
 
-### Update
+### Establishing connection with WolkAbout IoT platform
 
-```pip install -U feedcrawler```
+Create a device on WolkAbout IoT Platform by using the *Simple example* device type that is available on the platform.
+This device type fits [main.py](https://github.com/Wolkabout/WolkConnect-Python/blob/master/examples/simple/main.py) and demonstrates the periodic sending of a temperature sensor reading.
 
-### Starten
+```python
+import wolk
 
-```feedcrawler``` in der Konsole (Python muss im System-PATH hinterlegt sein)
+# Setup the device credentials which you received
+# when the device was created on the platform
+device = wolk.Device(key="device_key", password="some_password")
 
-## Hostnamen festlegen
+# Pass your device and server information
+# defaults to secure connection to Demo instance - comment out host, port and ca_cert
+wolk_device = wolk.WolkConnect(
+    device, host="api-demo.wolkabout.com", port=8883, ca_cert="path/to/ca.crt"
+)
 
-FeedCrawler kann zum durchsuchen beliebiger Webseiten verwendet werden. Ausschließlich der Anwender entscheidet, welche
-Seiten durchsucht werden sollen. Diese Entscheidung trifft der Anwender selbstständig, indem er die _Feedcrawler.ini_ in
-der Kategorie _[Hostnames]_ manuell befüllt (_ab = xyz.com_). Eingetragen werden dort reine Hostnamen (ohne _https://_).
+wolk_device.connect()
+```
 
-### Dabei gilt
+### Adding sensor readings
 
-* Welcher Hostname aufgerufen wird entscheidet allein der Anwender.
-* Ist nicht mindestens ein Hostname gesetzt, wird der FeedCrawler nicht starten.
-* Passt die aufgerufene Seite hinter dem jeweiligen Hostnamen nicht zum Suchmuster des Feedcrawlers, kann es zu Fehlern
-  kommen.
-* Weder FeedCrawler noch der Autor benennen oder befürworten spezifische Hostnamen. Fragen hierzu werden ignoriert!
+```python
+wolk_device.add_sensor_reading("T", 26.93)
 
-## Sicherheitshinweis
+# Multi-value sensor reading
+wolk_device.add_sensor_reading("ACL", (4, 2, 0))
+```
+or multiple sensors at once with `add_sensor_readings`:
+```python
+wolk_device.add_sensor_readings({"T": 26.93, "ACL": (4, 2, 0)})
+```
 
-Der Webserver sollte nie ohne Absicherung im Internet freigegeben werden. Dazu lassen sich im Webinterface Nutzername
-und Passwort festlegen.
+Optionally pass a `timestamp` as `round(time.time()) * 1000`.
+This is useful for maintaining data history when readings are not published immediately after adding them to storage.
+If `timestamp` is not provided, the library will assign a timestamp before placing the reading into storage.
 
-Es empfiehlt sich, zusätzlich einen Reverse-Proxy mit HTTPs-Zertifikat,
-bspw. [kostenlos von letsencrypt](https://letsencrypt.org/), zu verwenden.
 
-## Startparameter
+### Data publish strategy
 
-| Parameter | Erläuterung |
-|---|---|
-| ```--log-level=<LOGLEVEL>``` | Legt fest, wie genau geloggt wird (`CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`, `NOTSET`) |
-| ```--config="<CFGPFAD>"``` | Legt den Ablageort für Einstellungen und Logs fest |
-| ```--port=<PORT>``` | Legt den Port des Webservers fest |
-| ```--jd-user=<NUTZERNAME>``` | Legt den Nutzernamen für My JDownloader fest |
-| ```--jd-pass=<PASSWORT>``` | Legt das Passwort für My JDownloader fest |
-| ```--jd-device=<GERÄTENAME>``` | Legt den Gerätenamen für My JDownloader fest (optional, wenn nur ein Gerät vorhanden ist) |
-| ``` --keep-cdc``` | Leere die CDC-Tabelle (Feed ab hier bereits gecrawlt) nicht vor dem ersten Suchlauf |
+Stored sensor readings are pushed to WolkAbout IoT platform on demand by calling:
+```python
+wolk_device.publish()
+```
 
-## Credits
+### Disconnecting from the platform
 
-* [mmarquezs](https://github.com/mmarquezs/)
-* [Gutz-Pilz](https://github.com/Gutz-Pilz/)
-* [zapp-brannigan](https://github.com/zapp-brannigan/)
-* [JetBrains PyCharm](https://www.jetbrains.com/?from=FeedCrawler)
+```python
+wolk_device.disconnect()
+```
+
+## Additional functionality
+
+WolkConnect-Python library has integrated additional features which can perform full WolkAbout IoT platform potential. Read more about full feature set example [HERE](https://github.com/Wolkabout/WolkConnect-Python/tree/master/examples/full_feature_set).

@@ -1,36 +1,61 @@
-# -*- coding: utf-8 -*-
-# FeedCrawler
-# Projekt von https://github.com/rix1337
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Python
-*.pyc
-*.bak
-*.spec
-file_version_info.txt
-version.txt
-__pycache__
+# C extensions
+*.so
 
-# Build Tools
-build
-dist
-venv
-*.egg-info
+# Distribution / packaging
+.Python
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# FeedCrawler files
-*.conf
-*.db
-*.log
-*.crawljob
-*.ini
-*.journal
-*.zip
-*.1
-*.2
-*.3
-*.4
-*.5
+# Sphinx documentation
+docs/_static/
+docs/_templates/
+docs/build/
+
+# pyenv
+.python-version
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
 # PyCharm
-.idea
-.eggs
+.idea/
 
+# mypy
+.mypy_cache/
+
+# Coverage.py
+.coverage
+coverage_html_directory/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+
+# VS Code
+.vscode

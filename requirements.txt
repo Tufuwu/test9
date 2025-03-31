@@ -1,16 +1,2 @@
-# -*- coding: utf-8 -*-
-# FeedCrawler
-# Projekt von https://github.com/rix1337
-
-bs4
-docopt
-flask
-imdbpy
-lxml
-passlib
-pycryptodomex
-python-dateutil
-rapidfuzz
-requests
-simplejson
-waitress
+paho_mqtt>=1.5.1
+requests>=2.18.1

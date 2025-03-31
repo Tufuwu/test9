@@ -1,43 +1,40 @@
-# -*- coding: utf-8 -*-
-# FeedCrawler
-# Projekt von https://github.com/rix1337
+"""Setup file."""
+from os import path
 
 import setuptools
 
-from feedcrawler.version import get_version
+from wolk import __version__
 
-try:
-    with open('README.md', encoding='utf-8') as f:
-        long_description = f.read()
-except:
-    import io
-
-    long_description = io.open('README.md', encoding='utf-8').read()
-
-with open('requirements.txt') as f:
-    required = f.read().splitlines()
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
+    long_description = f.read()
 
 setuptools.setup(
-    name="feedcrawler",
-    version=get_version(),
-    author="rix1337",
-    author_email="",
-    description="Automating JDownloader Downloads (German!)",
+    name="wolk-connect",
+    version=__version__,
+    install_requires=["paho_mqtt>=1.5.1", "requests>=2.18.1"],
+    include_package_data=True,
+    license="Apache License 2.0",
+    author="WolkAbout",
+    author_email="info@wolkabout.com",
+    description="Python 3 library for connecting to WolkAbout IoT Platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/rix1337/FeedCrawler",
+    keywords=["IoT", "WolkAbout", "Internet of Things"],
+    url="https://github.com/Wolkabout/WolkConnect-Python",
+    test_suite="test",
     packages=setuptools.find_packages(),
-    include_package_data=True,
-    install_requires=required,
-    zip_safe=False,
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: Apache Software License",
+        "Natural Language :: English",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Operating System :: OS Independent",
+        "Topic :: Internet",
+        "Topic :: Communications",
+        "Topic :: Software Development :: Embedded Systems",
     ],
-    entry_points={
-        'console_scripts': [
-            'feedcrawler = feedcrawler.crawler:main',
-        ],
-    },
 )
