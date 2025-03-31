@@ -1,5 +1,3 @@
-include CHANGELOG.* CONTRIBUTORS.* LICENSE tox.ini wheel_filename/py.typed
-graft docs
-prune docs/_build
-graft test
-global-exclude *.py[cod]
+include LICENSE
+include README.rst
+recursive-include docs *
