@@ -1,8 +1,8 @@
 ---
 name: Bug report
-about: Report something that's not quite right
+about: Create a report to help us improve
 title: ''
-labels: bug
+labels: ''
 assignees: ''
 
 ---
@@ -11,13 +11,12 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **To Reproduce**
-If possible give an URL or command line that leads to the issue. If possible try to reproduce the issue on the public web instance.
+Minimal piece of Python code that reproduces the problem.
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Screenshots or Drawings**
-If the can't be reproduced easily, add screenshots or attach a drawing to help explain your problem.
+**Versions**
 
-**Additional context**
-Add any other context about the problem here.
+- Version of package with the problem.
+- Python version.

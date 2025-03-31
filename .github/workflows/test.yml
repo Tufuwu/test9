@@ -1,64 +1,71 @@
-name: Build documentation and deploy to Pages
-
-on:
-  push:
-    branches: ["main"]
-  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
-
-# Allow one concurrent deployment
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
+on: [push]
+name: build
 jobs:
-  # Build job
-  build:
-    # At a minimum this job should upload artifacts using actions/upload-pages-artifact
-    # Specify runner + deployment step
+  tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+        clickhouse-version:
+          - 19.3.5
+          - 18.14.9
+
+    name: ${{ matrix.python-version }} CH=${{ matrix.clickhouse-version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
         with:
-          python-version: "3.9"
-          cache: "pip" # caching pip dependencies
-      - name: Install dependencies
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+#      - name: Login to Docker Hub
+#        uses: docker/login-action@v1
+#        with:
+#          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Install test requirements
         run: |
-          pip install -r requirements.txt
-      - name: Build documentation
+          pip install --upgrade pip setuptools wheel
+          pip install flake8 flake8-print coverage
+      - name: Run flake8
+        run: flake8
+      - name: Setup /etc/hosts
         run: |
-          cd ./documentation/src/
-          ./boxes2rst generators.inc
-          make html #linkcheck
-          cp index.html ../build/
-          cd ../build/ && ls && ls html/
-          cp -r ../../static .
-          rm -rf doctrees
-          touch .nojekyll    
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+          # Overriding setup.cfg. Set host=clickhouse-server
+          sed -i 's/^host=localhost$/host=clickhouse-server/' setup.cfg
+          # Make host think that clickhouse-server is localhost
+          echo '127.0.0.1 clickhouse-server' | sudo tee /etc/hosts > /dev/null
+      - name: Start ClickHouse server container
+        run: |
+          echo "VERSION=${{ matrix.clickhouse-version }}" > tests/.env
+          docker-compose -f tests/docker-compose.yml up -d
+      - name: Run tests
+        run: coverage run --source=clickhouse_sqlalchemy setup.py test
+        timeout-minutes: 2
+      - name: Set up Python for coverage submission
+        if: ${{ matrix.python-version == '2.7' }}
+        uses: actions/setup-python@v2
         with:
-          path: ./documentation/build/
+          python-version: 3.9
+          architecture: x64
+      - name: Install coveralls
+        run: |
+          # Newer coveralls do not work with github actions.
+          pip install 'coveralls<3.0.0'
+      - name: Upload coverage
+        run: coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_PARALLEL: true
+          COVERALLS_FLAG_NAME: ${{ matrix.python-version }} CH=${{ matrix.clickhouse-version }}
 
-  # Deploy job
-  deploy:
-    # Add a dependency to the build job
-    needs: build
-
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-    permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    # Specify runner + deployment step
+  coveralls-finished:
+    name: Indicate completion to coveralls.io
+    needs: tests
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+      - name: Finished
+        uses: coverallsapp/github-action@1.1.3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
