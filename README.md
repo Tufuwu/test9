@@ -1,110 +1,109 @@
-<p align="center">
-  <h1 align="center">Welcome to Sockpuppet 👋</h1>
-  <p align="center">
-    <img src="https://img.shields.io/pypi/v/django-sockpuppet"/>
-    <img src="https://img.shields.io/npm/v/sockpuppet-js.svg?color=blue" />
-    <a href="https://www.npmjs.com/package/sockpuppet-js">
-      <img alt="downloads" src="https://img.shields.io/npm/dm/sockpuppet-js.svg?color=blue" target="_blank" />
-    </a>
-    <a href="https://github.com/jonathan-s/sockpuppet/blob/master/LICENSE">
-      <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-brightgreen.svg" target="_blank" />
-    </a>
-    <a href="https://sockpuppet.argpar.se/" target="_blank">
-      <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
-    </a>
-    <br />
-    <a href="#badge">
-      <img alt="semantic-release" src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg">
-    </a>
-    <img src="https://travis-ci.org/jonathan-s/django-sockpuppet.svg?branch=master" alt="Tests">
-  </p>
-</p>
+# urdf2webots
 
+[![Build Status](https://travis-ci.com/cyberbotics/urdf2webots.svg?branch=master)](https://travis-ci.com/cyberbotics/urdf2webots)
 
-### 🎉 **You just discovered an exciting new way to build modern, reactive, real-time apps with Django.**
+This tool converts URDF files into Webots PROTO files.
 
-**Why should I spend time exploring this?** If you use current frontend libraries, such as react, vue or angular you end up creating state for the frontend and then updating state changes in the backend through an api.
+## Install
 
-This means that you forgo server-rendered html with the advantages that brings + you'll end up with a more complex app overall.
-
-With this library you can still use normal django templates, and any frontend state you change will be directly reflected in the backend. Currently this happens through the use of websockets.
-
-This is the django implementation of the excellent rails library [stimulus-reflex][1], which in turn is inspired by [Phoenix LiveView][2].
-
-Hit me up on twitter if you have any questions.  [![Twitter follow](https://img.shields.io/twitter/follow/argparse?style=social)](https://twitter.com/argparse)
-
-## 📚 Documentation
-
-- [Official Documentation](https://sockpuppet.argpar.se/)
-
-## ⚡️ Get started
-
-```bash
-pip install django-sockpuppet
-
-# Add these into INSTALLED_APPS in settings.py
-INSTALLED_APPS = [
-    'channels',
-    'sockpuppet'
-]
-
-# generates scaffolding for webpack.config.js and installs required js dependencies
-# if you prefer to do that manually read the more thorough documentation
-python manage.py initial_sockpuppet
-
-# scaffolds a new reflex with everything that's needed.
-python manage.py generate_reflex app_name name_of_reflex
-```
-
-You're almost there, read about how to tie it all together in the [quickstart documentation][3]
-
-## 💙 Community
-
-- [Discord](https://discord.gg/XveN625) - We share the discord together with stimulus-reflex, and there is a channel dedicated for python/django discussions.
-- [django-sockpuppet-expo](https://github.com/zodman/django-sockpuppet-expo) - Do you want more examples? There code examples of chats, book search, etc ... We accept PRs :)
-
-
-## 🛠 Development in the repo
-
-See some common commands that can be useful for development
-
-```bash
-pip install -r requirements_dev.txt
-invoke -l
-```
-
-Try out a minimal example manually
+### From pip
 
 ```
-git clone git@github.com:jonathan-s/django-sockpuppet.git
-npm install
-npm run build:test
-python manage.py runserver
-# visit https://localhost:8000/test
+pip install urdf2webots
 ```
 
-## ⛑ Running tests locally
-The most important tests are integration tests that makes sure that frontend and backend work together in conjunction with each other.
+On macOS, export the pip binary path to the PATH: `export PATH="/Users/$USER/Library/Python/3.7/bin:$PATH"`
+
+### From Sources
 
 ```
-# Install the cypress et al
-npm install
-
-# Spin up a dev server.
-python manage.py runserver
-
-# Run the cypress tests
-npm run cypress:run
+git clone https://github.com/cyberbotics/urdf2webots.git
+cd urdf2webots
+pip install -r requirements.txt
 ```
 
+## Usage
 
-## 🔜 Release
+### From pip
 
 ```
-pip install -r requirements_dev.txt
-invoke release -b feature
+python -m urdf2webots.importer --input=someRobot.urdf [--output=outputFile] [--box-collision] [--normal] [--disable-mesh-optimization] [--multi-file] [--static-base] [--tool-slot=linkName] [--name-to-def] [--help]
 ```
 
-[1]: https://github.com/hopsoft/stimulus_reflex
-[2]: https://youtu.be/Z2DU0qLfPIY?t=670
-[3]: https://sockpuppet.argpar.se/quickstart-django
+### From Sources
+
+```
+python demo.py --input=someRobot.urdf [--output=outputFile] [--box-collision] [--normal] [--disable-mesh-optimization] [--multi-file] [--static-base] [--tool-slot=linkName] [--name-to-def] [--help]
+```
+
+### Arguments
+
+The script accepts the following arguments:
+  - **-h, --help**: Show the help message and exit.
+  - **--input=INFILE**: Specifies the urdf file to convert.
+  - **--output=OUTFILE**: If set, specifies the path and, if ending in ".proto", name of the resulting PROTO file. The filename minus the .proto extension will be the robot name.
+  - **--normal**: If set, the normals are exported if present in the URDF definition.
+  - **--box-collision**: If set, the bounding objects are approximated using boxes.
+  - **--disable-mesh-optimization**: If set, the duplicated vertices are not removed from the meshes (this can speed up a lot the conversion).
+  - **--multi-file**: If set, the mesh files are exported as separated PROTO files.
+  - **--static-base**: If set, the base link will have the option to be static (disable physics)
+  - **--tool-slot=LinkName**: Specify the link that you want to add a tool slot to (exact link name from urdf).
+  - **--rotation="0 1 0 0"**: Set the rotation field of your PROTO file. If your URDF file uses the z-axis as 'up', use `--rotation="1 0 0 -1.5708"`.
+  - **--init-pos=JointPositions**: Set the initial positions of your robot joints. Example: `--init-pos="[1.2, 0.5, -1.5]"` would set the first 3 joints of your robot to the specified values, and leave the rest with their default value.
+  - **--link-to-def**: Creates a DEF with the link name for each solid to be able to access it using getFromProtoDef(defName)
+  - **--joint-to-def**: Creates a DEF with the joint name for each joint to be able to access it using getFromProtoDef(defName)
+
+### In your Python Code
+
+```
+from urdf2webots.importer import convert2urdf
+convert2urdf('MY_PATH/MY_URDF.urdf')
+```
+
+### In-Depth Tutorial
+Check out [this tutorial](./docs/tutorial.md) for a more in-depth, step by step instruction, on how to:
+- Generate a URDF file from a ROS repository.
+- Convert your URDF file to a Webots PROTO file.
+- Load your converted model into Webots and make final adjustments.
+
+
+## Notes
+This tool have been tested using Webots R2020b on Ubuntu16.04 and Windows.  
+You can find the sources of these URDF files here:  
+  - universal robot: https://github.com/ros-industrial/universal_robot/tree/kinetic-devel/ur_description  
+  - pr2 robot: https://github.com/PR2/pr2_common/tree/kinetic-devel/pr2_description  
+  - motoman robot: https://github.com/ros-industrial/motoman/tree/kinetic-devel/motoman_sia20d_support
+  - kinova robot: https://github.com/Kinovarobotics/kinova-ros/tree/kinetic/kinova_description
+  - gait2392 human skeleton: https://github.com/cyberbotics/urdf2webots/tree/master/tests/sources/gait2392_simbody
+
+## Acknowledgements
+
+<a href="http://rosin-project.eu">
+  <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png"
+       alt="rosin_logo" height="60" >
+</a></br>
+
+Supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.  
+More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
+
+<img src="http://rosin-project.eu/wp-content/uploads/rosin_eu_flag.jpg"
+     alt="eu_flag" height="45" align="left" >  
+
+This project has received funding from the European Union’s Horizon 2020  
+research and innovation programme under grant agreement no. 732287.
+
+<br>
+
+<a href="https://opendr.eu/">
+  <img src="https://opendr.eu/wp-content/uploads/2020/01/logo-300x125.png"
+       alt="opendr_logo" height="60" >
+</a></br>
+
+Supported by OpenDR - Open Deep Learning Toolkit for Robotics.  
+More information: <a href="https://opendr.eu/">opendr.eu</a>
+
+<img src="https://opendr.csd.auth.gr/wp-content/uploads/2019/12/Flag_of_Europe-300x200.png"
+     alt="eu_flag" height="45" align="left" >  
+
+This project has received funding from the European Union’s Horizon 2020  
+research and innovation programme under grant agreement no. 871449.
