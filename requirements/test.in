@@ -1,0 +1,8 @@
+# Requirements for test runs
+
+-c constraints.txt
+
+-r production.txt
+
+mock
+pytest-cov
