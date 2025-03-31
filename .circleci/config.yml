@@ -1,0 +1,978 @@
+docs_deploy: &docs
+  docker:
+    - image: node:8.10.0
+  working_directory: /tmp/gh-pages
+  steps:
+    - run:
+        name: Check whether this is the original repo
+        command: |
+          if [[ "$CIRCLE_PROJECT_USERNAME" != "nipreps" ]]; then
+              echo "Not in nipreps/smriprep - skipping docs deploy."
+              circleci step halt
+          fi
+    - add_ssh_keys:
+        fingerprints:
+          - "80:ec:ae:e8:92:1f:88:83:2a:e0:ee:35:39:79:85:88"
+    - run:
+        name: Install gh-pages tool
+        command: |
+          npm install -g --silent gh-pages@2.0.1
+    - checkout
+    - run:
+        name: Set git settings
+        command: |
+          git config user.email "nipreps@gmail.com"
+          git config user.name "nipreps-bot"
+    - attach_workspace:
+        at: docs/_build
+    - run:
+        name: Disable jekyll builds
+        command: touch docs/_build/html/.nojekyll
+    - run:
+        name: Deploy docs to gh-pages branch
+        command: gh-pages --dotfiles --message "doc(update) [skip ci]" --dist docs/_build/html
+
+version: 2
+jobs:
+  build:
+    machine:
+      image: ubuntu-1604:202007-01
+    working_directory: /tmp/src/smriprep
+    environment:
+      TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+      SCRATCH: "/scratch"
+    steps:
+      - restore_cache:
+          keys:
+            - build-v3-{{ .Branch }}-{{ epoch }}
+            - build-v3-{{ .Branch }}-
+            - build-v3-master-
+            - build-v3-
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - run:
+          name: Docker authentication
+          command: |
+            if [[ -n $DOCKER_PASS ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            fi
+      - run:
+          name: Set up Docker registry
+          command: |
+            if [[ -f /tmp/images/registry.tar.gz ]]; then
+              echo "Loading saved registry image"
+              docker load < /tmp/images/registry.tar.gz
+            else
+              echo "Pulling registry image from DockerHub"
+              docker pull registry:2
+              mkdir -p /tmp/images
+              docker save registry:2 | gzip > /tmp/images/registry.tar.gz
+            fi
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images
+          command: |
+            set +e
+            docker pull localhost:5000/ubuntu
+            success=$?
+            set -e
+            if [[ "$success" = "0" ]]; then
+                echo "Pulling from local registry"
+                docker tag localhost:5000/ubuntu ubuntu:xenial-20201030
+                docker pull localhost:5000/smriprep
+                docker tag localhost:5000/smriprep nipreps/smriprep:latest
+                docker tag localhost:5000/smriprep nipreps/smriprep
+            else
+                echo "Pulling from Docker Hub"
+                docker pull ubuntu:xenial-20201030
+                docker tag ubuntu:xenial-20201030 localhost:5000/ubuntu
+                docker push localhost:5000/ubuntu
+                docker pull nipreps/smriprep:latest
+            fi
+      - checkout
+      - run:
+          name: Build Docker image
+          no_output_timeout: 60m
+          command: |
+            export PY3=$(pyenv versions | grep '3\.' |
+                         sed -e 's/.* 3\./3./' -e 's/ .*//')
+            pyenv local $PY3
+            # Get version, update files.
+            THISVERSION=$( python3 get_version.py )
+            if [[ ${THISVERSION:0:1} == "0" ]] ; then
+              echo "WARNING: latest git tag could not be found"
+              echo "Please, make sure you fetch all tags from upstream with"
+              echo "the command ``git fetch --tags --verbose`` and push"
+              echo "them to your fork with ``git push origin --tags``"
+            fi
+            # Build docker image
+            e=1 && for i in {1..5}; do
+              docker build --rm \
+                --cache-from=nipreps/smriprep \
+                -t nipreps/smriprep:latest \
+                --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+                --build-arg VCS_REF=`git rev-parse --short HEAD` \
+                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
+              && e=0 && break || sleep 15
+            done && [ "$e" -eq "0" ]
+
+      - run:
+          name: Docker push to local registry
+          no_output_timeout: 40m
+          command: |
+            docker tag nipreps/smriprep:latest localhost:5000/smriprep
+            docker push localhost:5000/smriprep
+      - run:
+          name: Docker registry garbage collection
+          command: |
+            docker exec -it registry /bin/registry garbage-collect --delete-untagged \
+                /etc/docker/registry/config.yml
+      - save_cache:
+         key: build-v3-{{ .Branch }}-{{ epoch }}
+         paths:
+            - /tmp/docker
+            - /tmp/images
+
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - src/smriprep
+            - .force
+
+  get_data:
+    docker:
+      - image: circleci/python:3.8.5
+    working_directory: /home/circleci/data
+    steps:
+      - restore_cache:
+          keys:
+            - testdata-v2-{{ .Branch }}-{{ epoch }}
+            - testdata-v2-{{ .Branch }}
+            - testdata-v2-
+      - run:
+          name: Get test data from ds000005
+          command: |
+            mkdir -p /tmp/data
+            if [[ ! -d /tmp/data/ds005 ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds005_downsampled.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f32a429ad5a101f977eb75"
+              tar xvzf ds005_downsampled.tar.gz -C /tmp/data/
+            else
+              echo "Dataset ds000005 was cached"
+            fi
+      - run:
+          name: Get test data from ds000054
+          command: |
+            if [[ ! -d /tmp/data/ds054 ]]; then
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds054_downsampled.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f32c22594d9001ef91bf9e"
+              tar xvzf ds054_downsampled.tar.gz -C /tmp/data/
+            else
+              echo "Dataset ds000054 was cached"
+            fi
+      - run:
+          name: Get FreeSurfer derivatives for ds000005
+          command: |
+            if [[ ! -d /tmp/ds005/freesurfer ]]; then
+              mkdir -p /tmp/ds005
+              wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q \
+                -O ds005_derivatives_freesurfer.tar.gz "https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/58fe59eb594d900250960180"
+              tar xvzf ds005_derivatives_freesurfer.tar.gz -C /tmp/ds005
+            else
+              echo "FreeSurfer derivatives of ds000005 were cached"
+            fi
+      - run:
+          name: Store FreeSurfer license file
+          command: |
+            mkdir -p /tmp/fslicense
+            cd /tmp/fslicense
+            echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IGxpY2Vuc2UudHh0Cg==" | base64 -d | sh
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - fslicense
+      - save_cache:
+          key: testdata-v2-{{ .Branch }}-{{ epoch }}
+          paths:
+            - /tmp/data
+            - /tmp/ds005/freesurfer
+      - checkout:
+          path: /tmp/src/smriprep
+      - restore_cache:
+          keys:
+            - templateflow-v1-{{ .Branch }}-{{ epoch }}
+            - templateflow-v1-{{ .Branch }}
+            - templateflow-v1-
+      - restore_cache:
+          keys:
+            - env-v1-{{ .Branch }}-{{ epoch }}
+            - env-v1-{{ .Branch }}
+            - env-v1-
+      - run:
+          name: Pull TemplateFlow down, pre-cache some templates
+          command: |
+            export TEMPLATEFLOW_HOME=/tmp/templateflow
+            pip install -U --user --no-cache-dir "$( grep templateflow /tmp/src/smriprep/setup.cfg | xargs )"
+            python -c "from templateflow import api as tfapi; \
+                       tfapi.get(['MNI152Lin', 'MNI152NLin2009cAsym', 'OASIS30ANTs'], suffix='T1w'); \
+                       tfapi.get(['MNI152Lin', 'MNI152NLin2009cAsym', 'OASIS30ANTs'], desc='brain', suffix='mask'); \
+                       tfapi.get('OASIS30ANTs', resolution=1, desc='4', suffix='dseg'); \
+                       tfapi.get(['OASIS30ANTs', 'NKI'], resolution=1, label='brain', suffix='probseg'); \
+                       tfapi.get(['MNI152NLin2009cAsym', 'OASIS30ANTs', 'NKI'], resolution=1, \
+                                 desc='BrainCerebellumExtraction', suffix='mask'); \
+                       tfapi.get(['MNI152NLin2009cAsym', 'OASIS30ANTs', 'NKI'], resolution=1, \
+                                 desc='BrainCerebellumRegistration', suffix='mask');"
+      - save_cache:
+          key: templateflow-v1-{{ .Branch }}-{{ epoch }}
+          paths:
+            - /tmp/templateflow
+      - save_cache:
+          key: env-v1-{{ .Branch }}-{{ epoch }}
+          paths:
+            - /home/circleci/.local
+
+  test_wrapper:
+    machine:
+      image: ubuntu-1604:202007-01
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - restore_cache:
+          keys:
+            - build-v3-{{ .Branch }}-{{ epoch }}
+            - build-v3-{{ .Branch }}-
+            - build-v3-master-
+            - build-v3-
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - run:
+          name: Docker authentication
+          command: |
+            if [[ -n $DOCKER_PASS ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            fi
+      - run:
+          name: Set up Docker registry
+          command: |
+            if [[ -f /tmp/images/registry.tar.gz ]]; then
+              echo "Loading saved registry image"
+              docker load < /tmp/images/registry.tar.gz
+            else
+              echo "Pulling registry image from DockerHub"
+              docker pull registry:2
+            fi
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images from local registry
+          command: |
+            docker pull localhost:5000/smriprep
+            docker tag localhost:5000/smriprep nipreps/smriprep:latest
+      - checkout
+      - run:
+          name: Test smriprep-wrapper (Python 2)
+          command: |
+            export PY2=$(pyenv versions | grep '2\.' |
+                         sed -e 's/.* 2\./2./' -e 's/ .*//')
+            pyenv local $PY2
+            echo -n "Python version: "
+            python --version
+            pip install --upgrade "pip<21"
+            pip install --upgrade setuptools
+            pip install --upgrade wrapper/
+            which smriprep-docker
+            smriprep-docker -i nipreps/smriprep:latest --help
+            smriprep-docker -i nipreps/smriprep:latest --version
+      - run:
+          name: Test smriprep-wrapper (Python 3)
+          command: |
+            export PY3=$(pyenv versions | grep '3\.' |
+                         sed -e 's/.* 3\./3./' -e 's/ .*//')
+            pyenv local $PY3
+            echo -n "Python version: "
+            python --version
+            pip install --upgrade pip setuptools
+            pip install --upgrade wrapper/
+            which smriprep-docker
+            smriprep-docker -i nipreps/smriprep:latest --help
+            smriprep-docker -i nipreps/smriprep:latest --version
+
+  test_deploy_pypi:
+    docker:
+      - image: circleci/python:3.8.5
+    working_directory: /tmp/src/smriprep
+    steps:
+      - checkout
+      - run:
+          name: Build sMRIPrep
+          command: |
+            pip install --user twine  # For use in checking distributions
+            THISVERSION=$( python get_version.py )
+            THISVERSION=${THISVERSION%.dirty*}
+            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
+            virtualenv --python=python build
+            source build/bin/activate
+            pip install --upgrade "pip>=19.1" numpy
+            echo "${CIRCLE_TAG:-$THISVERSION}" > smriprep/VERSION
+            python setup.py sdist
+            pip wheel --no-deps -w dist/ .
+      - store_artifacts:
+          path: /tmp/src/smriprep/dist
+      - run:
+          name: Check sdist distribution
+          command: |
+            THISVERSION=$( python get_version.py )
+            THISVERSION=${THISVERSION%.dirty*}
+            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
+            twine check dist/smriprep*.tar.gz
+            virtualenv --python=python sdist
+            source sdist/bin/activate
+            pip install --upgrade "pip>=19.1" numpy
+            pip install dist/smriprep*.tar.gz
+            which smriprep | grep sdist\\/bin
+            INSTALLED_VERSION=$(smriprep --version)
+            INSTALLED_VERSION=${INSTALLED_VERSION%$'\r'}
+            INSTALLED_VERSION=${INSTALLED_VERSION#*"smriprep v"}
+            echo "VERSION: \"$THISVERSION\""
+            echo "INSTALLED: \"$INSTALLED_VERSION\""
+            test "$INSTALLED_VERSION" = "$THISVERSION"
+      - run:
+          name: Check wheel distribution
+          command: |
+            THISVERSION=$( python get_version.py )
+            THISVERSION=${THISVERSION%.dirty*}
+            THISVERSION=${CIRCLE_TAG:-$THISVERSION}
+            twine check dist/smriprep*.whl
+            virtualenv --python=python wheel
+            source wheel/bin/activate
+            pip install dist/smriprep*.whl
+            which smriprep | grep wheel\\/bin
+            INSTALLED_VERSION=$(smriprep --version)
+            INSTALLED_VERSION=${INSTALLED_VERSION%$'\r'}
+            INSTALLED_VERSION=${INSTALLED_VERSION#*"smriprep v"}
+            echo "VERSION: \"$THISVERSION\""
+            echo "INSTALLED: \"$INSTALLED_VERSION\""
+            test "$INSTALLED_VERSION" = "$THISVERSION"
+      - run:
+          name: Build smriprep-docker
+          command: |
+            THISVERSION=$( python get_version.py )
+            THISVERSION=${THISVERSION%.dirty*}
+            cd wrapper
+            virtualenv --python=python build
+            source build/bin/activate
+            pip install --upgrade "pip>=19.1"
+            sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'${CIRCLE_TAG:-$THISVERSION}'/" smriprep_docker.py
+            python setup.py sdist
+            pip wheel --no-deps -w dist/ .
+      - store_artifacts:
+          path: /tmp/src/smriprep/wrapper/dist
+
+  ds005:
+    machine:
+      image: ubuntu-1604:202007-01
+    working_directory: /tmp/ds005
+    environment:
+      - FS_LICENSE: /tmp/fslicense/license.txt
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Check whether build should be skipped
+          command: |
+            cd /tmp/src/smriprep
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds005\]' )" != "" ]]; then
+              echo "Skipping ds000005 build"
+              circleci step halt
+            fi
+      - restore_cache:
+          keys:
+            - build-v3-{{ .Branch }}-{{ epoch }}
+            - build-v3-{{ .Branch }}-
+            - build-v3-master-
+            - build-v3-
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - restore_cache:
+          keys:
+            - ds005-anat-v7-{{ .Branch }}-{{ epoch }}
+            - ds005-anat-v7-{{ .Branch }}
+            - ds005-anat-v7-master
+            - ds005-anat-v7-
+      - restore_cache:
+          keys:
+            - testdata-v2-{{ .Branch }}-{{ epoch }}
+            - testdata-v2-{{ .Branch }}
+            - testdata-v2-
+      - run:
+          name: Setting up test
+          command: |
+            mkdir -p /tmp/ds005/derivatives /tmp/ds005/work
+            sudo setfacl -d -m group:$(id -gn):rwx /tmp/ds005/derivatives && \
+                sudo setfacl -m group:$(id -gn):rwx /tmp/ds005/derivatives
+            sudo setfacl -d -m group:$(id -gn):rwx /tmp/ds005/work && \
+                sudo setfacl -m group:$(id -gn):rwx /tmp/ds005/work
+      - run:
+          name: Install codecov
+          command: |
+              pyenv install 3.6.3
+              pyenv global 3.6.3
+              python --version
+              python -m pip install -U pip
+              python -m pip install -U codecov
+              pyenv rehash
+      - run:
+          name: Docker authentication
+          command: |
+            if [[ -n $DOCKER_PASS ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            fi
+      - run:
+          name: Set up Docker registry
+          command: |
+            if [[ -f /tmp/images/registry.tar.gz ]]; then
+              echo "Loading saved registry image"
+              docker load < /tmp/images/registry.tar.gz
+            else
+              echo "Pulling registry image from DockerHub"
+              docker pull registry:2
+            fi
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images from local registry
+          command: |
+            docker pull localhost:5000/smriprep
+            docker tag localhost:5000/smriprep nipreps/smriprep:latest
+      - restore_cache:
+          keys:
+            - ds005-anat-v7-{{ .Branch }}-{{ epoch }}
+            - ds005-anat-v7-{{ .Branch }}
+            - ds005-anat-v7-master
+            - ds005-anat-v7-
+      - restore_cache:
+          keys:
+            - testdata-v2-{{ .Branch }}-{{ epoch }}
+            - testdata-v2-{{ .Branch }}
+            - testdata-v2-
+      - restore_cache:
+          keys:
+            - templateflow-v1-{{ .Branch }}-{{ epoch }}
+            - templateflow-v1-{{ .Branch }}
+            - templateflow-v1-
+      - run:
+          name: Run anatomical workflow on ds005
+          no_output_timeout: 2h
+          command: |
+            bash /tmp/src/smriprep/.circleci/ds005_run.sh --write-graph
+      - run:
+          name: Combine coverage
+          no_output_timeout: 2h
+          command: |
+            # Combine coverage and convert to XML inside container because
+            # the file format is sensitive to changes in environment
+            docker run -it -e FMRIPREP_DEV=1 -u $(id -u) \
+                -v /tmp/ds005:/tmp/ds005 \
+                -v /tmp/src/smriprep:/src/smriprep \
+                -w /src/smriprep \
+                -e COVERAGE_FILE=/tmp/ds005/work/.coverage \
+                -e COVERAGE_RCFILE=/src/smriprep/docker/multiproc.coveragerc \
+                --entrypoint=coverage \
+                nipreps/smriprep:latest \
+                combine /tmp/ds005/work/.coverage.*
+            # Convert to XML to freeze
+            docker run -it -e FMRIPREP_DEV=1 -u $(id -u) \
+                -v /tmp/ds005:/tmp/ds005 \
+                -v /tmp/src/smriprep:/src/smriprep \
+                -w /src/smriprep \
+                -e COVERAGE_FILE=/tmp/ds005/work/.coverage \
+                -e COVERAGE_RCFILE=/src/smriprep/docker/multiproc.coveragerc \
+                --entrypoint=coverage \
+                nipreps/smriprep:latest \
+                xml
+      - run:
+          name: Combine coverage and submit
+          working_directory: /tmp/src/smriprep
+          command: |
+              pyenv local 3.6.3
+              which python
+              python --version
+              codecov --file coverage.xml --flags ds005 -e CIRCLE_JOB
+      - run:
+          name: Clean-up temporary directory of reportlets and fsdir_run_XXX nodes
+          when: always
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/ds005
+            rm -rf /tmp/ds005/work/reportlets
+            rm -rf /tmp/ds005/work/smriprep_wf/fsdir_run_*/
+      - save_cache:
+         key: ds005-anat-v7-{{ .Branch }}-{{ epoch }}
+         paths:
+            - /tmp/ds005/work
+
+      - run:
+          name: Checking outputs of sMRIPrep
+          command: |
+            mkdir -p /tmp/ds005/test
+            find /tmp/ds005/derivatives -name "*" ! -path "*/figures*" -print | sed s+/tmp/ds005/derivatives/++ | sort > /tmp/ds005/test/outputs.out
+            diff /tmp/src/smriprep/.circleci/ds005_outputs.txt /tmp/ds005/test/outputs.out
+            exit $?
+      - store_artifacts:
+          path: /tmp/ds005/derivatives
+      - run:
+          name: Clean working directory
+          when: on_success
+          command: |
+            rm -rf /tmp/ds005/work
+      - run:
+          name: Clean working directory
+          when: on_fail
+          command: |
+            find /tmp/ds005/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
+      - store_artifacts:
+          path: /tmp/ds005/work
+      - run:
+          name: Check fast track using existing derivatives
+          no_output_timeout: 5m
+          command: |
+            bash /tmp/src/smriprep/.circleci/ds005_run.sh --fast-track
+      - run:
+          name: Clean working directory
+          when: on_fail
+          command: |
+            rm -rf /tmp/ds005/work/smriprep_wf/fsdir_run_*/
+            find /tmp/ds005/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
+      - store_artifacts:
+          path: /tmp/ds005/work
+          destination: fasttrack
+      - store_artifacts:
+          path: /tmp/ds005/derivatives
+          destination: fasttrack
+  ds054:
+    machine:
+      image: ubuntu-1604:202007-01
+    working_directory: /tmp/ds054
+    environment:
+      - FS_LICENSE: /tmp/fslicense/license.txt
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Check whether build should be skipped
+          command: |
+            cd /tmp/src/smriprep
+            if [[ "$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[skip[ _]?ds054\]' )" != "" ]]; then
+              echo "Skipping ds000054 build"
+              circleci step halt
+            fi
+      - restore_cache:
+          keys:
+            - build-v3-{{ .Branch }}-{{ epoch }}
+            - build-v3-{{ .Branch }}-
+            - build-v3-master-
+            - build-v3-
+          paths:
+            - /tmp/docker
+            - /tmp/images
+      - run:
+          name: Setting up test
+          command: |
+            mkdir -p /tmp/ds054/derivatives /tmp/ds054/work
+            sudo setfacl -d -m group:$(id -gn):rwx /tmp/ds054/derivatives && \
+                sudo setfacl -m group:$(id -gn):rwx /tmp/ds054/derivatives
+            sudo setfacl -d -m group:$(id -gn):rwx /tmp/ds054/work && \
+                sudo setfacl -m group:$(id -gn):rwx /tmp/ds054/work
+      - run:
+          name: Install codecov
+          command: |
+              pyenv install 3.6.3
+              pyenv global 3.6.3
+              python --version
+              python -m pip install -U pip
+              python -m pip install -U codecov
+              pyenv rehash
+      - run:
+          name: Docker authentication
+          command: |
+            if [[ -n $DOCKER_PASS ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+            fi
+      - run:
+          name: Set up Docker registry
+          command: |
+            if [[ -f /tmp/images/registry.tar.gz ]]; then
+              echo "Loading saved registry image"
+              docker load < /tmp/images/registry.tar.gz
+            else
+              echo "Pulling registry image from DockerHub"
+              docker pull registry:2
+            fi
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images from local registry
+          command: |
+            docker pull localhost:5000/smriprep
+            docker tag localhost:5000/smriprep nipreps/smriprep:latest
+      - restore_cache:
+          keys:
+            - ds054-anat-v7-{{ .Branch }}-{{ epoch }}
+            - ds054-anat-v7-{{ .Branch }}
+            - ds054-anat-v7-master
+            - ds054-anat-v7-
+      - restore_cache:
+          keys:
+            - testdata-v2-{{ .Branch }}-{{ epoch }}
+            - testdata-v2-{{ .Branch }}
+            - testdata-v2-
+      - restore_cache:
+          keys:
+            - templateflow-v1-{{ .Branch }}-{{ epoch }}
+            - templateflow-v1-{{ .Branch }}
+            - templateflow-v1-
+      - run:
+          name: Run sMRIPrep on ds054 (with --fs-no-reconall)
+          no_output_timeout: 2h
+          command: |
+            bash /tmp/src/smriprep/.circleci/ds054_run.sh --write-graph
+      - run:
+          name: Combine coverage
+          no_output_timeout: 2h
+          command: |
+            # Combine coverage and convert to XML inside container because
+            # the file format is sensitive to changes in environment
+            docker run --rm=false -it \
+                -v /tmp/ds054:/tmp/ds054 \
+                -v /tmp/src/smriprep:/src/smriprep \
+                -w /src/smriprep \
+                -e FMRIPREP_DEV=1 -u $(id -u) \
+                -e COVERAGE_FILE=/tmp/ds054/work/.coverage \
+                -e COVERAGE_RCFILE=/src/smriprep/docker/multiproc.coveragerc \
+                --entrypoint=coverage \
+                nipreps/smriprep:latest \
+                combine /tmp/ds054/work/.coverage.*
+            # Convert to XML to freeze
+            docker run --rm=false -it \
+                -v /tmp/ds054:/tmp/ds054 \
+                -v /tmp/src/smriprep:/src/smriprep \
+                -w /src/smriprep \
+                -e FMRIPREP_DEV=1 -u $(id -u) \
+                -e COVERAGE_FILE=/tmp/ds054/work/.coverage \
+                -e COVERAGE_RCFILE=/src/smriprep/docker/multiproc.coveragerc \
+                --entrypoint=coverage \
+                nipreps/smriprep:latest \
+                xml
+      - run:
+          name: Submit coverage
+          working_directory: /tmp/src/smriprep
+          command: |
+              pyenv local 3.6.3
+              which python
+              python --version
+              codecov --file coverage.xml --flags ds054 -e CIRCLE_JOB
+      - run:
+          name: Clean-up temporary directory of reportlets
+          when: always
+          command: |
+            sudo chown $(id -un):$(id -gn) -R /tmp/ds054
+            rm -rf /tmp/ds054/work/reportlets
+      - save_cache:
+         key: ds054-anat-v7-{{ .Branch }}-{{ epoch }}
+         paths:
+            - /tmp/ds054/work
+      - run:
+          name: Checking outputs of sMRIPrep
+          command: |
+            mkdir -p /tmp/ds054/test
+            find /tmp/ds054/derivatives -path */figures -prune -o -name "*" -print | sed s+/tmp/ds054/derivatives/++ | sort > /tmp/ds054/test/outputs.out
+            diff /tmp/src/smriprep/.circleci/ds054_outputs.txt /tmp/ds054/test/outputs.out
+            exit $?
+      - run:
+          name: Clean working directory
+          when: on_success
+          command: |
+            sudo rm -rf /tmp/ds054/work
+      - run:
+          name: Clean working directory
+          when: on_fail
+          command: |
+            find /tmp/ds054/work \( -name "*.nii.gz" -or -name "*.nii" -or -name "*.gii" -or -name "*.h5" \) \
+                -exec sh -c 'rm -f {}; touch {}' \;
+      - store_artifacts:
+          path: /tmp/ds054
+
+      - run:
+          name: Check fast track using existing derivatives (with --fs-no-reconall)
+          no_output_timeout: 5m
+          command: |
+            bash /tmp/src/smriprep/.circleci/ds054_run.sh --fast-track
+      - store_artifacts:
+          path: /tmp/ds054/work
+          destination: fasttrack-work
+      - store_artifacts:
+          path: /tmp/ds054/derivatives
+          destination: fasttrack-derivatives
+
+  build_docs:
+    docker:
+      - image: circleci/python:3.8.5
+    working_directory: /tmp/gh-pages
+    environment:
+      - FSLOUTPUTTYPE: NIFTI
+      - SUBJECTS_DIR: /tmp/subjects
+    steps:
+      - checkout
+      - run:
+          name: Install Graphviz
+          command: sudo apt update && sudo apt -y install graphviz
+      - run:
+          name: Install deps
+          command: pip install -r docs/requirements.txt
+      - run:
+          name: Build only this commit
+          command: make -C docs SPHINXOPTS="-W" BUILDDIR="_build/no_version_html" html
+      - store_artifacts:
+          path: ./docs/_build/no_version_html/html
+          destination: noversion
+      - run:
+          name: Stop or generate versioned docs?
+          command: |
+            set +e
+            force_versioned="$( git log --format=oneline -n 1 $CIRCLE_SHA1 | grep -i -E '\[docs?[ _]?versions?\]' )"
+            set -e
+            if [[ "x${CIRCLE_TAG}" = "x" && "${CIRCLE_BRANCH}" != "master" && "x${force_versioned}" = "x" ]]; then
+              echo "Not a tag or master branch - skipping versioned docs."
+              circleci step halt
+            fi
+      - run:
+          name: Clean-up unversioned docs
+          command: make -C docs clean
+      - restore_cache:
+          keys:
+            - docs-v2-{{ .Branch }}-{{ .Revision }}
+            - docs-v2-{{ .Branch }}-
+            - docs-v2-master
+            - docs-v2-
+          paths:
+            - ./docs/_build
+      - run:
+          name: Generate Versioned Docs
+          command: make -f ./docs/Makefile versioned CURBRANCH=${CIRCLE_TAG:-$CIRCLE_BRANCH}
+      - save_cache:
+          key: docs-v2-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ./docs/_build
+      - persist_to_workspace:
+          root: docs/_build
+          paths: html
+      - store_artifacts:
+          path: ./docs/_build/html
+          destination: versioned
+
+  deploy_pypi:
+    docker:
+      - image: circleci/python:3.8.5
+    working_directory: /tmp/src/smriprep
+    steps:
+      - checkout
+      - run:
+          name: Build sMRIPrep
+          command: |
+            THISVERSION=$( python get_version.py )
+            virtualenv --python=python build
+            source build/bin/activate
+            pip install --upgrade "pip>=19.1"
+            echo "${CIRCLE_TAG:-$THISVERSION}" > smriprep/VERSION
+            python setup.py sdist
+            pip wheel --no-deps -w dist/ .
+      - run:
+          name: Build smriprep-docker
+          command: |
+            THISVERSION=$( python get_version.py )
+            cd wrapper
+            virtualenv --python=python build
+            source build/bin/activate
+            pip install --upgrade "pip>=19.1"
+            sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'${CIRCLE_TAG:-$THISVERSION}'/" smriprep_docker.py
+            python setup.py sdist
+            pip wheel --no-deps -w dist/ .
+      - run:
+          name: Upload packages to PyPI
+          command: |
+            pip install --user twine
+            twine upload dist/smriprep* wrapper/dist/smriprep*
+
+  deploy_docker:
+    machine:
+      image: ubuntu-1604:202007-01
+    working_directory: /tmp/src/smriprep
+    steps:
+      - restore_cache:
+          keys:
+            - build-v3-{{ .Branch }}-{{ epoch }}
+            - build-v3-{{ .Branch }}-
+            - build-v3-master-
+            - build-v3-
+          paths:
+            - /tmp/docker
+      - run:
+          name: Set-up a Docker registry
+          command: |
+            docker run -d -p 5000:5000 --restart=always --name=registry \
+                -v /tmp/docker:/var/lib/registry registry:2
+      - run:
+          name: Pull images from local registry
+          command: |
+            docker pull localhost:5000/smriprep
+            docker tag localhost:5000/smriprep nipreps/smriprep:latest
+      - run:
+          name: Deploy to Docker Hub
+          no_output_timeout: 40m
+          command: |
+            if [[ -n "$DOCKER_PASS" ]]; then
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+              docker tag nipreps/smriprep nipreps/smriprep:unstable
+              docker push nipreps/smriprep:unstable
+              if [[ -n "$CIRCLE_TAG" ]]; then
+                docker push nipreps/smriprep:latest
+                docker tag nipreps/smriprep nipreps/smriprep:$CIRCLE_TAG
+                docker push nipreps/smriprep:$CIRCLE_TAG
+              fi
+            fi
+
+  deploy_docs_tag:
+    <<: *docs
+
+  deploy_docs_master:
+    <<: *docs
+
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
+
+      - get_data:
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - /tests?\/.*/
+            tags:
+              only: /.*/
+
+      - test_deploy_pypi:
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - /ds005\/.*/
+                - /ds054\/.*/
+            tags:
+              only: /.*/
+
+      - test_wrapper:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - /ds005\/.*/
+                - /ds054\/.*/
+            tags:
+              only: /.*/
+
+      - build_docs:
+          filters:
+            branches:
+              ignore:
+                - /tests?\/.*/
+                - /ds005\/.*/
+                - /ds054\/.*/
+            tags:
+              only: /.*/
+
+      - ds005:
+          requires:
+            - get_data
+            - build
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - /tests?\/.*/
+                - /ds054\/.*/
+            tags:
+              only: /.*/
+
+      - ds054:
+          requires:
+            - get_data
+            - build
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+                - /tests?\/.*/
+                - /ds005\/.*/
+            tags:
+              only: /.*/
+
+
+      - deploy_docs_master:
+          requires:
+            - build_docs
+            - ds005
+            - ds054
+            - test_wrapper
+          filters:
+            branches:
+              only: /master/
+            tags:
+              ignore: /.*/
+
+      - deploy_docs_tag:
+          requires:
+            - build_docs
+            - ds005
+            - ds054
+            - test_deploy_pypi
+            - test_wrapper
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+
+      - deploy_pypi:
+          requires:
+            - deploy_docs_tag
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+
+      - deploy_docker:
+          requires:
+            - build
+            - ds005
+            - ds054
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /.*/

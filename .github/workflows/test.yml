@@ -1,83 +1,98 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+name: Python package
 
-name: test_and_release
-
-on: [ push, pull_request]
+on:
+  push:
+    branches: [ '*' ]
+    tags: [ '*' ]
+  pull_request:
+    branches: [ main, 'maint/*' ]
 
 jobs:
   build:
-
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.9", "3.10"]
-
+        pip: ["pip>=20.3"]
+        
     steps:
-    - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install setuptools flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Build
-      run: |
-        python setup.py bdist
-
-  test:
-
-    runs-on: ubuntu-latest
-    needs: build
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
-
-    steps:
     - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+        ssh-key: "${{ secrets.NIPREPS_DEPLOY }}"
+    - name: Fetch all tags (for versioneer to work)
+      if: "!startsWith(github.ref, 'refs/tags/')"
       run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
-        sudo apt install -qq openjdk-11-jre  # JDK is needed to run tests
-    - name: Test
+        /usr/bin/git -c protocol.version=2 fetch --tags --prune --unshallow origin
+    - name: Build in confined, updated environment and interpolate version
       run: |
-        python setup.py test
-
-  # https://github.com/actions/starter-workflows/blob/main/ci/python-publish.yml
-  release:
-
-    runs-on: ubuntu-latest
-    needs: test
-    if: startsWith(github.ref, 'refs/tags/v')
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-    - name: Deploy to PyPI
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
+        python -m venv /tmp/buildenv
+        source /tmp/buildenv/bin/activate
+        python -m pip install -U setuptools pip wheel twine docutils
         python setup.py sdist bdist_wheel
-        twine upload dist/*
+        python -m twine check dist/smriprep*
+        # Interpolate version
+        if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+          TAG=${GITHUB_REF##*/}
+        fi
+        THISVERSION=$( python get_version.py )
+        THISVERSION=${TAG:-$THISVERSION}
+        echo "Expected VERSION: \"${THISVERSION}\""
+        echo "THISVERSION=${THISVERSION}" >> ${GITHUB_ENV}
+    - name: Install in confined environment [sdist]
+      run: |
+        python -m venv /tmp/install_sdist
+        source /tmp/install_sdist/bin/activate
+        python -m pip install "${{ matrix.pip }}" setuptools
+        python -m pip install dist/smriprep*.tar.gz
+        INSTALLED_VERSION=$(python -c 'import smriprep; print(smriprep.__version__, end="")')
+        echo "VERSION: \"${THISVERSION}\""
+        echo "INSTALLED: \"${INSTALLED_VERSION}\""
+        test "${INSTALLED_VERSION}" = "${THISVERSION}"
+    - name: Install in confined environment [wheel]
+      run: |
+        python -m venv /tmp/install_wheel
+        source /tmp/install_wheel/bin/activate
+        python -m pip install "${{ matrix.pip }}" setuptools
+        python -m pip install dist/smriprep*.whl
+        INSTALLED_VERSION=$(python -c 'import smriprep; print(smriprep.__version__, end="")')
+        echo "INSTALLED: \"${INSTALLED_VERSION}\""
+        test "${INSTALLED_VERSION}" = "${THISVERSION}"
+    - name: Install in confined environment [setup.py - install]
+      run: |
+        python -m venv /tmp/setup_install
+        source /tmp/setup_install/bin/activate
+        python -m pip install "${{ matrix.pip }}" setuptools
+        python -m pip install numpy scipy "Cython >= 0.28.5" # sklearn needs this
+        python -m pip install scikit-learn  # otherwise it attempts to build it
+        python setup.py install
+        INSTALLED_VERSION=$(python -c 'import smriprep; print(smriprep.__version__, end="")')
+        echo "INSTALLED: \"${INSTALLED_VERSION}\""
+        test "${INSTALLED_VERSION}" = "${THISVERSION}"
+    - name: Install in confined environment [setup.py - develop]
+      run: |
+        python -m venv /tmp/setup_develop
+        source /tmp/setup_develop/bin/activate
+        python -m pip install "${{ matrix.pip }}" setuptools
+        # sklearn needs these dependencies
+        python -m pip install numpy scipy "Cython >= 0.28.5"
+        python -m pip install scikit-learn  # otherwise it attempts to build it
+        python setup.py develop
+        INSTALLED_VERSION=$(python -c 'import smriprep; print(smriprep.__version__, end="")')
+        echo "INSTALLED: \"${INSTALLED_VERSION}\""
+        test "${INSTALLED_VERSION}" = "${THISVERSION}"
+  flake8:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
+    - run: pip install flake8
+    - run: flake8 smriprep
