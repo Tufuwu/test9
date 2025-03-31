@@ -1,130 +1,99 @@
-# `split-folders` [![Build Status](https://img.shields.io/github/workflow/status/jfilter/split-folders/Test)](https://github.com/jfilter/split-folders/actions/workflows/test.yml) [![PyPI](https://img.shields.io/pypi/v/split-folders.svg)](https://pypi.org/project/split-folders/) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/split-folders.svg)](https://pypi.org/project/split-folders/) [![PyPI - Downloads](https://img.shields.io/pypi/dm/split-folders)](https://pypistats.org/packages/split-folders)
+# Unity YAML Parser #
 
-Split folders with files (e.g. images) into **train**, **validation** and **test** (dataset) folders.
+This project aims to provide a python3 API to load and dump Unity YAML 
+files(configurations, prefabs, scenes, serialized data, etc) in the exact same 
+format the internal Unity YAML serializer does.
 
-The input folder should have the following format:
+Using this API you will be able to easily manipulate(as python objects) 
+Unity YAML files and save them just the same, keeping the YAML structure
+exactly as Unity does. This has the advantages of, first not having to
+configure PyYAML beforehand to deal with Unity YAMLs, and second as the
+modified file keeps the same structure and formatting that Unity does, 
+when the YAML file is loaded by Unity it won't make formatting changes 
+to it that will make any VCS report unexpected file changes.
 
-```
-input/
-    class1/
-        img1.jpg
-        img2.jpg
-        ...
-    class2/
-        imgWhatever.jpg
-        ...
-    ...
-```
+## Installing ##
 
-In order to give you this:
+Install and update using [pip](https://pip.pypa.io/en/stable/quickstart/):
+````
+pip install -U unityparser
+````
+## A Simple Example ##
+````python
+from unityparser import UnityDocument
 
-```
-output/
-    train/
-        class1/
-            img1.jpg
-            ...
-        class2/
-            imga.jpg
-            ...
-    val/
-        class1/
-            img2.jpg
-            ...
-        class2/
-            imgb.jpg
-            ...
-    test/
-        class1/
-            img3.jpg
-            ...
-        class2/
-            imgc.jpg
-            ...
-```
+# Loading and modifying a config file with a single YAML document
+project_settings_file = 'UnityProject/ProjectSettings/ProjectSettings.asset'
+doc = UnityDocument.load_yaml(project_settings_file)
+ProjectSettings = doc.entry
+ProjectSettings.scriptingDefineSymbols[1] += ';CUSTOM_DEFINE'
+ProjectSettings.scriptingDefineSymbols[7] = ProjectSettings.scriptingDefineSymbols[1]
+doc.dump_yaml()
 
-This should get you started to do some serious deep learning on your data. [Read here](https://stats.stackexchange.com/questions/19048/what-is-the-difference-between-test-set-and-validation-set) why it's a good idea to split your data intro three different sets.
+# You can also load YAML files with multiple documents and filter for a single or multiple entries
+hero_prefab_file = 'UnityProject/Assets/Prefabs/Hero.prefab'
+doc = UnityDocument.load_yaml(hero_prefab_file)
+# accessing all entries
+doc.entries
+# [<UnityClass>, <UnityClass>, ...]
+# accessing first entry
+doc.entry
+# <UnityClass>
+# get single entry uniquely defined by filters
+entry = doc.get(class_name='MonoBehaviour', attributes=('m_MaxHealth',))
+entry.m_MaxHealth += 10
+# get multiple entries matching a filter
+entries = doc.filter(class_names=('MonoBehaviour',), attributes=('m_Enabled',))
+for entry in entries:
+    entry.m_Enabled = 1
+doc.dump_yaml()
+# calling entry method for a doc with multiple document will return the first one
+print(doc.entry.__class__.__name__)
+# 'Prefab'
+````
 
--   Split files into a training set and a validation set (and optionally a test set).
--   Works on any file types.
--   The files get shuffled.
--   A [seed](https://docs.python.org/3/library/random.html#random.seed) makes splits reproducible.
--   Allows randomized [oversampling](https://en.wikipedia.org/wiki/Oversampling_and_undersampling_in_data_analysis) for imbalanced datasets.
--   Optionally group files by prefix.
--   (Should) work on all operating systems.
+## Classes ##
 
-## Install
+### unityparser.UnityDocument ###
 
-This package is Python only and there are no external dependencies.
+Main class to load and dump files.
 
-```bash
-pip install split-folders
-```
+#### unityparser.UnityDocument.load_yaml(file_path) ####
 
-Optionally, you may install [tqdm](https://github.com/tqdm/tqdm) to get get a progress bar when moving files.
+_**Classmethod**_: Load the given YAML file_path and return a UnityDocument file
 
-```bash
-pip install split-folders[full]
-```
+#### unityparser.UnityDocument.dump_yaml(file_path=None) ####
 
-## Usage
+Dump the UnityDocument to the previously loaded file location(overwrite). 
+If *file_path* argument is provided, dump the document to the specified location instead.
 
-You can use `split-folders` as Python module or as a Command Line Interface (CLI).
+This method **keeps line endings** of the original file when it dumps.
 
-If your datasets is balanced (each class has the same number of samples), choose `ratio` otherwise `fixed`.
-NB: oversampling is turned off by default.
-Oversampling is only applied to the _train_ folder since having duplicates in _val_ or _test_ would be considered cheating.
+#### unityparser.UnityDocument.entries ####
 
-### Module
+_**Property**_: Return the _list_ of documents found in the YAML. The objects in the _list_ are of _types_ Class named after the serialized Unity class(ie. MonoBehaviour, GameObject, Prefab, CustomName, etc).
 
-```python
-import splitfolders  # or import split_folders
+#### unityparser.UnityDocument.entry ####
 
-# Split with a ratio.
-# To only split into training and validation set, set a tuple to `ratio`, i.e, `(.8, .2)`.
-splitfolders.ratio("input_folder", output="output", seed=1337, ratio=(.8, .1, .1), group_prefix=None) # default values
+_**Property**_: Return the first document in the YAML, useful if there is only one. Equivalent of doing `UnityDocument.entries[0]`.
 
-# Split val/test with a fixed number of items e.g. 100 for each set.
-# To only split into training and validation set, use a single number to `fixed`, i.e., `10`.
-splitfolders.fixed("input_folder", output="output", seed=1337, fixed=(100, 100), oversample=False, group_prefix=None) # default values
-```
+#### unityparser.UnityDocument.get(class_name=None, attributes=None) ####
 
-Occasionally you may have things that comprise more than a single file (e.g. picture (.png) + annotation (.txt)).
-`splitfolders` lets you split files into equally-sized groups based on their prefix.
-Set `group_prefix` to the length of the group (e.g. `2`).
-But now _all_ files should be part of groups.
+_**Method**_: Return a single entry uniquely matching the given filters. Must exist exactly one.
 
-### CLI
+#### unityparser.UnityDocument.filter(class_names=None, attributes=None) ####
 
-```
-Usage:
-    splitfolders [--output] [--ratio] [--fixed] [--seed] [--oversample] [--group_prefix] folder_with_images
-Options:
-    --output        path to the output folder. defaults to `output`. Get created if non-existent.
-    --ratio         the ratio to split. e.g. for train/val/test `.8 .1 .1 --` or for train/val `.8 .2 --`.
-    --fixed         set the absolute number of items per validation/test set. The remaining items constitute
-                    the training set. e.g. for train/val/test `100 100` or for train/val `100`.
-    --seed          set seed value for shuffling the items. defaults to 1337.
-    --oversample    enable oversampling of imbalanced datasets, works only with --fixed.
-    --group_prefix  split files into equally-sized groups based on their prefix
-Example:
-    splitfolders --ratio .8 .1 .1 -- folder_with_images
-```
+_**Method**_: Return a list of entries matching the given filters. Many or none can be matched.
 
-Because of some [Python quirks](https://github.com/jfilter/split-folders/issues/19) you have to prepend ` --` afer using `--ratio`.
+### unityparser.loader.UnityLoader ###
 
-Instead of the command `splitfolders` you can also use `split_folders` or `split-folders`.
+PyYAML's Loader class, can be used directly with PyYAML to customise loading. 
 
-## Development
+### unityparser.dumper.UnityDumper ###
 
-Install and use [poetry](https://python-poetry.org/).
+PyYAML's Dumper class, can be used directly with PyYAML to customise dumping. 
 
-## Contributing
+## Considerations ##
 
-If you have a **question**, found a **bug** or want to propose a new **feature**, have a look at the [issues page](https://github.com/jfilter/split-folders/issues).
+Text scalars which are single or double quoted that span multiple lines are not being dumped exactly as Unity does. There's a difference in the maximum length allowed per line and the logic to wrap them.
 
-**Pull requests** are especially welcomed when they fix bugs or improve the code quality.
-
-## License
-
-MIT
