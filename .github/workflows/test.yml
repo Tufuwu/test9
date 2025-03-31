@@ -1,39 +1,31 @@
-#
-# This software may be modified and distributed under the terms
-# of the MIT license.  See the LICENSE file for details.
-
-name: CI Tests
-
+name: docker-centos7-slurm
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
-
+  pull_request: {}
 jobs:
-  test:
-    name: Python ${{ matrix.python }}
+  Build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ["3.9", "3.10"]
+        python-version: ["3.9", "3.10"]
       fail-fast: false
-
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository code
+        uses: actions/checkout@v2
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python }}
+          python-version: ${{ matrix.python-version}}
 
-      - name: Update Pip
-        run: pip install --upgrade pip setuptools
+      - name: Install Dependencies
+        run: |
+          python${{ matrix.python-version }} -m pip install --upgrade pip
+          python${{ matrix.python-version }} -m pip install pipenv
+          pipenv --python ${{ matrix.python-version }} install --dev --skip-lock
 
-      - name: Install Tox
-        run: pip install tox
-
-      - name: Run tests
-        run: tox -e py
+      - name: Run Tests
+        run: |
+          pipenv run pytest -sv

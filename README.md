@@ -1,233 +1,157 @@
-PyLogBeat
-=========
+# Slurm on CentOS 7 Docker Image
 
-[![Travis CI](https://travis-ci.org/eht16/pylogbeat.svg?branch=master)](https://travis-ci.org/eht16/pylogbeat)
-[![PyPI](https://img.shields.io/pypi/v/pylogbeat.svg)](https://pypi.org/project/pylogbeat/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/pylogbeat.svg)](https://pypi.org/project/pylogbeat/)
-[![License](https://img.shields.io/pypi/l/pylogbeat.svg)](https://pypi.org/project/pylogbeat/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/giovtorres/docker-centos7-slurm.svg)](https://hub.docker.com/r/giovtorres/docker-centos7-slurm/)
 
-PyLogBeat is a simple, incomplete implementation of the Beats protocol
-used by Elastic Beats and Logstash. For more information about Beats see
-https://www.elastic.co/products/beats and
-https://www.elastic.co/guide/en/logstash/current/plugins-inputs-beats.html.
+This is an all-in-one [Slurm](https://slurm.schedmd.com/) installation.  This
+container runs the following processes:
 
-With this library it is possible to send log messages or any data to
-Logstash' beats input plugin or any other service which implements
-the Beats protocol.
+* slurmd (The compute node daemon for Slurm)
+* slurmctld (The central management daemon of Slurm)
+* slurmdbd (Slurm database daemon)
+* munged (Authentication service for creating and validating credentials)
+* mariadb (MySQL compatible database)
+* supervisord (A process control system)
 
-The main difference to other transport mechanisms like direct TCP
-or UDP transfer is that with the Beats protocol there is a higher
-reliability of the data transfer, especially since the server
-acknowledges the data it received so the client knows whether and
-what to resend.
+It also has the following Python versions installed using
+[pyenv](https://github.com/pyenv/pyenv):
 
+* Python 3.6.15
+* Python 3.7.12
+* Python 3.8.12
+* Python 3.9.9
 
-Installation
-------------
+## Usage
 
-The easiest method is to install directly from pypi using pip:
+There are multiple
+[tags](https://hub.docker.com/r/giovtorres/docker-centos7-slurm/tags/)
+available.  To use the latest available image, run:
 
-    pip install pylogbeat
-
-
-If you prefer, you can download PyLogBeat from
-https://github.com/eht16/pylogbeat and install it directly from source:
-
-    python setup.py install
-
-
-Due to a bug (<https://github.com/logstash-plugins/logstash-input-beats/pull/342>)
-in some Logstash versions, you will need Logstash >= 5.6.12 or Logstash >= 6.4.0.
-
-
-Get the Source
---------------
-
-The source code is available at https://github.com/eht16/pylogbeat/.
-
-
-Usage
------
-
-### Simple use
-
-```python
-    message = {'@timestamp': '2018-01-02T01:02:03',  '@version': '1', 'message': 'hello world'}
-    client = PyLogBeatClient('localhost', 5959, ssl_enable=False)
-    client.connect()
-    client.send([message])
-    client.close()
+```shell
+docker pull giovtorres/docker-centos7-slurm:latest
+docker run -it -h slurmctl giovtorres/docker-centos7-slurm:latest
 ```
 
-### Using a context manager
+The above command will drop you into a bash shell inside the container. Tini
+is responsible for `init` and supervisord is the process control system . To
+view the status of all the processes, run:
 
-```python
-    with PyLogBeatClient('localhost', 5959, ssl_enable=False) as client:
-        client.send([message])
+```shell
+[root@slurmctl /]# supervisorctl status
+munged                           RUNNING   pid 23, uptime 0:02:35
+mysqld                           RUNNING   pid 24, uptime 0:02:35
+slurmctld                        RUNNING   pid 25, uptime 0:02:35
+slurmd                           RUNNING   pid 22, uptime 0:02:35
+slurmdbd                         RUNNING   pid 26, uptime 0:02:35
 ```
 
-### Using a SSL connection
+In `slurm.conf`, the **ControlMachine** hostname is set to **slurmctl**. Since
+this is an all-in-one installation, the hostname must match **ControlMachine**.
+Therefore, you must pass the `-h slurmctl` to docker at run time so that the
+hostnames match.
 
-```python
-    with PyLogBeatClient('localhost', 5959, ssl_enable=True, ssl_verify=True,
-            keyfile='certificate.key', certfile='certificate.crt', ca_certs='ca.crt') as client:
-        client.send([message])
+You can run the usual Slurm commands:
+
+```shell
+[root@slurmctl /]# sinfo
+PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
+normal*      up 5-00:00:00      5   idle c[1-5]
+debug        up 5-00:00:00      5   idle c[6-10]
 ```
 
-For details regarding the SSL certificates and how to configure the
-Logstash input for SSL, see
-https://www.elastic.co/guide/en/logstash/current/plugins-inputs-beats.html.
-
-
-Message Format
---------------
-
-`PyLogBeatClient.send()` accepts a sequence (list, tuple, set) of "messages".
-The messages itself can either be a `dict` object representing the final
-message to be sent to Logstash or a `bytes` or `string` object which must
-contain properly formatted `JSON`.
-If a `dict` is passed as element, it is converted to `JSON` using
-`json.dumps()`.
-
-### Example message
-
-The following example is a message as `JSON`:
-
-```python
-    {
-        "@timestamp": "2018-01-02T01:02:03",
-        "@version": "1",
-        "extra": {
-            "application": "django_example",
-            "django_version": "2.1.0",
-            "environment": "production"
-        },
-        "host": "my-local-host",
-        "level": "INFO",
-        "logsource": "my-local-host",
-        "message": "foo bar",
-        "pid": 65534,
-        "program": "example.py",
-        "type": "python-logstash"
-    }
+```shell
+[root@slurmctl /]# scontrol show partition normal
+PartitionName=normal
+   AllowGroups=ALL AllowAccounts=ALL AllowQos=ALL
+   AllocNodes=ALL Default=YES QoS=N/A
+   DefaultTime=5-00:00:00 DisableRootJobs=NO ExclusiveUser=NO GraceTime=0 Hidden=NO
+   MaxNodes=1 MaxTime=5-00:00:00 MinNodes=1 LLN=NO MaxCPUsPerNode=UNLIMITED
+   Nodes=c[1-5]
+   PriorityJobFactor=50 PriorityTier=50 RootOnly=NO ReqResv=NO OverSubscribe=NO PreemptMode=OFF
+   State=UP TotalCPUs=5 TotalNodes=5 SelectTypeParameters=NONE
+   DefMemPerCPU=500 MaxMemPerNode=UNLIMITED
 ```
 
-This is the standard Logstash message format in JSON.
+## Building
 
+### Using Existing Tags
 
-Logging
--------
+There are multiple versions of Slurm available, each with its own tag.  To build
+a specific version of Slurm, checkout the tag that matches that version and
+build the Dockerfile:
 
-PyLogBeat uses a logger named "pylogbeat" to log some debug messages
-and warnings in case of errors. By default, the logger's log level
-is set to `Warning` so you will not see any debug log messages.
-If necessary simply change the log level of the logger to see the debug
-messages. For example:
-
-```python
-    import logging
-    logging.getLogger('pylogbeat').setLevel(logging.DEBUG)
+```shell
+git clone https://github.com/giovtorres/docker-centos7-slurm
+git checkout <tag>
+docker build -t docker-centos7-slurm .
 ```
 
-It is important to make this change *after* you imported
-the `pylogbeat` module.
+### Using Build Args
 
-Furthermore, PyLogBeatClient's constructor method takes a `use_logging`
-argument which should be a boolean indicating whether the logging
-subsystem should be used at all. The argument defaults to `False`,
-i.e. if you want any logging, you need to pass `True`.
-If PyLogBeat is used itself as part of the logging system (e.g.
-as the transport of a handler), it is important to not emit any new
-log messages once the logging subsystem has been shutdown or is in the
-process of shutting down. In this case, `use_logging` must be `False`
-in order to suppress generating log messages.
+You can use docker's `--build-arg` option to customize the version of Slurm
+and the version(s) of Python at build time.
 
+To specify the version of Slurm, assign a valid Slurm tag to the `SLURM_TAG`
+build argument:
 
-Protocol Support
-----------------
+```shell
+docker build --build-arg SLURM_TAG="slurm-19-05-1-2" -t docker-centos7-slurm:19.05.1-2
+```
 
-The implemented Beats protocol is not yet officially specified and
-documented, unfortunately. Hopefully the Beats developers will
-provide a specification in the future.
-So far, sending the data and waiting for the ACK from the server is
-implemented. But there might some details from the protocol missing
-in the implementation.
+To specify the version(s) of Python to include in the container, specify a
+space-delimited string of Python versions using the `PYTHON_VERSIONS` build
+argument:
 
+```shell
+docker build --build-arg PYTHON_VERSIONS="3.6 3.7" -t docker-centos7-slurm:py3
+```
 
-Future Maintenance
-------------------
+## Using docker-compose
 
-If you are interested in the code, want to improve it and/or
-complete the protocol support, please feel free to send PRs.
-I would be happy if someone likes to continue developing this library
-and would also take full maintainership for future development and
-releases.
+The included docker-compose file will run the cluster container in the
+background.  The docker-compose file uses data volumes to store the slurm state
+between container runs.  To start the cluster container, run:
 
+```shell
+docker-compose up -d
+```
 
-Contributing
-------------
+To execute commands in the container, use `docker exec`:
 
-Found a bug or got a feature request? Please report it at
-https://github.com/eht16/pylogbeat/issues.
+```shell
+docker exec dockercentos7slurm_slurm_1 sinfo
+PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
+normal*      up 5-00:00:00      5   idle c[1-5]
+debug        up 5-00:00:00      5   idle c[6-10]
 
+docker exec dockercentos7slurm_slurm_1 sbatch --wrap="sleep 10"
+Submitted batch job 27
 
-Credits
--------
+docker exec dockercentos7slurm_slurm_1 squeue
+            JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+            27    normal     wrap     root  R       0:07      1 c1
+```
 
-This code is based on https://github.com/brxie/PyLumberjack and
-adopted to support version 2 of the protocol.
-Thanks to brxie for the initial code.
+To attach to the bash shell inside the running container, run:
 
+```shell
+docker attach dockercentos7slurm_slurm_1
+```
 
-ChangeLog
----------
+Press `Ctrl-p,Ctrl-q` to detach from the container without killing the bash
+process and stopping the container.
 
-### 2.0.0 / 2020-10-04
+To stop the cluster container, run:
 
-- Remove "six" dependency
-- Require Python >= 3.6
+```shell
+docker-compose down
+```
 
+## Testing Locally
 
-### 1.0.5 / 2020-10-04
+[Testinfra](https://testinfra.readthedocs.io/en/latest/index.html) is used to
+build and run a Docker container test fixture. Run the tests with
+[pytest](https://docs.pytest.org/en/latest/):
 
-- Set `python_requires` to Python >=2.7 or Python >= 3.6 for
-  smooth upgrade to upcoming Python3 only.
-  This way Python2 only users will stay at this release.
-
-
-### 1.0.4 / 2020-05-06
-
-- Validate input data and fix documentation about accepted values (#2)
-
-
-### 1.0.3 / 2020-04-22
-
-- Add note about required Logstash versions (#1)
-- Improve unit tests
-
-
-### 1.0.2 / 2018-12-31
-
-- Add badges to README
-
-
-### 1.0.1 / 2018-12-31
-
-- Fix typo in setup.py
-- Use distribution "trusty" for Travis builds
-
-
-### 1.0.0 / 2018-12-31
-
-- Initial release
-
-
-License
--------
-PyLogBeat is licensed under the Apache License 2.0.
-
-
-Author
-------
-
-Enrico Tröger <enrico.troeger@uvena.de>
+```shell
+pytest -v
+```

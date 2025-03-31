@@ -1,56 +1,11 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+.pytest_cache
+.vscode
+__pycache__
+venv
+volumes
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-.tox/
-.cache
-
-# Translations
-*.mo
-
-# IDEs
-/.idea
-/.geany
-/.mr.developer.cfg
-/.project
-/.pydevproject
-/.settings
-/.release
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# pyenv
-.python-version
+venv
+.vscode
+.pytest_cache
+.hypothesis
+__pycache__
