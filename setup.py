@@ -5,12 +5,11 @@ from setuptools import find_packages
 
 
 setup(
-    name="liteiclink",
-    description="Small footprint and configurable Inter-Chip communication cores",
-    author="Florent Kermarrec",
-    author_email="florent@enjoy-digital.fr",
-    url="http://enjoy-digital.fr",
-    download_url="https://github.com/enjoy-digital/liteiclink",
+    name="litespi",
+    description="Small footprint and configurable SPI core",
+    author="LiteSPI Developers",
+    url="https://github.com/litex-hub",
+    download_url="https://github.com/litex-hub/litespi",
     test_suite="test",
     license="BSD",
     python_requires="~=3.6",
