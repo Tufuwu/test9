@@ -1,22 +1,46 @@
----
-name: CI build
-on: [push]
+on: [push, pull_request]
 
 jobs:
-  ci_test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@main
+    test:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                python-version: ["3.9", "3.10"]
 
-      - name: Lint Files
-        run: |
-          make lint
+        steps:
+            - name: Git Checkout
+              uses: actions/checkout@v2
+              with:
+                  submodules: recursive
 
-      - name: Test Asserts with sample value ansible=2.8
-        run: |
-          make test
+            - name: Setup Python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: ${{ matrix.python-version }}
 
-      - name: Test Asserts with sample value ansible=latest
-        run: |
-          make test ANSIBLE_VERSION=latest
+            - name: Build PICT
+              run: |
+                  pushd pict
+                  make libpict.so
+                  make pict
+                  echo "${PWD}" >> $GITHUB_PATH
+                  echo "LD_LIBRARY_PATH=${PWD}" >> $GITHUB_ENV
+                  popd
+
+            - name: Install dependencies
+              run: |
+                  pip install Cython
+
+            - name: Install PyPICT
+              run: |
+                  pip install -vvv .
+
+            - name: Show environment
+              run: |
+                  env
+                  python -V
+                  pip freeze
+
+            - name: Run tests
+              run: |
+                  python setup.py test
