@@ -1,39 +1,57 @@
-# GADMA ![](http://jb.gg/badges/research-flat-square.svg)
+[![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 
-[![Docs](https://readthedocs.org/projects/gadma/badge/?version=latest)](https://gadma.readthedocs.io/en/latest/?badge=latest) [![Build status](https://github.com/ctlab/GADMA/workflows/build/badge.svg)](https://github.com/ctlab/GADMA/workflows/build/badge.svg) [![codecov](https://codecov.io/gh/ctlab/GADMA/branch/master/graph/badge.svg?token=F303UDEWDJ)](https://codecov.io/gh/ctlab/GADMA)
+# ladybug-pandas
 
-Welcome to GADMA v2!
+A ladybug extension powered by pandas
 
-GADMA implements methods for automatic inference of the joint demographic history of multiple populations from the genetic data.
+## Installation
+```console
+pip install ladybug-pandas
+```
 
-GADMA is based on two open source packages: the ∂a∂i developed by Ryan Gutenkunst [<https://bitbucket.org/gutenkunstlab/dadi/>] and the *moments* developed by Simon Gravel [<https://bitbucket.org/simongravel/moments/>].
+## QuickStart
+```python
+import ladybug_pandas as lbp
+from ladybug.epw import EPW
 
-In contrast to these packages, GADMA is a command-line tool. It presents a series of launches of the genetic algorithm and infer demographic history from Allele Frequency Spectrum of multiple populations (up to three).
+epw_path = 'tests/assets/epw/tokyo.epw'
 
-GADMA is implemented by Ekaterina Noskova (ekaterina.e.noskova@gmail.com)
+epw = EPW(epw_path)
 
-**GADMA is now of version 2!**
+df = lbp.DataFrame.from_epw(epw)
 
-### Documentation
+df_ip = df.ladybug.to_ip()
 
-Full documentation including installation instructions, usage, examples and API are available [here](https://gadma.readthedocs.io).
+```
 
-### Contributors
+## [API Documentation](http://ladybug-tools.github.io/ladybug-pandas)
 
-* Ekaterina Noskova
+You can also find some usage examples in the [examples](https://github.com/ladybug-tools/ladybug-pandas/blob/master/examples) folder of the code repository.
 
-* Vladimir Ulyantsev
 
-* Pavel Dobrynin
+## Local Development
+1. Clone this repo locally
+```console
+git clone git@github.com:ladybug-tools/ladybug-pandas
 
-## Getting help
+# or
 
-Please don't be afraid to contact me for different problems and offers via email ekaterina.e.noskova@gmail.com. I will be glad to answer all questions. 
+git clone https://github.com/ladybug-tools/ladybug-pandas
+```
+2. Install dependencies:
+```console
+cd ladybug-pandas
+pip install -r dev-requirements.txt
+pip install -r requirements.txt
+```
 
-Also you are always welcome to [create an issue](https://github.com/ctlab/GADMA/issues) on the GitHub page of GADMA with your question.
+3. Run Tests:
+```console
+python -m pytest tests/
+```
 
-## Citation
-
-If you use GADMA in your research please cite:
-
-Ekaterina Noskova, Vladimir Ulyantsev, Klaus-Peter Koepfli, Stephen J O’Brien, Pavel Dobrynin, GADMA: Genetic algorithm for inferring demographic history of multiple populations from allele frequency spectrum data, *GigaScience*, Volume 9, Issue 3, March 2020, giaa005, <https://doi.org/10.1093/gigascience/giaa005>
+4. Generate Documentation:
+```console
+sphinx-apidoc -f -e -d 4 -o ./docs ./ladybug_pandas
+sphinx-build -b html ./docs ./docs/_build/docs
+```
