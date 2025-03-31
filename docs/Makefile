@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-SPHINXPROJ    = Xbox-Smartglass-Nano
+SPHINXPROJ    = asynctnt
 SOURCEDIR     = .
 BUILDDIR      = _build
 

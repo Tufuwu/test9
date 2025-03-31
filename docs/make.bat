@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=Xbox-Smartglass-Nano
+set SPHINXPROJ=asynctnt
 
 if "%1" == "" goto help
 
