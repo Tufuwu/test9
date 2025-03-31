@@ -1,0 +1,114 @@
+project_name: KerasLMU
+pkg_name: keras_lmu
+repo_name: nengo/keras-lmu
+description: Keras implementation of Legendre Memory Units
+license: abr-free
+
+copyright_start: 2019
+
+license_rst: {}
+
+contributing_rst: {}
+
+contributors_rst: {}
+
+manifest_in: {}
+
+setup_py:
+  install_req:
+    - packaging>=20.9
+    - scipy>=1.0.0
+    - tensorflow>=2.1.0
+  tests_req:
+    - pytest>=6.1.0
+    - pytest-rng>=1.0.0
+  docs_req:
+    - matplotlib>=3.0.2,<3.4.3
+    - jupyter>=1.0.0
+    - seaborn>=0.9.0
+    - sphinx>=1.8
+    - nbsphinx>=0.3.5
+    - nengo_sphinx_theme>=1.2.0
+    - numpydoc>=0.6
+  classifiers:
+    - "Development Status :: 3 - Alpha"
+    - "Intended Audience :: Science/Research"
+    - "Operating System :: OS Independent"
+    - "Programming Language :: Python "
+    - "Programming Language :: Python :: 3.6"
+    - "Programming Language :: Python :: 3.7"
+    - "Programming Language :: Python :: 3.8"
+    - "Topic :: Scientific/Engineering "
+    - "Topic :: Scientific/Engineering :: Artificial Intelligence"
+
+setup_cfg: {}
+
+docs_conf_py:
+  intersphinx_mapping:
+    scipy: "https://docs.scipy.org/doc/scipy/reference"
+  tagmanager_id: GTM-KWCR2HN
+  html_redirects:
+    getting_started.html: getting-started.html
+  autoautosummary_change_modules:
+    keras_lmu:
+      - keras_lmu.layers.LMUCell
+      - keras_lmu.layers.LMU
+      - keras_lmu.layers.LMUFFT
+  extensions:
+    - nengo_sphinx_theme.ext.autoautosummary
+  doctest_setup:
+    - import numpy as np
+    - import tensorflow as tf
+  sphinx_options:
+    autodoc_inherit_docstrings: False
+
+ci_scripts:
+  - template: static
+  - template: docs
+  - template: examples
+  - template: test
+    coverage: true
+    pip_install:
+      - $TF_VERSION
+  - template: remote-script
+    remote_script: test
+    output_name: remote-test
+    host: azure
+    azure_name: nengo-dl
+    azure_group: nengo-ci
+    coverage: true
+    remote_vars:
+      TF_FORCE_GPU_ALLOW_GROWTH: "true"
+      TF_VERSION: $TF_VERSION
+    remote_setup:
+      - conda install -y -c conda-forge cudatoolkit=11.3 cudnn=8.2
+      - export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:\$CONDA_PREFIX/lib
+  - template: remote-script
+    remote_script: docs
+    output_name: remote-docs
+    host: azure-docs
+    azure_name: nengo-dl-docs
+    azure_group: nengo-ci
+    remote_setup:
+      - conda install -y -c conda-forge cudatoolkit=11.3 cudnn=8.2
+      - export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:\$CONDA_PREFIX/lib
+  - template: remote-script
+    remote_script: examples
+    output_name: remote-examples
+    host: azure-examples
+    azure_name: nengo-dl-examples
+    azure_group: nengo-ci
+    remote_setup:
+      - conda install -y -c conda-forge cudatoolkit=11.3 cudnn=8.2
+      - export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:\$CONDA_PREFIX/lib
+
+pre_commit_config_yaml: {}
+
+pyproject_toml: {}
+
+version_py:
+  type: semver
+  major: 0
+  minor: 4
+  patch: 3
+  release: false

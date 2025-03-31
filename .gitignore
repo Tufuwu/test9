@@ -1,5 +1,10 @@
-/dist
+keras_lmu.egg-info
+*.swo
+*.swp
+*.ipynb_checkpoints
 __pycache__
-*.egg-info
-MANIFEST
-/build
+/.idea
+/bones-scripts
+/docs/_build
+/secret
+/tmp
