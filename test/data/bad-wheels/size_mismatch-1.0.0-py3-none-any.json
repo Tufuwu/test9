@@ -1,4 +1,0 @@
-{
-    "type": "RecordSizeMismatchError",
-    "str": "Size of file 'module.py' listed as 66 in RECORD, actually 65"
-}

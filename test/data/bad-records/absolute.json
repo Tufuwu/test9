@@ -1,4 +1,0 @@
-{
-    "type": "AbsolutePathError",
-    "str": "RECORD entry has an absolute path: '/module.py'"
-}

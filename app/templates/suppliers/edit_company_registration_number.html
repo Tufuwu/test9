@@ -1,0 +1,82 @@
+{% extends "_base_page.html" %}
+
+{% block pageTitle %}
+  Company registration number – Digital Marketplace
+{% endblock %}
+
+{% block breadcrumb %}
+  {{ govukBreadcrumbs({
+    "items": [
+      {
+        "text": "Digital Marketplace",
+        "href": "/"
+      },
+      {
+        "text": "Your account",
+        "href": url_for('.dashboard')
+      },
+      {
+        "text": "Your company details",
+        "href": url_for('.supplier_details')
+      },
+      {
+        "text": "Company registration number"
+      }
+    ]
+  }) }}
+{% endblock %}
+
+{% block mainContent %}
+{% include "toolkit/forms/validation.html" %}
+
+<div class="single-question-page">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">Are you registered with Companies House?</h1>
+
+      <form method="POST" action="{{ url_for('.edit_supplier_registration_number') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        {%
+          with
+          name = "has_companies_house_number",
+          type = "radio",
+          value = form.has_companies_house_number.data,
+          error = errors.get("has_companies_house_number", {}).get("message", None),
+          options = [
+          {
+              "label": "Yes",
+              "reveal": {
+                "name": "companies_house_number",
+                "question": "Companies House number",
+                "hint": "<a class='govuk-link' href='https://beta.companieshouse.gov.uk/search/companies'>Find your 8 digit Companies House number</a>"|safe,
+                "value": form.companies_house_number.data,
+                "error": errors.get("companies_house_number", {}).get("message", None),
+              }
+          },
+          {
+              "label": "No",
+              "reveal": {
+                "name": "other_company_registration_number",
+                "question": "Enter a number that can be used to identify your business and provide details of the organisation that issued it.",
+                "hint": "For example, ‘0123456789, Unique Taxpayer Reference, HMRC, UK’",
+                "value": form.other_company_registration_number.data,
+                "error": errors.get("other_company_registration_number", {}).get("message", None),
+              }
+          }
+        ]
+      %}
+        {% include "toolkit/forms/selection-buttons.html" %}
+      {% endwith %}
+
+        {{ govukButton({
+          "text": "Save and return",
+        }) }}
+
+        <p class="govuk-body"><a class="govuk-link" href="{{ url_for('.supplier_details') }}">Return to company details</a></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

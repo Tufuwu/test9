@@ -1,0 +1,141 @@
+{% extends "_base_page.html" %}
+
+
+{% block pageTitle %}
+  Your {{ framework.name }} declaration – Digital Marketplace
+{% endblock %}
+
+{% block breadcrumb %}
+  {{ govukBreadcrumbs({
+    "items": [
+      {
+        "text": "Digital Marketplace",
+        "href": "/"
+      },
+      {
+        "text": "Your account",
+        "href": url_for('.dashboard')
+      },
+      {
+        "text": ("Apply to "+framework.name) if framework.status == "open" else ("Your "+framework.name+" application"),
+        "href": url_for(".framework_dashboard", framework_slug=framework.slug)
+      },
+      {
+        "text": "Your declaration overview"
+      }
+    ]
+  }) }}
+{% endblock %}
+
+
+{% macro make_declaration_button_block() %}
+  {% if framework.status == "open" %}
+    {% if validates %}
+      {% if supplier_framework.declaration.status != "complete" %}
+      <form method="POST" action="">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        {{ govukButton({
+          "text": "Make declaration"
+        }) }}
+      </form>
+      {% endif %}
+      <p class="govuk-body">
+        You can come back and edit your answers at any time before
+        {% if supplier_framework.declaration.status == "complete" %}
+          {{ framework.applicationsCloseAt | nbsp }}.
+        {% else %}
+          the deadline.
+        {% endif %}
+      </p>
+    {% endif %}
+  {% endif %}
+{% endmacro %}
+
+
+{% block mainContent %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">Your declaration overview</h1>
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {% if framework.status == "open" and supplier_framework.declaration.status != "complete" %}
+        <p class="govuk-body">
+          You must {% if not validates %}answer all questions and{% endif %} make your declaration
+          before {{ framework.applicationsCloseAt | nbsp }} to apply to {{ framework.name }}.
+        </p>
+      {% endif %}
+      {{ make_declaration_button_block() }}
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      {% import "toolkit/summary-table.html" as summary %}
+      {% for section_slug, (section, section_errors) in sections_errors.items() %}
+        {{ summary.heading(section.name, id=section.slug) }}
+        {% if section.editable %}
+          {% if framework.status == 'open' %}
+            {{ summary.top_link("Edit", url_for(".framework_supplier_declaration_edit", framework_slug=framework.slug, section_id=section.id), hidden_text=section.name) }}
+          {% endif %}
+        {% endif %}
+        {% if section.summary_page_description %}
+          {{ summary.description(section.summary_page_description) }}
+        {% endif %}
+        {% call(question) summary.list_table(
+          section.questions,
+          caption=section.name,
+          field_headings=[
+            "Question",
+            "Answer",
+          ],
+          field_headings_visible=False
+        ) %}
+          {% call summary.row() %}
+            {{ summary.field_name(question.label|question_references(section.get_question)) }}
+            {% if section.editable %}
+              {% if framework.status == 'open' and section_errors %}
+                {% call summary.field() %}
+                  {# We don't want a question anchor on the first question of each section; it should take them
+                     to the top of the page so all content is visible #}
+                  {% if section.questions[0].id == question.id -%}
+                    <a class="govuk-link" href="{{ url_for(".framework_supplier_declaration_edit", framework_slug=framework.slug, section_id=section.id) }}">
+                  {% else -%}
+                    <a class="govuk-link" href="{{ url_for(".framework_supplier_declaration_edit", framework_slug=framework.slug, section_id=section.id, _anchor=question.id) }}">
+                  {%- endif -%}
+                  {% if supplier_framework.prefillDeclarationFromFrameworkSlug and section.prefill %}
+                    Review answer
+                  {% else %}
+                    Answer question
+                  {% endif %}
+                  </a>
+                {% endcall %}
+              {% elif not question.is_empty %}
+                {{ summary[question.type](question.value) }}
+              {% else %}
+                {# We need to call this (even if with nothing) to add the final column to the row, otherwise the row
+                   terminates early and the line separators between rows do not span the entire width of the table. #}
+                {% call summary.field(action=True) %}
+                {% endcall %}
+              {% endif %}
+            {% endif %}
+          {% endcall %}
+        {% endcall %}
+      {% endfor %}
+    </div>
+  </div>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      {{ make_declaration_button_block() }}
+    </div>
+  </div>
+
+  {%
+    with
+    url = url_for(".framework_dashboard", framework_slug=framework.slug),
+    text = "Return to application"
+  %}
+    {% include "toolkit/secondary-action-link.html" %}
+  {% endwith %}
+{% endblock %}

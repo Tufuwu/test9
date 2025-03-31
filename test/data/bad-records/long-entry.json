@@ -1,4 +1,0 @@
-{
-    "type": "RecordLengthError",
-    "str": "RECORD entry for 'module.py' has 4 fields; expected 3"
-}

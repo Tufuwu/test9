@@ -1,0 +1,95 @@
+{% extends "_base_page.html" %}
+{% import "toolkit/forms/macros/forms.html" as forms %}
+{% import "toolkit/summary-table.html" as summary %}
+{% block head %}
+  <link type="text/css" rel="stylesheet" media="screen" href="{{ asset_fingerprinter.get_url('stylesheets/location-autocomplete.min.css') }}"/>
+  {{ super() }}
+{% endblock %}
+{% block pageTitle %}
+  Registered address – Digital Marketplace
+{% endblock %}
+
+{% block breadcrumb %}
+  {{ govukBreadcrumbs({
+    "items": [
+      {
+        "text": "Digital Marketplace",
+        "href": "/"
+      },
+      {
+        "text": "Your account",
+        "href": url_for('.dashboard')
+      },
+      {
+        "text": "Your company details",
+        "href": url_for('.supplier_details')
+      },
+      {
+        "text": "Registered address"
+      }
+    ]
+  }) }}
+{% endblock %}
+
+
+{% block mainContent %}
+  {% include 'toolkit/forms/validation.html' %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <h1 class="govuk-heading-l">What is your registered office address?</h1>
+    </div>
+  </div>
+
+  <form action="{{ url_for('.edit_registered_address') }}" method="post">
+
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      {{ form.street }}
+      {{ form.city }}
+      {{ form.postcode }}
+
+      {# TODO: make sure this is using the standard GOV.UK design system location autocomplete #}
+      {% if form.country.errors %}
+      <div class="validation-wrapper">
+        <style>
+          #location-autocomplete {border: 5px solid #B10E1E;}
+          .autocomplete__hint {border: 5px solid;}
+        </style>
+      {% endif %}
+
+      <div class="question" id="country">
+        <span class="question-heading" id="country-label">Country</span>
+        {{ forms.field_errors(form.country.name, errors=form.country.errors) }}
+        <select name="country" id="location-autocomplete" class="location-autocomplete-fallback">
+        {% if not form.country.data %}
+          <option value="" selected="selected"></option>
+        {% endif %}
+        {% for country in countries %}
+          <option value="{{country[1]}}"{% if form.country.data == country[1]%} selected="selected"{% endif %}>{{country[0]}}</option>
+        {% endfor %}
+        </select>
+      </div>
+      {% if form.country.errors %}
+      </div>
+      {% endif %}
+
+      {{ govukButton({
+        "text": "Save and return",
+      }) }}
+
+    </div>
+  </div>
+  <p class="govuk-body">
+    <a class="govuk-link" href="{{ url_for('.supplier_details') }}">Return to company details</a>
+  </p>
+</form>
+{% endblock %}
+
+{% block pageScripts %}
+<script type="text/javascript" src="{{ asset_path }}javascripts/location-autocomplete.min.js"></script>
+<script type="text/javascript" src="{{ asset_path }}javascripts/app-location-autocomplete.js"></script>
+{% endblock %}
