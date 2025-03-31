@@ -1,90 +1,134 @@
-![zepid](docs/images/zepid_logo.png)
-# zEpid
+```
+                                    __   _ __      _______ _________
+                                   / /  (_) /____ / __/ _ /_  __/ _ |
+                                  / /__/ / __/ -_)\ \/ __ |/ / / __ |
+                                 /____/_/\__/\__/___/_/ |_/_/ /_/ |_|
 
-[![PyPI version](https://badge.fury.io/py/zepid.svg)](https://badge.fury.io/py/zepid)
-[![Python package](https://github.com/pzivich/zEpid/actions/workflows/python-package.yml/badge.svg)](https://github.com/pzivich/zEpid/actions/workflows/python-package.yml)
-[![Documentation Status](https://readthedocs.org/projects/zepid/badge/?version=latest)](https://zepid.readthedocs.io/en/latest/?badge=latest)
-[![Join the chat at https://gitter.im/zEpid/community](https://badges.gitter.im/zEpid/community.svg)](https://gitter.im/zEpid/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+                                  Copyright 2014-2020 / EnjoyDigital
+                                     Copyright 2014-2015 / HKU
 
-zEpid is an epidemiology analysis package, providing easy to use tools for epidemiologists coding in Python 3.5+. The 
-purpose of this library is to provide a toolset to make epidemiology e-z. A variety of calculations and plots can be 
-generated through various functions. For a sample walkthrough of what this library is capable of, please look at the 
-tutorials available at https://github.com/pzivich/Python-for-Epidemiologists
+                              A small footprint and configurable SATA core
+                                      powered by Migen & LiteX
+```
 
-A few highlights: basic epidemiology calculations, easily create functional form assessment plots, 
-easily create effect measure plots, and causal inference tools. Implemented estimators include; inverse 
-probability of treatment weights, inverse probability of censoring weights, inverse probabilitiy of missing weights, 
-augmented inverse probability of treatment weights, time-fixed g-formula, Monte Carlo g-formula, Iterative conditional 
-g-formula, and targeted maximum likelihood (TMLE). Additionally, generalizability/transportability tools are available 
-including; inverse probability of sampling weights, g-transport formula, and doubly robust 
-generalizability/transportability formulas.
+[![](https://github.com/enjoy-digital/litesata/workflows/ci/badge.svg)](https://github.com/enjoy-digital/litesata/actions) ![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)
 
-If you have any requests for items to be included, please contact me and I will work on adding any requested features. 
-You can contact me either through GitHub (https://github.com/pzivich), email (gmail: zepidpy), or twitter (@zepidpy).
 
-# Installation
+[> Intro
+--------
+LiteSATA provides a small footprint and configurable SATA core.
 
-## Installing:
-You can install zEpid using `pip install zepid`
+LiteSATA is part of LiteX libraries whose aims are to lower entry level of
+complex FPGA cores by providing simple, elegant and efficient implementations
+of components used in today's SoC such as Ethernet, SATA, PCIe, SDRAM Controller...
 
-## Dependencies:
-pandas >= 0.18.0, numpy, statsmodels >= 0.7.0, matplotlib >= 2.0, scipy, tabulate
+Using Migen to describe the HDL allows the core to be highly and easily configurable.
 
-# Module Features
+LiteSATA can be used as LiteX library or can be integrated with your standard
+design flow by generating the verilog rtl that you will use as a standard core.
 
-## Measures
-Calculate measures directly from a pandas dataframe object. Implemented measures include; risk ratio, risk difference, 
-odds ratio, incidence rate ratio, incidence rate difference, number needed to treat, sensitivity, specificity, 
-population attributable fraction, attributable community risk
+<p align="center"><img src="https://github.com/enjoy-digital/litesata/raw/master/doc/architecture.png" width="800"></p>
 
-Measures can be directly calculated from a pandas DataFrame object or using summary data.
+[> Features
+-----------
+PHY:
+  - Xilinx 7-Series (Kintex7, Artix7)
+  - Xilinx Ultrascale
+  - Xilinx Ultrascale+
+  - OOB, COMWAKE, COMINIT
+  - ALIGN inserter/remover and bytes alignment on K28.5
+  - 8B/10B encoding/decoding in transceiver
+  - Automatic TX/RX P/N polarity detection and swap.
+  - Errors detection and reporting
+  - 32 bits interface
+  - 1.5/3.0/6.0GBps supported speeds (respectively 37.5/75/150MHz system clk)
 
-Other handy features include; splines, Table 1 generator, interaction contrast, interaction contrast ratio, positive 
-predictive value, negative predictive value, screening cost analyzer, counternull p-values, convert odds to 
-proportions, convert proportions to odds
+Core:
 
-For guided tutorials with Jupyter Notebooks:
-https://github.com/pzivich/Python-for-Epidemiologists/blob/master/3_Epidemiology_Analysis/a_basics/1_basic_measures.ipynb
+ - Link:
+    - CONT inserter/remover
+    - Scrambling/Descrambling of data
+    - CRC inserter/checker
+    - HOLD insertion/detection
+    - Errors detection and reporting
+  - Transport/Command:
+    - Easy to use user interfaces (Can be used with or without CPU)
+    - 48 bits sector addressing
+    - 3 supported commands: READ_DMA(_EXT), WRITE_DMA(_EXT), IDENTIFY_DEVICE
+    - Errors detection and reporting
 
-## Graphics
-Uses matplotlib in the background to generate some useful plots. Implemented plots include; functional form assessment 
-(with statsmodels output), p-value function plots, spaghetti plot, effect measure plot (forest plot), receiver-operator 
-curve, dynamic risk plots, and L'Abbe plots
+Frontend:
+  - Configurable crossbar (simply declare your crossbar and use crossbar.get_port() to add a new port!)
+  - Ports arbitration transparent to the user
+  - Synthetizable BIST
+  - Striping module to segment data on multiple HDDs and increase write/read speed and capacity. (RAID0 equivalent)
+  - Mirroring module for data redundancy and increase read speeds. (RAID1 equivalent)
 
-For examples see:
-http://zepid.readthedocs.io/en/latest/Graphics.html
+[> FPGA Proven
+--------------
+LiteSATA is already used in commercial and open-source designs:
+- High End 50Mpixels CMOS Camera using CFAST & SD cards.
+- Low latency database research.
 
-## Causal
-The causal branch includes various estimators for causal inference with observational data. Details on currently 
-implemented estimators are below:
+[> Possible improvements
+------------------------
+- add standardized interfaces (AXI, Avalon-ST)
+- add NCQ support
+- add AES hardware encryption
+- add on-the-flow compression/decompression
+- add support for Altera PHYs.
+- add support for Lattice PHYs.
+- add Zynq Linux drivers.
+- ... See below Support and consulting :)
 
-### G-Computation Algorithm
-Current implementation includes; time-fixed exposure g-formula, Monte Carlo g-formula, and iterative conditional 
-g-formula
+If you want to support these features, please contact us at florent [AT]
+enjoy-digital.fr.
 
-### Inverse Probability Weights 
-Current implementation includes; IP Treatment W, IP Censoring W, IP Missing W. Diagnostics are also available for IPTW. 
-IPMW supports monotone missing data
+[> Getting started
+------------------
+1. Install Python 3.6+ and FPGA vendor's development tools.
+2. Install LiteX and the cores by following the LiteX's wiki [installation guide](https://github.com/enjoy-digital/litex/wiki/Installation).
+3. You can find examples of integration of the core with LiteX in LiteX-Boards and in the examples directory.
 
-### Augmented Inverse Probability Weights
-Current implementation includes the augmented-IPTW estimator described by Funk et al 2011 AJE
+[> Tests
+--------
+Unit tests are available in ./test/.
+To run all the unit tests:
+```sh
+$ ./setup.py test
+```
 
-### Targeted Maximum Likelihood Estimator
-TMLE can be estimated through standard logistic regression model, or through user-input functions. Alternatively, users 
-can input machine learning algorithms to estimate probabilities. Supported machine learning algorithms include `sklearn`
+Tests can also be run individually:
+```sh
+$ python3 -m unittest test.test_name
+```
 
-### Generalizability / Transportability
-For generalizing results or transporting to a different target population, several estimators are available. These 
-include inverse probability of sampling weights, g-transport formula, and doubly robust formulas
+[> License
+----------
+LiteSATA is released under the very permissive two-clause BSD license. Under the
+terms of this license, you are authorized to use LiteSATA for closed-source
+proprietary designs.
+Even though we do not require you to do so, those things are awesome, so please
+do them if possible:
+ - tell us that you are using LiteSATA
+ - cite LiteSATA in publications related to research it has helped
+ - send us feedback and suggestions for improvements
+ - send us bug reports when something goes wrong
+ - send us the modifications and improvements you have done to LiteSATA.
 
-Tutorials for the usage of these estimators are available at:
-https://github.com/pzivich/Python-for-Epidemiologists/tree/master/3_Epidemiology_Analysis/c_causal_inference
+[> Support and consulting
+-------------------------
+We love open-source hardware and like sharing our designs with others.
 
-#### G-estimation of Structural Nested Mean Models
-Single time-point g-estimation of structural nested mean models are supported.
+LiteSATA is developed and maintained by EnjoyDigital.
 
-## Sensitivity Analyses
-Includes trapezoidal distribution generator, corrected Risk Ratio
+If you would like to know more about LiteSATA or if you are already a happy
+user and would like to extend it for your needs, EnjoyDigital can provide standard
+commercial support as well as consulting services.
 
-Tutorials are available at:
-https://github.com/pzivich/Python-for-Epidemiologists/tree/master/3_Epidemiology_Analysis/d_sensitivity_analyses
+So feel free to contact us, we'd love to work with you! (and eventually shorten
+the list of the possible improvements :)
+
+[> Contact
+----------
+E-mail: florent [AT] enjoy-digital.fr
