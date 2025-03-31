@@ -1,199 +1,151 @@
-# py-solc-x
+# Face Recognition
 
-[![Pypi Status](https://img.shields.io/pypi/v/py-solc-x.svg)](https://pypi.org/project/py-solc-x/) [![Build Status](https://img.shields.io/travis/com/iamdefinitelyahuman/py-solc-x.svg)](https://travis-ci.com/iamdefinitelyahuman/py-solc-x) [![Coverage Status](https://coveralls.io/repos/github/iamdefinitelyahuman/py-solc-x/badge.svg?branch=master)](https://coveralls.io/github/iamdefinitelyahuman/py-solc-x?branch=master)
+Detect facial landmarks from Python using the world's most accurate face alignment network, capable of detecting points in both 2D and 3D coordinates.
 
-Python wrapper around the `solc` Solidity compiler with `0.5.x` and `0.6.x` support.
+Build using [FAN](https://www.adrianbulat.com)'s state-of-the-art deep learning based face alignment method. 
 
-Forked from [py-solc](https://github.com/ethereum/py-solc).
+<p align="center"><img src="docs/images/face-alignment-adrian.gif" /></p>
 
-## Dependencies
+**Note:** The lua version is available [here](https://github.com/1adrianb/2D-and-3D-face-alignment).
 
-Py-solc-x allows the use of multiple versions of solc and installs them as needed. You must have all required [solc dependencies](https://solidity.readthedocs.io/en/latest/installing-solidity.html#building-from-source) installed for it to work properly.
+For numerical evaluations it is highly recommended to use the lua version which uses indentical models with the ones evaluated in the paper. More models will be added soon.
 
-## Supported Versions
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)  [![Build Status](https://travis-ci.com/1adrianb/face-alignment.svg?branch=master)](https://travis-ci.com/1adrianb/face-alignment) [![Anaconda-Server Badge](https://anaconda.org/1adrianb/face_alignment/badges/version.svg)](https://anaconda.org/1adrianb/face_alignment)
+[![PyPI version](https://badge.fury.io/py/face-alignment.svg)](https://pypi.org/project/face-alignment/)
 
-Py-solc-x can install the following solc versions:
+## Features
 
-* Linux and Windows: `>=0.4.11`
-* OSX: `>=0.5.0`
+#### Detect 2D facial landmarks in pictures
 
-`0.4.x` versions are available on OSX if they have been [installed via brew](https://github.com/ethereum/homebrew-ethereum), but cannot be installed directly by py-solc-x.
-
-## Quickstart
-
-Installation
-
-```sh
-pip install py-solc-x
-```
-
-## Installing the `solc` Executable
-
-The first time py-solc-x is imported it will automatically check for an installed version of solc on your system. If none is found, you must manually install via `solcx.install_solc`:
+<p align='center'>
+<img src='docs/images/2dlandmarks.png' title='3D-FAN-Full example' style='max-width:600px'></img>
+</p>
 
 ```python
->>> from solcx import install_solc
->>> install_solc('v0.4.25')
+import face_alignment
+from skimage import io
+
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
+
+input = io.imread('../test/assets/aflw-test.jpg')
+preds = fa.get_landmarks(input)
 ```
 
-Or via the command line:
+#### Detect 3D facial landmarks in pictures
 
+<p align='center'>
+<img src='https://www.adrianbulat.com/images/image-z-examples.png' title='3D-FAN-Full example' style='max-width:600px'></img>
+</p>
+
+```python
+import face_alignment
+from skimage import io
+
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._3D, flip_input=False)
+
+input = io.imread('../test/assets/aflw-test.jpg')
+preds = fa.get_landmarks(input)
+```
+
+#### Process an entire directory in one go
+
+```python
+import face_alignment
+from skimage import io
+
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, flip_input=False)
+
+preds = fa.get_landmarks_from_directory('../test/assets/')
+```
+
+#### Detect the landmarks using a specific face detector.
+
+By default the package will use the SFD face detector. However the users can alternatively use dlib, BlazeFace, or pre-existing ground truth bounding boxes.
+
+```python
+import face_alignment
+
+# sfd for SFD, dlib for Dlib and folder for existing bounding boxes.
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, face_detector='sfd')
+```
+
+#### Running on CPU/GPU
+In order to specify the device (GPU or CPU) on which the code will run one can explicitly pass the device flag:
+
+```python
+import face_alignment
+
+# cuda for CUDA
+fa = face_alignment.FaceAlignment(face_alignment.LandmarksType._2D, device='cpu')
+```
+
+Please also see the ``examples`` folder
+
+## Installation
+
+### Requirements
+
+* Python 3.5+ (it may work with other versions too). Last version with support for python 2.7 was v1.1.1
+* Linux, Windows or macOS
+* pytorch (>=1.5)
+
+While not required, for optimal performance(especially for the detector) it is **highly** recommended to run the code using a CUDA enabled GPU.
+
+### Binaries
+
+The easiest way to install it is using either pip or conda:
+
+| **Using pip**                | **Using conda**                            |
+|------------------------------|--------------------------------------------|
+| `pip install face-alignment` | `conda install -c 1adrianb face_alignment` |
+|                              |                                            |
+
+Alternatively, bellow, you can find instruction to build it from source.
+
+### From source
+
+ Install pytorch and pytorch dependencies. Please check the [pytorch readme](https://github.com/pytorch/pytorch) for this.
+
+#### Get the Face Alignment source code
 ```bash
-python -m solcx.install v0.4.25
+git clone https://github.com/1adrianb/face-alignment
 ```
-
-By default, `solc` versions are installed at `~/.solcx/`. If you wish to use a different directory you can specify it with the `SOLCX_BINARY_PATH` environment variable.
-
-## Setting the `solc` Version
-
-Py-solc-x defaults to the most recent installed version set as the active one. To check or modify the active version:
-
-```python
->>> from solcx import get_solc_version, set_solc_version
->>> get_solc_version()
-Version('0.5.7+commit.6da8b019.Linux.gpp')
->>> set_solc_version('v0.4.25')
->>>
-```
-
-You can also set the version based on the pragma version string. The highest compatible version will be used:
-
-```python
->>> from solcx import set_solc_version_pragma
->>> set_solc_version_pragma('^0.4.20 || >0.5.5 <0.7.0')
-Using solc version 0.5.8
->>> set_solc_version_pragma('^0.4.20 || >0.5.5 <0.7.0', check_new=True)
-Using solc version 0.5.8
-Newer compatible solc version exists: 0.6.0
-```
-
-To view available and installed versions:
-
-```python
->>> from solcx import get_installed_solc_versions, get_available_solc_versions
->>> get_installed_solc_versions()
-['v0.4.25', 'v0.5.3', 'v0.6.0']
->>> get_available_solc_versions()
-['v0.6.0', 'v0.5.15', 'v0.5.14', 'v0.5.13', 'v0.5.12', 'v0.5.11', 'v0.5.10', 'v0.5.9', 'v0.5.8', 'v0.5.7', 'v0.5.6', 'v0.5.5', 'v0.5.4', 'v0.5.3', 'v0.5.2', 'v0.5.1', 'v0.5.0', 'v0.4.25', 'v0.4.24', 'v0.4.23', 'v0.4.22', 'v0.4.21', 'v0.4.20', 'v0.4.19', 'v0.4.18', 'v0.4.17', 'v0.4.16', 'v0.4.15', 'v0.4.14', 'v0.4.13', 'v0.4.12', 'v0.4.11']
-```
-
-To install the highest compatible version based on the pragma version string:
-
-```python
->>> from solcx import install_solc_pragma
->>> install_solc_pragma('^0.4.20 || >0.5.5 <0.7.0')
-```
-
-## Standard JSON Compilation
-
-Use the `solcx.compile_standard` function to make use of the [standard-json](http://solidity.readthedocs.io/en/latest/using-the-compiler.html#compiler-input-and-output-json-description) compilation feature.
-
-```python
->>> from solcx import compile_standard
->>> compile_standard({
-...     'language': 'Solidity',
-...     'sources': {'Foo.sol': 'content': "...."},
-... })
-{
-    'contracts': {...},
-    'sources': {...},
-    'errors': {...},
-}
->>> compile_standard({
-...     'language': 'Solidity',
-...     'sources': {'Foo.sol': {'urls': ["/path/to/my/sources/Foo.sol"]}},
-... }, allow_paths="/path/to/my/sources")
-{
-    'contracts': {...},
-    'sources': {...},
-    'errors': {...},
-}
-```
-
-## Legacy Combined JSON compilation
-
-```python
->>> from solcx import compile_source, compile_files
->>> compile_source("contract Foo { function Foo() {} }")
-{
-    'Foo': {
-        'abi': [{'inputs': [], 'type': 'constructor'}],
-        'code': '0x60606040525b5b600a8060126000396000f360606040526008565b00',
-        'code_runtime': '0x60606040526008565b00',
-        'source': None,
-        'meta': {
-            'compilerVersion': '0.3.5-9da08ac3',
-            'language': 'Solidity',
-            'languageVersion': '0',
-        },
-    },
-}
->>> compile_files(["/path/to/Foo.sol", "/path/to/Bar.sol"])
-{
-    'Foo': {
-        'abi': [{'inputs': [], 'type': 'constructor'}],
-        'code': '0x60606040525b5b600a8060126000396000f360606040526008565b00',
-        'code_runtime': '0x60606040526008565b00',
-        'source': None,
-        'meta': {
-            'compilerVersion': '0.3.5-9da08ac3',
-            'language': 'Solidity',
-            'languageVersion': '0',
-        },
-    },
-    'Bar': {
-        'abi': [{'inputs': [], 'type': 'constructor'}],
-        'code': '0x60606040525b5b600a8060126000396000f360606040526008565b00',
-        'code_runtime': '0x60606040526008565b00',
-        'source': None,
-        'meta': {
-            'compilerVersion': '0.3.5-9da08ac3',
-            'language': 'Solidity',
-            'languageVersion': '0',
-        },
-    },
-}
-```
-
-## Unlinked Libraries
-
-```python
->>> from solcx import link_code
->>> unlinked_bytecode = "606060405260768060106000396000f3606060405260e060020a6000350463e7f09e058114601a575b005b60187f0c55699c00000000000000000000000000000000000000000000000000000000606090815273__TestA_________________________________90630c55699c906064906000906004818660325a03f41560025750505056"
->>> link_code(unlinked_bytecode, {'TestA': '0xd3cda913deb6f67967b99d67acdfa1712c293601'})
-... "606060405260768060106000396000f3606060405260e060020a6000350463e7f09e058114601a575b005b60187f0c55699c00000000000000000000000000000000000000000000000000000000606090815273d3cda913deb6f67967b99d67acdfa1712c29360190630c55699c906064906000906004818660325a03f41560025750505056"
-```
-
-## Import Path Remappings
-
-`solc` provides path aliasing allow you to have more reusable project configurations.
-
-You can use this like:
-
-```python
->>> from solcx import compile_files
-
->>> compile_files([source_file_path], import_remappings=["zeppeling=/my-zeppelin-checkout-folder"])
-```
-
-[More information about solc import aliasing](http://solidity.readthedocs.io/en/latest/layout-of-source-files.html#paths)
-
-## Development
-
-This project was forked from [py-solc](https://github.com/ethereum/py-solc) and should be considered a beta. Comments, questions, criticisms and pull requests are welcomed.
-
-### Tests
-
-Py-solc-x is tested on Linux and Windows with solc versions ``>=0.4.11``.
-
-To run the test suite:
-
+#### Install the Face Alignment lib
 ```bash
-pytest tests/
+pip install -r requirements.txt
+python setup.py install
 ```
 
-By default, the test suite installs all available solc versions for your OS. If you only wish to test against already installed versions, include the `--no-install` flag.
+### Docker image
 
-## License
+A Dockerfile is provided to build images with cuda support and cudnn. For more instructions about running and building a docker image check the orginal Docker documentation.
+```
+docker build -t face-alignment .
+```
 
-This project is licensed under the [MIT license](LICENSE).
+## How does it work?
+
+While here the work is presented as a black-box, if you want to know more about the intrisecs of the method please check the original paper either on arxiv or my [webpage](https://www.adrianbulat.com).
+
+## Contributions
+
+All contributions are welcomed. If you encounter any issue (including examples of images where it fails) feel free to open an issue. If you plan to add a new features please open an issue to discuss this prior to making a pull request.
+
+## Citation
+
+```
+@inproceedings{bulat2017far,
+  title={How far are we from solving the 2D \& 3D Face Alignment problem? (and a dataset of 230,000 3D facial landmarks)},
+  author={Bulat, Adrian and Tzimiropoulos, Georgios},
+  booktitle={International Conference on Computer Vision},
+  year={2017}
+}
+```
+
+For citing dlib, pytorch or any other packages used here please check the original page of their respective authors.
+
+## Acknowledgements
+
+* To the [pytorch](http://pytorch.org/) team for providing such an awesome deeplearning framework
+* To [my supervisor](http://www.cs.nott.ac.uk/~pszyt/) for his patience and suggestions.
+* To all other python developers that made available the rest of the packages used in this repository.

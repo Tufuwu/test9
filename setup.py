@@ -1,33 +1,85 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from setuptools import find_packages, setup
+import io
+import os
+from os import path
+import re
+from setuptools import setup, find_packages
+# To use consisten encodings
+from codecs import open
+
+# Function from: https://github.com/pytorch/vision/blob/master/setup.py
+
+
+def read(*names, **kwargs):
+    with io.open(
+        os.path.join(os.path.dirname(__file__), *names),
+        encoding=kwargs.get("encoding", "utf8")
+    ) as fp:
+        return fp.read()
+
+# Function from: https://github.com/pytorch/vision/blob/master/setup.py
+
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
+here = path.abspath(path.dirname(__file__))
+
+# Get the long description from the README file
+with open(path.join(here, 'README.md'), encoding='utf-8') as readme_file:
+    long_description = readme_file.read()
+
+VERSION = find_version('face_alignment', '__init__.py')
+
+requirements = [
+    'torch',
+    'numpy',
+    'scipy>=0.17',
+    'scikit-image',
+    'opencv-python',
+    'tqdm',
+    'numba',
+    'enum34;python_version<"3.4"'
+]
 
 setup(
-    name="py-solc-x",
-    version="0.8.1",
-    description="""Python wrapper around the solc binary with 0.5.x and 0.6.x support""",
-    long_description_markdown_filename="README.md",
-    author="Ben Hauser (forked from py-solc by Piper Merriam)",
-    author_email="ben@hauser.id",
-    url="https://github.com/iamdefinitelyahuman/py-solc-x",
-    include_package_data=True,
-    py_modules=["solcx"],
-    setup_requires=["setuptools-markdown"],
-    python_requires=">=3.4, <4",
-    install_requires=["semantic_version>=2.8.1,<3", "requests>=2.19.0,<3"],
-    license="MIT",
-    zip_safe=False,
-    keywords="ethereum solidity solc",
-    packages=find_packages(exclude=["tests", "tests.*"]),
+    name='face_alignment',
+    version=VERSION,
+
+    description="Detector 2D or 3D face landmarks from Python",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+
+    # Author details
+    author="Adrian Bulat",
+    author_email="adrian@adrianbulat.com",
+    url="https://github.com/1adrianb/face-alignment",
+
+    # Package info
+    packages=find_packages(exclude=('test',)),
+
+    python_requires='>=3',
+    install_requires=requirements,
+    license='BSD',
+    zip_safe=True,
+
     classifiers=[
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Natural Language :: English",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
+        'Development Status :: 5 - Production/Stable',
+        'Operating System :: OS Independent',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+
+        # Supported python versions
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 )

@@ -1,97 +1,42 @@
-on: ["push", "pull_request"]
+name: Test Face alignmnet
 
-name: py-solc-x workflow
+on: [push, pull_request]
 
 jobs:
-
-  lint:
+  build:
     runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: Setup Python 3.6
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.9
-
-    - name: Install Tox
-      run: pip install tox
-
-    - name: Run Tox
-      run: tox -e lint
-
-
-  py36:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v1
-    
-    - name: Setup Python 3.6
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.9
-    
-    - name: Install Tox
-      run: pip install tox
-
-    - name: Run Tox
-      run: tox -e py36
-
-    - name: Upload coverage to Codecov  
-      uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: true
-
-
-  py37:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v1
-    
-    - name: Setup Python 3.7
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.9
-    
-    - name: Install Tox
-      run: pip install tox
-
-    - name: Run Tox
-      run: tox -e py37
-
-    - name: Upload coverage to Codecov  
-      uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: true
-
-
-  py38:
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-
+        python-version: ["3.9", "3.10"]
+        pytorch-version: [1.5.1, 1.6.0, 1.7.1, nightly]
+    
     steps:
-    - uses: actions/checkout@v1
-    
-    - name: Setup Python 3.8
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.9
-    
-    - name: Install Tox
-      run: pip install tox
-
-    - name: Run Tox
-      run: tox -e py38
-
-    - name: Upload coverage to Codecov  
-      uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: true
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Add conda to system path
+        run: |
+          echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install dependencies
+        run: |
+          conda create -q -n test-environment python=${{ matrix.python-version }}
+          source activate test-environment
+          if [[ "${{ matrix.pytorch-version }}" == "nightly" ]]; then
+            conda install pytorch cpuonly -c pytorch-nightly 
+          else
+            conda install pytorch==${{ matrix.pytorch-version }} cpuonly -c pytorch
+          fi
+          conda install flake8
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python setup.py install
+      - name: Test with pytest
+        run: |
+          source activate test-environment
+          conda install pytest
+          pytest test/
+      - name : Lint with flake8
+        run: |
+          source activate test-environment
+          flake8 . --exit-zero
