@@ -1,6 +1,5 @@
-Current Maintainer:
-Thomas Kluyver <thomas@kluyver.me.uk>
-
-Inactive:
-Heinrich Wendel <h_wendel@cojobo.net>
-Sergey Kuleshov <svyatogor@gentoo.org>
+Luis Pedro Coelho
+Zachary Pincus [code from from scikits.image]
+Peter J. Verveer [code from scipy.ndimage]
+Davis King [code from dlib]
+Christoph Gohlke [many Windows and other fixes]

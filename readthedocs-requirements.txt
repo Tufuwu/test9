@@ -1,0 +1,4 @@
+numpy
+numpydoc
+matplotlib
+sphinx>=1.4.3

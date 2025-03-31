@@ -1,9 +1,6 @@
-*.pyc
-__pycache__
-build/
-_build/
-*.egg-info/
 dist/
-MANIFEST
-.coverage
-cover/
+build/
+mahotas.egg-info/
+*.pyc
+*.so
+*.pyd
