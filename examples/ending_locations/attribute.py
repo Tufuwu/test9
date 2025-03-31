@@ -1,2 +1,0 @@
-snake.colour
-snake . colour
