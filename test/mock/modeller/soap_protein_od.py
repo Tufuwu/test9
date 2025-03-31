@@ -1,2 +1,0 @@
-class Scorer(object):
-    pass

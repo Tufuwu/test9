@@ -1,14 +1,46 @@
+# Test Suites
+.coverage*
+.pytest_cache/
+
+# Documentation builds
+docs/site/
+docs/mlxtend.pdf
+
+# Temporary documentation files
+docs/sources/user_guide/*.md
+docs/sources/user_guide/*/*.md
+#docs/sources/user_guide/*/*/*.png
+#docs/sources/user_guide/*.png
+#docs/sources/user_guide/*/*.png
+#docs/sources/user_guide/*/*/*.png
+docs/sources/api_modules/
+docs/sources/api_subpackages/
+
+# PyPI
+build/
+dist/
+MANIFEST
+
+# Temporary files
+.coverage
+.ipynb_checkpoints
+
+*.sqlite
+gmon.out
+__pycache__
 *.pyc
+*.o
+*.so
+*.gcno
 *.swp
-*.swo
-.nfs*
-.out
-biopython-1.55
-blastp
-check_runs.out
-concavity_distr
-fpocket2
-hbplus
-muscle
-scikit-learn-0.11
-usearch4.0.43
+*.egg-info
+*.egg
+*~
+build
+dist
+lib/test
+doc/_build
+*env
+*ENV
+.DS_store
+.idea
