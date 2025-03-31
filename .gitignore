@@ -1,8 +1,8 @@
 *.pyc
-*.egg-info
-dist/
-.DS_Store
-.mypy_cache
-.coverage
-env/
-build/
+*.DS_Store
+som-ast*
+som-bc*
+pypy
+.settings
+.idea
+src/attic

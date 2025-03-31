@@ -1,31 +1,76 @@
-name: Build and test discogs_client
+name: Tests
 
-on:
-  push:
-  pull_request:
-    types: [opened, review_requested, synchronize, reopened, edited, ready_for_review]
+on: [push, pull_request]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
+  test_som:
+    runs-on: ubuntu-latest # ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10"]
+        include:
+          - name: AST Interpreter PyPy2
+            id:   ast
+            interp: AST
+            python-version: pypy2 
+          - name: Bytecode Interpreter PyPy2
+            id:   bc
+            interp: BC
+            python-version: pypy2
+          - name: Basics Python 2.7
+            python-version: 3.9
+            id: basic
+          - name: Basics Python 3.8
+            python-version: 3.9
+            id: basic
+
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Run Tests with coverage
-      run: |
-        if [ $(python -c "import sys; print(sys.version_info.minor)") -lt 7 ]; then
-            nosetests
-        else
-            nosetests --with-coverage --cover-package=discogs_client
-        fi
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Set up PyPy
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download PyPy Sources
+        if: matrix.id != 'basic'
+        run: |
+          curl https://downloads.python.org/pypy/pypy2.7-v7.3.1-src.tar.bz2 -o pypy.tar.bz2
+          tar -xjf pypy.tar.bz2
+          mv pypy2.7-v7.3.1-src .pypy
+
+      - name: Install PyTest
+        run: |
+           pip install pytest
+
+      - name: Tests
+        if: matrix.id == 'basic'
+        run: |
+          export PYTHON=python
+          export PYTHONPATH=src
+          SOM_INTERP=AST pytest
+          SOM_INTERP=BC  pytest
+          SOM_INTERP=AST ./som.sh -cp Smalltalk TestSuite/TestHarness.som
+          SOM_INTERP=BC  ./som.sh -cp Smalltalk TestSuite/TestHarness.som
+
+      - name: Full Tests
+        if: matrix.id != 'basic'
+        run: |
+          export SOM_INTERP=${{ matrix.interp }}
+          PYTHONPATH=$PYTHONPATH:.pypy:src pytest
+          PYTHONPATH=$PYTHONPATH:.pypy ./som.sh -cp Smalltalk TestSuite/TestHarness.som
+          PYTHONPATH=$PYTHONPATH:.pypy .pypy/rpython/bin/rpython --batch src/main-rpython.py
+          ./som-${{ matrix.id }}-interp -cp Smalltalk TestSuite/TestHarness.som
+
+      - name: SomSom Tests
+        if: matrix.id != 'basic'
+        run: |
+          ./som-${{ matrix.id }}-interp -cp core-lib/Smalltalk:core-lib/TestSuite:core-lib/SomSom/src/compiler:core-lib/SomSom/src/vm:core-lib/SomSom/src/vmobjects:core-lib/SomSom/src/interpreter:core-lib/SomSom/src/primitives \
+            core-lib/SomSom/tests/SomSomTests.som
+
+concurrency:
+  group: "workflow = ${{ github.workflow }}, ref = ${{ github.event.ref }}, pr = ${{ github.event.pull_request.id }}"
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
