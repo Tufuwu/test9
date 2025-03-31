@@ -1,43 +1,76 @@
-from setuptools import find_packages, setup
+import os
+from setuptools import setup, find_packages
 
-VERSION_FILE = "pytest_sherlock/_version.py"
 
-with open("README.md", "r") as f:
-    long_description = f.read()
+local_dir = os.path.dirname(os.path.realpath(__file__))
+
+
+about = {}
+with open(os.path.join(local_dir, 'pds4_tools', '__about__.py')) as f:
+    exec(f.read(), about)
+
+
+def read(filename, full_path=False):
+    if not full_path: filename = os.path.join(local_dir, filename)
+    with open(filename, 'r') as file_handler:
+        data = file_handler.read()
+
+    return data
 
 
 setup(
-    name="pytest-sherlock",
-    use_scm_version={
-        "write_to": VERSION_FILE,
-        "local_scheme": "dirty-tag",
-    },
-    setup_requires=["setuptools_scm==5.0.2"],
-    author="Denis Korytkin",
-    author_email="dkorytkin@gmail.com",
-    description="pytest plugin help to find coupled tests",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/DKorytkin/pytest-sherlock",
-    keywords=["py.test", "pytest", "flaky", "coupled", "tests"],
-    py_modules=[
-        "pytest_sherlock.binary_tree_search",
-        "pytest_sherlock.plugin",
-        "pytest_sherlock.sherlock",
-    ],
-    packages=find_packages(exclude=["tests*"]),
-    install_requires=["setuptools>=28.8.0", "pytest>=3.5.1", "six>=1.13.0"],
-    entry_points={"pytest11": ["sherlock = pytest_sherlock.plugin"]},
-    license="MIT license",
-    python_requires=">=2.7",
+    name='pds4_tools',
+    version=about['__version__'],
+
+    description='Package to read and display NASA PDS4 data',
+    long_description=read('README.rst'),
+
+    author=about['__author__'],
+    author_email=about['__email__'],
+
+    url='https://sbnwiki.astro.umd.edu/wiki/Python_PDS4_Tools',
+    license='BSD',
+    keywords=['pds4_viewer', 'pds4', 'pds'],
+
     classifiers=[
-        "Framework :: Pytest",
-        "Development Status :: 5 - Production/Stable",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Topic :: Software Development :: Quality Assurance",
-        "Topic :: Software Development :: Testing",
-        "Topic :: Utilities",
+        'Development Status :: 5 - Production/Stable',
+
+        'Intended Audience :: Science/Research',
+        'Intended Audience :: Developers',
+        'Topic :: Scientific/Engineering :: Astronomy',
+        'Topic :: Scientific/Engineering :: Physics',
+
+        'License :: OSI Approved :: BSD License',
+
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: POSIX',
+        'Operating System :: Unix',
+        'Operating System :: MacOS',
+
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
+
+    packages=find_packages(exclude=['doc', '*.tests', '*.tests.*']),
+    package_data={'': ['viewer/logo/*']},
+
+    zip_safe=False,
+
+    install_requires=[
+        'numpy',
+    ],
+
+    extras_require={
+        'viewer': ['matplotlib', 'Tkinter'],
+        'tests': ['pytest'],
+    }
 )
