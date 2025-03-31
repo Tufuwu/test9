@@ -1,42 +1,34 @@
-name: Test Pytorch Flops Counter
+name: Test MicropyCli
 
 on: [push, pull_request]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
-        pytorch-version: [1.5.1, 1.6.0, 1.7.1, nightly]
-    
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Add conda to system path
-        run: |
-          echo $CONDA/bin >> $GITHUB_PATH
-      - name: Install dependencies
-        run: |
-          conda create -q -n test-environment python=${{ matrix.python-version }}
-          source activate test-environment
-          if [[ "${{ matrix.pytorch-version }}" == "nightly" ]]; then
-            conda install pytorch torchvision cpuonly -c pytorch-nightly 
-          else
-            conda install pytorch==${{ matrix.pytorch-version }} torchvision cpuonly -c pytorch
-          fi
-          conda install flake8
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          python setup.py install
-      - name: Test with pytest
-        run: |
-          source activate test-environment
-          conda install pytest
-          pytest test/
-      - name : Lint with flake8
-        run: |
-          source activate test-environment
-          flake8 . --exit-zero
+    build:
+        name: ${{ matrix.os }} @ Py v${{ matrix.python }}
+        runs-on: ${{ matrix.os }}
+        env:
+            COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        strategy:
+            max-parallel: 4
+            matrix:
+                os: [macOS-10.14, windows-2016, ubuntu-latest]
+                python: ["3.9", "3.10"]
+
+        steps:
+            - uses: actions/checkout@main
+              with:
+                  submodules: true
+
+            - name: Setup Python ${{ matrix.python }}
+              uses: actions/setup-python@v1
+              with:
+                  python-version: ${{ matrix.python }}
+                  architecture: x64
+
+            - name: Install Dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install tox tox-gh-actions
+
+            - name: Test with Tox
+              run: tox
