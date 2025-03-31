@@ -1,58 +1,56 @@
-"""
-Setup module of OSI Validation Software
-"""
-import glob
-import sys
+# SPDX-FileCopyrightText: Nir Soffer <nirsof@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 import os
-import setuptools
+import io
+from setuptools import setup
 
-AUTHOR = "BMW AG"
+
+def read(fname):
+    path = os.path.join(os.path.dirname(__file__), fname)
+    with io.open(path, encoding="utf8") as f:
+        return f.read()
 
 
-if __name__ == "__main__":
-    with open("README.md", "r") as fh:
-        README = fh.read()
-
-    python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
-    data_files_path = os.path.join(
-        "lib", f"python{python_version}", "site-packages", "rules"
-    )
-
-    setuptools.setup(
-        name="OSI Validation",
-        version="1.1.0",
-        author=AUTHOR,
-        description="Validator for OSI messages",
-        long_description=README,
-        long_description_content_type="text/markdown",
-        url="https://github.com/OpenSimulationInterface/osi-validation",
-        packages=setuptools.find_packages(),
-        classifiers=[
-            "Programming Language :: Python :: 3.8",
-            "License :: MPL-2.0",
-            "Operating System :: OS Independent",
+setup(
+    name='pytest-threadleak',
+    version='0.4.0',
+    author='Nir Soffer',
+    author_email='nirsof@gmail.com',
+    maintainer='Nir Soffer',
+    maintainer_email='nirsof@gmail.com',
+    license='MIT',
+    url='https://github.com/nirs/pytest-threadleak',
+    description='Detects thread leaks',
+    long_description=read('README.rst'),
+    py_modules=['pytest_threadleak'],
+    install_requires=['pytest>=3.1.1'],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Framework :: Pytest',
+        'Intended Audience :: Developers',
+        'Topic :: Software Development :: Testing',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
+        'Operating System :: OS Independent',
+        'License :: OSI Approved :: MIT License',
+    ],
+    entry_points={
+        'pytest11': [
+            'threadleak = pytest_threadleak',
         ],
-        data_files=[
-            (
-                "open-simulation-interface",
-                glob.glob("open-simulation-interface/*.proto"),
-            ),
-            (
-                data_files_path,
-                glob.glob("rules/*.yml"),
-            ),
-        ],
-        include_package_data=True,
-        install_requires=[
-            "tqdm>=4.66.1",
-            "tabulate>=0.9.0",
-            "ruamel.yaml>=0.18.5",
-            "defusedxml>=0.7.1",
-            "iso3166>=2.1.1",
-            "protobuf==3.20.1",
-            "open-simulation-interface @ git+https://github.com/OpenSimulationInterface/open-simulation-interface.git@v3.6.0",
-        ],
-        entry_points={
-            "console_scripts": ["osivalidator=osivalidator.osi_general_validator:main"],
-        },
-    )
+    },
+)
