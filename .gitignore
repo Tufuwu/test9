@@ -1,31 +1,8 @@
-# python
-*.pyc
-
-# setuptools
-/dist
-/*.egg-info
-/share
-
-# virtualenv
-/venv
-/pip-selfcheck.json
-
-# Node
-node_modules
-package-lock.json
-
-# dev
-.idea/
-
-# tests
+__pycache__/
 /.coverage
-/htmlcov
-/media
-/.cache
-.pytest_cache
-
-# SQlite DBs
-*.sqlite3*
-
-# Local instance specific settings
-/tests/project/local.py
+/build/
+/dist/
+/nutils.egg-info/
+/.eggs/
+/docs/examples/
+/docs/nutils/

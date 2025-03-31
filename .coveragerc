@@ -1,6 +1,5 @@
 [run]
-source =
-    adhocracy4
-omit =
-    */migrations/*
-    */autofixtures.py
+source = nutils
+
+[html]
+directory = build/coverage/

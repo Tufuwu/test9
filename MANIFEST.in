@@ -1,4 +1,0 @@
-include LICENSE
-include README
-recursive-include adhocracy4/*/static *
-recursive-include adhocracy4/*/templates *
