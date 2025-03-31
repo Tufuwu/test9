@@ -1,231 +1,130 @@
-# gutenberg-metadata
+# `split-folders` [![Build Status](https://img.shields.io/github/workflow/status/jfilter/split-folders/Test)](https://github.com/jfilter/split-folders/actions/workflows/test.yml) [![PyPI](https://img.shields.io/pypi/v/split-folders.svg)](https://pypi.org/project/split-folders/) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/split-folders.svg)](https://pypi.org/project/split-folders/) [![PyPI - Downloads](https://img.shields.io/pypi/dm/split-folders)](https://pypistats.org/packages/split-folders)
 
-[![Lint](https://github.com/hugovk/gutenberg-metadata/actions/workflows/lint.yml/badge.svg)](https://github.com/hugovk/gutenberg-metadata/actions/workflows/lint.yml)
+Split folders with files (e.g. images) into **train**, **validation** and **test** (dataset) folders.
 
-Metadata from 60,559 Project Gutenberg ebooks.
+The input folder should have the following format:
 
-## The data
-
-Grab the data from [gutenberg-metadata.json](http://hugovk.github.io/gutenberg-metadata/gutenberg-metadata.json).
-
-## To generate
-
-Uses the [Gutenberg](https://github.com/c-w/Gutenberg) library.
-
-Run `gutenberg-metadata.py` to generate `gutenberg-metadata.json`.
-
-## Sample data
-
-For example:
-
-```json
-"1":{
-"author":[
-"United States President (1801-1809)"
-],
-"formaturi":[
-"http://www.gutenberg.org/ebooks/1.txt.utf-8",
-"http://www.gutenberg.org/files/1/1.txt",
-"http://www.gutenberg.org/ebooks/1.html.images",
-"http://www.gutenberg.org/ebooks/1.html.noimages",
-"http://www.gutenberg.org/files/1/1.zip",
-"http://www.gutenberg.org/ebooks/1.epub.images",
-"http://www.gutenberg.org/ebooks/1.rdf",
-"http://www.gutenberg.org/ebooks/1.kindle.noimages",
-"http://www.gutenberg.org/6/5/2/6527/6527-t/6527-t.tex",
-"http://www.gutenberg.org/ebooks/1.epub.noimages",
-"http://www.gutenberg.org/6/5/2/6527/6527-t.zip",
-"http://www.gutenberg.org/ebooks/1.kindle.images"
-],
-"language":[
-"en"
-],
-"rights":[
-"Public domain in the USA."
-],
-"subject":[
-"E201",
-"United States. Declaration of Independence",
-"United States -- History -- Revolution, 1775-1783 -- Sources",
-"JK"
-],
-"title":[
-"The Declaration of Independence of the United States of America"
-]
-},
-...
-"15":{
-"author":[
-"Melville, Hermann"
-],
-"formaturi":[
-"http://www.gutenberg.org/files/15/text/moby-117.txt",
-"http://www.gutenberg.org/files/15/text/moby-097.txt",
-"http://www.gutenberg.org/files/15/text/moby-054.txt",
-"http://www.gutenberg.org/files/15/text/moby-041.txt",
-"http://www.gutenberg.org/files/15/text/moby-021.txt",
-"http://www.gutenberg.org/files/15/text/moby-062.txt",
-"http://www.gutenberg.org/files/15/text/moby-056.txt",
-"http://www.gutenberg.org/files/15/text/moby-065.txt",
-"http://www.gutenberg.org/files/15/text/moby-077.txt",
-"http://www.gutenberg.org/files/15/text/moby-006.txt",
-"http://www.gutenberg.org/ebooks/15.html.noimages",
-"http://www.gutenberg.org/files/15/text/moby-107.txt",
-"http://www.gutenberg.org/files/15/text/moby-080.txt",
-"http://www.gutenberg.org/files/15/text/moby-119.txt",
-"http://www.gutenberg.org/files/15/text/moby-091.txt",
-"http://www.gutenberg.org/files/15/text/moby-087.txt",
-"http://www.gutenberg.org/files/15/text/moby-001.txt",
-"http://www.gutenberg.org/files/15/text/moby-058.txt",
-"http://www.gutenberg.org/files/15/text/moby-114.txt",
-"http://www.gutenberg.org/files/15/text/moby-003.txt",
-"http://www.gutenberg.org/files/15/text/moby-045.txt",
-"http://www.gutenberg.org/files/15/text/moby-035.txt",
-"http://www.gutenberg.org/ebooks/15.txt.utf-8",
-"http://www.gutenberg.org/files/15/text/moby-068.txt",
-"http://www.gutenberg.org/files/15/text/moby-079.txt",
-"http://www.gutenberg.org/files/15/text/moby-038.txt",
-"http://www.gutenberg.org/files/15/text/moby-102.txt",
-"http://www.gutenberg.org/files/15/text/moby-051.txt",
-"http://www.gutenberg.org/files/15/text/moby-000.txt",
-"http://www.gutenberg.org/files/15/text/moby-074.txt",
-"http://www.gutenberg.org/files/15/text/moby-026.txt",
-"http://www.gutenberg.org/files/15/text/moby-124.txt",
-"http://www.gutenberg.org/ebooks/15.epub.images",
-"http://www.gutenberg.org/files/15/text/moby-067.txt",
-"http://www.gutenberg.org/files/15/text/moby-127.txt",
-"http://www.gutenberg.org/files/15/text/moby-076.txt",
-"http://www.gutenberg.org/files/15/text/moby-008.txt",
-"http://www.gutenberg.org/files/15/text/moby-055.txt",
-"http://www.gutenberg.org/files/15/15.txt",
-"http://www.gutenberg.org/files/15/text/moby-022.txt",
-"http://www.gutenberg.org/files/15/text/moby-095.txt",
-"http://www.gutenberg.org/files/15/text/moby-011.txt",
-"http://www.gutenberg.org/files/15/text/moby-047.txt",
-"http://www.gutenberg.org/files/15/text/moby-090.txt",
-"http://www.gutenberg.org/files/15/text/moby-085.txt",
-"http://www.gutenberg.org/files/15/15-text.zip",
-"http://www.gutenberg.org/files/15/text/moby-092.txt",
-"http://www.gutenberg.org/files/15/text/moby-042.txt",
-"http://www.gutenberg.org/files/15/text/moby-034.txt",
-"http://www.gutenberg.org/files/15/text/moby-075.txt",
-"http://www.gutenberg.org/files/15/text/moby-099.txt",
-"http://www.gutenberg.org/files/15/text/moby-072.txt",
-"http://www.gutenberg.org/files/15/text/moby-100.txt",
-"http://www.gutenberg.org/files/15/text/moby-052.txt",
-"http://www.gutenberg.org/files/15/text/moby-036.txt",
-"http://www.gutenberg.org/files/15/text/moby-071.txt",
-"http://www.gutenberg.org/ebooks/15.epub.noimages",
-"http://www.gutenberg.org/files/15/text/moby-093.txt",
-"http://www.gutenberg.org/files/15/text/moby-049.txt",
-"http://www.gutenberg.org/files/15/text/moby-129.txt",
-"http://www.gutenberg.org/files/15/text/moby-063.txt",
-"http://www.gutenberg.org/files/15/text/moby-112.txt",
-"http://www.gutenberg.org/files/15/text/moby-002.txt",
-"http://www.gutenberg.org/files/15/text/moby-089.txt",
-"http://www.gutenberg.org/files/15/text/moby-059.txt",
-"http://www.gutenberg.org/files/15/text/moby-083.txt",
-"http://www.gutenberg.org/files/15/text/moby-037.txt",
-"http://www.gutenberg.org/files/15/text/moby-109.txt",
-"http://www.gutenberg.org/files/15/text/moby-046.txt",
-"http://www.gutenberg.org/files/15/text/moby-104.txt",
-"http://www.gutenberg.org/files/15/text/moby-094.txt",
-"http://www.gutenberg.org/files/15/text/moby-012.txt",
-"http://www.gutenberg.org/files/15/text/moby-024.txt",
-"http://www.gutenberg.org/files/15/text/moby-018.txt",
-"http://www.gutenberg.org/files/15/text/moby-106.txt",
-"http://www.gutenberg.org/files/15/text/moby-010.txt",
-"http://www.gutenberg.org/files/15/text/moby-118.txt",
-"http://www.gutenberg.org/files/15/text/moby-070.txt",
-"http://www.gutenberg.org/files/15/text/moby-088.txt",
-"http://www.gutenberg.org/files/15/text/moby-132.txt",
-"http://www.gutenberg.org/files/15/text/moby-125.txt",
-"http://www.gutenberg.org/files/15/text/moby-040.txt",
-"http://www.gutenberg.org/files/15/text/moby-020.txt",
-"http://www.gutenberg.org/files/15/text/moby-098.txt",
-"http://www.gutenberg.org/files/15/text/moby-032.txt",
-"http://www.gutenberg.org/files/15/text/moby-064.txt",
-"http://www.gutenberg.org/files/15/text/moby-113.txt",
-"http://www.gutenberg.org/files/15/text/moby-013.txt",
-"http://www.gutenberg.org/files/15/text/moby-048.txt",
-"http://www.gutenberg.org/files/15/text/moby-122.txt",
-"http://www.gutenberg.org/files/15/text/moby-031.txt",
-"http://www.gutenberg.org/files/15/text/moby-014.txt",
-"http://www.gutenberg.org/files/15/text/moby-084.txt",
-"http://www.gutenberg.org/files/15/text/moby-128.txt",
-"http://www.gutenberg.org/files/15/text/moby-078.txt",
-"http://www.gutenberg.org/files/15/text/moby-111.txt",
-"http://www.gutenberg.org/files/15/text/moby-017.txt",
-"http://www.gutenberg.org/files/15/text/moby-120.txt",
-"http://www.gutenberg.org/files/15/text/moby-057.txt",
-"http://www.gutenberg.org/files/15/text/moby-060.txt",
-"http://www.gutenberg.org/files/15/text/moby-009.txt",
-"http://www.gutenberg.org/files/15/text/moby-050.txt",
-"http://www.gutenberg.org/files/15/text/moby-073.txt",
-"http://www.gutenberg.org/ebooks/15.kindle.images",
-"http://www.gutenberg.org/files/15/text/moby-110.txt",
-"http://www.gutenberg.org/files/15/text/moby-096.txt",
-"http://www.gutenberg.org/files/15/text/moby-082.txt",
-"http://www.gutenberg.org/files/15/text/moby-025.txt",
-"http://www.gutenberg.org/files/15/text/moby-123.txt",
-"http://www.gutenberg.org/files/15/text/moby-131.txt",
-"http://www.gutenberg.org/files/15/text/moby-101.txt",
-"http://www.gutenberg.org/files/15/text/moby-007.txt",
-"http://www.gutenberg.org/files/15/text/moby-030.txt",
-"http://www.gutenberg.org/files/15/text/moby-004.txt",
-"http://www.gutenberg.org/files/15/text/moby-133.txt",
-"http://www.gutenberg.org/files/15/text/moby-016.txt",
-"http://www.gutenberg.org/files/15/text/moby-044.txt",
-"http://www.gutenberg.org/files/15/text/moby-019.txt",
-"http://www.gutenberg.org/files/15/text/moby-105.txt",
-"http://www.gutenberg.org/files/15/text/moby-043.txt",
-"http://www.gutenberg.org/files/15/text/moby-066.txt",
-"http://www.gutenberg.org/ebooks/15.kindle.noimages",
-"http://www.gutenberg.org/files/15/text/moby-039.txt",
-"http://www.gutenberg.org/files/15/text/moby-108.txt",
-"http://www.gutenberg.org/files/15/text/moby-115.txt",
-"http://www.gutenberg.org/files/15/text/moby-130.txt",
-"http://www.gutenberg.org/files/15/text/moby-116.txt",
-"http://www.gutenberg.org/files/15/text/moby-033.txt",
-"http://www.gutenberg.org/files/15/text/moby-027.txt",
-"http://www.gutenberg.org/files/15/text/moby-061.txt",
-"http://www.gutenberg.org/files/15/text/moby-126.txt",
-"http://www.gutenberg.org/files/15/text/moby-134.txt",
-"http://www.gutenberg.org/files/15/text/moby-069.txt",
-"http://www.gutenberg.org/files/15/text/moby-028.txt",
-"http://www.gutenberg.org/files/15/text/moby-005.txt",
-"http://www.gutenberg.org/files/15/text/moby-086.txt",
-"http://www.gutenberg.org/files/15/text/moby-121.txt",
-"http://www.gutenberg.org/files/15/text/moby-015.txt",
-"http://www.gutenberg.org/files/15/text/moby-053.txt",
-"http://www.gutenberg.org/files/15/15.zip",
-"http://www.gutenberg.org/files/15/text/moby-029.txt",
-"http://www.gutenberg.org/files/15/text/moby-081.txt",
-"http://www.gutenberg.org/files/15/text/moby-023.txt",
-"http://www.gutenberg.org/ebooks/15.rdf",
-"http://www.gutenberg.org/ebooks/15.html.images",
-"http://www.gutenberg.org/files/15/text/moby-103.txt"
-],
-"language":[
-"en"
-],
-"rights":[
-"Public domain in the USA."
-],
-"subject":[
-"PS",
-"Ahab, Captain (Fictitious character) -- Fiction",
-"Psychological fiction",
-"Ship captains -- Fiction",
-"Whaling -- Fiction",
-"Whales -- Fiction",
-"Mentally ill -- Fiction",
-"Whaling ships -- Fiction",
-"Sea stories",
-"Adventure stories"
-],
-"title":[
-"Moby Dick"
-]
-},
 ```
+input/
+    class1/
+        img1.jpg
+        img2.jpg
+        ...
+    class2/
+        imgWhatever.jpg
+        ...
+    ...
+```
+
+In order to give you this:
+
+```
+output/
+    train/
+        class1/
+            img1.jpg
+            ...
+        class2/
+            imga.jpg
+            ...
+    val/
+        class1/
+            img2.jpg
+            ...
+        class2/
+            imgb.jpg
+            ...
+    test/
+        class1/
+            img3.jpg
+            ...
+        class2/
+            imgc.jpg
+            ...
+```
+
+This should get you started to do some serious deep learning on your data. [Read here](https://stats.stackexchange.com/questions/19048/what-is-the-difference-between-test-set-and-validation-set) why it's a good idea to split your data intro three different sets.
+
+-   Split files into a training set and a validation set (and optionally a test set).
+-   Works on any file types.
+-   The files get shuffled.
+-   A [seed](https://docs.python.org/3/library/random.html#random.seed) makes splits reproducible.
+-   Allows randomized [oversampling](https://en.wikipedia.org/wiki/Oversampling_and_undersampling_in_data_analysis) for imbalanced datasets.
+-   Optionally group files by prefix.
+-   (Should) work on all operating systems.
+
+## Install
+
+This package is Python only and there are no external dependencies.
+
+```bash
+pip install split-folders
+```
+
+Optionally, you may install [tqdm](https://github.com/tqdm/tqdm) to get get a progress bar when moving files.
+
+```bash
+pip install split-folders[full]
+```
+
+## Usage
+
+You can use `split-folders` as Python module or as a Command Line Interface (CLI).
+
+If your datasets is balanced (each class has the same number of samples), choose `ratio` otherwise `fixed`.
+NB: oversampling is turned off by default.
+Oversampling is only applied to the _train_ folder since having duplicates in _val_ or _test_ would be considered cheating.
+
+### Module
+
+```python
+import splitfolders  # or import split_folders
+
+# Split with a ratio.
+# To only split into training and validation set, set a tuple to `ratio`, i.e, `(.8, .2)`.
+splitfolders.ratio("input_folder", output="output", seed=1337, ratio=(.8, .1, .1), group_prefix=None) # default values
+
+# Split val/test with a fixed number of items e.g. 100 for each set.
+# To only split into training and validation set, use a single number to `fixed`, i.e., `10`.
+splitfolders.fixed("input_folder", output="output", seed=1337, fixed=(100, 100), oversample=False, group_prefix=None) # default values
+```
+
+Occasionally you may have things that comprise more than a single file (e.g. picture (.png) + annotation (.txt)).
+`splitfolders` lets you split files into equally-sized groups based on their prefix.
+Set `group_prefix` to the length of the group (e.g. `2`).
+But now _all_ files should be part of groups.
+
+### CLI
+
+```
+Usage:
+    splitfolders [--output] [--ratio] [--fixed] [--seed] [--oversample] [--group_prefix] folder_with_images
+Options:
+    --output        path to the output folder. defaults to `output`. Get created if non-existent.
+    --ratio         the ratio to split. e.g. for train/val/test `.8 .1 .1 --` or for train/val `.8 .2 --`.
+    --fixed         set the absolute number of items per validation/test set. The remaining items constitute
+                    the training set. e.g. for train/val/test `100 100` or for train/val `100`.
+    --seed          set seed value for shuffling the items. defaults to 1337.
+    --oversample    enable oversampling of imbalanced datasets, works only with --fixed.
+    --group_prefix  split files into equally-sized groups based on their prefix
+Example:
+    splitfolders --ratio .8 .1 .1 -- folder_with_images
+```
+
+Because of some [Python quirks](https://github.com/jfilter/split-folders/issues/19) you have to prepend ` --` afer using `--ratio`.
+
+Instead of the command `splitfolders` you can also use `split_folders` or `split-folders`.
+
+## Development
+
+Install and use [poetry](https://python-poetry.org/).
+
+## Contributing
+
+If you have a **question**, found a **bug** or want to propose a new **feature**, have a look at the [issues page](https://github.com/jfilter/split-folders/issues).
+
+**Pull requests** are especially welcomed when they fix bugs or improve the code quality.
+
+## License
+
+MIT
