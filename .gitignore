@@ -1,19 +1,13 @@
-*.pyc
-*.sw?
-*.DS_Store
-wiki
-.ropeproject/
-.sass-cache/
-docs/_build
-src/popper.egg-info/
-src/build
-src/dist
-.idea/
+# general things to ignore
+build/
+dist/
+*.egg-info/
+*.egg
+*.py[cod]
+__pycache__/
+*.so
+*~
+
+# due to using tox and pytest
+.tox
 .cache
-popper_logs
-popper_status
-.cache
-popper_logs
-popper_status
-.pipeline_cache.yml
-src/popper/_version.py

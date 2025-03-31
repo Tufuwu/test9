@@ -1,8 +1,0 @@
-steps:
-- id: install
-  uses: docker://node:12-alpine
-  runs: [npm, install]
-
-- id: test
-  uses: docker://node:12-alpine
-  runs: [npm, test]
