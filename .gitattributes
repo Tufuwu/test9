@@ -1,3 +1,0 @@
-*         filter=annex annex.largefiles=nothing
-*.nii     annex.largefiles=anything
-*.nii.gz  annex.largefiles=anything
