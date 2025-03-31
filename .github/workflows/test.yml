@@ -1,31 +1,41 @@
-name: ci
+name: CI
 
-on: [push, pull_request]
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    name: Test
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10"]
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
     steps:
-      # Checkout Repository
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Checkout demo
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 
-      # Install Tools
-      - name: Install Tools
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@98f2ad02fd48d057ee3b4d4f66525b231c3e52b6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
+
+      - name: Install dependencies
         run: |
-          sudo apt-get install wget build-essential python3
-          pip3 install setuptools
+          python3 -m pip install -U pip
+          python3 -m pip install -r requirements.txt
 
-      # Install (n)Migen / LiteX / Cores
-      - name: Install LiteX
+      - name: Run demo
         run: |
-          wget https://raw.githubusercontent.com/enjoy-digital/litex/main/litex_setup.py
-          python3 litex_setup.py init install --user
-
-      # Install Project
-      - name: Install Project
-        run: python3 setup.py develop --user
-
-      # Test
-      - name: Run Tests
-        run: python3 setup.py test
+          python3 run_demo_md.py
