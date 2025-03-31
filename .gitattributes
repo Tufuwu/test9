@@ -1,5 +1,4 @@
-*.sh text eol=lf
-# Treat minified or packed JS/CSS files as binary, as they're not meant to be human-readable
-*.min.* binary
-*.map binary
-*.pack.js binary
+*.png binary
+*.jpg binary
+*.pdf binary
+*.pkl binary
