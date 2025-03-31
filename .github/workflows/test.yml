@@ -1,148 +1,68 @@
-name: TradingBot CI
+name: CI
 
 on:
   push:
+    branches:
+      - "main"
   pull_request:
     branches:
-      - main
+      - "main"
   schedule:
-    - cron: '0 0 * * 0' # weekly
-
-env:
-  poetry-version: 1.0.10
-  docker-image-name: ilcardella/tradingbot
-  push-docker-image: ${{ startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' }}
+    - cron: "0 0 * * *"
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    name: Test on ${{ matrix.os }}, 🐍=${{ matrix.python-version }}, Program=${{ matrix.conda-env }}
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
-    name: Python ${{ matrix.python-version }}
+        os: [ubuntu-latest, macOS-latest]
+        conda-env: [basic]
+
+
+    env:
+      CI_OS: ${{ matrix.os }}
+      ENV: ${{ matrix.conda-env }}
+      PYVER: ${{ matrix.python-version }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - name: Additional info about the build
+        shell: bash
+        run: |
+          uname -a
+          df -h
+          ulimit -a
+
+      - name: Create Environment
+        uses: conda-incubator/setup-miniconda@v2
         with:
+          activate-environment: test
+          environment-file: devtools/conda-envs/${{ matrix.conda-env }}.yaml
           python-version: ${{ matrix.python-version }}
-          architecture: x64
+          auto-activate-base: false
 
-      - name: Pip cache
-        uses: actions/cache@v4
-        with:
-          # This path is specific to Ubuntu
-          path: ~/.cache/pip
-          # Look to see if there is a cache hit for the corresponding poetry.lock
-          key: ${{ runner.os }}-pip-${{ env.poetry-version }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
-
-      - name: Install dependencies
+      - name: Environment Information
+        shell: bash -l {0}
         run: |
-          python -m pip install --upgrade pip
-          pip install 'poetry==${{ env.poetry-version }}'
+          conda info
+          conda list --show-channel-urls
 
-      - name: Poetry cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-poetry-
-
-      - name: Run tests
-        run: make ci
-
-  docker:
-    needs: build
-    runs-on: ubuntu-latest
-    name: Docker build and push
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          dockerfile: docker/Dockerfile
-          repository: ${{ env.docker-image-name }}
-          build_args: POETRY_VERSION=${{ env.poetry-version }}
-          tag_with_ref: true
-          push: ${{ env.push-docker-image }}
-
-  docker-buildx:
-    needs: build
-    runs-on: ubuntu-latest
-    name: Docker buildx
-    #if: github.event_name == 'schedule' || startsWith(github.ref, 'refs/tags/')
-    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Prepare
-        id: prepare
+      - name: Install QUBEKit
+        shell: bash -l {0}
         run: |
-          DOCKER_IMAGE=${{ env.docker-image-name }}
-          VERSION=latest
-          PLATFORMS=linux/arm64
+          python setup.py develop --no-deps
 
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          elif [[ $GITHUB_REF != refs/heads/main ]]; then
-            VERSION=${GITHUB_REF#refs/heads/}
-          fi
+      - name: PyTest
+        shell: bash -l {0}
+        run: |
+          pytest -v --cov=QUBEKit --cov-config=setup.cfg QUBEKit/tests/ --cov-report=xml
 
-          echo ::set-output name=platforms::${PLATFORMS}
-          echo ::set-output name=docker_image::${DOCKER_IMAGE}
-          echo ::set-output name=version::${VERSION}-arm64
-
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: crazy-max/ghaction-docker-buildx@v3
+      - name: Codecov
+        uses: codecov/codecov-action@v1
         with:
-          buildx-version: latest
-          qemu-version: latest
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        id: cache
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - name: Docker Login
-        if: success() && ${{ env.push-docker-image }}
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
-
-      - name: Run Buildx
-        run: |
-          docker buildx build \
-          --cache-from "type=local,src=/tmp/.buildx-cache" \
-          --cache-to "type=local,dest=/tmp/.buildx-cache" \
-          --platform ${{ steps.prepare.outputs.platforms }} \
-          --output "type=image,push=${{ env.push-docker-image }}" \
-          --file docker/Dockerfile-arm \
-          -t ${{ steps.prepare.outputs.docker_image }}:${{ steps.prepare.outputs.version }} \
-          --build-arg POETRY_VERSION=${{ env.poetry-version }} \
-          .
-
-      - name: Clear
-        if: always()
-        run: |
-          rm -f ${HOME}/.docker/config.json
+          file: ./coverage.xml
+          fail_ci_if_error: false

@@ -1,0 +1,12 @@
+# Include the README and style guide
+include *.md
+
+# Include the license
+include LICENSE.txt
+
+include setup.py
+
+recursive-include QUBEKit *.py
+include QUBEKit/GUI/*
+include QUBEKit/tests/files/*
+

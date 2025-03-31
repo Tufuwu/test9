@@ -1,0 +1,21 @@
+name: test
+channels:
+  - conda-forge
+  - omnia
+dependencies:
+    # Core
+  - python
+  - pip
+
+    # Testing
+  - openff-toolkit
+  - rdkit
+  - torsiondrive
+  - numpy >=1.18.1
+  - scipy
+  - networkx >=2.4
+  - matplotlib-base
+  - qcengine >=0.18.0
+  - typing-extensions
+  - pytest
+  - pytest-cov
