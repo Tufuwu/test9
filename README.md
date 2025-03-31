@@ -1,73 +1,213 @@
-# python-georss-ingv-centro-nazionale-terremoti-client
+# PSRQpy
 
-[![Build Status](https://github.com/exxamalte/python-georss-ingv-centro-nazionale-terremoti-client/workflows/CI/badge.svg?branch=master)](https://github.com/exxamalte/python-georss-ingv-centro-nazionale-terremoti-client/actions?workflow=CI)
-[![codecov](https://codecov.io/gh/exxamalte/python-georss-ingv-centro-nazionale-terremoti-client/branch/master/graph/badge.svg?token=PHASSFXFVU)](https://codecov.io/gh/exxamalte/python-georss-ingv-centro-nazionale-terremoti-client)
-[![PyPi](https://img.shields.io/pypi/v/georss-ingv-centro-nazionale-terremoti-client.svg)](https://pypi.python.org/pypi/georss-ingv-centro-nazionale-terremoti-client)
-[![Version](https://img.shields.io/pypi/pyversions/georss-ingv-centro-nazionale-terremoti-client.svg)](https://pypi.python.org/pypi/georss-ingv-centro-nazionale-terremoti-client)
+This module aims to provide a python interface for querying the [ATNF pulsar catalogue](http://www.atnf.csiro.au/people/pulsar/psrcat/). It is an unofficial
+package and is not endorsed by or affiliated with the ATNF.
 
-This library provides convenient access to the [INGV Centro Nazionale Terremoti (Earthquakes) Feed](http://cnt.rm.ingv.it/).
+Full documentation of the module can be found [here](http://psrqpy.readthedocs.io/).
+
+Any comments or suggestions are welcome.
 
 ## Installation
-`pip install georss-ingv-centro-nazionale-terremoti-client`
 
-## Usage
-See below for an example of how this library can be used. After instantiating 
-the feed class and supplying the required parameters, you can call `update` to 
-retrieve the feed data. The return value will be a tuple of a status code and 
-the actual data in the form of a list of specific feed entries.
+To install the code from source, clone the git repository and run either:
 
-**Status Codes**
-* _UPDATE_OK_: Update went fine and data was retrieved. The library may still return empty data, for example because no entries fulfilled the filter criteria.
-* _UPDATE_OK_NO_DATA_: Update went fine but no data was retrieved, for example because the server indicated that there was not update since the last request.
-* _UPDATE_ERROR_: Something went wrong during the update
-
-**Supported Filters**
-
-| Filter            |                            | Description |
-|-------------------|----------------------------|-------------|
-| Radius            | `filter_radius`            | Radius in kilometers around the home coordinates in which events from feed are included. |
-| Minimum Magnitude | `filter_minimum_magnitude` | Minimum magnitude as float value. Only events with a magnitude equal or above this value are included. |
-
-**Example**
-```python
-from georss_ingv_centro_nazionale_terremoti_client import \
-    IngvCentroNazionaleTerremotiFeed
-# Home Coordinates: Latitude: 40.84, Longitude: 14.25
-# Filter radius: 200 km
-# Filter minimum magnitude: 4.0
-feed = IngvCentroNazionaleTerremotiFeed((40.84, 14.25), 
-                                        filter_radius=200, 
-                                        filter_minimum_magnitude=4.0)
-status, entries = feed.update()
+```
+python setup.py install --user
 ```
 
-## Feed Manager
+to install as a user, or
 
-The Feed Manager helps managing feed updates over time, by notifying the 
-consumer of the feed about new feed entries, updates and removed entries 
-compared to the last feed update.
+```
+sudo python setup.py install
+```
 
-* If the current feed update is the first one, then all feed entries will be 
-  reported as new. The feed manager will keep track of all feed entries' 
-  external IDs that it has successfully processed.
-* If the current feed update is not the first one, then the feed manager will 
-  produce three sets:
-  * Feed entries that were not in the previous feed update but are in the 
-    current feed update will be reported as new.
-  * Feed entries that were in the previous feed update and are still in the 
-    current feed update will be reported as to be updated.
-  * Feed entries that were in the previous feed update but are not in the 
-    current feed update will be reported to be removed.
-* If the current update fails, then all feed entries processed in the previous
-  feed update will be reported to be removed.
+to install as root.
 
-After a successful update from the feed, the feed manager will provide two
-different dates:
+The module can also be installed using `pip` with:
 
-* `last_update` will be the timestamp of the last successful update from the
-  feed. This date may be useful if the consumer of this library wants to
-  treat intermittent errors from feed updates differently.
-* `last_timestamp` will be the latest timestamp extracted from the feed data. 
-  This requires that the underlying feed data actually contains a suitable 
-  date. This date may be useful if the consumer of this library wants to 
-  process feed entries differently if they haven't actually been updated.
+```
+pip install psrqpy
+```
+
+or in a [Conda](https://docs.conda.io/en/latest/) environment using:
+
+```
+conda install -c conda-forge psrqpy
+```
+
+### Requirements
+
+The [requirements](requirements.txt) for installing the code are:
+
+ * [`requests`](http://docs.python-requests.org/en/master/)
+ * [`beautifulsoup4`](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
+ * [`numpy`](http://www.numpy.org/)
+ * [`scipy`](https://www.scipy.org/)
+ * [`astropy`](http://www.astropy.org/)
+ * [`pandas`](https://pandas.pydata.org/)
+ * [`ads`](https://ads.readthedocs.io/en/latest/)
+ * [`matplotlib`](https://matplotlib.org/)
+
+## Examples
+
+A simple query of the catalogue to, e.g., just return all pulsar frequencies, would be:
+
+```python
+import psrqpy
+
+q = psrqpy.QueryATNF(params='F0')
+
+# get frequencies as an astropy table
+t = q.table
+
+print(t['F0'])
+```
+
+You can query multiple parameters, e.g.:
+
+```python
+import psrqpy
+
+q = psrqpy.QueryATNF(params=['F0', 'F1', 'RAJ', 'DecJ'])
+
+# get values as an astropy table
+t = q.table
+
+print(t['F0'])
+```
+
+You can query specific pulsars, e.g.:
+
+```
+import psrqpy
+
+q = psrqpy.QueryATNF(params=['F0', 'F1', 'RAJ', 'DecJ'], psrs=['J0534+2200', 'J0537-6910'])
+
+# get values as an astropy table
+t = q.table
+
+# print the table
+print(t)
+  JNAME          F0       F0_ERR       F1      F1_ERR     RAJ      RAJ_ERR     DECJ     DECJ_ERR
+                 Hz         Hz       1 / s2    1 / s2                                           
+---------- ------------- ------- ------------- ------ ------------ ------- ------------ --------
+J0534+2200     29.946923   1e-06  -3.77535e-10  2e-15 05:34:31.973   0.005 +22:00:52.06     0.06
+J0537-6910 62.0261895958 1.3e-09 -1.992272e-10  4e-17 05:37:47.416    0.11 -69:10:19.88      0.6
+```
+
+You can set [conditions](http://www.atnf.csiro.au/research/pulsar/psrcat/psrcat_help.html?type=normal#condition) for the searches,
+e.g.:
+
+```python
+import psrqpy
+q = psrqpy.QueryATNF(params=['Jname', 'f0'], condition='f0 > 100 && f0 < 200', assoc='GC')
+```
+
+where `assoc=GC` looks for all pulsars in globular clusters.
+
+When a query is generated the entire catalogue is downloaded and stored in the `QueryATNF` object as
+a pandas [`DataFrame`](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html).
+The query can therefore be re-used to access data on different parameters, different pulsars, or
+using different conditions, without the need to re-download the catalogue. We may originally want
+to query pulsar frequencies using only frequencies greater than 10 Hz, with
+
+```python
+import psrqpy
+q = psrqpy.QueryATNF(params=['F0'], condition='F0 > 10')
+freqs = q.table['F0']
+```
+
+Using the same `QueryATNF` object we could change to get frequency derivatives for pulsars
+with frequencies less than 10 Hz, with
+
+```python
+q.condition = 'F0 < 10'
+q.query_params = 'F1'
+
+fdot = q.table['F1']
+```
+
+In these cases the whole catalogue (with no conditions applied and all available parameters) stored as a pandas [`DataFrame`](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html)
+is accessible with
+
+```python
+catalogue = q.catalogue
+```
+
+You can also [generate](http://psrqpy.readthedocs.io/en/latest/query.html#psrqpy.search.QueryATNF.ppdot) a
+_lovely_ period vs. period derivative plot based on the latest catalogue information, using
+just three lines of code, e.g.:
+
+```python
+from psrqpy import QueryATNF
+query = QueryATNF(params=['P0', 'P1', 'ASSOC', 'BINARY', 'TYPE', 'P1_I'])
+query.ppdot(showSNRs=True, showtypes='all')
+```
+
+gives
+
+![PPdot](../master/docs/source/images/ppdot.png)
+
+## Development and Support
+
+Code development is done via the package's [GitHib repository](https://github.com/mattpitkin/psrqpy).
+Any contributions can be made via a [fork and pull request](https://help.github.com/articles/creating-a-pull-request-from-a-fork/) model
+from that repository, and must adhere to the [MIT license](#License). Any problems with the code
+or support requests can be submitted via the repository's [Issue tracker](https://github.com/mattpitkin/psrqpy/issues).
+
+## Test suite
+
+There are tests supplied that cover many of the functions within PSRQpy. These can be run from the
+base directory of the repository (after installing the [`pytest`](https://docs.pytest.org/en/latest/) and
+[`pytest-socket`](https://pypi.org/project/pytest-socket/) modules, e.g., with `pip`) by just calling:
+
+```bash
+pytest
+```
+
+These tests are not included in the `pip` installed version of the code.
+
+## Copyright and referencing for the catalogue
+
+Regarding the use of the catalogue and software behind it, the [following statements](http://www.atnf.csiro.au/research/pulsar/psrcat/download.html) apply:
+
+> PSRCAT is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. PSRCAT is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+>
+> PSRCAT makes use of "evaluateExpression: A Simple Expression Evaluator". Copyright &copy; 1996 - 1999 Parsifal Software, All Rights Reserved.
+>
+> The programs and databases remain the property of the Australia Telescope National Facility, CSIRO, and are covered by the [CSIRO Legal Notice and Disclaimer](http://www.csiro.au/en/About/Footer/Legal-notice).
+>
+> If you make use of information from the ATNF Pulsar Catalogue in a publication, we would appreciate acknowledgement by reference to the publication "[The ATNF Pulsar Catalogue](http://adsabs.harvard.edu/abs/2005AJ....129.1993M)", R. N. Manchester, G. B. Hobbs, A. Teoh & M. Hobbs, Astronomical Journal, 129, 1993-2006 (2005) and by quoting the web address http://www.atnf.csiro.au/research/pulsar/psrcat for updated versions.
+
+If making use of this code to access the catalogue, or produce plots, I would be grateful if (as well as citing the ATNF pulsar catalogue [paper](http://adsabs.harvard.edu/abs/2005AJ....129.1993M) and [URL](http://www.atnf.csiro.au/research/pulsar/psrcat) given above) you consider citing the [JOSS](http://joss.theoj.org/) [paper](https://doi.org/10.21105/joss.00538) for this software:
+
+```tex
+@article{psrqpy,
+  author = {{Pitkin}, M.},
+   title = "{psrqpy: a python interface for querying the ATNF pulsar catalogue}",
+  volume = 3,
+  number = 22,
+   pages = 538,
+   month = feb,
+    year = 2018,
+ journal = "{Journal of Open Source Software}",
+     doi = {10.21105/joss.00538},
+     url = {https://doi.org/10.21105/joss.00538}
+}
+```
+
+## License
+
+This code is licensed under the [MIT License](http://opensource.org/licenses/MIT).
+
+&copy; Matt Pitkin, 2017
+
+[![PyPI version](https://badge.fury.io/py/psrqpy.svg)](https://badge.fury.io/py/psrqpy)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/psrqpy/badges/version.svg)](https://anaconda.org/conda-forge/psrqpy)
+[![version](https://img.shields.io/pypi/pyversions/psrqpy.svg)](https://pypi.org/project/psrqpy/)
+[![Build Status](https://travis-ci.org/mattpitkin/psrqpy.svg?branch=master)](https://travis-ci.org/mattpitkin/psrqpy)
+[![codecov](https://codecov.io/gh/mattpitkin/psrqpy/branch/master/graph/badge.svg)](https://codecov.io/gh/mattpitkin/psrqpy)
+[![Documentation Status](https://readthedocs.org/projects/psrqpy/badge/?version=latest)](http://psrqpy.readthedocs.io/en/latest/?badge=latest)
+[![status](http://joss.theoj.org/papers/711dc5566159f6e9f8ea5d07dbfaf5d2/status.svg)](http://joss.theoj.org/papers/711dc5566159f6e9f8ea5d07dbfaf5d2)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1489692.svg)](https://doi.org/10.5281/zenodo.1489692)
+[![ASCL](https://img.shields.io/badge/ascl-1812.017-blue.svg?colorB=262255)](http://ascl.net/1812.017)
