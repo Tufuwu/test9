@@ -1,4 +1,7 @@
-attrs
-click
-fissix
-sh
+# python 2/3 support
+future
+
+# testing
+pytest
+pylint
+flake8

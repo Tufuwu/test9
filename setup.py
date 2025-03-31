@@ -1,46 +1,55 @@
-#!/usr/bin/env python3
-#
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
+#!/usr/bin/env python
 
-from setuptools import find_packages, setup
+from __future__ import absolute_import
+import os
+from setuptools import setup, find_packages
+from codecs import open
 
-with open("README.md") as f:
-    readme = f.read()
+here = os.path.abspath(os.path.dirname(__file__))
 
-with open("bowler/__init__.py") as f:
-    for line in f:
-        if line.startswith("__version__"):
-            version = line.split('"')[1]
+with open(os.path.join(here, "src/fileseq/__version__.py")) as version_file:
+    exec(version_file.read())
 
-with open("requirements.txt") as f:
-    requires = f.read().strip().splitlines()
+# Get the long description from the README file
+with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+    
+descript = 'A Python library for parsing frame ranges and file sequences ' \
+           'commonly used in VFX and Animation applications.'
 
-setup(
-    name="bowler",
-    description="Safe code refactoring for modern Python projects",
-    long_description=readme,
-    long_description_content_type="text/markdown",
-    version=version,
-    author="John Reese, Facebook",
-    author_email="jreese@fb.com",
-    url="https://github.com/facebookincubator/bowler",
-    classifiers=[
-        "Development Status :: 1 - Planning",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-    ],
-    license="MIT",
-    packages=["bowler", "bowler.tests"],
-    test_suite="bowler.tests",
-    python_requires=">=3.6",
-    setup_requires=["setuptools>=38.6.0"],
-    install_requires=requires,
-    entry_points={"console_scripts": ["bowler = bowler.main:main"]},
-)
+setup(name='Fileseq',
+      version=__version__,
+
+      package_dir = {'': 'src'},
+      packages=find_packages('src'),
+
+      test_suite="test.run",
+
+      author='Matt Chambers',
+      author_email='yougotrooted@gmail.com',
+
+      maintainer='Justin Israel',
+      maintainer_email='justinisrael@gmail.com',
+
+      url='https://github.com/justinfx/fileseq',
+
+      description=descript,
+      long_description=long_description,
+      long_description_content_type="text/markdown",
+
+      license='MIT',
+
+      classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3',
+      ],
+
+      keywords='vfx visual effects file sequence frames image',
+
+      install_requires=['future'],
+      )

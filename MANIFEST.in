@@ -1,1 +1,3 @@
-include README.md LICENSE CODE_OF_CONDUCT.md CONTRIBUTING.md requirements.txt docs/*.md
+graft test
+include README.md
+global-include *.exr *.py
