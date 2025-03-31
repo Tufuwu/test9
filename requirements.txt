@@ -1,1 +1,4 @@
--e .
+urwid==2.0.1
+requests==2.22.0
+pyfiglet==0.8.post1
+html2text==2019.8.11
