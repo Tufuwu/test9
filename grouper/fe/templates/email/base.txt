@@ -1,7 +1,0 @@
-Grouper - {% block subject %}Notification{% endblock %}
-
-{% block content %}{% endblock %}
-
---
-Your friendly Grouper robot
-{{url}}/
