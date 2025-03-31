@@ -1,36 +1,23 @@
-*.py[cod]
-MANIFEST
+# Addon input files
+addons.txt
+installed.ini
+addons-classic.txt
+addons-retail.txt
+addons-test.txt
+config-classic.ini
+config-retail.ini
+config-test.ini
+installed-classic.ini
+installed-test.ini
 
-# Packages
-/.eggs
-*.egg
-*.egg-info
-/dist
-/build
-/docs/_build/
-/eggs
-/bin
-/var
-/sdist
-/develop-eggs
-/.installed.cfg
+# Settings for IntelliJ
+.idea/
 
-# Installer logs
-/pip-log.txt
+# Compiled pyc files
+__pycache__/
+.vscode/
+desktop.ini
 
-# Unit test / coverage reports
-.coverage
-.tox
-nosetests.xml
+\.coverage
 
-# Translations
-*.mo
-
-# IDEs
-/.idea
-/.geany
-/.mr.developer.cfg
-/.project
-/.pydevproject
-/.settings
-/.release
+*.log
