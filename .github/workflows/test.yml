@@ -1,35 +1,67 @@
-name: pytest
+---
+name: CI
 
 on:
   pull_request:
+    branches:
+      - dev
   push:
-    branches: [main, dev]
+    branches:
+      - main
 
 jobs:
-  pytest:
+  test:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.9", "3.10"]
-      fail-fast: false
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: pytest
+        run: |
+          pip install poetry
+          poetry install
+          poetry run py.test
+
+  lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -U \
-          matplotlib \
-          scipy \
-          rectpack \
-          freetype-py \
-          pytest
-        pip install -e .
-    - name: Run test
-      uses: GabrielBB/xvfb-action@v1
-      with:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.x"
+          architecture: x64
+      - name: setup
         run: |
-          pytest
-          python ./phidl/phidl_tutorial_example.py
+          pip install poetry
+          poetry install
+      - name: lint
+        run: |
+          poetry run black --check --fast pytile
+          poetry run flake8 pytile
+          poetry run pydocstyle pytile
+          poetry run pylint pytile
+      - name: typing
+        run: |
+          poetry run mypy --ignore-missing-imports pytile
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.x"
+          architecture: x64
+      - run: |
+          pip install poetry
+          poetry install
+      - run: |
+          poetry run py.test -s --verbose --cov-report term-missing --cov-report xml --cov=pytile tests
+      - uses: codecov/codecov-action@v1.0.3
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
