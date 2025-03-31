@@ -1,30 +1,46 @@
-from platform import python_version
-from setuptools import setup
+from codecs import open
+from os import path
 
+from fints import version
+from setuptools import find_packages, setup
 
-def readme():
-    with open('README.md') as readme_file:
-        return readme_file.read()
+here = path.abspath(path.dirname(__file__))
 
+try:
+    # Get the long description from the relevant file
+    with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+        long_description = f.read()
+except:
+    long_description = ''
 
 setup(
-    name='comment_parser',
-    version='1.2.5',
-    description='Parse comments from various source files.',
+    name='fints',
+    version=version,
+    description='Pure-python FinTS 3.0 (formerly known as HBCI) implementation',
+    long_description=long_description,
+    url='https://github.com/raphaelm/python-fints',
+    author='Raphael Michel',
+    author_email='mail@raphaelmichel.de',
+    license='GNU Lesser General Public License v3 (LGPLv3)',
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Programming Language :: Python :: 3',
-        'Topic :: Software Development :: Documentation',
-        'License :: OSI Approved :: MIT License'
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Other Audience',
+        'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
-    url='http://github.com/jeanralphaviles/comment_parser',
-    author='Jean-Ralph Aviles',
-    author_email='jeanralph.aviles+pypi@gmail.com',
-    license='MIT',
-    long_description=readme(),
-    long_description_content_type='text/markdown',
-    packages=['comment_parser', 'comment_parser.parsers'],
-    install_requires=['python-magic>=0.4.27'],
-    zip_safe=False,
-    python_requires='>=3.13',
+
+    keywords='hbci banking fints',
+    install_requires=[
+        'bleach',
+        'mt-940',
+        'requests',
+        'sepaxml~=2.1',
+    ],
+
+    packages=find_packages(include=['fints', 'fints.*']),
 )

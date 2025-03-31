@@ -1,170 +1,36 @@
-# Comment Parser
+PyFinTS
+=======
 
-[![Run Tests](https://github.com/jeanralphaviles/comment_parser/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/jeanralphaviles/comment_parser/actions/workflows/test.yml)
-[![PyPI status](https://img.shields.io/pypi/status/comment_parser.svg)](https://pypi.python.org/pypi/comment_parser/)
-[![PyPI version shields.io](https://img.shields.io/pypi/v/comment_parser.svg)](https://pypi.python.org/pypi/comment_parser/)
-[![PyPI license](https://img.shields.io/pypi/l/comment_parser.svg)](https://pypi.python.org/pypi/comment_parser/)
-[![PyPI pyversions](https://img.shields.io/pypi/pyversions/comment_parser.svg)](https://pypi.python.org/pypi/comment_parser/)
-
-Python module used to extract comments from source code files of various types.
-
-## Installation
-
-### Prerequisites
-
-* libmagic
-
-### Linux/Unix
-
-```shell
-sudo pip3 install comment_parser
-```
-
-### OSX and Windows
-
-Additionally, complete the special installation requirements for
-[python-magic](https://github.com/ahupp/python-magic).
-
-## Usage
-
-To use, simply run:
-
-```python
->>> from comment_parser import comment_parser
->>> # Returns a list of comment_parser.parsers.common.Comments
->>> comment_parser.extract_comments('/path/to/source_file')
->>> # Or
->>> comment_parser.extract_comments_from_str('...')
-```
-
-### extract_comments signatures
-
-```python
-def extract_comments(filename, mime=None):
-    """Extracts and returns the comments from the given source file.
-
-    Args:
-        filename: String name of the file to extract comments from.
-        mime: Optional MIME type for file (str). Note some MIME types accepted
-            don't comply with RFC2045. If not given, an attempt to deduce the
-            MIME type will occur.
-    Returns:
-        Python list of parsers.common.Comment in the order that they appear in
-            the source file.
-    Raises:
-        UnsupportedError: If filename is of an unsupported MIME type.
-    """
-    pass
+This is a pure-python implementation of FinTS (formerly known as HBCI), a
+online-banking protocol commonly supported by German banks.
 
 
-def extract_comments_from_str(code, mime=None):
-    """Extracts and returns comments from the given source string.
+[Read our documentation for more info](https://python-fints.readthedocs.io)
 
-    Args:
-        code: String containing code to extract comments from.
-        mime: Optional MIME type for code (str). Note some MIME types accepted
-            don't comply with RFC2045. If not given, an attempt to deduce the
-            MIME type will occur.
-    Returns:
-        Python list of parsers.common.Comment in the order that they appear in
-            the source code.
-    Raises:
-        UnsupportedError: If code is of an unsupported MIME type.
-    """
-    pass
-```
+Maintenance Status 
+------------------
 
-### Comments Interface
+This project is maintained, but with limited capacity. Working on this is takes a lot of time and testing since all banks do things differently and once you move a part here, you break an unexpected one over there. Therefore: Bugs will only be fixed by me if they occur with a bank where I have an account. New features will only be developed if I need them. PRs will be merged if they either have a very low risk of breaking things elsewhere (e.g. purely adding new commands) or if I can test them. In any case, things might take a little time until I have the bandwidth to focus on them. Sorry about that :( 
 
-```python
-class Comment(object):
-    """Represents comments found in source files."""
-    def text(self):
-        """Returns the comment's text.
-        Returns:
-            String
-        """
-        pass
+Limitations
+-----------
 
-    def line_number(self):
-        """Returns the line number the comment was found on.
-        Returns:
-            Int
-        """
-        pass
+* Only FinTS 3.0 is supported
+* Only PIN/TAN authentication is supported, no signature cards
+* Only the following operations are supported:
+  * Fetching bank statements
+  * Fetching balances
+  * Fetching holdings
+  * SEPA transfers and debits (only with required TAN and with specific TAN methods)
+* Supports Python 3.6+
 
-    def is_multiline(self):
-        """Returns whether this comment was a multiline comment.
-        Returns:
-            True if comment was a multiline comment, False if not.
-        """
-       pass
+Credits and License
+-------------------
 
-    def __str__(self):
-        pass
+This library is maintained by Raphael Michel <mail@raphaelmichel.de>
+and features major contributions by Henryk Plötz.
 
-    def __eq__(self, other):
-        pass
-```
+Further thanks for improving this library go out to:
+Daniel Nowak, Patrick Braune, Mathias Dalheimer, Christopher Grebs, Markus Schindler, and many more.
 
-## Development
-
-### Install Dependencies
-
-```shell
-pip install -r requirements.txt -r requirements-dev.txt
-```
-
-### Running locally
-
-Start python in the base of repository.
-
-```python
-from comment_parser import comment_parser
-comment_parser.extract_comments('foo.c', mime='text/x-c')
-```
-
-### Running tests
-
-```shell
-python -m pytest
-```
-
-### Running pylint
-
-```shell
-pylint comment_parser
-```
-
-### Running formatter
-
-```shell
-yapf -rip .
-```
-
-### Deploying to PyPi
-
-```shell
-python setup.py sdist
-twine upload dist/*
-```
-
-## Supported Programming Languages
-
-| Language    | Mime String              |
-|------------ |------------------------- |
-| C           | text/x-c                 |
-| C++/C#      | text/x-c++               |
-| Go          | text/x-go                |
-| HTML        | text/html                |
-| Java        | text/x-java-source       |
-| Javascript  | application/javascript   |
-| Python      | text/x-python            |
-| Python      | text/x-script.python     |
-| Ruby        | text/x-ruby              |
-| Shell       | text/x-shellscript       |
-| XML         | text/xml                 |
-
-And more to come!
-
-*Check comment_parser.py for corresponding MIME types.*
+License: LGPL

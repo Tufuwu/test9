@@ -1,1 +1,4 @@
-python-magic==0.4.27
+requests
+mt-940
+sepaxml==2.1.*
+bleach
