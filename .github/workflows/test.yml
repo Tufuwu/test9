@@ -1,37 +1,33 @@
-name: unit-tests
-on:
-  # Trigger the workflow on push or pull request,
-  # but only for the main branch
-  push:
-    branches:
-      - main
-      - develop
-  pull_request:
-    branches:
-      - main
-      - develop
+name: Sciris CI workflow
+on: [pull_request]
+
 jobs:
-  build:
+  install_and_test:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        python-version: ["3.9", "3.10"]
+    name: Install and test
     steps:
-    - uses: actions/checkout@v2
-    - name: python-3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: install-dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e .
-    - name: print env
-      run: |
-        env
-    - name: pytorch-test
-      run: |
-        ./tests/end2end_pytorch/run.sh
-    - name: tensorflow-test
-      run: |
-        ./tests/end2end_tensorflow/run.sh
-    - name: doc-creation-test
-      run: |
-        ./tests/test_docs/run.sh
+      - name: Checkout sources
+        uses: actions/checkout@v1
+      - uses: actions/setup-python@main
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: Install Sciris
+        run: python setup.py develop
+      - name: Install tests
+        run: pip install pytest
+      - name: Run API tests
+        working-directory: ./tests
+        run: pytest test_*.py --durations=0 --junitxml=test-results.xml # Run actual tests
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test_results
+          path: tests/test-results.xml
