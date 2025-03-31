@@ -1,0 +1,600 @@
+// Copyright 2017-2024 The Khronos Group Inc.
+// SPDX-License-Identifier: CC-BY-4.0
+
+[appendix]
+[[changes_to_opencl]]
+= Changes to OpenCL
+
+Changes to the OpenCL API and OpenCL C specifications between successive
+versions are summarized below.
+
+// (Jon) Are these section and table numbers for the current spec, in which
+// case they should turn into asciidoctor xrefs, or to older specs?
+
+== Summary of Changes from OpenCL 1.0 to OpenCL 1.1
+
+The following features are added to the OpenCL 1.1 platform layer and
+runtime (_sections 4 and 5_):
+
+  * Following queries to _table 4.3_
+  ** {CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR},
+     {CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT},
+     {CL_DEVICE_NATIVE_VECTOR_WIDTH_INT},
+     {CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG},
+     {CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT},
+     {CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE},
+     {CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF}
+  ** {CL_DEVICE_HOST_UNIFIED_MEMORY}
+  ** {CL_DEVICE_OPENCL_C_VERSION}
+  * {CL_CONTEXT_NUM_DEVICES} to the list of queries specified to
+    {clGetContextInfo}.
+  * Optional image formats: {CL_Rx}, {CL_RGx}, and {CL_RGBx}.
+  * Support for sub-buffer objects ability to create a buffer object that
+    refers to a specific region in another buffer object using
+    {clCreateSubBuffer}.
+  * {clEnqueueReadBufferRect}, {clEnqueueWriteBufferRect} and
+    {clEnqueueCopyBufferRect} APIs to read from, write to and copy a
+    rectangular region of a buffer object respectively.
+  * {clSetMemObjectDestructorCallback} API to allow a user to register a
+    callback function that will be called when the memory object is deleted
+    and its resources freed.
+  * Options that <<opencl-c-version, control the OpenCL C version>> used
+    when building a program executable.
+  * {CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE} to the list of queries
+    specified to {clGetKernelWorkGroupInfo}.
+  * Support for user events.
+    User events allow applications to enqueue commands that wait on a user
+    event to finish before the command is executed by the device.
+    Following new APIs are added - {clCreateUserEvent} and
+    {clSetUserEventStatus}.
+  * {clSetEventCallback} API to register a callback function for a specific
+    command execution status.
+
+The following modifications are made to the OpenCL 1.1 platform layer and
+runtime (_sections 4 and 5_):
+
+  * Following queries in _table 4.3_
+  ** The minimum FULL_PROFILE value for {CL_DEVICE_MAX_PARAMETER_SIZE}
+     increased from 256 to 1024 bytes
+  ** The minimum FULL_PROFILE value for {CL_DEVICE_LOCAL_MEM_SIZE} increased
+     from 16 KB to 32 KB.
+  * The _global_work_offset_ argument in {clEnqueueNDRangeKernel} can be a
+    non-`NULL` value.
+  * All API calls except {clSetKernelArg} are thread-safe.
+
+The following features are added to the OpenCL C programming language
+(_section 6_) in OpenCL 1.1:
+
+  * 3-component vector data types.
+  * New built-in functions
+  ** *get_global_offset* work-item function defined in section _6.15.1_.
+  ** *minmag*, *maxmag* math functions defined in section _6.15.2_.
+  ** *clamp* integer function defined in _section 6.15.3_.
+  ** (vector, scalar) variant of integer functions *min* and *max* in
+     _section 6.12.3_.
+  ** *async_work_group_strided_copy* defined in section _6.15.11_.
+  ** *vec_step*, *shuffle* and *shuffle2* defined in section _6.15.13_.
+  * `<<cl_khr_byte_addressable_store>>` extension is a core feature.
+  * `<<cl_khr_global_int32_base_atomics>>`,
+    `<<cl_khr_global_int32_extended_atomics>>`,
+    `<<cl_khr_local_int32_base_atomics>>` and
+    `<<cl_khr_local_int32_extended_atomics>>` extensions are core features.
+    The built-in atomic function names are changed to use the *atomic_*
+    prefix instead of *atom_*.
+  * Macros `CL_VERSION_1_0` and `CL_VERSION_1_1`.
+
+The following features in OpenCL 1.0 are deprecated (see glossary) in OpenCL
+1.1:
+
+// Bugzilla 6140
+  * The {clSetCommandQueueProperty} API is deprecated, which simplifies
+    implementations and possibly improves performance by enforcing that
+    command-queue properties are invariant.
+    Applications are encouraged to create multiple command-queues with
+    different properties versus modifying the properties of a single
+    command-queue.
+// Bugzilla 6628
+  * The `-cl-strict-aliasing` build option has been deprecated.
+    It is no longer required after defining type-based aliasing rules.
+// Bugzilla 5593 and 6068
+  * The `<<cl_khr_select_fprounding_mode>>` extension is deprecated and its
+    use is no longer recommended.
+
+The following new extensions are added to _section 9_ in OpenCL 1.1:
+
+  * `<<cl_khr_gl_event>>` for creating a CL event object from a GL sync object.
+  * `<<cl_khr_d3d10_sharing>>` for sharing memory objects with Direct3D 10.
+
+The following modifications are made to the OpenCL ES Profile described in
+_section 10_ in OpenCL 1.1:
+
+  * 64-bit integer support is optional.
+
+== Summary of Changes from OpenCL 1.1 to OpenCL 1.2
+
+The following features are added to the OpenCL 1.2 platform layer and
+runtime (_sections 4 and 5_):
+
+  * Custom devices and built-in kernels are supported.
+    {clCreateProgramWithBuiltInKernels} has been added to allow creation of
+    a {cl_program_TYPE} using built-in kernels.
+  * Device partitioning that allows a device to be partitioned based on a
+    number of partitioning schemes supported by the device.  This is done by
+    using {clCreateSubDevices} to create a new {cl_device_id_TYPE} based on a
+    partitioning.
+  * {clCompileProgram} and {clLinkProgram} to allow handling these aspects
+    {clBuildProgram} separately.
+  * Extend {cl_mem_flags_TYPE} to describe how the host accesses the data in a
+    {cl_mem_TYPE} object.
+  * {clEnqueueFillBuffer} and {clEnqueueFillImage} to support filling a
+    buffer with a pattern or an image with a color.
+  * Add {CL_MAP_WRITE_INVALIDATE_REGION} to {cl_map_flags_TYPE}.
+    Appropriate clarification to the behavior of {CL_MAP_WRITE} has been added
+    to the spec.
+  * New image types: 1D image, 1D image from a buffer object, 1D image array
+    and 2D image arrays.
+  * {clCreateImage} to create an image object.
+  * {clEnqueueMigrateMemObjects} API that allows a developer to have
+    explicit control over the location of memory objects or to migrate a
+    memory object from one device to another.
+  * Support separate compilation and linking of programs.
+  * Additional queries to get the number of kernels and kernel names in a
+    program have been added to {clGetProgramInfo}.
+  * Additional queries to get the compile and link status and options have
+    been added to {clGetProgramBuildInfo}.
+  * {clGetKernelArgInfo} API that returns information about the arguments of
+    a kernel.
+  * {clEnqueueMarkerWithWaitList} and {clEnqueueBarrierWithWaitList} APIs.
+  * {clUnloadPlatformCompiler} to request that a single platform's compiler is
+    unloaded.  This is compatible with the `<<cl_khr_icd>>` extension if that is
+    supported, unlike {clUnloadCompiler}.
+
+The following features are added to the OpenCL C programming language
+(_section 6_) in OpenCL 1.2:
+
+  * Double-precision is now an optional core feature instead of an
+    extension.
+  * New built in image types: *image1d_t*, *image1d_buffer_t*,
+    *image1d_array_t*, and *image2d_array_t*.
+  * New built-in functions
+  ** Functions to read from and write to a 1D image, 1D and 2D image arrays
+     described in _sections 6.15.15.2_, _6.15.15.3_ and _6.15.15.4_.
+  ** Sampler-less image read functions described in _section 6.15.15.3_.
+  ** *popcount* integer function described in _section 6.15.3_.
+  ** *printf* function described in _section 6.15.14_.
+  * Storage class specifiers extern and static as described in _section
+    6.10_.
+  * Macros `CL_VERSION_1_2` and `+__OPENCL_C_VERSION__+`.
+
+The following APIs in OpenCL 1.1 are deprecated (see glossary) in OpenCL
+1.2:
+
+// Bugzilla 6597
+  * The {clEnqueueMarker}, {clEnqueueBarrier} and {clEnqueueWaitForEvents}
+    APIs are deprecated to simplify the API.
+    The {clEnqueueMarkerWithWaitList} and {clEnqueueBarrierWithWaitList}
+    APIs provide equivalent functionality and support explicit event
+    wait lists.
+// No Bugzilla
+  * The {clCreateImage2D}, {clCreateImage3D}, {clCreateFromGLTexture2D} and
+    {clCreateFromGLTexture3D} APIs are deprecated to simplify the API.
+    The {clCreateImage} and {clCreateFromGLTexture} APIs provide equivalent
+    functionality and support additional image types and properties.
+// Bugzilla 5391 - cl_khr_icd specification
+  * {clUnloadCompiler} and {clGetExtensionFunctionAddress} APIs are deprecated.
+    The {clUnloadPlatformCompiler} and {clGetExtensionFunctionAddressForPlatform}
+    APIs provide equivalent functionality are compatible with the `<<cl_khr_icd>>`
+    extension.
+
+The following queries are deprecated (see glossary) in OpenCL 1.2:
+
+// Bugzilla 7832
+  * The {CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE} query is deprecated.
+    The minimum data type alignment can be derived from
+    {CL_DEVICE_MEM_BASE_ADDR_ALIGN}.
+
+== Summary of Changes from OpenCL 1.2 to OpenCL 2.0
+
+The following features are added to the OpenCL 2.0 platform layer and
+runtime (_sections 4 and 5_):
+
+  * Shared virtual memory.  The associated API additions are:
+  ** {clSetKernelArgSVMPointer} to control which shared virtual memory (SVM)
+     pointer to associate with a kernel instance.
+  ** {clSVMAlloc}, {clSVMFree} and {clEnqueueSVMFree} to allocate and free
+     memory for use with SVM.
+  ** {clEnqueueSVMMap} and {clEnqueueSVMUnmap} to map and unmap to update
+     regions of an SVM buffer from host.
+  ** {clEnqueueSVMMemcpy} and {clEnqueueSVMMemFill} to copy or fill SVM memory
+     regions.
+  * Device queues used to enqueue kernels on the device.
+  ** {clCreateCommandQueueWithProperties} is added to allow creation of a
+     command-queue with properties that affect both host command-queues and
+     device queues.
+  * Pipes.
+  ** {clCreatePipe} and {clGetPipeInfo} have been added to the API for host
+     side creation and querying of pipes.
+  * Images support for 2D image from buffer, depth images and sRGB images.
+  * {clCreateSamplerWithProperties}.
+
+The following modifications are made to the OpenCL 2.0 platform layer and
+runtime (sections 4 and 5):
+
+  * All API calls except {clSetKernelArg}, {clSetKernelArgSVMPointer} and
+    {clSetKernelExecInfo} are thread-safe.
+    Note that this statement does not imply that other API calls were not
+    thread-safe in earlier versions of the specification.
+
+The following features are added to the OpenCL C programming language
+(_section 6_) in OpenCL 2.0:
+
+  * Clang Blocks.
+  * Kernels enqueuing kernels to a device queue.
+  * Program scope variables in global address space.
+  * Generic address space.
+  * C1x atomics.
+  * New built-in functions (sections 6.15.10, 6.15.12, and 6.15.16).
+  * Support images with the read_write qualifier.
+  * 3D image writes are a core feature.
+  * The `CL_VERSION_2_0` and `NULL` macros.
+  * The `opencl_unroll_hint` attribute.
+
+The following APIs are deprecated (see glossary) in OpenCL 2.0:
+
+// Bugzilla 7971
+  * The {clCreateCommandQueue} API has been deprecated to simplify
+    the API.
+    The {clCreateCommandQueueWithProperties} API provides equivalent
+    functionality and supports specifying additional command-queue
+    properties.
+// Bugzilla 8093 - cl_khr_mipmap_image specification
+  * The {clCreateSampler} API has been deprecated to simplify the
+    API.
+    The {clCreateSamplerWithProperties} API provides equivalent
+    functionality and supports specifying additional sampler
+    properties.
+// Bugzilla 10270
+  * The {clEnqueueTask} API has been deprecated to simplify the API.
+    The {clEnqueueNDRangeKernel} API provides equivalent functionality.
+
+The following queries are deprecated (see glossary) in OpenCL 2.0:
+
+// Bugzilla 7156
+  * The {CL_DEVICE_HOST_UNIFIED_MEMORY} query is deprecated.
+    This query was purely informational and had different meanings
+    for different implementations.
+    Its use is no longer recommended.
+// Bugzilla 7954
+  * The {CL_IMAGE_BUFFER} query has been deprecated to simplify the API.
+    The {CL_MEM_ASSOCIATED_MEMOBJECT} query provides equivalent
+    functionality.
+// Bugzilla 7971
+  * The {CL_DEVICE_QUEUE_PROPERTIES} query has been deprecated and
+    replaced by {CL_DEVICE_QUEUE_ON_HOST_PROPERTIES}.
+// Bugzilla 8761
+  * Atomics and Fences
+  ** The Explicit Memory Fence Functions defined in section 6.12.9 of the
+     OpenCL 1.2 specification have been deprecated to simplify the
+     programming language.
+     The *atomic_work_item_fence* function provides equivalent
+     functionality.
+     The deprecated functions are still described in section 6.15.9 of this
+     specification.
+  ** The Atomic Functions defined in section 6.12.11 of the OpenCL 1.2
+     specification have been deprecated to simplify the programming
+     language.
+     The *atomic_fetch* and modify functions provide equivalent
+     functionality.
+     The deprecated functions are still described in section 6.15.12.8 of this
+     specification.
+
+== Summary of Changes from OpenCL 2.0 to OpenCL 2.1
+
+The following features are added to the OpenCL 2.1 platform layer and
+runtime (_sections 4 and 5_):
+
+  * {clGetKernelSubGroupInfo} API call.
+  * {CL_KERNEL_MAX_NUM_SUB_GROUPS}, {CL_KERNEL_COMPILE_NUM_SUB_GROUPS}
+    additions to table 5.21 of the API specification.
+  * {clCreateProgramWithIL} API call.
+  * {clGetHostTimer} and {clGetDeviceAndHostTimer} API calls.
+  * {clEnqueueSVMMigrateMem} API call.
+  * {clCloneKernel} API call.
+  * {clSetDefaultDeviceCommandQueue} API call.
+  * {CL_PLATFORM_HOST_TIMER_RESOLUTION} added to table 4.1 of the API
+    specification.
+  * {CL_DEVICE_IL_VERSION}, {CL_DEVICE_MAX_NUM_SUB_GROUPS},
+    {CL_DEVICE_SUB_GROUP_INDEPENDENT_FORWARD_PROGRESS} added to table 4.3 of
+    the API specification.
+  * {CL_PROGRAM_IL} to table 5.17 of the API specification.
+  * {CL_QUEUE_DEVICE_DEFAULT} added to table 5.2 of the API specification.
+  * Added table 5.22 to the API specification with the enums:
+    {CL_KERNEL_MAX_SUB_GROUP_SIZE_FOR_NDRANGE},
+    {CL_KERNEL_SUB_GROUP_COUNT_FOR_NDRANGE} and
+    {CL_KERNEL_LOCAL_SIZE_FOR_SUB_GROUP_COUNT}
+
+The following modifications are made to the OpenCL 2.1 platform layer and
+runtime (sections 4 and 5):
+
+  * All API calls except {clSetKernelArg}, {clSetKernelArgSVMPointer},
+    {clSetKernelExecInfo} and {clCloneKernel} are thread-safe.
+    Note that this statement does not imply that other API calls were not
+    thread-safe in earlier versions of the specification.
+
+Note that the OpenCL C kernel language is not updated for OpenCL 2.1.
+The OpenCL 2.0 kernel language will still be consumed by OpenCL 2.1
+runtimes.
+
+The SPIR-V and OpenCL SPIR-V Environment specifications have been added.
+
+== Summary of Changes from OpenCL 2.1 to OpenCL 2.2
+
+The following changes have been made to the OpenCL 2.2 execution model
+(section 3)
+
+  * Added the third prerequisite (executing non-trivial constructors for
+    program scope global variables).
+
+The following features are added to the OpenCL 2.2 platform layer and
+runtime (_sections 4 and 5_):
+
+  * {clSetProgramSpecializationConstant} API call
+  * {clSetProgramReleaseCallback} API call
+  * Queries for {CL_PROGRAM_SCOPE_GLOBAL_CTORS_PRESENT} and
+    {CL_PROGRAM_SCOPE_GLOBAL_DTORS_PRESENT}
+
+The following modifications are made to the OpenCL 2.2 platform layer and
+runtime (section 4 and 5):
+
+  * Modified description of {CL_DEVICE_MAX_CLOCK_FREQUENCY} query.
+  * Added a new error code {CL_MAX_SIZE_RESTRICTION_EXCEEDED} to
+    {clSetKernelArg} API call
+
+Added definition of Deprecation and Specialization constants to the
+glossary.
+
+== Summary of Changes from OpenCL 2.2 to OpenCL 3.0
+
+OpenCL 3.0 is a major revision that breaks backwards compatibility with
+previous versions of OpenCL, see
+<<opencl-3.0-backwards-compatibility, OpenCL 3.0 Backwards Compatibility>>
+for details.
+
+OpenCL 3.0 adds new queries to determine optional capabilities for a
+device:
+
+  * {CL_DEVICE_ATOMIC_MEMORY_CAPABILITIES} and
+    {CL_DEVICE_ATOMIC_FENCE_CAPABILITIES} to determine the
+    atomic memory and atomic fence capabilities of a device.
+  * {CL_DEVICE_NON_UNIFORM_WORK_GROUP_SUPPORT} to
+    determine if a device supports non-uniform work-group sizes.
+  * {CL_DEVICE_WORK_GROUP_COLLECTIVE_FUNCTIONS_SUPPORT}
+    to determine whether a device supports optional work-group
+    collective functions, such as broadcasts, scans, and reductions.
+  * {CL_DEVICE_GENERIC_ADDRESS_SPACE_SUPPORT} to
+    determine whether a device supports the generic address space.
+  * {CL_DEVICE_DEVICE_ENQUEUE_CAPABILITIES} to determine the device-side enqueue
+    capabilities of a device.
+  * {CL_DEVICE_PIPE_SUPPORT} to determine whether a device supports
+    pipe memory objects.
+  * {CL_DEVICE_PREFERRED_WORK_GROUP_SIZE_MULTIPLE} to determine the
+    the preferred work-group size multiple for a device.
+
+OpenCL 3.0 adds new queries to conveniently and precisely
+describe supported features and versions:
+
+  * {CL_PLATFORM_NUMERIC_VERSION} to describe the platform
+    version as a numeric value.
+  * {CL_PLATFORM_EXTENSIONS_WITH_VERSION} to describe supported
+    platform extensions and their supported version.
+  * {CL_DEVICE_NUMERIC_VERSION} to describe the device version
+    as a numeric value.
+  * {CL_DEVICE_EXTENSIONS_WITH_VERSION} to describe supported
+    device extensions and their supported version.
+  * {CL_DEVICE_ILS_WITH_VERSION} to describe supported
+    intermediate languages (ILs) and their supported version.
+  * {CL_DEVICE_BUILT_IN_KERNELS_WITH_VERSION} to describe supported
+    built-in kernels and their supported version.
+
+OpenCL 3.0 adds a new API to register a function that will be called
+when a context is destroyed, enabling an application to safely free
+user data associated with a context callback function.
+
+  * {clSetContextDestructorCallback}
+
+OpenCL 3.0 adds two new APIs to support creating buffer and image
+memory objects with additional properties.
+Although no new properties are added in OpenCL 3.0, these APIs enable
+new buffer and image extensions to be added easily and consistently:
+
+  * {clCreateBufferWithProperties}
+  * {clCreateImageWithProperties}
+
+OpenCL 3.0 adds new queries for the properties arrays specified
+when creating buffers, images, pipes, samplers, and command-queues:
+
+  * {CL_MEM_PROPERTIES}
+  * {CL_PIPE_PROPERTIES}
+  * {CL_SAMPLER_PROPERTIES}
+  * {CL_QUEUE_PROPERTIES_ARRAY}
+
+// GitHub issue #348
+Program initialization and clean-up kernels are not supported in OpenCL
+3.0 due to implementation complexity and lack of demand.
+The following APIs and queries for program initialization and clean-up
+kernels are deprecated in OpenCL 3.0:
+
+  * {CL_PROGRAM_SCOPE_GLOBAL_CTORS_PRESENT}
+  * {CL_PROGRAM_SCOPE_GLOBAL_DTORS_PRESENT}
+  * {clSetProgramReleaseCallback}
+
+OpenCL 3.0 adds the OpenCL 3.0 C kernel language, which includes
+feature macros to describe OpenCL C language support.
+Please refer to the OpenCL C specification for details.
+
+// GitHub issue #178
+Scalar input arguments to the *any* and *all* built-in functions have
+been deprecated in the OpenCL 3.0 C kernel language.
+These functions behaved inconsistently with the C language's use of
+scalar integers as logical values.
+
+OpenCL 3.0 adds new queries to determine supported OpenCL C language
+versions and supported OpenCL C features:
+
+  * {CL_DEVICE_OPENCL_C_ALL_VERSIONS} to determine the set
+    of OpenCL C language versions supported by a device.
+  * {CL_DEVICE_OPENCL_C_FEATURES} to determine
+    optional OpenCL C language features supported by a device.
+
+OpenCL 3.0 adds an event command type to identify events
+associated with the OpenCL 2.1 command {clEnqueueSVMMigrateMem}:
+
+  * {CL_COMMAND_SVM_MIGRATE_MEM}
+
+OpenCL 3.0 adds a new query to determine the latest version of the conformance
+test suite that the device has fully passed in accordance with the official
+conformance process:
+
+  * {CL_DEVICE_LATEST_CONFORMANCE_VERSION_PASSED}
+
+== Summary of Changes from OpenCL 3.0
+
+The first non-provisional version of the OpenCL 3.0 specifications was *v3.0.5*.
+
+Changes from *v3.0.5*:
+
+  * Fixed the calculation in "mapping work-items onto an ND-range".
+  * Added new extensions:
+      ** `<<cl_khr_extended_versioning>>`
+      ** `<<cl_khr_subgroup_extended_types>>`
+      ** `<<cl_khr_subgroup_non_uniform_vote>>`
+      ** `<<cl_khr_subgroup_ballot>>`
+      ** `<<cl_khr_subgroup_non_uniform_arithmetic>>`
+      ** `<<cl_khr_subgroup_shuffle>>`
+      ** `<<cl_khr_subgroup_shuffle_relative>>`
+      ** `<<cl_khr_subgroup_clustered_reduce>>`
+
+Changes from *v3.0.6*:
+
+  * Removed erroneous condition for {CL_INVALID_KERNEL_ARGS}.
+  * Fixed the spelling of `-cl-no-signed-zeros`.
+  * Clarified the table structure in the backwards compatibility appendix.
+  * Clarified that `-cl-unsafe-math-optimizations` also implies `-cl-denorms-are-zero`.
+  * Added new extensions:
+      ** `<<cl_khr_extended_bit_ops>>`
+      ** `<<cl_khr_pci_bus_info>>`
+      ** `<<cl_khr_spirv_extended_debug_info>>`
+      ** `<<cl_khr_spirv_linkonce_odr>>`
+      ** `<<cl_khr_suggested_local_work_size>>`
+
+Changes from *v3.0.7*:
+
+  * Clarified optionality support for double-precision literals.
+  * Removed unnecessary phrase from sub-group mask function descriptions.
+  * Added _input_slice_pitch_ error condition for read and write image APIs.
+  * Added new extension:
+      ** `<<cl_khr_integer_dot_product>>`
+
+Changes from *v3.0.8*:
+
+  * Added a missing error condition for {clGetKernelSuggestedLocalWorkSizeKHR}.
+  * Clarified requirements for {CL_DEVICE_DOUBLE_FP_CONFIG} prior to OpenCL 2.0.
+  * Clarified the behavior of ballot operations for remainder sub-groups.
+  * Added new extensions:
+      ** `<<cl_khr_integer_dot_product>>` (version 2)
+      ** `<<cl_khr_semaphore>>` (provisional)
+      ** `<<cl_khr_external_semaphore>>` (provisional)
+      ** `<<cl_khr_external_semaphore_dx_fence>>` (provisional)
+      ** `<<cl_khr_external_semaphore_opaque_fd>>` (provisional)
+      ** `<<cl_khr_external_semaphore_sync_fd>>` (provisional)
+      ** `<<cl_khr_external_semaphore_win32>>` (provisional)
+      ** `<<cl_khr_external_memory>>` (provisional)
+      ** `<<cl_khr_external_memory_dma_buf>>` (provisional)
+      ** `<<cl_khr_external_memory_dx>>` (provisional)
+      ** `<<cl_khr_external_memory_opaque_fd>>` (provisional)
+      ** `<<cl_khr_external_memory_win32>>` (provisional)
+
+Changes from *v3.0.9*:
+
+  * Relaxed memory object acquire error checking requirements for OpenGL, EGL, and DirectX interop extensions.
+  * Added a missing error condition for {clGetSemaphoreHandleForTypeKHR}.
+  * Clarified that {clCompileProgram} is valid for programs created from SPIR.
+  * Documented the possible state of a kernel object after a failed call to {clSetKernelArg}.
+  * Added new extensions:
+      ** `<<cl_khr_async_copy_fence>>` (final)
+      ** `<<cl_khr_extended_async_copies>>` (final)
+      ** `<<cl_khr_expect_assume>>`
+      ** `<<cl_khr_command_buffer>>` (provisional)
+
+Changes from *v3.0.10*:
+
+  * Added a requirement for implementations supporting device-side enqueue to also support program scope global variables.
+  * Added missing device scope atomic feature guards to several atomic function overloads.
+  * Added a possible error condition for {clGetEventProfilingInfo} for pre-OpenCL 3.0 devices.
+  * Added several missing error conditions for {clGetKernelSubGroupInfo}.
+  * Clarified the expected return value for the of {CL_IMAGE_ROW_PITCH} and {CL_IMAGE_SLICE_PITCH} queries.
+  * Updated descriptions of the extended async copies functions to remove references to nonexistent function arguments.
+  * Clarified that the extended versioning extension is a core OpenCL 3.0 feature.
+  * Clarified sub-group clustered reduction behavior when the cluster size is not an integer constant or a power of two.
+  * Added new extensions:
+      ** `<<cl_khr_subgroup_rotate>>`
+      ** `<<cl_khr_work_group_uniform_arithmetic>>`
+
+Changes from *v3.0.11*:
+
+  * Added a definition for a valid object and requirements for testing for valid objects.
+  * Added a maximum limit for the number of arguments supported by a kernel.
+  * Clarified requirements for comparability and uniqueness of object handles.
+  * Clarified behavior for invalid device-side enqueue `clk_event_t` handles.
+  * Clarified `<<cl_khr_command_buffer>>` interactions with other extensions.
+  * Specified error behavior when a command buffer is finalized multiple times.
+  * Added new extension:
+      ** `<<cl_khr_command_buffer_mutable_dispatch>>` (provisional)
+
+Changes from *v3.0.12*:
+
+  * Fixed the accuracy requirements description for half-precision math functions (those prefixed by `half_`).
+  * Clarified that the semaphore type must always be provided when creating a semaphore.
+  * Removed an unnecessary and contradictory error condition when creating a semaphore.
+  * Added an issue regarding non-linear image import to the `<<cl_khr_external_memory>>` extension.
+  * Added missing calls to {clBuildProgram} to the `<<cl_khr_command_buffer>>` and `<<cl_khr_command_buffer_mutable_dispatch>>` sample code.
+  * Fixed a copy-paste error in the extensions quick reference appendix.
+  * Fixed typos and improved formatting consistency in the extensions spec.
+
+Changes from *v3.0.13*:
+
+  * Corrected the precision for `cross` and `dot` to be based on `HALF_EPSILON` in `<<cl_khr_fp16>>`, see {khronos-opencl-pr}/893[#893].
+  * Added a context query for command-buffers to `<<cl_khr_command_buffer>>`, see {khronos-opencl-pr}/899[#899].
+  * Updated the semaphore wait and signal rules for binary semaphores in `<<cl_khr_semaphore>>`, see {khronos-opencl-pr}/882[#882].
+  * Removed redundant error conditions from `<<cl_khr_external_semaphore>>` and `<<cl_khr_external_memory>>`, see {khronos-opencl-pr}/903[#903] and {khronos-opencl-pr}/904[#904].
+  * Added new extension:
+      ** `<<cl_khr_command_buffer_multi_device>>` (provisional)
+
+Changes from *v3.0.14*:
+
+  * Clarified which error code should be returned when calling {clCreateBuffer} with a pointer to an SVM allocation that is too small, see {khronos-opencl-pr}/879[#879].
+  * Improved capitalization and hyphenation consistency throughout the specs, see {khronos-opencl-pr}/902[#902].
+  * Clarified that SVM is optional for all OpenCL 3.0 devices, see {khronos-opencl-pr}/913[#913].
+  * Clarified that {clSetCommandQueueProperty} is only required for OpenCL 1.0 devices and may return an error otherwise, see {khronos-opencl-pr}/980[#980].
+  * Clarified that the application must ensure the free function passed to {clEnqueueSVMFree} is thread safe, see {khronos-opencl-pr}/1016[#1016].
+  * Clarified that the application must ensure the user function passed to {clEnqueueNativeKernel} is thread safe, see {khronos-opencl-pr}/1026[#1026].
+  * `<<cl_khr_command_buffer>>` (provisional):
+      ** Removed the "invalid" command buffer state, see {khronos-opencl-pr}/885[#885].
+      ** Added support for recording SVM memory copies and memory fills in a command buffer, see {khronos-opencl-pr}/915[#915].
+  * `<<cl_khr_command_buffer_multi_device>>` (provisional):
+      ** Clarified that the sync devices query should only return root devices, see {khronos-opencl-pr}/925[#925].
+  * `<<cl_khr_external_memory>>` (provisional):
+      ** Disallowed specifying a device handle list without also specifying an external memory handle, see {khronos-opencl-pr}/922[#922].
+      ** Added a query to determine the handle types an implementation will assume have a linear memory layout, see {khronos-opencl-pr}/940[#940].
+      ** Added an external memory-specific device handle list enum, see {khronos-opencl-pr}/956[#956].
+      ** Clarified that implementations may acquire information about an image from an external memory handle when the image is created, see {khronos-opencl-pr}/970[#970].
+  * `<<cl_khr_external_semaphore>>` (provisional):
+      ** Added the ability to re-import "sync fd" handles into an existing semaphore, see {khronos-opencl-pr}/939[#939].
+      ** Clarified that a semaphore may only export one handle type, and that a semaphore created from an external handle cannot also export a handle, see {khronos-opencl-pr}/975[#975].
+      ** Clarified that `<<cl_khr_external_semaphore>>` requires support for `<<cl_khr_semaphore>>`, see {khronos-opencl-pr}/976[#976].
+      ** Added a query to determine if a semaphore may export an external handle, see {khronos-opencl-pr}/997[#997].
+  * `<<cl_khr_semaphore>>` (provisional):
+      ** Added an semaphore-specific device handle list enum, see {khronos-opencl-pr}/956[#956].
+      ** Restricted semaphores to a single associated device, see {khronos-opencl-pr}/996[#996].
+  * `<<cl_khr_subgroup_rotate>>`:
+      ** Clarified that only rotating within a subgroup is supported, see {khronos-opencl-pr}/967[#967].

@@ -1,0 +1,554 @@
+// Copyright 2020-2024 The Khronos Group Inc.
+
+[appendix]
+[[opencl-3.0-backwards-compatibility]]
+= OpenCL 3.0 Backwards Compatibility
+
+OpenCL 3.0 breaks backwards compatibility with earlier versions of OpenCL by making some features that were previously required for FULL_PROFILE or EMBEDDED_PROFILE devices optional.
+This appendix describes the features that were previously required that are now optional, how to detect whether an optional feature is supported, and expected behavior when an optional feature is not supported.
+
+NOTE: Informally, in the tables below the first row usually describes a feature detection mechanism ("May return this value indicating that the feature is not supported") and subsequent rows usually describe behavior when a feature is not supported ("Returns this value if the feature is not supported").
+
+== Shared Virtual Memory
+
+Shared Virtual Memory (SVM) is optional for devices supporting OpenCL 3.0.
+When Shared Virtual Memory is not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_SVM_CAPABILITIES}
+| May return `0`, indicating that _device_ does not support Shared Virtual Memory.
+
+| {clGetMemObjectInfo}, passing +
+{CL_MEM_USES_SVM_POINTER}
+| Returns {CL_FALSE} if no devices in the context associated with _memobj_ support Shared Virtual Memory.
+
+| {clSVMAlloc}
+| Returns `NULL` if no devices in _context_ support Shared Virtual Memory.
+
+| {clSVMFree}
+| Is a NOP if no devices in _context_ support Shared Virtual Memory.
+
+| {clEnqueueSVMFree}, +
+  {clEnqueueSVMMemcpy}, +
+  {clEnqueueSVMMemFill}, +
+  {clEnqueueSVMMap}, +
+  {clEnqueueSVMUnmap}, +
+  {clEnqueueSVMMigrateMem}
+| Returns {CL_INVALID_OPERATION} if the device associated with _command_queue_ does not support Shared Virtual Memory.
+
+| {clSetKernelArgSVMPointer}, +
+  {clSetKernelExecInfo}
+| Returns {CL_INVALID_OPERATION} if no devices in the context associated with _kernel_ support Shared Virtual Memory.
+
+|====
+
+== Memory Consistency Model
+
+Some aspects of the OpenCL memory consistency model are optional for devices supporting OpenCL 3.0.
+New device queries were added to {clGetDeviceInfo} to allow capabilities to be precisely reported.
+When the full memory consistency model is not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_ATOMIC_MEMORY_CAPABILITIES}
+| May return:
+
+{CL_DEVICE_ATOMIC_ORDER_RELAXED} \| +
+{CL_DEVICE_ATOMIC_SCOPE_WORK_GROUP}
+
+indicating that _device_ does not support the full memory consistency model for atomic memory operations.
+
+// The above is based on mapping OpenCL 1.x atomic operations to 2.x as:
+// atomic_add(ptr, operand) --> atomic_fetch_add_explicit(ptr, operand,
+//                                                        memory_order_relaxed,
+//                                                        memory_scope_work_group)
+// The scope is inconsequential for relaxed consistency order, but in general
+// in OpenCL 1.x non-atomic memory operations are only guaranteed to be visible
+// within the work-group (until the work-group completes).
+
+Note that a device that provides the same level of capabilities as an OpenCL 2.x device would be expected to return:
+
+{CL_DEVICE_ATOMIC_ORDER_RELAXED} \| +
+{CL_DEVICE_ATOMIC_ORDER_ACQ_REL} \| +
+{CL_DEVICE_ATOMIC_ORDER_SEQ_CST} \| +
+{CL_DEVICE_ATOMIC_SCOPE_WORK_GROUP} \| +
+{CL_DEVICE_ATOMIC_SCOPE_DEVICE} \| +
+{CL_DEVICE_ATOMIC_SCOPE_ALL_DEVICES}
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_ATOMIC_FENCE_CAPABILITIES}
+| May return:
+
+{CL_DEVICE_ATOMIC_ORDER_RELAXED} \| +
+{CL_DEVICE_ATOMIC_ORDER_ACQ_REL} \| +
+{CL_DEVICE_ATOMIC_SCOPE_WORK_GROUP}
+
+indicating that _device_ does not support the full memory consistency model for atomic fence operations.
+
+// The above is based on mapping OpenCL 1.x fences to 2.x fences as:
+// mem_fence(flags) --> atomic_work_item_fence(flags,
+//                                             memory_order_acq_rel,
+//                                             memory_scope_work_group)
+// read_mem_fence(flags) --> atomic_work_item_fence(flags,
+//                                                  memory_order_acquire,
+//                                                  memory_scope_work_group)
+// write_mem_fence(flags) --> atomic_work_item_fence(flags,
+//                                                   memory_order_release,
+//                                                   memory_scope_work_group)
+
+Note that a device that provides the same level of capabilities as an OpenCL 2.x device would be expected to return:
+
+{CL_DEVICE_ATOMIC_ORDER_RELAXED} \| +
+{CL_DEVICE_ATOMIC_ORDER_ACQ_REL} \| +
+{CL_DEVICE_ATOMIC_ORDER_SEQ_CST} \| +
+{CL_DEVICE_ATOMIC_SCOPE_WORK_ITEM} \| +
+{CL_DEVICE_ATOMIC_SCOPE_WORK_GROUP} \| +
+{CL_DEVICE_ATOMIC_SCOPE_DEVICE} \| +
+{CL_DEVICE_ATOMIC_SCOPE_ALL_DEVICES}
+
+|====
+
+OpenCL C compilers supporting atomics orders or scopes beyond the mandated
+minimum will define some or all of following feature macros as appropriate:
+
+[none]
+* `+__opencl_c_atomic_order_acq_rel+` -- Indicating atomic operations support acquire-release orderings.
+* `+__opencl_c_atomic_order_seq_cst+` -- Indicating atomic operations and fences support acquire sequentially consistent orderings.
+* `+__opencl_c_atomic_scope_device+` -- Indicating atomic operations and fences support device-wide memory ordering constraints.
+* `+__opencl_c_atomic_scope_all_devices+` -- Indicating atomic operations and fences support all-device memory ordering constraints, across any host threads and all devices that can share SVM memory with each other and the host process.
+
+== Device-Side Enqueue
+
+Device-side enqueue and on-device queues are optional for devices supporting OpenCL 3.0.
+When device-side enqueue is not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_DEVICE_ENQUEUE_CAPABILITIES}
+| May return `0`, indicating that _device_ does not support device-side enqueue and on-device queues.
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_QUEUE_ON_DEVICE_PROPERTIES}
+| Returns `0` if _device_ does not support device-side enqueue and on-device queues.
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_QUEUE_ON_DEVICE_PREFERRED_SIZE}, +
+{CL_DEVICE_QUEUE_ON_DEVICE_MAX_SIZE}, +
+{CL_DEVICE_MAX_ON_DEVICE_QUEUES}, or +
+{CL_DEVICE_MAX_ON_DEVICE_EVENTS}
+| Returns `0` if _device_ does not support device-side enqueue and on-device queues.
+
+| {clGetCommandQueueInfo}, passing +
+{CL_QUEUE_SIZE}
+| Returns {CL_INVALID_COMMAND_QUEUE} since _command_queue_ cannot be a valid device command-queue.
+
+| {clGetCommandQueueInfo}, passing +
+{CL_QUEUE_DEVICE_DEFAULT}
+| Returns `NULL` if the device associated with _command_queue_ does not support on-device queues.
+
+| {clGetEventProfilingInfo}, passing +
+{CL_PROFILING_COMMAND_COMPLETE}
+| Returns a value equivalent to passing {CL_PROFILING_COMMAND_END} if the device associated with _event_ does not support device-side enqueue.
+
+| {clSetDefaultDeviceCommandQueue}
+| Returns {CL_INVALID_OPERATION} if _device_ does not support on-device queues.
+
+|====
+
+When device-side enqueue is supported but a replaceable default on-device queue is not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_DEVICE_ENQUEUE_CAPABILITIES}
+| May omit {CL_DEVICE_QUEUE_REPLACEABLE_DEFAULT}, indicating that _device_ does not support a replaceable default on-device queue.
+
+| {clSetDefaultDeviceCommandQueue}
+| Returns {CL_INVALID_OPERATION} if _device_ does not support a replaceable default on-device queue.
+
+|====
+
+OpenCL C compilers supporting device-side enqueue and on-device queues will define the feature macro `+__opencl_c_device_enqueue+`.
+OpenCL C compilers that define the feature macro `+__opencl_c_device_enqueue+` must also define the feature macro `+__opencl_c_generic_address_space+` because some OpenCL C functions for device-side enqueue accept pointers to the generic address space.
+OpenCL C compilers that define the feature macro `+__opencl_c_device_enqueue+` must also define the feature macro `+__opencl_c_program_scope_global_variables+` because an implementation of blocks may interact with program scope variables in global address space as part of ABI.
+
+== Pipes
+
+Pipe memory objects are optional for devices supporting OpenCL 3.0.
+When pipes are not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_PIPE_SUPPORT}
+| May return {CL_FALSE}, indicating that _device_ does not support pipes.
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_MAX_PIPE_ARGS}, +
+{CL_DEVICE_PIPE_MAX_ACTIVE_RESERVATIONS}, or +
+{CL_DEVICE_PIPE_MAX_PACKET_SIZE}
+| Returns `0` if _device_ does not support pipes.
+
+| {clCreatePipe}
+| Returns {CL_INVALID_OPERATION} if no devices in _context_ support pipes.
+
+| {clGetPipeInfo}
+| Returns {CL_INVALID_MEM_OBJECT} since _pipe_ cannot be a valid pipe object.
+
+|====
+
+OpenCL C compilers supporting pipes will define the feature macro `+__opencl_c_pipes+`.
+OpenCL C compilers that define the feature macro `+__opencl_c_pipes+` must also define the feature macro `+__opencl_c_generic_address_space+` because some OpenCL C functions for pipes accept pointers to the generic address space.
+
+== Program Scope Global Variables
+
+Program scope global variables are optional for devices supporting OpenCL 3.0.
+When program scope global variables are not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_MAX_GLOBAL_VARIABLE_SIZE}
+| May return `0`, indicating that _device_ does not support program scope global variables.
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_GLOBAL_VARIABLE_PREFERRED_TOTAL_SIZE}
+| Returns `0` if _device_ does not support program scope global variables.
+
+| {clGetProgramBuildInfo}, passing +
+{CL_PROGRAM_BUILD_GLOBAL_VARIABLE_TOTAL_SIZE}
+| Returns `0` if _device_ does not support program scope global variables.
+
+|====
+
+OpenCL C compilers supporting program scope global variables will define the feature macro `+__opencl_c_program_scope_global_variables+`.
+
+// TODO: There is no SPIR-V capability specific to program scope global variables.
+// May need to update the validation rules to disallow program scope global variables
+// for OpenCL 1.2 consumers regardless.
+
+== Non-Uniform Work-groups
+
+Support for non-uniform work-groups is optional for devices supporting OpenCL 3.0.
+When non-uniform work-groups are not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_NON_UNIFORM_WORK_GROUP_SUPPORT}
+| May return {CL_FALSE}, indicating that _device_ does not support non-uniform work-groups.
+
+| {clEnqueueNDRangeKernel}
+| Behaves as though non-uniform work-groups were not enabled for _kernel_, if the device associated with _command_queue_ does not support non-uniform work-groups.
+
+|====
+
+// Note, there are no language or SPIR-V changes for non-uniform work-groups.
+// The `get_enqueued_local_size` and `get_enqueued_num_sub_groups` built-in
+// functions, and the *EnqueuedWorkgroupSize* and *NumEnqueuedSubGroups*
+// *BuiltIn* decorations will be supported even if the device does not support
+// non-uniform work-groups.
+
+== Read-Write Images
+
+Read-write images, that may be read from and written to in the same kernel, are optional for devices supporting OpenCL 3.0.
+When read-write images are not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_MAX_READ_WRITE_IMAGE_ARGS}
+| May return `0`, indicating that _device_ does not support read-write images.
+
+| {clGetSupportedImageFormats}, passing +
+{CL_MEM_KERNEL_READ_AND_WRITE}
+| Returns an empty set (such as _num_image_formats_ equal to `0`), indicating that no image formats are supported for reading and writing in the same kernel, if no devices in _context_ support read-write images.
+
+|====
+
+OpenCL C compilers supporting read-write images will define the feature macro `+__opencl_c_read_write_images+`.
+
+== Creating 2D Images From Buffers
+
+Creating a 2D image from a buffer is optional for devices supporting OpenCL 3.0.
+When creating a 2D image from a buffer is not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_IMAGE_PITCH_ALIGNMENT} or +
+{CL_DEVICE_IMAGE_BASE_ADDRESS_ALIGNMENT}
+| May return `0`, indicating that _device_ does not support creating a 2D image from a Buffer.
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_EXTENSIONS}
+| Will not describe support for the `<<cl_khr_image2d_from_buffer>>` extension if _device_ does not support creating a 2D image from a buffer.
+
+| {clCreateImage} or +
+{clCreateImageWithProperties}, passing +
+__image_type__ equal to {CL_MEM_OBJECT_IMAGE2D} and +
+__mem_object__ not equal to `NULL`
+| Returns {CL_INVALID_OPERATION} if no devices in _context_ support creating a 2D image from a buffer.
+
+|====
+
+== sRGB Images
+
+All of the sRGB image channel orders (such as {CL_sRGBA}) are optional for devices supporting OpenCL 3.0.
+When sRGB images are not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetSupportedImageFormats}
+| Will not return return any image formats with `image_channel_order` equal to an sRGB image channel order if no devices in _context_ support sRGB images.
+
+|====
+
+== Depth Images
+
+The {CL_DEPTH} image channel order is optional for devices supporting OpenCL 3.0.
+When depth images are not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetSupportedImageFormats}
+| Will not return any image formats with `image_channel_order` equal to {CL_DEPTH} if no devices in _context_ support depth images.
+
+|====
+
+== Device and Host Timer Synchronization
+
+Synchronizing the device and host timers is optional for platforms supporting OpenCL 3.0.
+When device and host timer synchronization is not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetPlatformInfo}, passing +
+{CL_PLATFORM_HOST_TIMER_RESOLUTION}
+| May return `0`, indicating that _platform_ does not support device and host timer synchronization.
+
+| {clGetDeviceAndHostTimer},
+{clGetHostTimer}
+| Returns {CL_INVALID_OPERATION} if the platform associated with _device_ does not support device and host timer synchronization.
+
+|====
+
+== Intermediate Language Programs
+
+Creating programs from an intermediate language (such as SPIR-V) is optional for devices supporting OpenCL 3.0.
+When intermediate language programs are not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_IL_VERSION} or +
+{CL_DEVICE_ILS_WITH_VERSION}
+| May return an empty string and empty array, indicating that _device_ does not support intermediate language programs.
+
+| {clGetProgramInfo}, passing +
+{CL_PROGRAM_IL}
+| Returns an empty buffer (such as _param_value_size_ret_ equal to `0`) if no devices in the context associated with _program_ support intermediate language programs.
+
+| {clCreateProgramWithIL}
+| Returns {CL_INVALID_OPERATION} if no devices in _context_ support intermediate language programs.
+
+| {clSetProgramSpecializationConstant}
+| Returns {CL_INVALID_OPERATION} if no devices associated with _program_ support intermediate language programs.
+
+| {clGetKernelSubGroupInfo}, passing +
+{CL_KERNEL_COMPILE_NUM_SUB_GROUPS}
+| Returns `0` if _device_ does not support intermediate language programs, since there is currently no way to require a number of sub-groups per work-group for programs created from source.
+
+|====
+
+== Sub-groups
+
+Sub-groups are optional for devices supporting OpenCL 3.0.
+When sub-groups are not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_MAX_NUM_SUB_GROUPS}
+| May return `0`, indicating that _device_ does not support sub-groups.
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_SUB_GROUP_INDEPENDENT_FORWARD_PROGRESS}
+| Returns {CL_FALSE} if _device_ does not support sub-groups.
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_EXTENSIONS}
+| Will not describe support for the `<<cl_khr_subgroups>>` extension if _device_ does not support sub-groups.
+
+| {clGetKernelSubGroupInfo}
+| Returns {CL_INVALID_OPERATION} if _device_ does not support sub-groups.
+// Note: for {CL_KERNEL_MAX_SUB_GROUP_SIZE_FOR_NDRANGE}, {CL_KERNEL_SUB_GROUP_COUNT_FOR_NDRANGE},
+//       {CL_KERNEL_LOCAL_SIZE_FOR_SUB_GROUP_COUNT}, {CL_KERNEL_MAX_NUM_SUB_GROUPS},
+//       {CL_KERNEL_COMPILE_NUM_SUB_GROUPS}.
+
+|====
+
+OpenCL C compilers supporting sub-groups will define the feature macro `+__opencl_c_subgroups+`.
+
+== Program Initialization and Clean-Up Kernels
+
+Program initialization and clean-up kernels are not supported in OpenCL 3.0, and the APIs and queries for program initialization and clean-up kernels are deprecated in OpenCL 3.0.
+When program initialization and clean-up kernels are not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetProgramInfo}, passing +
+{CL_PROGRAM_SCOPE_GLOBAL_CTORS_PRESENT} or +
+{CL_PROGRAM_SCOPE_GLOBAL_DTORS_PRESENT}
+| Returns {CL_FALSE} if no devices in the context associated with _program_ support program initialization and clean-up kernels.
+
+| {clSetProgramReleaseCallback}
+| Returns {CL_INVALID_OPERATION} if no devices in the context associated with _program_ support program initialization and clean-up kernels.
+
+|====
+
+== 3D Image Writes
+
+Kernel built-in functions for writing to 3D image objects are optional for devices supporting OpenCL 3.0.
+When writing to 3D image objects is not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_EXTENSIONS}
+| Will not describe support for the `<<cl_khr_3d_image_writes>>` extension if _device_ does not support writing to 3D image objects.
+
+| {clGetSupportedImageFormats}, passing +
+{CL_MEM_OBJECT_IMAGE3D} and one of +
+{CL_MEM_WRITE_ONLY}, +
+{CL_MEM_READ_WRITE}, or +
+{CL_MEM_KERNEL_READ_AND_WRITE}
+| Returns an empty set (such as _num_image_formats_ equal to `0`), indicating that no image formats are supported for writing to 3D image objects, if no devices in _context_ support writing to 3D image objects.
+
+|====
+
+OpenCL C compilers supporting writing to 3D image objects will define the feature macro `+__opencl_c_3d_image_writes+`.
+
+== Work-group Collective Functions
+
+Work-group collective functions for broadcasts, scans, and reductions are optional for devices supporting OpenCL 3.0.
+When work-group collective functions are not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_WORK_GROUP_COLLECTIVE_FUNCTIONS_SUPPORT}
+| May return {CL_FALSE}, indicating that _device_ does not support work-group collective functions.
+
+|====
+
+OpenCL C compilers supporting work-group collective functions will define the feature macro `+__opencl_c_work_group_collective_functions+`.
+
+== Generic Address Space
+
+Support for the generic address space is optional for devices supporting OpenCL 3.0.
+When the generic address space is not supported:
+
+[cols="2,3",options="header",]
+|====
+|*API*
+|*Behavior*
+
+| {clGetDeviceInfo}, passing +
+{CL_DEVICE_GENERIC_ADDRESS_SPACE_SUPPORT}
+| May return {CL_FALSE}, indicating that _device_ does not support the generic address space.
+
+|====
+
+OpenCL C compilers supporting the generic address space will define the feature macro `+__opencl_c_generic_address_space+`.
+
+//== Required APIs
+//
+//* {clCloneKernel}
+//* NULL / Zero Global Work Size
+//* Preferred Atomic Alignment Queries
+//    ** {CL_DEVICE_PREFERRED_PLATFORM_ATOMIC_ALIGNMENT}
+//    ** {CL_DEVICE_PREFERRED_GLOBAL_ATOMIC_ALIGNMENT}
+//    ** {CL_DEVICE_PREFERRED_LOCAL_ATOMIC_ALIGNMENT}
+//    ** These queries can all return `0`, indicating alignment
+//       to the natural size of the type.
+//* {clCreateSamplerWithProperties}
+//* {clCreateCommandQueueWithProperties}
+//
+//== Required Language / SPIR-V
+//
+//* Maximum Kernel Argument Size Decoration
+//    ** Support for SPIR-V **MaxByteOffset** **Decoration**
+//    ** {CL_MAX_SIZE_RESTRICTION_EXCEEDED} error code to {clSetKernelArg}
+//    ** Do NOT add to core OpenCL C 3.0, but could be an extension.
+//* Misc Built-in Functions
+//    ** Count Trailing Zeroes
+//        *** `ctz`
+//    ** Linear IDs, e.g.
+//        *** `get_global_linear_id`
+//        *** `get_local_linear_id`
+//    ** `work_group_barrier` (as a synonym for `barrier`)
+
+== Language Features That Were Already Optional
+
+Some OpenCL C language features were already optional before OpenCL 3.0, the API mechanisms for querying these have not changed.
+
+New feature macros for these optional features have been added to OpenCL C to provide a consistent mechanism for using optional features in OpenCL C 3.0.
+OpenCL C compilers supporting images will define the feature macro `+__opencl_c_images+`.
+OpenCL C compilers supporting the `double` type will define the feature macro `+__opencl_c_fp64+`.
+OpenCL C compilers supporting the `long`, `unsigned long` and `ulong` types will define the feature macro `+__opencl_c_int64+`, note that compilers for FULL_PROFILE devices must support these types and define the macro unconditionally.
