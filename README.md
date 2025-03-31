@@ -1,201 +1,204 @@
-# batchspawner for Jupyterhub
+<h1 align="center">
+  <img src="https://raw.githubusercontent.com/manrajgrover/halo/master/art/halo.png" height="50px"/>
+  <br>
+  halo
+</h1>
 
-[![Build Status](https://img.shields.io/travis/com/jupyterhub/batchspawner?logo=travis)](https://travis-ci.com/jupyterhub/batchspawner)
+[![Build Status](https://travis-ci.com/manrajgrover/halo.svg?branch=master)](https://travis-ci.com/manrajgrover/halo) [![Build status](https://ci.appveyor.com/api/projects/status/wa6t414gltr403ff?svg=true)](https://ci.appveyor.com/project/manrajgrover/halo) [![Coverage Status](https://coveralls.io/repos/github/manrajgrover/halo/badge.svg?branch=master)](https://coveralls.io/github/manrajgrover/halo?branch=master)
+ [![PyPI](https://img.shields.io/pypi/v/halo.svg)](https://github.com/manrajgrover/halo) ![awesome](https://img.shields.io/badge/awesome-yes-green.svg) [![Downloads](https://pepy.tech/badge/halo)](https://pepy.tech/project/halo) [![Downloads](https://pepy.tech/badge/halo/month)](https://pepy.tech/project/halo/month)
+> Beautiful spinners for terminal, IPython and Jupyter
 
-This is a custom spawner for [Jupyterhub](https://jupyterhub.readthedocs.io/) that is designed for installations on clusters using batch scheduling software.
+![halo](https://raw.github.com/manrajgrover/halo/master/art/doge_spin.svg?sanitize=true)
 
-This began as a generalization of [mkgilbert's batchspawner](https://github.com/mkgilbert/slurmspawner) which in turn was inspired by [Andrea Zonca's blog post](http://zonca.github.io/2015/04/jupyterhub-hpc.html 'Run jupyterhub on a Supercomputer') where he explains his implementation for a spawner that uses SSH and Torque. His github repo is found [here](http://www.github.com/zonca/remotespawner 'RemoteSpawner').
+## Install
 
-This package formerly included WrapSpawner and ProfilesSpawner, which provide mechanisms for runtime configuration of spawners.  These have been split out and moved to the [`wrapspawner`](https://github.com/jupyterhub/wrapspawner) package.
+```shell
+$ pip install halo
+```
 
-## Installation
-1. from root directory of this repo (where setup.py is), run `pip install -e .`
+## Usage
 
-   If you don't actually need an editable version, you can simply run
-      `pip install batchspawner`
+```py
+from halo import Halo
 
-2. add lines in jupyterhub_config.py for the spawner you intend to use, e.g.
+spinner = Halo(text='Loading', spinner='dots')
+spinner.start()
 
-   ```python
-      c = get_config()
-      c.JupyterHub.spawner_class = 'batchspawner.TorqueSpawner'
-      import batchspawner    # Even though not used, needed to register batchspawner interface
-   ```
-3. Depending on the spawner, additional configuration will likely be needed.
+# Run time consuming work here
+# You can also change properties for spinner as and when you want
 
-## Batch Spawners
+spinner.stop()
+```
 
-For information on the specific spawners, see [SPAWNERS.md](SPAWNERS.md).
+Alternatively, you can use halo with Python's `with` statement:
 
-### Overview
+```py
+from halo import Halo
 
-This file contains an abstraction layer for batch job queueing systems (`BatchSpawnerBase`), and implements
-Jupyterhub spawners for Torque, Moab, SLURM, SGE, HTCondor, LSF, and eventually others.
-Common attributes of batch submission / resource manager environments will include notions of:
-  * queue names, resource manager addresses
-  * resource limits including runtime, number of processes, memory
-  * singleuser child process running on (usually remote) host not known until runtime
-  * job submission and monitoring via resource manager utilities
-  * remote execution via submission of templated scripts
-  * job names instead of PIDs
+with Halo(text='Loading', spinner='dots'):
+    # Run time consuming work here
+```
 
-`BatchSpawnerBase` provides several general mechanisms:
-  * configurable traits `req_foo` that are exposed as `{foo}` in job template scripts.  Templates (submit scripts in particular) may also use the full power of [jinja2](http://jinja.pocoo.org/).  Templates are automatically detected if a `{{` or `{%` is present, otherwise str.format() used.
-  * configurable command templates for submitting/querying/cancelling jobs
-  * a generic concept of job-ID and ID-based job state tracking
-  * overrideable hooks for subclasses to plug in logic at numerous points
+Finally, you can use halo as a decorator:
 
-### Example
+```py
+from halo import Halo
 
-Every effort has been made to accommodate highly diverse systems through configuration
-only. This example consists of the (lightly edited) configuration used by the author
-to run Jupyter notebooks on an academic supercomputer cluster.
+@Halo(text='Loading', spinner='dots')
+def long_running_function():
+    # Run time consuming work here
+    pass
 
-   ```python
-   # Select the Torque backend and increase the timeout since batch jobs may take time to start
-   import batchspawner
-   c.JupyterHub.spawner_class = 'batchspawner.TorqueSpawner'
-   c.Spawner.http_timeout = 120
+long_running_function()
+```
 
-   #------------------------------------------------------------------------------
-   # BatchSpawnerBase configuration
-   #    These are simply setting parameters used in the job script template below
-   #------------------------------------------------------------------------------
-   c.BatchSpawnerBase.req_nprocs = '2'
-   c.BatchSpawnerBase.req_queue = 'mesabi'
-   c.BatchSpawnerBase.req_host = 'mesabi.xyz.edu'
-   c.BatchSpawnerBase.req_runtime = '12:00:00'
-   c.BatchSpawnerBase.req_memory = '4gb'
-   #------------------------------------------------------------------------------
-   # TorqueSpawner configuration
-   #    The script below is nearly identical to the default template, but we needed
-   #    to add a line for our local environment. For most sites the default templates
-   #    should be a good starting point.
-   #------------------------------------------------------------------------------
-   c.TorqueSpawner.batch_script = '''#!/bin/sh
-   #PBS -q {queue}@{host}
-   #PBS -l walltime={runtime}
-   #PBS -l nodes=1:ppn={nprocs}
-   #PBS -l mem={memory}
-   #PBS -N jupyterhub-singleuser
-   #PBS -v {keepvars}
-   module load python3
-   {cmd}
-   '''
-   # For our site we need to munge the execution hostname returned by qstat
-   c.TorqueSpawner.state_exechost_exp = r'int-\1.mesabi.xyz.edu'
-   ```
+## API
 
-### Security
+#### `Halo([text|text_color|spinner|animation|placement|color|interval|stream|enabled])`
 
-Unless otherwise stated for a specific spawner, assume that spawners
-*do* evaluate shell environment for users and thus the [security
-requirements of JupyterHub security for untrusted
-users](https://jupyterhub.readthedocs.io/en/stable/reference/websecurity.html)
-are not fulfilled because some (most?) spawners *do* start a user
-shell which will execute arbitrary user environment configuration
-(``.profile``, ``.bashrc`` and the like) unless users do not have
-access to their own cluster user account.  This is something which we
-are working on.
+##### `text`
+*Type*: `str`
 
+Text shown along with spinner.
 
-## Provide different configurations of BatchSpawner
+##### `text_color`
+*Type*: `str`
+*Values*: `grey`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`
 
-### Overview
+Color of the spinner text. Defaults to `None`.
 
-`ProfilesSpawner`, available as part of the [`wrapspawner`](https://github.com/jupyterhub/wrapspawner)
-package, allows the Jupyterhub administrator to define a set of different spawning configurations,
-both different spawners and different configurations of the same spawner.
-The user is then presented a dropdown menu for choosing the most suitable configuration for their needs.
+##### `spinner`
+*Type*: `str|dict`
 
-This method provides an easy and safe way to provide different configurations of `BatchSpawner` to the
-users, see an example below.
+If string, it should be one of the spinners listed in the given [json](https://github.com/sindresorhus/cli-spinners/blob/dac4fc6571059bb9e9bc204711e9dfe8f72e5c6f/spinners.json) file. If a dict is passed, it should define `interval` and `frames`. Something like:
 
-### Example
+```py
+{
+    'interval': 100,
+    'frames': ['-', '+', '*', '+', '-']
+}
+```
 
-The following is based on the author's configuration (at the same site as the example above)
-showing how to give users access to multiple job configurations on the batch scheduled
-clusters, as well as an option to run a local notebook directly on the jupyterhub server.
+Defaults to `dots` spinner. For Windows users, it defaults to `line` spinner.
 
-   ```python
-   # Same initial setup as the previous example
-   import batchspawner
-   c.JupyterHub.spawner_class = 'wrapspawner.ProfilesSpawner'
-   c.Spawner.http_timeout = 120
-   #------------------------------------------------------------------------------
-   # BatchSpawnerBase configuration
-   #   Providing default values that we may omit in the profiles
-   #------------------------------------------------------------------------------
-   c.BatchSpawnerBase.req_host = 'mesabi.xyz.edu'
-   c.BatchSpawnerBase.req_runtime = '12:00:00'
-   c.TorqueSpawner.state_exechost_exp = r'in-\1.mesabi.xyz.edu'
-   #------------------------------------------------------------------------------
-   # ProfilesSpawner configuration
-   #------------------------------------------------------------------------------
-   # List of profiles to offer for selection. Signature is:
-   #   List(Tuple( Unicode, Unicode, Type(Spawner), Dict ))
-   # corresponding to profile display name, unique key, Spawner class,
-   # dictionary of spawner config options.
-   #
-   # The first three values will be exposed in the input_template as {display},
-   # {key}, and {type}
-   #
-   c.ProfilesSpawner.profiles = [
-      ( "Local server", 'local', 'jupyterhub.spawner.LocalProcessSpawner', {'ip':'0.0.0.0'} ),
-      ('Mesabi - 2 cores, 4 GB, 8 hours', 'mesabi2c4g12h', 'batchspawner.TorqueSpawner',
-         dict(req_nprocs='2', req_queue='mesabi', req_runtime='8:00:00', req_memory='4gb')),
-      ('Mesabi - 12 cores, 128 GB, 4 hours', 'mesabi128gb', 'batchspawner.TorqueSpawner',
-         dict(req_nprocs='12', req_queue='ram256g', req_runtime='4:00:00', req_memory='125gb')),
-      ('Mesabi - 2 cores, 4 GB, 24 hours', 'mesabi2c4gb24h', 'batchspawner.TorqueSpawner',
-         dict(req_nprocs='2', req_queue='mesabi', req_runtime='24:00:00', req_memory='4gb')),
-      ('Interactive Cluster - 2 cores, 4 GB, 8 hours', 'lab', 'batchspawner.TorqueSpawner',
-         dict(req_nprocs='2', req_host='labhost.xyz.edu', req_queue='lab',
-             req_runtime='8:00:00', req_memory='4gb', state_exechost_exp='')),
-      ]
-   c.ProfilesSpawner.ip = '0.0.0.0'
-   ```
+##### `animation`
+*Type*: `str`
+*Values*: `bounce`, `marquee`
 
+Animation to apply to the text if it's too large and doesn't fit in the terminal. If no animation is defined, the text will be ellipsed.
 
-## Debugging batchspawner
+##### `placement`
+*Type*: `str`
+*Values*: `left`, `right`
 
-Sometimes it can be hard to debug batchspawner, but it's not really
-once you know how the pieces interact.  Check the following places for
-error messages:
+Which side of the text the spinner should be displayed. Defaults to `left`
 
-* Check the JupyterHub logs for errors.
+##### `color`
+*Type*: `str`
+*Values*: `grey`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`
 
-* Check the JupyterHub logs for the batch script that got submitted
-  and the command used to submit it.  Are these correct?  (Note that
-  there are submission environment variables too, which aren't
-  displayed.)
+Color of the spinner. Defaults to `cyan`.
 
-* At this point, it's a matter of checking the batch system.  Is the
-  job ever scheduled?  Does it run?  Does it succeed?  Check the batch
-  system status and output of the job.  The most comon failure
-  patterns are a) job never starting due to bad scheduler options, b)
-  job waiting in the queue beyond the `start_timeout`, causing
-  JupyterHub to kill the job.
+##### `interval`
+*Type*: `float`
 
-* At this point the job starts.  Does it fail immediately, or before
-  Jupyter starts?  Check the scheduler output files (stdout/stderr of
-  the job), wherever it is stored.  To debug the job script, you can
-  add debugging into the batch script, such as an `env` or `set
-  -x`.
+Interval between each frame. Defaults to spinner interval (recommended).
 
-* At this point Jupyter itself starts - check its error messages.  Is
-  it starting with the right options?  Can it communicate with the
-  hub?  At this point there usually isn't anything
-  batchspawner-specific, with the one exception below.  The error log
-  would be in the batch script output (same file as above).  There may
-  also be clues in the JupyterHub logfile.
+##### `stream`
+*Type*: `file`
 
-Common problems:
+Stream to write the output. Defaults to `sys.stdout`.
 
-* Did you `import batchspawner` in the `jupyterhub_config.py` file?
-  This is needed in order to activate the batchspawer API in
-  JupyterHub.
+##### `enabled`
+*Type*: `bool`
 
+Enable or disable the spinner. Defaults to `True`.
 
-## Changelog
+### Methods
 
-See [CHANGELOG.md](CHANGELOG.md).
+Following are the methods available:
+
+#### `spinner.start([text])`
+
+Starts the spinner. If `text` is passed, it is set as spinner text. Returns the instance.
+
+#### `spinner.stop()`
+
+Stops and clears the spinner. Returns the instance.
+
+#### `spinner.clear()`
+
+Clears the spinner. Returns the instance.
+
+#### `spinner.render()`
+
+Manually renders a new frame. Returns the instance.
+
+#### `spinner.frame()`
+
+Returns next frame to be rendered.
+
+#### `spinner.succeed([text])`
+##### `text`: *Type*: `str`
+
+Stops the spinner and changes symbol to `✔`. If text is provided, it is persisted else current text is persisted. Returns the instance.
+
+#### `spinner.fail([text])`
+##### `text`: *Type*: `str`
+
+Stops the spinner and changes symbol to `✖`. If text is provided, it is persisted else current text is persisted. Returns the instance.
+
+#### `spinner.warn([text])`
+##### `text`: *Type*: `str`
+
+Stops the spinner and changes symbol to `⚠`. If text is provided, it is persisted else current text is persisted. Returns the instance.
+
+#### `spinner.info([text])`
+##### `text`: *Type*: `str`
+
+Stops the spinner and changes symbol to `ℹ`. If text is provided, it is persisted else current text is persisted. Returns the instance.
+
+#### `spinner.stop_and_persist([symbol|text])`
+Stops the spinner and changes symbol and text. Returns the instance.
+
+##### `symbol`
+*Type*: `str`
+
+Symbol to replace the spinner with. Defaults to `' '`.
+
+##### `text`
+*Type*: `str`
+
+Text to be persisted. Defaults to instance text.
+
+![Persist spin](https://raw.github.com/manrajgrover/halo/master/art/persist_spin.svg?sanitize=true)
+
+#### `spinner.text`
+Change the text of spinner.
+
+#### `spinner.color`
+Change the color of spinner
+
+#### `spinner.spinner`
+Change the spinner itself.
+
+#### `spinner.enabled`
+Enable or disable the spinner.
+
+## How to contribute?
+
+Please see [Contributing guidelines](https://github.com/manrajgrover/halo/blob/master/.github/CONTRIBUTING.md) for more information.
+
+## Like it?
+
+🌟 this repo to show support. Let me know you liked it on [Twitter](https://twitter.com/manrajsgrover).
+Also, share the [project](https://twitter.com/intent/tweet?url=https%3A%2F%2Fgithub.com%2Fmanrajgrover%2Fhalo&via=manrajsgrover&text=Checkout%20%23halo%20-%20a%20beautiful%20%23terminal%20%23spinners%20library%20for%20%23python&hashtags=github%2C%20pypi).
+
+## Related
+
+* [py-spinners](https://github.com/manrajgrover/py-spinners) - Spinners in Python
+* [py-log-symbols](https://github.com/manrajgrover/py-log-symbols) - Log Symbols in Python
+* [ora](https://github.com/sindresorhus/ora) - Elegant terminal spinners in JavaScript (inspiration behind this project) 
+
+## License
+[MIT](https://github.com/manrajgrover/halo/blob/master/LICENSE) © Manraj Singh
