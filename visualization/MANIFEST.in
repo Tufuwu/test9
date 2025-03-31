@@ -1,4 +1,0 @@
-include requirements.txt
-include requirements-full.txt
-include eolearn/visualization/report_templates/report.html
-include LICENSE
