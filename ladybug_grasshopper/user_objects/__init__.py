@@ -1,1 +1,0 @@
-"""Ladybug Grasshopper User Objects."""
