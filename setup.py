@@ -1,45 +1,29 @@
-from codecs import open
-from os import path
+import io
+import os
+from setuptools import setup, find_packages
 
-from setuptools import find_packages, setup
+ROOT_DIR = os.path.dirname(__file__)
 
-here = path.abspath(path.dirname(__file__))
+# Ray tests depend on buidling tune_sklearn. Thus, if `setup.py`
+# depends on Ray, then we create a cyclic dep.
+# workaround from: https://stackoverflow.com/a/17626524
+with open("tune_sklearn/_version.py") as f:
+    text = f.readlines()  # Returns ['__version__ = "0.2.0"']
+    __version__ = text[-1].split()[-1].strip("\"'")
 
-with open(path.join(here, "README.md"), encoding="utf-8") as f:
-    long_description = f.read()
-
-__version__ = None
-with open("sendgrid_backend/version.py") as f:
-    exec(f.read())
+VERSION = os.environ.get("TSK_RELEASE_VERSION", __version__)
 
 setup(
-    name="django-sendgrid-v5",
-    version=str(__version__),
-    description="An implementation of Django's EmailBackend compatible with sendgrid-python v5+",
-    long_description=long_description,
-    url="https://github.com/sklarsa/django-sendgrid-v5",
-    license="MIT",
-    author="Steven Sklar",
-    author_email="sklarsa@gmail.com",
-    classifiers=[
-        "Development Status :: 3 - Alpha",
-        "Intended Audience :: Developers",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-    ],
-    keywords="django email sendgrid backend",
-    packages=find_packages(
-        exclude=[
-            "test",
-        ]
-    ),
-    install_requires=[
-        "django >=1.8",
-        "sendgrid >=5.0.0",
-        "python-http-client >=3.0.0",
-    ],
-)
+    name="tune_sklearn",
+    packages=find_packages(),
+    version=VERSION,
+    author="Michael Chau, Anthony Yu, and Ray Team",
+    author_email="ray-dev@googlegroups.com",
+    description=("A drop-in replacement for Scikit-Learn’s "
+                 "GridSearchCV / RandomizedSearchCV with cutting edge "
+                 "hyperparameter tuning techniques."),
+    long_description=io.open(
+        os.path.join(ROOT_DIR, "README.md"), "r", encoding="utf-8").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/ray-project/tune-sklearn",
+    install_requires=["scikit-learn", "scipy", "ray[tune]", "numpy>=1.16"])

@@ -1,0 +1,17 @@
+numpy>=1.16
+scikit-learn
+pandas
+tabulate
+ray[tune]
+scikit-optimize>=0.8.1
+parameterized
+pytest>=6.1.2
+xgboost
+torch
+torchvision
+skorch
+lightgbm>=3.0.0
+keras
+tensorflow
+click
+catboost
