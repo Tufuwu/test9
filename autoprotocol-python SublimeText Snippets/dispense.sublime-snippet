@@ -1,0 +1,8 @@
+<snippet>
+    <content><![CDATA[
+dispense(ref=${1:Container ref}, reagent="${2:Str reagent}", columns=[{"column": ${3:0}, "volume": "${4:vol}"},])
+]]></content>
+    <tabTrigger>dispense</tabTrigger>
+    <scope>source.python</scope>
+    <description>Dispense reagent to columns</description>
+</snippet>

@@ -1,0 +1,8 @@
+<snippet>
+    <content><![CDATA[
+gel_separate(wells=${1:WellGroup wells}, volume="${2:Str volume}", matrix="${3:Str matrix}", ladder="${4:Str ladder}", duration="${5:Str duration}", dataref="${6:Str dataref}")
+]]></content>
+    <tabTrigger>gel_separate</tabTrigger>
+    <scope>source.python</scope>
+    <description>Agarose gel separation</description>
+</snippet>

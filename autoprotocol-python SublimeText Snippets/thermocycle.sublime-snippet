@@ -1,0 +1,8 @@
+<snippet>
+    <content><![CDATA[
+thermocycle(ref=${1:Container ref}, groups=${2:[groups]})
+]]></content>
+    <tabTrigger>thermocycle</tabTrigger>
+    <scope>source.python</scope>
+    <description>Thermocycle instruction</description>
+</snippet>
