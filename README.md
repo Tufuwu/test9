@@ -1,310 +1,132 @@
-# Nautobot Circuit Maintenance plugin
+www.geany.org
+=============
 
-A plugin for [Nautobot](https://github.com/nautobot/nautobot) to easily handle Circuit Maintenances related to Nautobot Circuits.
+## About
 
-`nautobot-circuit-maintenance` lets you handle maintenances for your Circuits based on notifications received by email by leveraging on [circuit-maintenance-parser](https://github.com/networktocode/circuit-maintenance-parser), a notifications parser library for multiple network service providers that exposes structured data following a recommendation defined in this [draft NANOG BCOP](https://github.com/jda/maintnote-std/blob/master/standard.md).
+This is the website code for <https://www.geany.org>.
+It's based on Django and uses Mezzanine (<https://mezzanine.jupo.org/>, the coolest Django CMS)
+for content management.
 
-## Installation
 
-The plugin is available as a Python package in pypi and can be installed with pip
+## Management And Maintenance
 
-```shell
-pip install nautobot-circuit-maintenance
-```
+### Admin Area
 
-> The plugin is compatible with Nautobot 1.0.0b4 and higher
+To enter the Django admin area, just open <https://geany.org/admin/>.
+In case you forgot your username and/or password or when it never had been set before,
+use the password reset form with your registered email address.
 
-To ensure Circuit Maintenance is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-circuit-maintenance` package:
+### Set Latest Version on release time
 
-```no-highlight
-# echo nautobot-circuit-maintenance >> local_requirements.txt
-```
+When releasing Geany, the website should be updated as well.
+This is easily done by editing the version number at
+<https://geany.org/admin/latest_version/latestversion/1/change/>.
+After the latest version has been updated in the admin area, it may take
+a few minutes until cached contents have expired.
 
-Once installed, the plugin needs to be enabled in your `configuration.py`.
+Afterwards, all references on the website where the version number
+is used, are up to date.
 
-```python
-# In your configuration.py
-PLUGINS = ["nautobot_circuit_maintenance"]
-```
+### Deploy Content Changes from GIT to the website
 
-```py
-PLUGINS_CONFIG = {
-    "nautobot_circuit_maintenance": {
-        "raw_notifications": {
-            "initial_days_since": 100,
-            "raw_notification_size": 500,
-        },
-        "notification_sources": [
-            {
-              ...
-            }
-        ]
-    }
-}
-```
+To change any content on the website, find and edit the corresponding
+Markdown source file in this repository's `page_content` directory.
+The directories and files in therein represent the website page structure.
 
-In the `raw_notifications` section, you can define:
+After you made your changes, commit and push the changed file(s) to GIT.
 
-- `initial_days_since`: define how many days back the plugin will check for `RawNotification`s for each
-  `NotificationSource`, in order to limit the number of notifications to be processed on the first run of the plugin.
-  In subsequent runs, the last notification date will be used as the reference to limit. If not defined, it defaults to **365 days**.
-- `raw_notification_size`: define how many bytes from a notification will be stored in the database to not store too big objects. If not defined, it defaults to **1000** bytes.
+Then open <https://geany.org/admin/mezzanine_sync_pages/mezzaninesyncpages/>,
+check `Execute "git pull"` and press `Sync Pages`.
+Then the current website's pages are synced with the file contents in the
+GIT repository. For your convenience, after the sync has finished you are
+presented with an overview and diff of all made changes.
 
-The `notification_sources` have custom definition depending on the `Source` type, and are defined in the [Usage](#Usage) section.
+Please note, there is no dry-run, preview or rollback of the performed changes.
+Only the diff of the changes *after* they have been applied.
 
-## Usage
+#### Special Pages
 
-### 1. Define source emails per Provider
+There are a few special pages which cannot be synced the way described above.
+This is because those pages are partially or completely rendered dynamically
+with non-static content.
 
-In the Nautobot UI, under **Circuits -> Providers**, for each Provider that we would like to track via the Circuit Maintenance plugin, we **must** configure at least one email source address (or a comma-separated list of addresses) in the **`Custom Fields -> Emails for Circuit Maintenance plugin** field.
+  * contribute/translation/statistics.md: generate nightly from source code
+  * documentation/releasenotes.md: generated from Github upon request
+  * documentation/todo.md: generated from Github upon request
+  * download/nightly-builds.md: generated upon request
+  * fake.md: dummy page for various non-CMS pages like pastebin.geany.org and more
 
-These are the source email addresses that the plugin will detect and will use to classify each notification for each specific provider.
+#### Supported Markdown Extensions
 
-Also, by default, the Provider **slug** is used to match the provider parser from the `circuit-maintenance-parser` library, but if a custom mapping is desired (i.e. CentruryLink to Lumen), you can define this custom mapping in the **`Custom Fields -> Provider Parser for Circuit Maintenance plugin** field.
+There are a couple of Markdown extensions enabled for the website, mainly
+to support similar features like Github Flavored Markdown provides:
 
-### 2. Configure Notification Sources
+  * pymdownx.magiclink
+  * pymdownx.betterem
+  * pymdownx.tilde
+  * pymdownx.tasklist
+  * pymdownx.superfences
+  * nl2br (transform line breaks to HTML `<br>` tags)
+  * tables
+  * toc
 
-Notification Sources are defined in two steps:
+For details and usage instructions of the listed extensions, please see
+the documentation at <https://facelessuser.github.io/pymdown-extensions/>.
 
-#### 2.1 Define Notification Sources in `nautobot_config.py`
+#### Page Content Management Commands
 
-In `nautobot_config.py`, in the `PLUGINS_CONFIG`, under the `nautobot_circuit_maintenance` key, we should define the Notification Sources that will be able later in the UI, where you will be able to **validate** if the authentication credentials provided are working fine or not.
+  * `venv/bin/python manage.py sync_pages`
+    This command can be used to sync the website's pages with the
+    file contents in the GIT repository (like described above).
 
-There are two mandatory attributes (other keys are dependent on the integration type, and will be documented below):
+  * `venv/bin/python manage.py dump_pages`
+    Perform a backwards sync, i.e. read the current website's pages
+    content and write it as Markdown files into the repository's
+    `page_content` directory.
+    Be careful, this command should only be executed initially or
+    only if you really know what you are doing.
+    It will overwrite any previous contents in the `page_content`
+    directory without confirmation.
 
-- `name`: Name to identify the Source and will be available in the UI.
-- `url`: URL to reach the Notification Source (i.e. `imap://imap.gmail.com:993`)
+## Deployment
 
-There is also one optional attribute:
+To be able to deploy the code, you need a working SSH connection
+to the geany.org server. Obviously, this implies an user account
+on the server.
 
-- `attach_all_providers`: Flag that enables auto linking of newly created `Providers` to this Notification Source.
+### Using Fabric
 
-> Currently, only IMAP and HTTPS (accounts.google.com) integrations are supported as URL scheme
+To deploy the code the following steps are necessary:
 
-##### 2.1.1 IMAP
-
-There are 2 extra required attributes:
-
-- `account`: Identifier (i.e. email address) to use to authenticate.
-- `secret`: Password to IMAP authentication.
-
-> Gmail example: [How to setup Gmail with App Passwords](https://support.google.com/accounts/answer/185833)
-
-There is also one optional attribute:
-
-- `source_header`: Specify a particular email header to use to identify the source of a particular notification and assign it to the appropriate provider. If unset, `From` will be used, but if your emails are not received directly from the provider but instead pass through a mailing list or alias, you might need to set this to a different value such as `X-Original-Sender` instead.
-
-```py
-PLUGINS_CONFIG = {
-    "nautobot_circuit_maintenance": {
-        "notification_sources": [
-            {
-                "name": "my custom name",
-                "account": os.getenv("CM_NS_1_ACCOUNT", ""),
-                "secret": os.getenv("CM_NS_1_SECRET", ""),
-                "url": os.getenv("CM_NS_1_URL", ""),
-                "source_header": os.getenv("CM_NS_1_SOURCE_HEADER", "From"),  # optional
-                "attach_all_providers": True,  # optional
-            }
-        ]
-    }
-}
-```
-
-##### 2.1.2 Gmail API integrations
-
-There are 2 extra required attributes:
-
-- `account`: Identifier (i.e. email address) to access via OAuth or to impersonate as service account.
-- `credentials_file`: JSON file containing all the necessary data to identify the API integration (see below).
-
-There are also two optional attributes:
-
-- `source_header`: Specify a particular email header to use to identify the source of a particular notification and assign it to the appropriate provider. If unset, `From` will be used, but if your emails are not received directly from the provider but instead pass through a mailing list or alias, you might need to set this to a different value such as `X-Original-Sender` instead.
-- `extra_scopes`: Specify a list of additional Google OAuth2 scopes to request access to in addition to GMail API access.
-
-```py
-PLUGINS_CONFIG = {
-    "nautobot_circuit_maintenance": {
-        "notification_sources": [
-            {
-                "name": "my custom name",
-                "account": os.getenv("CM_NS_1_ACCOUNT", ""),
-                "credentials_file": os.getenv("CM_NS_1_CREDENTIALS_FILE", ""),
-                "url": os.getenv("CM_NS_1_URL", ""),
-                "source_header": os.getenv("CM_NS_1_SOURCE_HEADER", "From"),          # optional
-                "extra_scopes": ["https://www.googleapis.com/auth/calendar.events"],  # optional
-            }
-        ]
-    }
-}
-```
-
-To enable Gmail API access, there are some common steps for both Service Account and OAuth authentication:
-
-1. Create a **New Project** in [Google Cloud Console](https://console.cloud.google.com/).
-2. Under **APIs and Services**, enable **Gmail API** for the selected project.
-
-###### 2.1.2.1 Service Account
-
-To create a [Service Account](https://support.google.com/a/answer/7378726?hl=en) integration:
-
-3. Still under **APIs and Services**, in **Credentials**, create a new **Service Account** and save the credentials file generated to be used when configuring Nautobot Sources.
-4. With Admin rights, edit the newly created Service Account and expand the **Show Domain-Wide Delegation** section. Enable Google Workspace Domain-wide Delegation and save the changes. Copy the Client ID shown.
-5. With Super Admin rights, open the [Google Workspace admin console](https://admin.google.com). Navigate to **Security**, **API controls**, and select the **Manage Domain Wide Delegation** at the bottom of the page.
-6. Add a new API client and paste in the Client ID copied earlier. In the **OAuth scopes** field add the scopes `https://www.googleapis.com/auth/gmail.readonly` and `https://mail.google.com/`. Save the new client configuration by clicking _Authorize_.
-
-###### 2.1.2.2 OAuth
-
-To create a [OAuth 2.0](https://developers.google.com/identity/protocols/oauth2/web-server) integration:
-
-3. Still under **APIs and Services**, in **Credentials**, create a new **OAuth client ID** selecting the **Web application** application type.
-4. Under **Authorized redirect URIs** add the location where your Nautobot server is listening plus `plugins/circuit-maintenance/source/google_oauth2callback/`. For instance: `http://localhost:8080/plugins/circuit-maintenance/source/google_oauth2callback/`
-5. Save the credentials file generated to be used when configuring Nautobot Sources.
-
-> For OAuth integration, it's recommendable that, at least the first time, you run a manual **Validate** of the Notification Source to complete the OAuth authentication workflow, identifying your Google credentials.
-
-> Typically the `url` setting to configure in your `nautobot_config.py` for use with OAuth integration will be `"https://accounts.google.com/o/oauth2/auth"`.
-
-#### 2.2 Add `Providers` to the Notification Sources
-
-In the Circuit Maintenance plugin UI section, there is a **Notification Sources** button (yellow) where you can configure the Notification Sources to track new circuit maintenance notifications from specific providers.
-
-Because the Notification Sources are defined by the configuration, you can only view and edit `providers`, but not `add` or `delete` new Notification Sources via UI or API.
-
-> Note that for emails from a given Provider to be processed, you must _both_ define a source email address(es) for that Provider (Usage section 1, above) _and_ add that provider to a specific Notification Source as described in this section.
-
-### 3. Run Handle Notifications Job
-
-There is an asynchronous task defined as a **Nautobot Job**, **Handle Circuit Maintenance Notifications** that will connect to the emails sources defined under the Notification Sources section (step above), and will fetch new notifications received since the last notification was fetched.
-Each notification will be parsed using the [circuit-maintenance-parser](https://github.com/networktocode/circuit-maintenance-parser) library, and if a valid parsing is executed, a new **Circuit Maintenance** will be created, or if it was already created, it will updated with the new data.
-
-So, for each email notification received, several objects will be created:
-
-#### 3.1 Notification
-
-Each notification received will create a related object, containing the raw data received, and linking to the corresponding **parsed notification** in case the [circuit-maintenance-parser](https://github.com/networktocode/circuit-maintenance-parser) was able to parse it correctly.
-
-#### 3.2 Parsed Notification
-
-When a notification was successfully parsed, it will create a **parsed notification** object, that will contain the structured output from the parser library , following the recommendation defined in [draft NANOG BCOP](https://github.com/jda/maintnote-std/blob/master/standard.md), and a link to the related **Circuit Maintenance** object created.
-
-#### 3.3 Circuit Maintenance
-
-The **Circuit Maintenance** is where all the necessary information related to a Circuit maintenance is tracked, and reuses most of the data model defined in the parser library.
-
-Attributes:
-
-- Name: name or identifier of the maintenance.
-- Description: description of the maintenance.
-- Status: current state of the maintenance.
-- Start time: defined start time of the maintenance work.
-- End time: defined end time of the maintenance work.
-- Ack: boolean to show if the maintenance has been properly handled by the operator.
-- Circuits: list of circuits and its specific impact linked to this maintenance.
-- Notes: list of internal notes linked to this maintenance.
-- Notifications: list of all the parsed notifications that have been processed for this maintenance.
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/nautobot/nautobot-plugin-circuit-maintenance/develop/docs/images/circuit_maintenance.png" width="800" class="center">
-</p>
-
-### Metrics
-
-Leveraging the `nautobot-capacity-metrics` plugin, the `nautobot-circuit-maintenance` plugin can expose application metrics at `/api/plugins/capacity-metrics/app-metrics` if desired.
-
-Current exposed metric is the `circuit operational status` which shows the operational status for each `Circuit`(attached to a `CircuitTermination`) depending on related Circuit Maintenances (1: Operational, 2: Under active maintenance):
-
-```
-# HELP circuit_maintenance_status Circuit operational status
-# TYPE circuit_maintenance_status gauge
-circuit_maintenance_status{circuit="1111111",circuit_type="Transit",provider="ntt",site="Barcelona"} 2.0
-circuit_maintenance_status{circuit="2222222",circuit_type="Peering",provider="colt",site="Girona"} 1.0
-```
-
-Metric generation is **disabled** by default, to **enable** them, add a `enable: True` in the `nautobot_circuit_maintenance.metrics` dict. (Of course you must also install the `nautobot_capacity_metrics` plugin and ensure that it is included in `PLUGINS` as a prerequisite to enabling this feature.)
-
-By default, each circuit has attached some labels and values (cid, provider, type and site), but these labels can be defined in the Plugin configuration by adding an optional dictionary (under "metrics" -> "labels_attached") with the label name and the attributes within the Circuit object. (Note: in case of a value that can be multiple values, such as `terminations`, the first defined one will be used)
-
-```
-PLUGINS_CONFIG = {
-    "nautobot_circuit_maintenance": {
-        ...
-        "metrics": {
-            "enable": True,
-            "labels_attached": {
-                "circuit": "circuit.cid",
-                "provider": "circuit.provider.name",
-                "circuit_type": "circuit.type.name",
-                "site": "site.name",
-            }
-        },
-    }
-}
-```
-
-### Rest API
-
-The plugin includes 6 API endpoints to manage its related objects, complete info in the Swagger section.
-
-- Circuit Maintenance: `/api/plugins​/circuit-maintenance​/maintenance`
-- Circuit Impact: `/api/plugins​/circuit-maintenance​/circuitimpact`
-- Note: `/api/plugins​/circuit-maintenance​/note`
-
-### GraphQL API
-
-Circuit Maintenance and Circuit Impact objects are available for GraphQL queries.
-
-## Contributing
-
-Pull requests are welcomed and automatically built and tested against multiple version of Python and multiple version of Nautobot through TravisCI.
-
-The project is packaged with a light development environment based on `docker-compose` to help with the local development of the project and to run the tests within TravisCI.
-
-The project is following Network to Code software development guideline and is leveraging:
-
-- Black, Pylint, Bandit and pydocstyle for Python linting and formatting.
-- Django unit test to ensure the plugin is working properly.
-
-### CLI Helper Commands
-
-The project is coming with a CLI helper based on [invoke](http://www.pyinvoke.org/) to help setup the development environment. The commands are listed below in 3 categories `dev environment`, `utility` and `testing`.
-
-Each command can be executed with `invoke <command>`. All commands support the arguments `--nautobot-ver` and `--python-ver` if you want to manually define the version of Python and Nautobot to use. Each command also has its own help `invoke <command> --help`
-
-#### Local dev environment
-
-```no-highlight
-  build            Build all docker images.
-  debug            Start Nautobot and its dependencies in debug mode.
-  destroy          Destroy all containers and volumes.
-  restart          Restart Nautobot and its dependencies.
-  start            Start Nautobot and its dependencies in detached mode.
-  stop             Stop Nautobot and its dependencies.
-```
-
-#### Utility
-
-```no-highlight
-  cli              Launch a bash shell inside the running Nautobot container.
-  create-user      Create a new user in django (default: admin), will prompt for password.
-  makemigrations   Run Make Migration in Django.
-  nbshell          Launch a nbshell session.
-```
-
-#### Testing
-
-```no-highlight
-  bandit           Run bandit to validate basic static code security analysis.
-  black            Run black to check that Python files adhere to its style standards.
-  flake8           This will run flake8 for the specified name and Python version.
-  pydocstyle       Run pydocstyle to validate docstring formatting adheres to NTC defined standards.
-  pylint           Run pylint code analysis.
-  tests            Run all tests for this plugin.
-  unittest         Run Django unit tests for the plugin.
-```
-
-## Questions
-
-For any questions or comments, please check the [FAQ](FAQ.md) first and feel free to swing by the [Network to Code slack channel](https://networktocode.slack.com/) (channel #nautobot).
-Sign up [here](http://slack.networktocode.com/)
+  * Install Fabric (<https://www.fabfile.org/>, version 2 or later) on your
+    local machine: `pip install fabric` or use the system package manager
+  * `cd <path-to-the-code-repository>`
+  * `fab deploy`
+  * Done.
+
+### Alternative Way (remote only)
+
+You can also deploy the code to the website using a SSH shell
+on the server and perform the commands manually which would have
+been executed by Fabric otherwise.
+
+  * Login to geany.org with your user via SSH: `ssh geany.org`
+  * Switch to the Django user: `sudjango`
+  * Execute all or only some of the following commands:
+
+      ```sh
+      cd /srv/django/www.geany.org
+      git pull
+      venv/bin/python manage.py clean_pyc
+      venv/bin/python manage.py compile_pyc
+      venv/bin/python manage.py check
+      venv/bin/python manage.py pygments_styles
+      venv/bin/python manage.py collectstatic --clear --no-input --verbosity 0
+      venv/bin/python manage.py compress --verbosity 0
+      venv/bin/python manage.py migrate --run-syncdb
+      venv/bin/python manage.py clear_cache
+      ```
+
+  * Exit the shell session for user "django"
+  * Restart the Uwsgi server: `sudo systemctl restart geany.org.service`
+  * Done.
