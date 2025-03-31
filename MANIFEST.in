@@ -1,4 +1,1 @@
-include LICENSE.txt
-include README.md
-recursive-include redirects *
-recursive-exclude * *.pyc __pycache__ .DS_Store
+include LICENSE README.rst requirements.txt CONTRIBUTING.md
