@@ -1,9 +1,7 @@
-.idea/
 *.pyc
-*.vscode/
-dist/
+.eggs/
+*.png
 build/
-grill.egg-info/
-docs/build/
-docs/Makefile
-docs/make.bat
+dist/
+.ipynb_checkpoints/
+*.pdf

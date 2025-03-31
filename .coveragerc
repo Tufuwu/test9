@@ -1,8 +1,0 @@
-[run]
-source=grill
-[report]
-omit =
-    setup.py
-exclude_lines =
-    pragma: not covered
-    @typing.overload
