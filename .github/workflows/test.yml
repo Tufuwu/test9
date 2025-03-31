@@ -1,33 +1,51 @@
-name: Test
+name: PythonSymbols
+
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: "0 0 * * 0"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
-  test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.9", "3.10"]
-    name: "Python ${{ matrix.python-version }} on ${{ matrix.os }} "
-    runs-on: ${{ matrix.os }}
+  build:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - name: Checkout gh-pages branch.
+        uses: actions/checkout@v3
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install Requirements
+          ref: gh-pages
+          fetch-depth: 0 # Fetch all branches so we can merge.
+      - name: Merge any recent changes into the gh-pagest branch.
         run: |
-          python -m pip install -U tox
-      - name: Run Linting
-        # only lint on 3.8 for two reasons
-        #  1. faster overall runs
-        #  2. Linting fails on py3.5 because tools require 3.6+
-        if: ${{ matrix.python-version == '3.8' }}
-        run: python -m tox -e lint
-      - name: Run Tests
-        run: python -m tox -e py
-      - name: Ensure docs build
-        # docs are only ever built on a linux 3.8 box (readthedocs)
-        if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-latest' }}
-        run: python -m tox -e docs
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git merge -X theirs origin/main
+      - name: Setup Python.
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.x
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Update symbol server.
+        run: |
+          python pysymsrv.py
+      - name: Generate index.html.
+        run: |
+          python generateindex.py
+      - name: Deploy new symbols to GH Pages.
+        run: |
+          date > lastrun.txt
+          git add --all :/
+          git commit -m "Automatic update of gh-pages"
+          git push
