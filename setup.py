@@ -1,76 +1,87 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """
-A setuptools based setup module.
-
-See:
-https://packaging.python.org/en/latest/distributing.html
+URL filter and manipulation tools
+http://github.com/adbar/courlan
 """
 
-import io
-from os import path
-try:  # for pip >= 10
-    from pip._internal.req import parse_requirements
-except ImportError:  # for pip <= 9.0.3
-    from pip.req import parse_requirements
-from setuptools import setup, find_packages
+import re
+
+from pathlib import Path
+from setuptools import setup
 
 
-def get_requirements(requirements_file):
-    """Use pip to parse requirements file."""
-    requirements = []
-    if path.isfile(requirements_file):
-        for req in parse_requirements(requirements_file, session="hack"):
-            try:
-                # check markers, such as
-                #
-                #     rope_py3k    ; python_version >= '3.0'
-                #
-                if req.match_markers():
-                    requirements.append(str(req.req))
-            except AttributeError:
-                # pip >= 20.0.2
-                requirements.append(req.requirement)
-    return requirements
+
+def get_version(package):
+    "Return package version as listed in `__version__` in `init.py`"
+    # version = Path(package, '__init__.py').read_text() # Python >= 3.5
+    with open(str(Path(package, '__init__.py')), 'r', encoding='utf-8') as filehandle:
+        initfile = filehandle.read()
+    return re.search('__version__ = [\'"]([^\'"]+)[\'"]', initfile).group(1)
 
 
-if __name__ == "__main__":
-    HERE = path.abspath(path.dirname(__file__))
-    INSTALL_REQUIRES = get_requirements(path.join(HERE, "requirements.txt"))
+def get_long_description():
+    "Return the README"
+    with open('README.rst', 'r', encoding='utf-8') as filehandle:
+        long_description = filehandle.read()
+    #long_description += "\n\n"
+    #with open("CHANGELOG.md", encoding="utf8") as f:
+    #    long_description += f.read()
+    return long_description
 
-    with io.open(path.join(HERE, "README.rst"), encoding="utf-8") as readme:
-        LONG_DESCRIPTION = readme.read()
 
-    setup(
-        name="modoboa-sievefilters",
-        description="The sieve filters editor of Modoboa",
-        long_description=LONG_DESCRIPTION,
-        license="MIT",
-        url="http://modoboa.org/",
-        author="Antoine Nguyen",
-        author_email="tonio@ngyn.org",
-        classifiers=[
-            "Development Status :: 5 - Production/Stable",
-            "Environment :: Web Environment",
-            "Framework :: Django :: 1.11",
-            "Intended Audience :: System Administrators",
-            "License :: OSI Approved :: MIT License",
-            "Operating System :: OS Independent",
-            "Programming Language :: Python :: 2",
-            "Programming Language :: Python :: 2.7",
-            "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.4",
-            "Programming Language :: Python :: 3.5",
-            "Programming Language :: Python :: 3.6",
-            "Topic :: Communications :: Email",
-            "Topic :: Internet :: WWW/HTTP",
-        ],
-        keywords="email sieve",
-        packages=find_packages(exclude=["docs", "test_project"]),
-        include_package_data=True,
-        zip_safe=False,
-        install_requires=INSTALL_REQUIRES,
-        use_scm_version=True,
-        setup_requires=["setuptools_scm"],
-    )
+setup(
+    name='courlan',
+    version=get_version('courlan'),
+    description='Clean, filter, normalize, and sample URLs',
+    long_description=get_long_description(),
+    classifiers=[
+        # As from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+        'Development Status :: 4 - Beta',
+        #'Development Status :: 5 - Production/Stable',
+        #'Development Status :: 6 - Mature',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Education',
+        'Intended Audience :: Information Technology',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Topic :: Internet :: WWW/HTTP',
+        'Topic :: Scientific/Engineering :: Information Analysis',
+        'Topic :: Text Processing :: Filters',
+    ],
+    keywords=['urls', 'url-parsing', 'url-manipulation', 'preprocessing', 'validation', 'webcrawling'],
+    url='http://github.com/adbar/courlan',
+    author='Adrien Barbaresi',
+    author_email='barbaresi@bbaw.de',
+    license='GPLv3+',
+    packages=['courlan'],
+    project_urls={
+        "Source": "https://github.com/adbar/courlan",
+        "Coverage": "https://codecov.io/github/adbar/courlan",
+        "Tracker": "https://github.com/adbar/courlan/issues",
+    },
+    #package_data={},
+    include_package_data=True,
+    python_requires='>=3.5',
+    install_requires=[
+        'tldextract; python_version < "3.6"',
+        'tld; python_version >= "3.6"',
+        'urllib3>=1.25,<2',
+    ],
+    #extras_require=extras,
+    entry_points = {
+        'console_scripts': ['courlan=courlan.cli:main'],
+    },
+    # platforms='any',
+    tests_require=['pytest', 'tox'],
+    zip_safe=False,
+)

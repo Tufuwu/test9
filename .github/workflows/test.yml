@@ -1,159 +1,92 @@
-name: Modoboa sieve filters plugin
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Tests
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  release:
-    branches: [ main ]
-    types: [ published ]
-
-env:
-  POSTGRES_HOST: localhost
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:11
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
-        ports:
-        # will assign a random free host port
-        - 5432/tcp
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_USER: modoboa
-          MYSQL_PASSWORD: modoboa
-          MYSQL_DATABASE: modoboa
-        ports:
-          - 3306/tcp
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+  build:
 
+    runs-on: ${{ matrix.os }}
     strategy:
-      matrix:
-        database: ['postgres', 'mysql']
-        python-version: ["3.9", "3.10"]
       fail-fast: false
-
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.9", "3.10"]
+        include:
+        # custom tests
+        - python-version: 3.9
+          os: ubuntu-latest
+          experimental: true
+          allowed_failure: true
+        - python-version: 3.9-dev
+          os: ubuntu-latest
+          experimental: true
+          allowed_failure: true
+        - python-version: pypy3
+          os: ubuntu-latest
+          experimental: true
+          allowed_failure: true
+        - os: macos-latest
+          python-version: 3.9
+        - os: windows-latest
+          python-version: 3.9
+          experimental: true
+          allowed_failure: true
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -y && sudo apt-get install -y librrd-dev rrdtool 
-          python -m pip install --upgrade pip
-          pip install -e git+https://github.com/modoboa/modoboa.git#egg=modoboa
-          pip install -r requirements.txt
-          pip install -r test-requirements.txt
-          python setup.py develop
-      - name: Install postgres requirements
-        if: ${{ matrix.database == 'postgres' }}
-        run: |
-          pip install psycopg2-binary>=2.7.4
-          pip install coverage
-          echo "DB=postgres" >> $GITHUB_ENV
-      - name: Install mysql requirements
-        if: ${{ matrix.database == 'mysql' }}
-        run: |
-          pip install 'mysqlclient<2.1.1'
-          echo "DB=mysql" >> $GITHUB_ENV
-      - name: Test with pytest
-        if: ${{ matrix.python-version != '3.9' || matrix.database != 'postgres' }}
-        run: |
-          cd test_project
-          python3 manage.py test modoboa_sievefilters
-        env:
-          # use localhost for the host here because we are running the job on the VM.
-          # If we were running the job on in a container this would be postgres
-          POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
-          MYSQL_HOST: 127.0.0.1
-          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }} # get randomly assigned published port
-          MYSQL_USER: root
+    # Python and pip setup
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
 
-      - name: Test with pytest and coverage
-        if: ${{ matrix.python-version == '3.9' && matrix.database == 'postgres' }}
-        run: |
-          cd test_project
-          coverage run --source ../modoboa_sievefilters manage.py test modoboa_sievefilters
-        env:
-          # use localhost for the host here because we are running the job on the VM.
-          # If we were running the job on in a container this would be postgres
-          POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
-          MYSQL_HOST: 127.0.0.1
-          MYSQL_PORT: ${{ job.services.mysql.ports[3306] }} # get randomly assigned published port
-          MYSQL_USER: root
-      - name: Upload coverage result
-        if: ${{ matrix.python-version == '3.9' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-results
-          path: test_project/.coverage
+    - name: Upgrade pip
+      run: python -m pip install --upgrade pip setuptools wheel
 
-  coverage:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      - name: Install dependencies
-        run: |
-          pip install codecov
-      - name: Download coverage results
-        uses: actions/download-artifact@v2
-        with:
-          name: coverage-results
-      - name: Report coverage
-        run: |
-          coverage report
-          codecov
+    - name: Get pip cache dir
+      id: pip-cache
+      run: |
+        echo "::set-output name=dir::$(pip cache dir)"
 
-  release:
-    needs: coverage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      - name: Build packages
-        run: |
-          sudo apt-get install librrd-dev rrdtool libssl-dev gettext
-          python -m pip install --upgrade pip setuptools wheel
-          pip install -r requirements.txt
-          cd modoboa_sievefilters
-          django-admin compilemessages
-          cd ..
-          python setup.py sdist bdist_wheel
-      - name: Publish to Test PyPI
-        if: endsWith(github.event.ref, '/main')
-        uses: pypa/gh-action-pypi-publish@main
-        with:
-          user: __token__
-          password: ${{ secrets.test_pypi_password }}
-          repository_url: https://test.pypi.org/legacy/
-          skip_existing: true
-      - name: Publish distribution to PyPI
-        if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
-        uses: pypa/gh-action-pypi-publish@main
-        with:
-          user: __token__
-          password: ${{ secrets.pypi_password }}
-          skip_existing: true
+    - name: pip cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.pip-cache.outputs.dir }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    # package setup
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: python -m pip install -e "."
+
+    - name: Install full dependencies
+      if: ${{ matrix.env.MINIMAL == 'false'}}
+      run: python -m pip install -e ".[all]"
+
+    # tests
+    - name: Lint with flake8
+      run: |
+        python -m pip install flake8
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Test with pytest
+      run: |
+        python -m pip install pytest pytest-cov
+        pytest --cov=./
+
+    # coverage
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true
