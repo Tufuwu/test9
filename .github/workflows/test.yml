@@ -1,52 +1,37 @@
-name: CI
+name: CodeCov tests
 
 on: [push, pull_request]
 
 jobs:
-  tests:
-    runs-on: ubuntu-latest
+  unit-tests:
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: pip install tox
-      - name: Run unit tests
-        run: tox -e py
+        requirements-file: [
+            django-2.2.txt,
+            django-3.1.txt,
+            django-3.2.txt
+        ]
+        os: [
+          ubuntu-latest,
+        ]
 
-  coverage:
-    runs-on: ubuntu-latest
-    env:
-      PYTHON_VERSION: 3.9
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install dependencies
-        run: |
-          pip install tox coveralls
-      - name: Run unit tests
-        run: tox -e cov
-      - if: ${{ success() }}
-        name: Submit coverage
-        run: coveralls --service=github
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r tests/requirements/${{ matrix.requirements-file }}
+        python setup.py install
 
-  integration:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        toxenv: [py27, py36, py37, py38, py39, pypy]
-    env:
-      TOXENV: ${{ matrix.toxenv }}
-    steps:
-    - uses: actions/checkout@v2
-    - name: Run integration tests via Docker
-      run: python tests/integration_test_runner.py `echo ${PWD}` $TOXENV dpkg pacman rpm
+    - name: Run coverage
+      run: coverage run setup.py test
+
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v1

@@ -1,62 +1,51 @@
+=========
 Changelog
 =========
 
-v1.1.0 (2020-09-18)
+unreleased
+==========
 
-- [info] Python 3.4 no longer supported
-- [info] Python 3.8 now supported
-- [change] Python 3.8 dropped support of platform.dist(). Replaced by distro module
+* Added support for Django 3.2
+* Drop support for python 3.5 and 3.6
 
-v1.0.4 (2020-03-31)
+2.0.0 (2020-08-26)
+==================
 
-- [add] --evidence: Now multiple paths to directories or single files supported
-- [add] --schema-location: Add xsi:schamaLocation attribute with schema URIs
-- [add] --lang: Set value of xml:lang attribute
+* Added support for Django 3.1
+* Dropped support for Python 2.7 and Python 3.4
+* Dropped support for Django < 2.2
+* Replaced pep8 with flake8
+* Adapted documentation
 
-v1.0.3 (2017-09-09)
 
-- [add] The parameters --os and --arch generate a SWID tag with this product info
+1.1.0 (2020-01-22)
+==================
 
-v1.0.2 (2017-08-03)
+* Added support for Django 3.0
+* Added support for Python 3.8
+* Extended test matrix
+* Added isort and adapted imports
+* Adapted code base to align with other supported addons
+* Adapted ``README.rst`` instructions
 
-- [add] The parameters --name and --version-string generate a SWID tag with this package info
 
-v1.0.1 (2017-07-27)
+1.0.0 (2019-04-11)
+==================
 
-- [info] Updated documentation
+* Added support for Django 1.11, 2.0, 2.1, and 2.2
+* Removed support for Django < 1.11
 
-v1.0.0 (2017-07-01)
 
-- [info] Python 2.6 no longer supported
-- [info] Python Versions: 3.5, 3.6 now supported
-- [info] swidGenerator now based on ISO IEC 19770-2 2015 and no longer on draft:
-  (Software Inventory Message and Attributes (SWIMA) for PA-TNC draft-coffin-sacm-nea-swid-patnc-03)
-- [info] 'Guidelines for the Creation of Interoperable Software Identification (SWID) Tags' (NISTIR 8060) respected
-- [info] For special encodings in stdout (e.g latin1, etc.), please add UTF-8 Compatibility
-- [add] Additionally to the parameter '--pretty', a new parameter '--hierarchical' now available. This prints the SWID-Tag in
-  hierarchical format.
-- [add] '--hash': e.g '--hash sha256,sha384,sha512' computes the hash-values of the file-content. One or more hash-algorithms can be passed.
-- [add] '--package-file': e.g '--package-file /tmp/test.deb' generates the SWID-Tag based on the information of the package-file. Following packages
-  are supported: *.deb, *.rpm, *.pkg.tar.xz
-- [add] '--pkcs12': e.g '--pkcs12 /path/to/cert.pfx' signs the SWID-Tag with the given certificate. The '--pkcs12-pwd <password>'-Argument is
-  needed for password-protected certificates.
-- [add] '--evidence': e.g '--evidence /path/to/folder' generates the SWID-Tag based the File-/Directory-structure of the path. Possible Arguments
-  for the evidence-function added: '--name' sets name of SWID-Tag, '--version-string' sets Version of SWID-Tag, '--new-root' sets root of SWID-Tag.
-- [change] TestEnvironment working with python standard mocking-framework, tests declared in TestCase-Classes and IntegrationTests based on
-  Docker added. This to test the whole swid_generator on each distribution (Debian, Redhat and ArchLinux)
-- [info] PyTest Versions and dependencies changed to newest
+0.10.0 (2016-08-28)
+===================
 
-v0.3.0 (2014-08-28)
+* Added support for Django 1.10
+* Removed support for Python 2.6
 
-- [add] Python 2.6 support
 
-v0.2.0 (2014-06-19)
+0.9.0 (2015-12-06)
+==================
 
-- [info] Refactored the codebase
-- [add] New -v / --version commandline switch
-- [change] URI reserved characters (``:/?#[]@!$&'()*+,;=``) in the package name
-  / version section of the Unique-ID are replaced with a tilde (``~``) sign.
-
-v0.1.1 (2014-05-31)
-
-- [info] Initial release to PyPI
+* Added Changelog
+* Added support for Django 1.9
+* Added support for Python 3.5

@@ -1,3 +1,0 @@
-acl 2.2.52-3
-arch-install-scripts 17-1
-archlinux-keyring 20170320-1

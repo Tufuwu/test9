@@ -1,2 +1,3 @@
-include README.rst LICENSE.txt CONTRIBUTORS.rst CHANGELOG.rst
-prune tests
+include LICENSE
+include README.rst
+recursive-exclude * *.py[co]

@@ -1,5 +1,0 @@
-docker /usr/bin/docker
-docker /usr/bin/docker-containerd
-docker /usr/bin/docker-containerd-ctr
-docker /usr/bin/docker-containerd-shim
-docker /etc/docker.ini
