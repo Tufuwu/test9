@@ -1,105 +1,45 @@
-import concurrent
-import decimal
-import json
-from unittest.mock import MagicMock, patch
+"""Pytest configuration."""
+import csv
+import os
+import tempfile
+import shutil
 
 import pytest
-from google.cloud.pubsub_v1 import PublisherClient
-from google.cloud.pubsub_v1.exceptions import TimeoutError
-from google.protobuf import timestamp_pb2
-
-from rele import Publisher
-from rele.client import Subscriber
-from rele.config import Config
-from rele.middleware import register_middleware
 
 
 @pytest.fixture
-def project_id():
-    return "rele-test"
+def export_dir():
+    export_dir = tempfile.mkdtemp(prefix="export_")
+    yield export_dir
+    shutil.rmtree(export_dir, ignore_errors=True)
 
 
 @pytest.fixture
-def config(project_id):
-    return Config(
-        {
-            "APP_NAME": "rele",
-            "SUB_PREFIX": "rele",
-            "GC_CREDENTIALS_PATH": "tests/dummy-pub-sub-credentials.json",
-            "MIDDLEWARE": ["rele.contrib.LoggingMiddleware"],
-        }
-    )
+def songs_raw():
+    return ["\nmeow\nmeow", "woof\n\nchorus\nwoof\n"]
 
 
 @pytest.fixture
-def subscriber(project_id, config):
-    return Subscriber(config.gc_project_id, config.credentials, 60)
+def songfile(songs_raw):
+    _, songfile = tempfile.mkstemp(prefix="songs_", suffix=".csv")
+    with open(songfile, "w", newline="") as f:
+        writer = csv.writer(f, delimiter=",", quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(["artist", "text"])
+        writer.writerow(["cat", songs_raw[0]])
+        writer.writerow(["dog", songs_raw[1]])
+    yield songfile
+    os.remove(songfile)
+
+
+@pytest.fixture()
+def songs():
+    return ["meow \n meow", "woof \n  \n chorus \n woof woof"]
 
 
 @pytest.fixture
-def mock_future():
-    return MagicMock(spec=concurrent.futures.Future)
-
-
-@pytest.fixture
-def publisher(config, mock_future):
-    publisher = Publisher(
-        gc_project_id=config.gc_project_id,
-        credentials=config.credentials,
-        encoder=config.encoder,
-        timeout=config.publisher_timeout,
-        blocking=config.publisher_blocking,
-    )
-    publisher._client = MagicMock(spec=PublisherClient)
-    publisher._client.publish.return_value = mock_future
-
-    return publisher
-
-
-@pytest.fixture
-def published_at():
-    return 1560244246.863829
-
-
-@pytest.fixture
-def time_mock(published_at):
-    with patch("time.time") as mock:
-        mock.return_value = published_at
-        yield mock
-
-
-@pytest.fixture(autouse=True)
-def default_middleware(config):
-    register_middleware(config=config)
-
-
-@pytest.fixture
-def custom_encoder():
-    class DecimalEncoder(json.JSONEncoder):
-        def default(self, obj):
-            if isinstance(obj, decimal.Decimal):
-                return float(obj)
-
-    return DecimalEncoder
-
-
-@pytest.fixture
-def mock_publish_timeout():
-    with patch("rele.client.Publisher.publish") as mock:
-        mock.side_effect = TimeoutError()
-        yield mock
-
-
-@pytest.fixture
-def mock_post_publish_failure():
-    with patch(
-        "rele.contrib.logging_middleware.LoggingMiddleware.post_publish_failure"
-    ) as mock:
-        yield mock
-
-
-@pytest.fixture
-def publish_time():
-    timestamp = timestamp_pb2.Timestamp()
-    timestamp.GetCurrentTime()
-    return timestamp
+def embedding_file():
+    _, embedding_file = tempfile.mkstemp(prefix="embedding_", suffix=".txt")
+    with open(embedding_file, "w") as f:
+        f.write("woof 0.1 0.2 0.3")
+    yield embedding_file
+    os.remove(embedding_file)

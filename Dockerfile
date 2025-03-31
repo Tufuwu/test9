@@ -1,11 +1,8 @@
-FROM python:3.8-buster
+FROM tensorflow/tensorflow:2.4.1-gpu
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-WORKDIR /rele
-LABEL python_version=python
+WORKDIR /tf/src
 
-COPY . .
-
-RUN make install-dev-requirements
-
-CMD ["make", "clean", "lint", "test"]
+# Only need the base requirements (i.e. excluding Tensorflow)
+COPY requirements_base.txt .
+RUN pip install pip==21.1
+RUN pip install -r requirements_base.txt
