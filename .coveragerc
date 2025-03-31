@@ -1,13 +1,24 @@
 [run]
+relative_files = True
 branch = True
-include =
-  nmigen_soc/*
+source =
+    strongMan/apps
+    strongMan/helper_apps
 omit =
-  nmigen_soc/test/*
-  */__init__.py
+    */migrations/*
+    */tests/*
 
 [report]
+# Regexes for lines to exclude from consideration
 exclude_lines =
-  :nocov:
-partial_branches =
-  :nobr:
+    # Don't complain about missing debug-only code:
+    def __repr__
+    if self\.debug
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError
+
+    # Don't complain if non-runnable code isn't run:
+    if 0:
+    if __name__ == .__main__.:

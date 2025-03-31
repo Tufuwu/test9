@@ -1,0 +1,16 @@
+version: '2.1'
+
+services:
+  gateway:
+    command: "ipsec start --nofork"
+    build:
+      dockerfile: ./docker/gateway/Dockerfile
+      context: .
+    privileged: true
+
+  roadwarrior:
+    extends: gateway
+    build:
+      dockerfile: ./docker/roadwarrior/Dockerfile
+    links:
+     - "gateway"
