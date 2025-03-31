@@ -1,112 +1,99 @@
-<p align=center>
-    <img src="https://developer.somfy.com/sites/default/files/img/SoOpen.png"/>
-</p>
-<p align=center>
-    <a href="https://pypi.org/project/pymfy/"><img src="https://img.shields.io/pypi/v/pymfy.svg"/></a>
-    <a href="https://github.com/tetienne/somfy-open-api/actions"><img src="https://github.com/tetienne/somfy-open-api/workflows/CI/badge.svg"/></a>
-    <a href="https://codeclimate.com/github/tetienne/somfy-open-api/maintainability"><img src="https://api.codeclimate.com/v1/badges/efefe25b6c0dc796bc1c/maintainability" /></a>
-    <a href="https://codeclimate.com/github/tetienne/somfy-open-api/test_coverage"><img src="https://api.codeclimate.com/v1/badges/efefe25b6c0dc796bc1c/test_coverage" /></a>
-    <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" /></a>
-</p>
+# Bambam
 
-This library is an attempt to implement the entire Somfy API in Python 3.
-Documentation for the Somfy API can be found [here](https://developer.somfy.com/somfy-open-api/apis).
+[![Build Status](https://travis-ci.com/porridge/bambam.svg?branch=master)](https://travis-ci.com/porridge/bambam)
+[![Translation Status](https://hosted.weblate.org/widgets/bambam/-/app-and-manpage/svg-badge.svg)](https://hosted.weblate.org/engage/bambam/)
 
+Bambam is a simple baby keyboard (and gamepad) masher application that locks the keyboard and mouse and instead displays bright colors, pictures, and sounds.  While OSX has great programs like [AlphaBaby](http://www.kldickey.addr.com/alphababy/), the original author couldn't find anything for Linux and having wanted to learn Python for a while, Bambam was his excuse.
 
-## Get developer credentials
-
-1. Vist https://developer.somfy.com
-2. Create an account
-3. Open the *My Apps* menu
-4. Add a new App (for testing, redirect url can be anything in https)
-4. Plug in your details into the test script below.
-
-## Supported devices
-Somfy currently exposes the following type of devices:
-  - [Blinds](https://developer.somfy.com/products/blinds-interior-and-exterior)
-  - [Rolling shutters](https://developer.somfy.com/products/rolling-shutters)
-  - [Cameras](https://developer.somfy.com/products/cameras)
-  - [Connected Thermostat](https://developer.somfy.com/products/connected-thermostat)
-
-If you find on this [page](https://developer.somfy.com/products-services-informations) devices not yet handle by this
-repository, don't hesitate to open an issue.
+![Bambam screenshot](docs/bambam.png "Bambam screenshot")
 
 ## Installation
+
+### From a distribution package
+
+First, see if your distribution has a bambam package already.
+This way takes care of dependencies, translated program messages, `.desktop` files and manual pages.
+
+For example:
 ```
-pip install pymfy
-```
-
-## Example usage
-
-Print all covers name.
-
-```python
-import os
-import json
-from urllib.parse import urlparse, parse_qs
-
-from pymfy.api.devices.roller_shutter import RollerShutter
-from pymfy.api.somfy_api import SomfyApi
-from pymfy.api.devices.category import Category
-
-client_id = r'<CLIENT_ID>' # Consumer Key
-redir_url = '<REDIR_URL>' # Callback URL (for testing, can be anything)
-secret = r'<secret>' # Consumer Secret
-
-def get_token():
-        try:
-            with open(cache_path, 'r') as cache:
-                return json.loads(cache.read())
-        except IOError:
-            pass
-
-def set_token(token) -> None:
-    with open(cache_path, 'w') as cache:
-        cache.write(json.dumps(token))
-
-cache_path = '/optional/cache/path'
-api = SomfyApi(client_id, secret, redir_url, token=get_token(), token_updater=set_token)
-if not os.path.isfile(cache_path):
-    authorization_url, _ = api.get_authorization_url()
-    print('Please go to {} and authorize access.'.format(authorization_url))
-    authorization_response = input('Enter the full callback URL')
-    code = parse_qs(urlparse(authorization_response).query)['code'][0]
-    set_token(api.request_token(code=code))
-
-devices = api.get_devices(category=Category.ROLLER_SHUTTER)
-
-covers = [RollerShutter(d, api) for d in devices]
-
-for cover in covers:
-    print("Cover {} has the following position: {}".format(cover.device.name, cover.get_position()))
-
+sudo apt install bambam
+man bambam
 ```
 
-## Contribute
-The current [documentation](https://developer.somfy.com/products-services-informations) does not give enough information to implement all the devices.
-If you want to contribute to this repository adding new devices, you can create an issue with the output of this script:
-```python
-import json
-import re
-from urllib.parse import urlparse, parse_qs
+### Manual installation
 
-client_id = r'<CLIENT_ID>' # Consumer Key
-redir_url = '<REDIR_URL>' # Callback URL (for testing, can be anything)
-secret = r'<secret>' # Consumer Secret
+Before installing this application, ensure you have the following installed:
+  * [Python](http://python.org) - version 3.x is recommended but version 2.7 should work too
+  * [Pygame](http://www.pygame.org/) - version 2.x is recommended, but version 1.9 may work too
 
-from pymfy.api.somfy_api import SomfyApi
-
-api = SomfyApi(client_id, secret, redir_url)
-authorization_url, _ = api.get_authorization_url()
-print('Please go to {} and authorize access.'.format(authorization_url))
-authorization_response = input('Enter the full callback URL')
-code = parse_qs(urlparse(authorization_response).query)['code'][0]
-api.request_token(code=code)
-
-devices = api.get_devices()
-# Remove personal information
-dumps = json.dumps(devices, sort_keys=True, indent=4, separators=(',', ': '))
-dumps = re.sub('".*id.*": ".*",\n', '', dumps)
-
-print(dumps)
+If not, you can install it manually as follows:
+  1. [Download](https://github.com/porridge/bambam/releases) the `bambam-1.2.0.zip` or `bambam-1.2.0.tar.gz` file.
+  1. Unzip bambam-1.2.0.zip or `tar zxvf bambam-1.2.0.tar.gz` to create the `bambam-1.2.0` directory.
+  1. Change into the 'bambam-1.2.0' directory
 ```
+cd bambam-1.2.0
+```
+
+If you would like to take advantage of the recommended way to start the game (see the next section) do the following:
+
+```
+sed -i -e "s,/usr/games/bambam,`pwd`/bambam.py," bambam-session.desktop
+sudo mkdir -p /etc/X11/sessions
+sudo cp bambam-session.desktop /etc/X11/sessions/
+```
+
+For an alternative way to start the game from your applications menu, do the following:
+```
+sed -i -e "s,/usr/games/bambam,`pwd`/bambam.py," bambam.desktop
+mkdir -p ~/.local/share/applications
+cp bambam.desktop ~/.local/share/applications/
+```
+
+## Usage
+
+Once installed, there are two ways to run the game:
+1. **Recommended**: as a dedicated graphical session.
+
+   When logging into your system, look for a gear icon, which opens a drop-down
+   menu of available session types. Select BamBam and log in.
+
+   This way only the game is launched, and the user is logged out as soon as
+   the game quits.  Thanks to this, a child is not able to cause any damage
+   even if he or she somehow manages to quit the game.
+
+   This way is safer, but more cumbersome.
+2. Directly from a terminal, or applications menu.
+
+   Select the game from your applications menu, or to run the game from a
+   terminal window, type `bambam` if you installed from a distribution package, or
+   `./bambam.py` if you installed manually.
+
+   This way the program runs as part of a regular session. The game tries to
+   grab the keyboard and mouse pointer focus in order to prevent a child from
+   exiting the game or switching away from it. However it is not 100%
+   bulletproof, depending on the exact environment.
+
+   This way is easier, but potentially more risky. Take care when leaving your
+   child unattended with the game.
+
+## Exiting
+
+To exit, just directly type the command mentioned in the upper left-hand corner of the window. In the English locales, this is:
+```
+quit
+```
+
+More information is in the man page. To view it, type:
+```
+man ./bambam.6
+```
+
+Comments or suggestions? Any feedback is appreciated, please send it to [the bambam-users forum](https://groups.google.com/forum/#!forum/bambam-users).
+
+Translations for this game are done on [Weblate](https://hosted.weblate.org/projects/bambam/). Please help translating for your mother tongue!
+
+## History
+
+This project was moved from [its code.google.com location](https://code.google.com/p/bambam/) in April 2015, since that site was about to be shut down.
+
+Note that changes (as of 2010-08-17) from [the launchpad bambam fork](https://launchpad.net/bambam) had been merged back to this project in February 2014.
