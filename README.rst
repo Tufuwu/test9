@@ -1,345 +1,129 @@
-|appveyor|_
-|coverage|_
-|nala|_
 
-About
-=====
+.. image:: http://scikit-bio.org/assets/logo.svg
+   :target: http://scikit-bio.org
+   :alt: scikit-bio logo
 
-CAN BUS tools in Python 3.
+|Build Status| |Coverage Status| |ASV Benchmarks| |Gitter Badge| |Depsy Badge| |Anaconda Build Platforms| |Anaconda Build Version| |License| |Downloads| |Install|
 
-- `DBC`_, `KCD`_, SYM, ARXML 4 and CDD file parsing.
+scikit-bio is an open-source, BSD-licensed Python 3 package providing data structures, algorithms and educational resources for bioinformatics.
 
-- CAN message encoding and decoding.
+To view scikit-bio's documentation, visit `scikit-bio.org
+<http://scikit-bio.org>`__.
 
-- Simple and extended signal multiplexing.
+**Note:** scikit-bio is no longer compatible with Python 2. scikit-bio is compatible with Python 3.6 and later.
 
-- Diagnostic DID encoding and decoding.
+scikit-bio is currently in beta. We are very actively developing it, and **backward-incompatible interface changes can and will arise**. To avoid these types of changes being a surprise to our users, our public APIs are decorated to make it clear to users when an API can be relied upon (stable) and when it may be subject to change (experimental). See the `API stability docs <https://github.com/biocore/scikit-bio/blob/master/doc/source/user/api_stability.rst>`_ for more details, including what we mean by *stable* and *experimental* in this context.
 
-- ``candump`` output decoder.
+Installing
+----------
 
-- Node `tester`_.
+The recommended way to install scikit-bio is via the ``conda`` package manager available in `Anaconda <http://continuum.io/downloads>`_ or `miniconda <http://conda.pydata.org/miniconda.html>`_.
 
-- `C` source code generator.
+To install the latest release of scikit-bio::
 
-- CAN bus monitor.
+    conda install -c conda-forge scikit-bio
 
-Project homepage: https://github.com/eerimoq/cantools
+Alternatively, you can install scikit-bio using ``pip``::
 
-Documentation: https://cantools.readthedocs.io
+    pip install scikit-bio
 
-Installation
-============
+You can verify your installation by running the scikit-bio unit tests::
 
-.. code-block:: python
+    python -m skbio.test
 
-    pip install cantools
+For users of Debian, ``skbio`` is in the Debian software distribution and may
+be installed using::
 
-Example usage
-=============
+    sudo apt-get install python3-skbio python-skbio-doc
 
-Scripting
+
+Getting help
+------------
+
+To get help with scikit-bio, you should use the `skbio <http://stackoverflow.com/questions/tagged/skbio>`_ tag on StackOverflow (SO). Before posting a question, check out SO's guide on how to `ask a question <http://stackoverflow.com/questions/how-to-ask>`_. The scikit-bio developers regularly monitor the ``skbio`` SO tag.
+
+Projects using scikit-bio
+-------------------------
+
+Some of the projects that we know of that are using scikit-bio are:
+
+- `QIIME <http://qiime.org/>`__
+- `Emperor <http://biocore.github.io/emperor/>`__
+- `An Introduction to Applied
+  Bioinformatics <http://readIAB.org>`__
+- `tax2tree <https://github.com/biocore/tax2tree>`__
+- `Qiita <http://qiita.microbio.me>`__
+- `ghost-tree <https://github.com/JTFouquier/ghost-tree>`__
+- `Platypus-Conquistador <https://github.com/biocore/Platypus-Conquistador>`__
+
+If you're using scikit-bio in your own projects, feel free to issue a pull request to add them to this list.
+
+scikit-bio development
+----------------------
+
+If you're interested in getting involved in scikit-bio development, see `CONTRIBUTING.md <https://github.com/biocore/scikit-bio/blob/master/CONTRIBUTING.md>`__.
+
+See the list of `scikit-bio's contributors
+<https://github.com/biocore/scikit-bio/graphs/contributors>`__.
+
+Licensing
 ---------
 
-The example starts by parsing a `small DBC-file`_ and printing its
-messages and signals.
-
-.. code-block:: python
-
-   >>> import cantools
-   >>> from pprint import pprint
-   >>> db = cantools.database.load_file('tests/files/dbc/motohawk.dbc')
-   >>> db.messages
-   [message('ExampleMessage', 0x1f0, False, 8, 'Example message used as template in MotoHawk models.')]
-   >>> example_message = db.get_message_by_name('ExampleMessage')
-   >>> pprint(example_message.signals)
-   [signal('Enable', 7, 1, 'big_endian', False, 1.0, 0, 0.0, 0.0, '-', False, None, {0: 'Disabled', 1: 'Enabled'}, None),
-    signal('AverageRadius', 6, 6, 'big_endian', False, 0.1, 0, 0.0, 5.0, 'm', False, None, None, ''),
-    signal('Temperature', 0, 12, 'big_endian', True, 0.01, 250, 229.53, 270.47, 'degK', False, None, None, None)]
-
-The example continues `encoding`_ a message and sending it on a CAN
-bus using the `python-can`_ package.
-
-.. code-block:: python
-
-   >>> import can
-   >>> can_bus = can.interface.Bus('vcan0', bustype='socketcan')
-   >>> data = example_message.encode({'Temperature': 250.1, 'AverageRadius': 3.2, 'Enable': 1})
-   >>> message = can.Message(arbitration_id=example_message.frame_id, data=data)
-   >>> can_bus.send(message)
-
-Alternatively, a message can be encoded using the `encode_message()`_
-method on the database object.
-
-The last part of the example receives and `decodes`_ a CAN message.
-
-.. code-block:: python
-
-   >>> message = can_bus.recv()
-   >>> db.decode_message(message.arbitration_id, message.data)
-   {'AverageRadius': 3.2, 'Enable': 'Enabled', 'Temperature': 250.09}
-
-See `examples`_ for additional examples.
-
-Command line tool
------------------
-
-The decode subcommand
-^^^^^^^^^^^^^^^^^^^^^
-
-Decode CAN frames captured with the Linux program ``candump``.
-
-.. code-block:: text
-
-   $ candump vcan0 | cantools decode tests/files/dbc/motohawk.dbc
-     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 ::
-   ExampleMessage(
-       Enable: 'Enabled' -,
-       AverageRadius: 0.0 m,
-       Temperature: 255.92 degK
-   )
-     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 ::
-   ExampleMessage(
-       Enable: 'Enabled' -,
-       AverageRadius: 0.0 m,
-       Temperature: 255.92 degK
-   )
-     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 ::
-   ExampleMessage(
-       Enable: 'Enabled' -,
-       AverageRadius: 0.0 m,
-       Temperature: 255.92 degK
-   )
-
-Alternatively, the decoded message can be printed on a single line:
-
-.. code-block:: text
-
-   $ candump vcan0 | cantools decode --single-line tests/files/dbc/motohawk.dbc
-     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
-     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
-     vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
-
-The dump subcommand
-^^^^^^^^^^^^^^^^^^^
-
-Dump given database in a human readable format:
-
-.. code-block:: text
-
-   $ cantools dump tests/files/dbc/motohawk.dbc
-   ================================= Messages =================================
-
-     ------------------------------------------------------------------------
-
-     Name:       ExampleMessage
-     Id:         0x1f0
-     Length:     8 bytes
-     Cycle time: - ms
-     Senders:    PCM1
-     Layout:
-
-                             Bit
-
-                7   6   5   4   3   2   1   0
-              +---+---+---+---+---+---+---+---+
-            0 |<-x|<---------------------x|<--|
-              +---+---+---+---+---+---+---+---+
-                |                       +-- AverageRadius
-                +-- Enable
-              +---+---+---+---+---+---+---+---+
-            1 |-------------------------------|
-              +---+---+---+---+---+---+---+---+
-            2 |----------x|   |   |   |   |   |
-        B     +---+---+---+---+---+---+---+---+
-        y               +-- Temperature
-        t     +---+---+---+---+---+---+---+---+
-        e   3 |   |   |   |   |   |   |   |   |
-              +---+---+---+---+---+---+---+---+
-            4 |   |   |   |   |   |   |   |   |
-              +---+---+---+---+---+---+---+---+
-            5 |   |   |   |   |   |   |   |   |
-              +---+---+---+---+---+---+---+---+
-            6 |   |   |   |   |   |   |   |   |
-              +---+---+---+---+---+---+---+---+
-            7 |   |   |   |   |   |   |   |   |
-              +---+---+---+---+---+---+---+---+
-
-     Signal tree:
-
-       -- {root}
-          +-- Enable
-          +-- AverageRadius
-          +-- Temperature
-
-     Signal choices:
-
-       Enable
-           0 Disabled
-           1 Enabled
-
-     ------------------------------------------------------------------------
-
-The generate C source subcommand
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Generate `C` source code from given database.
-
-The generated code contains:
-
-- Message `structs`_.
-
-- Message `pack`_ and `unpack`_ functions.
-
-- Signal `encode`_ and `decode`_ functions.
-
-- Frame id, length, type, cycle time and signal choices `defines`_.
-
-Known limitations:
-
-- The maximum signal size is 64 bits, which in practice is never
-  exceeded.
-
-Below is an example of how to generate C source code from a
-database. The database is ``tests/files/dbc/motohawk.dbc``.
-
-.. code-block:: text
-
-   $ cantools generate_c_source tests/files/dbc/motohawk.dbc
-   Successfully generated motohawk.h and motohawk.c.
-
-See `motohawk.h`_ and `motohawk.c`_ for the contents of the generated
-files.
-
-In the next example we use ``--database-name`` to set a custom
-namespace for all generated types, defines and functions. The output
-file names are also changed by this option.
-
-.. code-block:: text
-
-   $ cantools generate_c_source --database-name my_database_name tests/files/dbc/motohawk.dbc
-   Successfully generated my_database_name.h and my_database_name.c.
-
-See `my_database_name.h`_ and `my_database_name.c`_ for the contents
-of the generated files.
-
-In the last example we use ``--no-floating-point-numbers`` to generate
-code without floating point types, i.e. ``float`` and ``double``.
-
-.. code-block:: text
-
-   $ cantools generate_c_source --no-floating-point-numbers tests/files/dbc/motohawk.dbc
-   Successfully generated motohawk.h and motohawk.c.
-
-See `motohawk_no_floating_point_numbers.h`_ and
-`motohawk_no_floating_point_numbers.c`_ for the contents of the
-generated files.
-
-Other C code generators:
-
-- http://www.coderdbc.com
-
-- https://github.com/howerj/dbcc
-
-- https://github.com/lonkamikaze/hsk-libs/blob/master/scripts/dbc2c.awk
-
-- https://sourceforge.net/projects/comframe/
-
-The monitor subcommand
-^^^^^^^^^^^^^^^^^^^^^^
-
-Monitor CAN bus traffic in a text based user interface.
-
-.. code-block:: text
-
-   $ cantools monitor tests/files/dbc/motohawk.dbc
-
-.. image:: https://github.com/eerimoq/cantools/raw/master/docs/monitor.png
-
-The menu at the bottom of the monitor shows the available commands.
-
-- Quit: Quit the monitor. Ctrl-C can be used as well.
-
-- Filter: Only display messages matching given regular
-  expression. Press <Enter> to return to the menu from the filter
-  input line.
-
-- Play/Pause: Toggle between playing and paused (or running and freezed).
-
-- Reset: Reset the monitor to its initial state.
-
-Contributing
-============
-
-#. Fork the repository.
-
-#. Install prerequisites.
-
-   .. code-block:: text
-
-      pip install -r requirements.txt
-
-#. Implement the new feature or bug fix.
-
-#. Implement test case(s) to ensure that future changes do not break
-   legacy.
-
-#. Run the tests.
-
-   .. code-block:: text
-
-      make test
-
-#. Create a pull request.
-
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/eerimoq/cantools?svg=true
-.. _appveyor: https://ci.appveyor.com/project/eerimoq/cantools/branch/master
-
-.. |coverage| image:: https://coveralls.io/repos/github/eerimoq/cantools/badge.svg?branch=master
-.. _coverage: https://coveralls.io/github/eerimoq/cantools
-
-.. |nala| image:: https://img.shields.io/badge/nala-test-blue.svg
-.. _nala: https://github.com/eerimoq/nala
-
-.. _small DBC-file: https://github.com/eerimoq/cantools/blob/master/tests/files/dbc/motohawk.dbc
-
-.. _motohawk.dbc: https://github.com/eerimoq/cantools/blob/master/tests/files/dbc/motohawk.dbc
-
-.. _python-can: https://python-can.readthedocs.io/en/master/
-
-.. _DBC: http://www.socialledge.com/sjsu/index.php?title=DBC_Format
-
-.. _KCD: https://github.com/julietkilo/kcd
-
-.. _tester: http://cantools.readthedocs.io/en/latest/#cantools.tester.Tester
-
-.. _encoding: http://cantools.readthedocs.io/en/latest/#cantools.database.can.Message.encode
-
-.. _encode_message(): http://cantools.readthedocs.io/en/latest/#cantools.database.can.Database.encode_message
-
-.. _decodes: http://cantools.readthedocs.io/en/latest/#cantools.database.can.Database.decode_message
-
-.. _examples: https://github.com/eerimoq/cantools/blob/master/examples
-
-.. _structs: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L58
-
-.. _pack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L88
-
-.. _unpack: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L102
-
-.. _encode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L116
-
-.. _decode: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L125
-
-.. _defines: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h#L42
-
-.. _motohawk.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.h
-
-.. _motohawk.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk.c
-
-.. _my_database_name.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/my_database_name.h
-
-.. _my_database_name.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/my_database_name.c
-
-.. _motohawk_no_floating_point_numbers.h: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.h
-
-.. _motohawk_no_floating_point_numbers.c: https://github.com/eerimoq/cantools/blob/master/tests/files/c_source/motohawk_no_floating_point_numbers.c
+scikit-bio is available under the new BSD license. See
+`COPYING.txt <https://github.com/biocore/scikit-bio/blob/master/COPYING.txt>`__ for scikit-bio's license, and the
+`licenses directory <https://github.com/biocore/scikit-bio/tree/master/licenses>`_ for the licenses of third-party software that is
+(either partially or entirely) distributed with scikit-bio.
+
+The pre-history of scikit-bio
+-----------------------------
+
+scikit-bio began from code derived from `PyCogent
+<http://www.pycogent.org>`__ and `QIIME <http://www.qiime.org>`__, and
+the contributors and/or copyright holders have agreed to make the code
+they wrote for PyCogent and/or QIIME available under the BSD
+license. The contributors to PyCogent and/or QIIME modules that have
+been ported to scikit-bio are: Rob Knight (`@rob-knight
+<https://github.com/rob-knight>`__), Gavin Huttley (`@gavin-huttley
+<https://github.com/gavin-huttley>`__), Daniel McDonald (`@wasade
+<https://github.com/wasade>`__), Micah Hamady, Antonio Gonzalez
+(`@antgonza <https://github.com/antgonza>`__), Sandra Smit, Greg
+Caporaso (`@gregcaporaso <https://github.com/gregcaporaso>`__), Jai
+Ram Rideout (`@jairideout <https://github.com/jairideout>`__),
+Cathy Lozupone (`@clozupone <https://github.com/clozupone>`__), Mike Robeson
+(`@mikerobeson <https://github.com/mikerobeson>`__), Marcin Cieslik,
+Peter Maxwell, Jeremy Widmann, Zongzhi Liu, Michael Dwan, Logan Knecht
+(`@loganknecht <https://github.com/loganknecht>`__), Andrew Cochran,
+Jose Carlos Clemente (`@cleme <https://github.com/cleme>`__), Damien
+Coy, Levi McCracken, Andrew Butterfield, Will Van Treuren (`@wdwvt1
+<https://github.com/wdwvt1>`__), Justin Kuczynski (`@justin212k
+<https://github.com/justin212k>`__), Jose Antonio Navas Molina
+(`@josenavas <https://github.com/josenavas>`__), Matthew Wakefield
+(`@genomematt <https://github.com/genomematt>`__) and Jens Reeder
+(`@jensreeder <https://github.com/jensreeder>`__).
+
+Logo
+----
+
+scikit-bio's logo was created by `Alina Prassas <http://cargocollective.com/alinaprassas>`_.
+
+.. |Build Status| image:: https://travis-ci.org/biocore/scikit-bio.svg?branch=master
+   :target: https://travis-ci.org/biocore/scikit-bio
+.. |Coverage Status| image:: https://coveralls.io/repos/biocore/scikit-bio/badge.png
+   :target: https://coveralls.io/r/biocore/scikit-bio
+.. |ASV Benchmarks| image:: http://img.shields.io/badge/benchmarked%20by-asv-green.svg?style=flat
+   :target: https://s3-us-west-2.amazonaws.com/scikit-bio.org/benchmarks/master/index.html
+.. |Gitter Badge| image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/biocore/scikit-bio
+   :target: https://gitter.im/biocore/scikit-bio?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+.. |Depsy Badge| image:: http://depsy.org/api/package/pypi/scikit-bio/badge.svg
+   :target: http://depsy.org/package/python/scikit-bio
+.. |Anaconda Build Platforms| image:: https://anaconda.org/conda-forge/scikit-bio/badges/platforms.svg
+   :target: https://anaconda.org/conda-forge/scikit-bio
+.. |Anaconda Build Version| image:: https://anaconda.org/conda-forge/scikit-bio/badges/version.svg
+   :target: https://anaconda.org/conda-forge/scikit-bio
+.. |License| image:: https://anaconda.org/conda-forge/scikit-bio/badges/license.svg
+   :target: https://anaconda.org/conda-forge/scikit-bio
+.. |Downloads| image:: https://anaconda.org/conda-forge/scikit-bio/badges/downloads.svg
+   :target: https://anaconda.org/conda-forge/scikit-bio
+.. |Install| image:: https://anaconda.org/conda-forge/scikit-bio/badges/installer/conda.svg
+   :target: https://conda.anaconda.org/conda-forge

@@ -1,3 +1,28 @@
-include LICENSE
+include .coveragerc
+include CHANGELOG.md
+include CONTRIBUTING.md
+include COPYING.txt
 include Makefile
-recursive-include tests *.py *.arxml *.dbc *.cdd *.kcd *.sym *.h *.c *.mk *.DBC
+include PULL_REQUEST_TEMPLATE.md
+include pyproject.toml
+include README.rst
+include RELEASE.md
+include REVIEWING.md
+include checklist.py
+include asv.conf.json
+
+graft assets
+graft ci
+graft doc
+graft ipynbs
+graft licenses
+graft skbio
+
+prune doc/build
+prune doc/source/generated
+
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude *.so
+global-exclude .*.swp
+global-exclude .coverage
