@@ -1,0 +1,251 @@
+# -*- coding: utf8 -*-
+# This file is part of PYBOSSA.
+#
+# Copyright (C) 2015 SF Isle of Man Limited
+#
+# PYBOSSA is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# PYBOSSA is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with PYBOSSA.  If not, see <http://www.gnu.org/licenses/>.
+import json
+from unittest.mock import patch
+
+from test import db, with_context
+from test.factories import ProjectFactory, TaskFactory, UserFactory, TaskRunFactory
+from test.helper import web
+from test.helper.gig_helper import make_subadmin, make_admin
+from pybossa.repositories import UserRepository, ProjectRepository, TaskRepository, WebhookRepository, ResultRepository
+from pybossa.cache import projects as cached_projects
+
+
+project_repo = ProjectRepository(db)
+task_repo = TaskRepository(db)
+user_repo = UserRepository(db)
+webhook_repo = WebhookRepository(db)
+result_repo = ResultRepository(db)
+
+
+class TestProjectPublicationView(web.Helper):
+
+    @with_context
+    def setUp(self):
+        super(TestProjectPublicationView, self).setUp()
+        self.owner = UserFactory.create(email_addr='a@a.com')
+        self.owner.set_password('1234')
+        user_repo.save(self.owner)
+        project = ProjectFactory.create(owner=self.owner, published=False)
+        self.project_id = project.id
+        self.signin(email='a@a.com', password='1234')
+
+    @with_context
+    @patch('pybossa.view.projects.ensure_authorized_to')
+    def test_it_checks_permissions_over_project(self, fake_auth):
+        project = project_repo.get(self.project_id)
+        post_resp = self.app.get('/project/%s/publish' % project.short_name)
+        get_resp = self.app.post('/project/%s/publish' % project.short_name)
+
+        call_args = fake_auth.call_args_list
+
+        assert fake_auth.call_count == 2, fake_auth.call_count
+        assert call_args[0][0][1].id == project.id, call_args[0]
+        assert call_args[1][0][1].id == project.id, call_args[1]
+
+    @with_context
+    def test_template_returned_when_get(self):
+        project = project_repo.get(self.project_id)
+        TaskFactory.create(project=project)
+        url = '/project/%s/publish' % project.short_name
+        res = self.app_get_json(url, follow_redirects=True)
+        data = json.loads(res.data)
+        assert data['template'] == '/projects/publish.html'
+
+    @with_context
+    def test_it_changes_project_to_published_after_post(self):
+        project = project_repo.get(self.project_id)
+        TaskFactory.create(project=project)
+        resp = self.app.post('/project/%s/publish' % project.short_name,
+                             follow_redirects=True)
+
+        project = project_repo.get(project.id)
+        assert resp.status_code == 200, resp.status_code
+        assert project.published == True, project
+
+    @with_context
+    @patch('pybossa.view.projects.webhook_repo.delete_entries_from_project')
+    @patch('pybossa.view.projects.result_repo.delete_results_from_project')
+    @patch('pybossa.view.projects.task_repo')
+    def test_it_deletes_project_taskruns_before_publishing(self, mock_task_repo,
+                                                           mock_result_repo,
+                                                           mock_webhook_repo):
+        project = project_repo.get(self.project_id)
+        task = TaskFactory.create(project=project, n_answers=1)
+        TaskRunFactory.create(task=task)
+        result = result_repo.get_by(project_id=task.project_id)
+        assert not result, "There should not be a result"
+        resp = self.app.post('/project/%s/publish' % project.short_name,
+                             follow_redirects=True, data={'force_reset': 'on'})
+
+        taskruns = task_repo.filter_task_runs_by(project_id=project.id)
+
+        repo_call = mock_task_repo.delete_taskruns_from_project.call_args_list[0][0][0]
+        assert repo_call.id == project.id, repo_call
+
+        mock_webhook_repo.assert_called_with(project)
+        mock_result_repo.assert_called_with(project)
+        assert 'Project published' in str(resp.data), resp.data
+
+
+    @with_context
+    @patch('pybossa.view.projects.auditlogger')
+    def test_it_logs_the_event_in_auditlog(self, fake_logger):
+        project = project_repo.get(self.project_id)
+        TaskFactory.create(project=project)
+        resp = self.app.post('/project/%s/publish' % project.short_name,
+                             follow_redirects=True)
+
+        assert fake_logger.log_event.called, "Auditlog not called"
+
+    @with_context
+    def test_published_get(self):
+        project = ProjectFactory.create(info=dict())
+        make_subadmin(project.owner)
+        url = '/project/%s/publish?api_key=%s' % (project.short_name,
+                                                  project.owner.api_key)
+        # Without tasks should return 403
+        res = self.app.get(url)
+        assert res.status_code == 403, res.status_code
+
+        # With a task should return 403 and no task presenter
+        TaskFactory.create(project=project)
+        res = self.app.get(url)
+        assert res.status_code == 403, res.status_code
+
+        project.info['task_presenter'] = 'task presenter'
+
+        project_repo.update(project)
+
+        res = self.app.get(url)
+        assert res.status_code == 200, res.status_code
+
+    @with_context
+    def test_published_disable_task_presenter_get(self):
+        with patch.dict(self.flask_app.config,
+                        {'DISABLE_TASK_PRESENTER': True}):
+            project = ProjectFactory.create(info=dict())
+            make_subadmin(project.owner)
+
+            url = '/project/%s/publish?api_key=%s' % (project.short_name,
+                                                      project.owner.api_key)
+            # With a task should return 200 as task presenter is disabled.
+            TaskFactory.create(project=project)
+            res = self.app.get(url)
+            assert res.status_code == 200, res.status_code
+
+    @with_context
+    def test_publish_project(self):
+        project = ProjectFactory.create(published=False, info=dict(
+            task_presenter='task presenter'))
+        make_subadmin(project.owner)
+        task = TaskFactory.create(project=project, n_answers=1)
+        TaskRunFactory.create(task=task)
+
+        #unpublish project
+        url = '/project/%s/publish?api_key=%s' % (project.short_name,
+                                                  project.owner.api_key)
+        res = self.app.get(url)
+        assert res.status_code == 200, res.status_code
+
+        assert 'You are about to publish your project in' in str(res.data), \
+            'You are about to publish your project in message should be provided'
+
+    @with_context
+    def test_unpublish_project(self):
+        project = ProjectFactory.create(published=True, info=dict(
+            task_presenter='task presenter'))
+        make_subadmin(project.owner)
+        task = TaskFactory.create(project=project, n_answers=1)
+        TaskRunFactory.create(task=task)
+        orig_taskruns = cached_projects.n_task_runs(project.id)
+
+        #unpublish project
+        url = '/project/%s/publish?api_key=%s' % (project.short_name,
+                                                  project.owner.api_key)
+        res = self.app.get(url)
+        assert res.status_code == 200, res.status_code
+
+        assert 'You are about to unpublish your project.' in str(res.data), \
+            'You are about to unpublish your project. message should be provided'
+
+        resp = self.app.post('/project/%s/publish' % project.short_name,
+                             follow_redirects=True)
+        assert res.status_code == 200, 'Failed to unpublish project'
+        project = project_repo.get(project.id)
+        assert not project.published, 'Project should not be published'
+
+        #publish an unpublished project
+        resp = self.app.post('/project/%s/publish' % project.short_name,
+                             follow_redirects=True, data={'force_reset': 'off'})
+        assert res.status_code == 200, 'Failed to publish project'
+        project = project_repo.get(project.id)
+        assert project.published, 'Project should be published'
+        taskruns_when_published = cached_projects.n_task_runs(project.id)
+        assert taskruns_when_published == orig_taskruns, 'Publish project should not have deleted taskruns'
+
+    @with_context
+    def test_newtask_unpublish_project(self):
+        """Test user obtains newtask with published projects only; 404 with unpublished projects"""
+        project = ProjectFactory.create(info=dict(published=True,
+            task_presenter='task presenter'))
+        admin, subadmin_coowner, regular_coowner, user = UserFactory.create_batch(4)
+        make_admin(admin)
+        make_subadmin(subadmin_coowner)
+        tasks = TaskFactory.create_batch(10, project=project, n_answers=1)
+
+
+        self.set_proj_passwd_cookie(project, user)
+        res = self.app.get('api/project/{}/newtask?api_key={}'
+                           .format(project.id, user.api_key))
+        task = json.loads(res.data)
+        assert res.status_code == 200 and task['id'] == tasks[0].id, 'User should have obtained new task'
+
+        # submit answer for the task
+        task_run = dict(project_id=project.id, task_id=task['id'], info='hi there!')
+        res = self.app.post('api/taskrun?api_key={}'.format(user.api_key),
+                            data=json.dumps(task_run))
+        assert res.status_code == 200, res.status_code
+
+        #unpublish project
+        project.published = False
+        project.owners_ids.append(regular_coowner.id)
+        project.owners_ids.append(subadmin_coowner.id)
+        project_repo.save(project)
+        project = project_repo.get(project.id)
+        assert not project.published, 'Project should not be published'
+
+        # for unpublished project, obtaining newtask would succeed for admin
+        res = self.app.get('api/project/{}/newtask?api_key={}'
+                           .format(project.id, admin.api_key))
+        assert res.status_code == 200, 'newtask to unpublished project should succeed for admin'
+
+        # for unpublished project, obtaining newtask would succeed for subadmin coowner
+        res = self.app.get('api/project/{}/newtask?api_key={}'
+                           .format(project.id, subadmin_coowner.api_key))
+        assert res.status_code == 200, 'newtask to unpublished project should succeed for admin'
+
+        # for unpublished project, obtaining newtask would succeed for regular coowner
+        res = self.app.get('api/project/{}/newtask?api_key={}'
+                           .format(project.id, regular_coowner.api_key))
+        assert res.status_code == 200, 'newtask to unpublished project should succeed for admin'
+
+        # for unpublished project, obtaining newtask would fail for regular user
+        res = self.app.get('api/project/{}/newtask?api_key={}'
+                           .format(project.id, user.api_key))
+        assert res.status_code == 404, 'newtask to unpublished project should return 404'

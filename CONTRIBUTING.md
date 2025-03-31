@@ -1,35 +1,39 @@
-<!---
+# Contributing to PYBOSSA
 
-This file serves as an entry point for GitHub's Contributing
-Guidelines [1] only.
+## Before You Start
 
-GitHub doesn't render rST very well, especially in respect to internal
-hyperlink targets and cross-references [2]. People also tend to
-confuse rST and Markdown syntax. Therefore, instead of keeping the
-contents here (and including from rST documentation under doc/), link
-to the Sphinx generated docs is provided below.
+Anyone wishing to contribute to the **[Scifabric/pybossa](https://github.com/Scifabric/pybossa)** project 
+**MUST read & sign a Contributor Assignment Agreement (CAA)**. 
 
+The Scifabric team is legally prevented from accepting any pull requests from users who have not signed the CAA first.
 
-[1] https://github.com/blog/1184-contributing-guidelines
-[2] http://docutils.sourceforge.net/docs/user/rst/quickref.html#hyperlink-targets
+If you have any doubts about the CAA, please, contact us at *info AT scifabric.com*.
 
--->
+## Instructions
 
-# Certbot Contributing Guide
+This document explains how you have to sign the **Individual or Entity Contributor Assignment Agreement**. 
 
-Hi! Welcome to the Certbot project. We look forward to collaborating with you.
+If you are younger than 18 years of age or if you are contributing on behalf of an entity or individual from South Africa or Portugal please follow the download instructions (last section). 
 
-If you're reporting a bug in Certbot, please make sure to include:
- - The version of Certbot you're running.
- - The operating system you're running it on.
- - The commands you ran.
- - What you expected to happen, and
- - What actually happened.
+If you are older than 18 and an individual or contributing on behalf of an entity from anywhere else please select the appropriate form:
 
-If you're a developer, we have some helpful information in our
-[Developer's Guide](https://certbot.eff.org/docs/contributing.html) to get you
-started. In particular, we recommend you read these sections 
+* [Individual](https://docs.google.com/forms/d/1Hm3d1CylEvvuZ9TiQKoy9U8qBUMbQ1t5IiWum4tecJU/viewform), 
+* [Entity](https://docs.google.com/forms/d/1IBUu6HAr1hdQlgv9SJ6FluoypjK-_SLAxnuEt5q7nug/viewform)
+ 
+You will be prompted to provide identifying information and to show your consent.
 
- - [Finding issues to work on](https://certbot.eff.org/docs/contributing.html#find-issues-to-work-on)
- - [Coding style](https://certbot.eff.org/docs/contributing.html#coding-style)
- - [Submitting a pull request](https://certbot.eff.org/docs/contributing.html#submitting-a-pull-request)
+Once we have received your consent, we will send you back the agreement via e-mail, and from that moment you will be able to start contributing to the project normally. Welcome to the community!
+
+If you have any doubts, do not hesitate and contact us here: *info AT scifabric.com*. We will be happy to answer all your questions.
+
+## If You do not own the Copyright in the entire work of authorship
+
+If this is your case, you will need to contact all the other authors, and get their signed permission in order to contribute to the project.
+
+## Download Instructions
+
+If you are an **Individual** download this [form](https://drive.google.com/file/d/0B-wKsWbAUup4Y0pLOGY1Sl9UMTQ/view?usp=sharing).
+
+If you are an **Entity** download this [form](https://drive.google.com/file/d/0B-wKsWbAUup4YWRxakNXVV9BYmc/view?usp=sharing).
+
+Please print, sign and scan it and send it as an attachment in an email to  to *info AT scifabric.com* Once we have received your copy, we will send you back a signed copy from us, and from that moment you will be able to start contributing to the project normally. Welcome to the community!

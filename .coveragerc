@@ -1,11 +1,4 @@
-[run]
-branch = True
-source = josepy
-
-[paths]
-source =
-   .tox/*/lib/python*/site-packages/josepy
-   .tox/pypy*/site-packages/josepy
-
 [report]
-show_missing = True
+omit = 
+    /home/travis/virtualenv*
+    */test/*
