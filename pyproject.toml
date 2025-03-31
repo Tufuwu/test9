@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "pysmo"
+version = "0.9.0-dev"
+description = "Python module to read/write/manipulate SAC (Seismic Analysis Code) files"
+readme = "README.md"
+authors = ["Simon M. Lloyd <simon@slloyd.net>"]
+license = "GPL-3.0-or-later"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+scipy = "^1.5.4"
+numpy = "^1.19.4"
+matplotlib = "^3.3.3"
+pyproj = "^3.0.0"
+PyYAML = "^5.3.1"
+requests = "^2.25.1"
+
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.1.2"
+Sphinx = "^3.3.1"
+sphinx-rtd-theme = "^0.5.0"
+pytest-mpl = "^0.12"
+pytest-cov = "^2.10.1"
+pytest-depends = "^1.0.1"
+flake8 = "^3.9.2"
+
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
