@@ -1,48 +1,65 @@
 name: Test
 on:
-  push:
-    branches: ["main"]
   pull_request:
-    branches: ["main"]
+    branches:
+    - main
+  push:
+    branches:
+    - main
+
 jobs:
   test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.9", "3.10"]
-        # we do not want a large number of windows and macos builds, so
-        # enumerate them explicitly
-        include:
-          - os: windows-latest
-            python-version: 3.9
-          - os: windows-latest
-            python-version: 3.9
-          - os: macos-latest
-            python-version: 3.9
-    name: "Python ${{ matrix.python-version }} on ${{ matrix.os }} "
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    # Local registry where we output p4lang/p4runtime-sh so that it can be used
+    # to build p4lang/p4runtime-sh-dev.
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install Requirements
-        run: python -m pip install -U pip setuptools tox
-      - name: Run Linting
-        # only lint on 3.8 for two reasons
-        #  1. faster overall runs
-        #  2. Linting fails on py3.5 because tools require 3.6+
-        if: ${{ matrix.python-version == '3.8' }}
-        run: python -m tox -e lint
-      # really clumsy retry with backoff... is there a better way?
-      - name: Run Tests
-        id: testrun1
-        continue-on-error: true
-        run: python -m tox -e py
-      - name: Wait and retest if first test failed
-        if: steps.testrun1.outcome == 'failure'
-        id: testrun2
-        run: |
-          sleep 60
-          python -m tox -e py
+    - name: Check-out code
+      uses: actions/checkout@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+      with:
+          driver-opts: network=host
+    - name: Login to DockerHub if needed
+      if: ${{ github.repository == 'p4lang/p4runtime-shell' && github.event_name == 'push' }}
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build and push p4lang/p4runtime-sh to local registry
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        tags: localhost:5000/p4lang/p4runtime-sh
+        push: true
+        cache-from: type=gha,scope=p4runtime-sh
+        cache-to: type=gha,scope=p4runtime-sh,mode=max
+    - name: Build and export p4lang/p4runtime-sh-dev to Docker
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: Dockerfile.dev
+        build-args: BASE_IMAGE=localhost:5000/p4lang/p4runtime-sh:latest
+        load: true
+        tags: p4lang/p4runtime-sh-dev
+        cache-from: |
+          type=registry,ref=localhost:5000/p4lang/p4runtime-sh
+          type=gha,scope=p4runtime-sh-dev
+        cache-to: type=gha,scope=p4runtime-sh-dev,mode=max
+    - name: Check Python code formatting
+      run: docker run p4lang/p4runtime-sh-dev bash -c "source venv/bin/activate && flake8 p4runtime_sh config_builders"
+    - name: Run unit tests and upload code coverage
+      run: |
+        ci_env=`bash <(curl -s https://codecov.io/env)`
+        docker run $ci_env p4lang/p4runtime-sh-dev bash -c "source venv/bin/activate && nose2 --with-coverage p4runtime_sh config_builders && codecov"
+    - name: Build and push p4lang/p4runtime-sh to Dockerhub if needed
+      if: ${{ github.repository == 'p4lang/p4runtime-shell' && github.event_name == 'push' }}
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: p4lang/p4runtime-sh
