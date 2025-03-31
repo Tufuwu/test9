@@ -1,18 +1,16 @@
-build/
-dist/
-rpm-build/
-rpms/
-*~
-.DS_Store
-*.swp
-*.pyc
-*.pyo
-*.egg*
-.tox
-.coveralls.yml
+.idea
+.pytest_cache
 .coverage
-pyrax.spec
+htmlcov
+.nox
+coverage.xml
 
-.venv/
-env/
-venv/
+# byte-compiled / optimized
+__pycache__
+*.pyc
+*.egg-info
+
+# packaging / distribution
+site
+dist
+build
