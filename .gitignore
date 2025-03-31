@@ -1,23 +1,19 @@
-.DS_Store
-.idea
-__pycache__
+# Byte-compiled / DLL / optimized files...
+__pycache__/
 
-docker_volumes/*
-!docker_volumes/**/.gitkeep
-!docker_config/**/.gitkeep
+# OSX
+.DS_STORE
 
-backend/config/*config.yml
-backend/config/config_backup*
+# Jupyter notebook
+*.ipynb_checkpoints/
 
-checkers/*
-!checkers/.gitkeep
-!checkers/bin/.gitkeep
+# nbsite output
+builtdocs/
+doc/tools.rst
+doc/_static/cache/
 
-*.env
-/docker-compose-base.yml
+# doit
+.doit.db
 
-node_modules/
-.mypy_cache
-
-/.version
-/release
+# pytest
+.pytest_cache

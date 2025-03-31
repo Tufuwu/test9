@@ -1,5 +1,0 @@
-checklib
-requests
-psycopg2-binary
-flake8
-PyYAML
