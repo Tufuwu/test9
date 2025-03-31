@@ -1,66 +1,88 @@
 #!/usr/bin/env python
-#-----------------------------------------------------------------------------
-# Copyright (c) 2013-2020, NeXpy Development Team.
+
+# setup.py - python-stdnum installation script
 #
-# Distributed under the terms of the Modified BSD License.
+# Copyright (C) 2010-2021 Arthur de Jong
 #
-# The full license is in the file COPYING, distributed with this software.
-#-----------------------------------------------------------------------------
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301 USA
 
-from setuptools import setup, find_packages, Extension
+"""python-stdnum installation script."""
 
-import os, sys
-import versioneer
+import os
+import sys
 
-# pull in some definitions from the package's __init__.py file
-sys.path.insert(0, os.path.join('src', ))
-import nexpy
-import nexpy.requires
+from setuptools import find_packages, setup
 
-verbose=1
+import stdnum
 
-setup (name =  nexpy.__package_name__,        # NeXpy
-       version=versioneer.get_version(),
-       cmdclass=versioneer.get_cmdclass(),
-       license = nexpy.__license__,
-       description = nexpy.__description__,
-       long_description = nexpy.__long_description__,
-       author=nexpy.__author_name__,
-       author_email=nexpy.__author_email__,
-       url=nexpy.__url__,
-       download_url=nexpy.__download_url__,
-       platforms='any',
-       python_requires='>=3.7',
-       install_requires = nexpy.requires.pkg_requirements,
-       extras_require = nexpy.requires.extra_requirements,
-       package_dir = {'': 'src'},
-       packages = find_packages('src'),
-       include_package_data = True,
-       package_data = {
-                       'nexpy.gui': ['resources/icon/*.svg',
-                                     'resources/icon/*.png',
-                                     'resources/*.png',
-                                    ],
-                       'nexpy.definitions': ['base_classes/*.xml'],
-                       'nexpy': [
-                           'examples/*.*',
-                           'examples/*/*.*',
-                           'examples/*/*/*.*',
-                       ],
-                   },
-       entry_points={
-            # create & install scripts in <python>/bin
-            'gui_scripts': ['nexpy = nexpy.nexpygui:main',],
-       },
-       classifiers= ['Development Status :: 4 - Beta',
-                     'Intended Audience :: Developers',
-                     'Intended Audience :: Science/Research',
-                     'License :: OSI Approved :: BSD License',
-                     'Programming Language :: Python',
-                     'Programming Language :: Python :: 3',
-                     'Programming Language :: Python :: 3.7',
-                     'Programming Language :: Python :: 3.8',
-                     'Programming Language :: Python :: 3.9',
-                     'Topic :: Scientific/Engineering',
-                     'Topic :: Scientific/Engineering :: Visualization'],
-      )
+
+# fix permissions for sdist
+if 'sdist' in sys.argv:
+    os.system('chmod -R a+rX .')
+    os.umask(int('022', 8))
+
+base_dir = os.path.dirname(__file__)
+
+with open(os.path.join(base_dir, 'README'), 'rb') as fp:
+    long_description = fp.read().decode('utf-8')
+
+setup(
+    name='python-stdnum',
+    version=stdnum.__version__,
+    description='Python module to handle standardized numbers and codes',
+    long_description=long_description,
+    author='Arthur de Jong',
+    author_email='arthur@arthurdejong.org',
+    url='https://arthurdejong.org/python-stdnum/',
+    project_urls={
+        'Documentation': 'https://arthurdejong.org/python-stdnum/doc/',
+        'GitHub': 'https://github.com/arthurdejong/python-stdnum/',
+    },
+    license='LGPL',
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Financial and Insurance Industry',
+        'Intended Audience :: Information Technology',
+        'Intended Audience :: Telecommunications Industry',
+        'License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: Implementation :: PyPy',
+        'Topic :: Office/Business :: Financial',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Text Processing :: General',
+    ],
+    packages=find_packages(),
+    install_requires=[],
+    package_data={'': ['*.dat']},
+    extras_require={
+        # The SOAP feature is only required for a number of online tests
+        # of numbers such as the EU VAT VIES lookup, the Dominican Republic
+        # DGII services or the Turkish T.C. Kimlik validation.
+        'SOAP': ['zeep'],      # recommended implementation
+        'SOAP-ALT': ['suds'],  # but this should also work
+        'SOAP-FALLBACK': ['PySimpleSOAP'],  # this is a fallback
+    },
+)
