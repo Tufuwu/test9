@@ -1,28 +1,26 @@
-name: S3Path Tester
+name: Check
 
-on: [push]
+on:
+  push:
+    branches: ['*']
+  schedule:
+    # run every Monday at 6 AM
+    - cron: '0 6 * * 1'
 
 jobs:
-  build:
+  py36:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
     steps:
-      - uses: actions/checkout@v2
-      
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up Python 3.6
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
-
+          python-version: '3.9'
       - name: Install dependencies
-        env:
-          PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
-        run: make init
-
-      - name: Run Tests
-        run: make tests
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox
+      - name: Run tox
+        run: |
+          tox
