@@ -1,97 +1,156 @@
-# Mbed Tools
+[![Build Status](https://github.com/red-hat-storage/cephci/workflows/tests/badge.svg)](https://github.com/red-hat-storage/cephci/actions)
+# Ceph-CI
+CEPH-CI is a framework tightly coupled with CentralCI and Red Hat Builds for
+testing Ceph downstream builds with CentralCI and Jenkins.
 
-![Package](https://badgen.net/badge/Package/mbed-tools/grey)
-[![Documentation](https://badgen.net/badge/Documentation/GitHub%20Pages/blue?icon=github)](https://armmbed.github.io/mbed-tools/api/)
-[![PyPI](https://badgen.net/pypi/v/mbed-tools)](https://pypi.org/project/mbed-tools/)
-[![PyPI - Status](https://img.shields.io/pypi/status/mbed-tools)](https://pypi.org/project/mbed-tools/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mbed-tools)](https://pypi.org/project/mbed-tools/)
+It uses a modified version of Mita to create/destroy Ceph resources dynamically
 
-[![License](https://badgen.net/pypi/license/mbed-tools)](https://github.com/ARMmbed/mbed-tools/blob/master/LICENSE)
+## Getting Started
+#### Prerequisites
+1. Python 3.6 or newer.
 
-[![Build Status](https://dev.azure.com/mbed-tools/mbed-tools/_apis/build/status/Build%20and%20Release?branchName=master&stageName=CI%20Checkpoint)](https://dev.azure.com/mbed-tools/mbed-tools/_build/latest?definitionId=10&branchName=master)
-[![Test Coverage](https://codecov.io/gh/ARMmbed/mbed-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/ARMmbed/mbed-tools)
-[![Maintainability](https://api.codeclimate.com/v1/badges/b9fca0e16f7a85da7674/maintainability)](https://codeclimate.com/github/ARMmbed/mbed-tools/maintainability)
+#### Installing
+It is recommended that you use a python virtual environment to install the necessary dependencies and execute cephci.
 
-## Overview
+1. Setup a Python 3 virtual environment.
+    * `python3 -m venv <path/to/venv>`
+    * `source <path/to/venv>/bin/activate`
+2. Install requirements with `pip install -r requirements.txt`
 
-This is the **future** command line tool for Mbed OS. It provides the ability to detect Mbed Enabled devices connected
-by USB, checkout Mbed projects and perform builds amongst other operations.
+#### Initial Setup
+Configure your cephci.yaml file:
 
-> :warning: While this package is generally available it is not complete. The available functionality can be viewed with
-> the `--help` option once installed. Please note that the current tools for Mbed OS 5.x and above can be found at
-> https://github.com/ARMmbed/mbed-cli.
+This file is used to allow configuration around a number of things within cephci.
+The template can be found at the top level of the repository, `cephci.yaml.template`.
+The required keys are in the template. Values are placeholders and should be replaced by legitimate values.
+Values for report portal or polarion are only required if you plan on posting to that particular service.
 
-## Releases
-
-For release notes and a history of changes of all **production** releases, please see the following:
-
-- [Changelog](https://github.com/ARMmbed/mbed-tools/blob/master/CHANGELOG.md)
-
-For a the list of all available versions please, please see the:
-
-- [PyPI Release History](https://pypi.org/project/mbed-tools/#history)
-
-## Versioning
-
-The version scheme used follows [PEP440](https://www.python.org/dev/peps/pep-0440/) and
-[Semantic Versioning](https://semver.org/). For production quality releases the version will look as follows:
-
-- `<major>.<minor>.<patch>`
-
-Pre releases are used to give early access to new functionality, for testing and to get feedback on experimental
-features. As such these releases may not be stable and should not be used for production. Additionally any interfaces
-introduced in a pre release may be removed or changed without notice. For pre releases the version will look as
-follows:
-
-- `<major>.<minor>.<patch>.dev<pre-release-number>`
-
-## Installation
-
-`mbed-tools` relies on the Ninja build system and CMake.
-- CMake. [Install version 3.19.0 or newer for all operating systems](https://cmake.org/install/).
-- Ninja. [Install version 1.0 or newer for all operating systems](https://github.com/ninja-build/ninja/wiki/Pre-built-Ninja-packages).
-
-We recommend installing `mbed-tools` in a Python virtual environment to avoid dependency conflicts.
-
-To install the most recent production quality release use:
-
+Move a copy of the template to your user directory and edit it from there with the proper values.
 ```
-pip install mbed-tools
+cp cephci.yaml.template ~/.cephci.yaml
 ```
 
-To install a specific release:
+## Tests
+#### CentralCI Authentication
+CentralCI auth files are kept in the `osp` directory.
+
+The `osp-cred-ci-2.yaml` file has OpenStack credentials details to create/destroy resources.
+For local cephci runs, you will want to replace the username/password with
+your own OpenStack credentials.
+
+#### Cluster Configuration
+Cluster configuration files are kept in a directory under `conf` for each ceph version.
+For jewel, configs are under `conf/jewel`.
+For luminous, configs are under `conf/luminous`.
+For nautilus, configs are under `conf/nautilus`
+
+The conf files describes the test bed configuration.
+The image-name inside globals: define what image is used to clone ceph-nodes(
+mon, osd, mds etc), The role maps to ceph role that the node will take
+and osd generally attach 3 additional volumes with disk-size as specified in
+config.
+
+#### Inventory Files
+Inventory files are kept under `conf/inventory`,
+and are used to specify which operating system to be used for the cluster resources.
+
+#### Test Suites
+All test suite configurations are found inside the `suites` directory.
+
+There are various suites that are mapped to versions of Ceph under test
 
 ```
-pip install mbed-tools==<version>
+suites/jewel/ansible/sanity_ceph_ansible will be valid for 2.0 builds
+suites/luminous/ansible/sanity_ceph_ansible will be valid for 3.0 builds
 ```
+The tests inside the suites are described in yaml format
+
+```
+tests:
+   - test:
+      name: ceph deploy
+      module: test_ceph_deploy.py
+      config:
+        base_url: 'http://download-node-02.eng.bos.redhat.com/rcm-guest/ceph-drops/auto/ceph-1.3-rhel-7-compose/RHCEPH-1.3-RHEL-7-20161010.t.0/'
+        installer_url: 
+      desc: test cluster setup using ceph-deploy
+      destroy-cluster: False
+      abort-on-fail: True
+      
+   - test:
+      name: rados workunit
+      module: test_workunit.py
+      config:
+            test_name: rados/test_python.sh
+            branch: hammer
+      desc: Test rados python api
+```
+The above snippet describes two tests and the module is the name of the python
+script that is executed to verify the test, every module can take a config
+dict that is passed to it from the run wrapper, The run wrapper executes
+the tests serially found in the suites. The test scripts are location in
+the `tests` folder.
 
 ## Usage
+`run.py` is the main script for ceph-ci. You can view the full usage details by passing in the `--help` argument.
+```
+python run.py --help
+```
+#### Required Arguments
+There are a few arguments that are required for cephci execution:
 
-Interface definition and usage documentation (for developers of Mbed OS tooling) is available for the most recent
-production release here:
+* `--rhbuild <build_version>`
+* `--osp-cred <cred_file>`
+* `--global-conf <conf_file>`
+* `--inventory <inventory_file>`
+* `--suite <suite_file>`
 
-- [GitHub Pages](https://armmbed.github.io/mbed-tools/api/)
+#### Useful Arguments
+Some non-required arguments that we end up using a lot:
+* `--log level <level>` - set the log level that is output to stdout.
 
-## Project Structure
+#### Examples
+Ceph ansible install suite:
+```
+python run.py --rhbuild 3.3 --global-conf conf/luminous/ansible/sanity-ansible-lvm.yaml --osp-cred osp/osp-cred-ci-2.yaml
+--inventory conf/inventory/rhel-7.8-server-x86_64.yaml --suite suites/luminous/ansible/sanity_ceph_ansible_lvm.yaml
+--log-level info
+```
+Upgrade suite:
+```
+python run.py --rhbuild 3.2 --global-conf conf/luminous/upgrades/upgrade.yaml --osp-cred osp/osp-cred-ci-2.yaml
+--inventory conf/inventory/rhel-7.8-server-x86_64-released.yaml --suite suites/luminous/upgrades/upgrades.yaml
+--log-level info
+```
+Containerized upgrade suite:
+```
+python run.py --rhbuild 3.2 --global-conf conf/luminous/upgrades/upgrade.yaml --osp-cred osp/osp-cred-ci-2.yaml
+--inventory conf/inventory/rhel-7.8-server-x86_64-released.yaml --suite suites/luminous/upgrades/upgrades_containerized.yaml
+--log-level info --ignore-latest-container --insecure-registry --skip-version-compare
+```
 
-The follow described the major aspects of the project structure:
+#### Manual cluster cleanup
+Ceph-CI also has the ability to manually clean up cluster nodes if anything was left behind during a test run.
+All you need to provide is your osp credentials and the instances name for the cluster. Don't use subset naming for custom instances name.eg: --instances-name vp and --instances-name vpoliset  at same time.
 
-- `azure-pipelines/` - CI configuration files for Azure Pipelines.
-- `docs/api` - Interface definition and usage documentation.
-- `src/mbed_tools/` - Python source files.
-- `news/` - Collection of news files for unreleased changes.
-- `tests/` - Unit and integration tests.
+For example, this command will delete all volumes and nodes that have the substring `ceph-kdreyer` in their names:
+```
+python run.py --osp-cred <cred_file> --log-level info --cleanup ceph-kdreyer
+```
 
-## Getting Help
+## Results
+In order to post results properly or receive results emails you must first configure your `~/.cephci.yaml` file.
+Please see the [Initial Setup](#initial-setup) section of the readme if you haven't done that.
 
-- For interface definition and usage documentation, please see [GitHub Pages](https://armmbed.github.io/mbed-tools/api/).
-- For a list of known issues and possible work arounds, please see [Known Issues](KNOWN_ISSUES.md).
-- To raise a defect or enhancement please use [GitHub Issues](https://github.com/ARMmbed/mbed-tools/issues).
-- To ask a question please use the [Mbed Forum](https://forums.mbed.com/).
+#### Polarion
+Results are posted to polarion if the `--post-results` argument is passed to `run.py`.
+When this argument is used, any tests that have a `polarion-id` configured in the suite
+will have it's result posted to polarion.
 
-## Contributing
+#### Report Portal
+Results are posted to report portal if the `--report-portal` argument is passed to `run.py`.
 
-- Mbed OS is an open source project and we are committed to fostering a welcoming community, please see our
-  [Code of Conduct](https://github.com/ARMmbed/mbed-tools/blob/master/CODE_OF_CONDUCT.md) for more information.
-- For how to contribute to the project, including how to develop the project,
-  please see the [Contributions Guidelines](https://github.com/ARMmbed/mbed-tools/blob/master/CONTRIBUTING.md)
+#### Email
+A result email is automatically sent to the address configured in your `~/.cephci.yaml` file.
+In addition to personally configured emails, if the `--post-results` or `--report-portal` arguments are
+passed to `run.py` an email will also be sent to `cephci@redhat.com`.
