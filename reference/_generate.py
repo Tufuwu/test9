@@ -1,0 +1,181 @@
+#!/usr/bin/env python3
+"""asciidoc generator for CLI web pages
+
+based originally on click-man, but significantly specialized for the globus-cli
+"""
+import os
+import time
+
+import click
+import requests
+from pkg_resources import load_entry_point
+
+CLI = load_entry_point("globus-cli", "console_scripts", "globus")
+TARGET_DIR = os.path.dirname(__file__)
+
+try:
+    # try to fetch last release date
+    last_release = requests.get(
+        "https://api.github.com/repos/globus/globus-cli/releases/latest"
+    )
+    REV_DATE = time.strptime(last_release.json()["published_at"], "%Y-%m-%dT%H:%M:%SZ")
+except Exception:
+    # fallback to current time
+    REV_DATE = time.gmtime()
+REV_DATE = time.strftime("%B %d, %Y", REV_DATE)
+
+EXIT_STATUS_TEXT = """0 on success.
+
+1 if a network or server error occurred, unless --map-http-status has been
+used to change exit behavior on http error codes.
+
+2 if the command was used improperly.
+"""
+EXIT_STATUS_NOHTTP_TEXT = """0 on success.
+
+1 if an error occurred.
+
+2 if the command was used improperly.
+"""
+
+
+def walk_contexts(name="globus", cmd=CLI, parent_ctx=None):
+    """
+    A recursive walk over click Contexts for all commands in a tree
+    Returns the results in a tree-like structure as triples,
+      (context, subcommands, subgroups)
+
+    subcommands is a list of contexts
+    subgroups is a list of (context, subcommands, subgroups) triples
+    """
+    current_ctx = click.Context(cmd, info_name=name, parent=parent_ctx)
+    cmds, groups = [], []
+    for subcmdname, subcmd in getattr(cmd, "commands", {}).items():
+        # explicitly skip hidden commands and `globus config`
+        if subcmd.hidden or (name + " " + subcmdname) == "globus config":
+            continue
+        # non-group commands which don't set adoc_skip=False are not properly subclassed
+        # from GlobusCommand, skip them
+        if not isinstance(subcmd, click.Group) and getattr(subcmd, "adoc_skip", True):
+            continue
+
+        if not isinstance(subcmd, click.Group):
+            cmds.append(click.Context(subcmd, info_name=subcmdname, parent=current_ctx))
+        else:
+            groups.append(walk_contexts(subcmdname, subcmd, current_ctx))
+
+    return (current_ctx, cmds, groups)
+
+
+def iter_all_commands(tree=None):
+    ctx, subcmds, subgroups = tree or walk_contexts()
+    for cmd in subcmds:
+        yield cmd
+    for g in subgroups:
+        for cmd in iter_all_commands(g):
+            yield cmd
+
+
+def _format_option(optstr):
+    opt = optstr.split()
+    optnames, optparams = [], []
+    for o in opt:
+        if not optparams:
+            # options like '--foo / --bar' or '--foo, --bar'
+            if o.startswith("-") or o == "/":
+                optnames.append(o)
+                continue
+        optparams.append(o)
+    optnames = "*" + " ".join(optnames) + "*"
+    optparams = " ".join([f"`{x}`" for x in optparams])
+    return f"{optnames}{' ' if optparams else ''}{optparams}::\n"
+
+
+def _format_synopsis(usage_pieces):
+    as_str = " ".join(usage_pieces)
+    if as_str.endswith("..."):
+        as_str = as_str[:-3]
+    return as_str
+
+
+class AdocPage:
+    def __init__(self, ctx):
+        self.commandname = ctx.command_path
+        self.short_help = ctx.command.get_short_help_str()
+        self.description = ctx.command.help.replace("\b\n", "")
+        self.synopsis = ctx.command.adoc_synopsis or _format_synopsis(
+            ctx.command.collect_usage_pieces(ctx)
+        )
+        self.options = "\n\n".join(
+            _format_option(y[0]) + "\n" + y[1].replace("\n\n", "\n+\n")
+            for y in [
+                x.get_help_record(ctx)
+                for x in ctx.command.params
+                if isinstance(x, click.Option)
+            ]
+            if y
+        )
+        self.output = ctx.command.adoc_output
+        self.examples = ctx.command.adoc_examples
+        uses_http = "map_http_status" not in ctx.command.globus_disable_opts
+        self.exit_status_text = ctx.command.adoc_exit_status or (
+            EXIT_STATUS_TEXT if uses_http else EXIT_STATUS_NOHTTP_TEXT
+        )
+
+    def __str__(self):
+        sections = []
+        sections.append(f"= {self.commandname.upper()}\n")
+        sections.append(f"== NAME\n\n{self.commandname} - {self.short_help}\n")
+        sections.append(f"== SYNOPSIS\n\n`{self.commandname} {self.synopsis}`\n")
+        if self.description:
+            sections.append(f"== DESCRIPTION\n\n{self.description}\n")
+        if self.options:
+            sections.append(f"== OPTIONS\n{self.options}\n")
+        if self.output:
+            sections.append(f"== OUTPUT\n\n{self.output}\n")
+        if self.examples:
+            sections.append(f"== EXAMPLES\n\n{self.examples}\n")
+        sections.append(f"== EXIT STATUS\n\n{self.exit_status_text}\n")
+        return "\n".join(sections)
+
+
+def write_pages():
+    for ctx in iter_all_commands():
+        if not isinstance(ctx.command, click.Group) and not getattr(
+            ctx.command, "adoc_skip", True
+        ):
+            cmd_name = ctx.command_path.replace(" ", "_")[len("globus_") :]
+            path = os.path.join(TARGET_DIR, cmd_name + ".adoc")
+            with open(path, "w") as f:
+                f.write(str(AdocPage(ctx)))
+
+
+def commands_with_headings(heading, tree=None):
+    ctx, subcmds, subgroups = tree or walk_contexts()
+    if subcmds:
+        yield heading, subcmds
+    for subgrouptree in subgroups:
+        heading = f"== {subgrouptree[0].command_path} commands"
+        for subheading, subcommands in commands_with_headings(heading, subgrouptree):
+            yield subheading, subcommands
+
+
+def generate_index():
+    with open(os.path.join(TARGET_DIR, "index.adoc"), "w") as f:
+        # header required for globus docs to specify extra attributes
+        f.write("---\nmenu_weight: 10\nshort_title: Reference\n---\n")
+        for heading, commands in commands_with_headings(
+            f"""= Command Line Interface (CLI) Reference
+
+[doc-info]*Last Updated: {REV_DATE}*"""
+        ):
+            f.write(heading + "\n\n")
+            for ctx in commands:
+                link = ctx.command_path.replace(" ", "_")[len("globus_") :]
+                f.write(f"link:{link}[{ctx.command_path}]::\n")
+                f.write(ctx.command.get_short_help_str() + "\n\n")
+
+
+if __name__ == "__main__":
+    write_pages()
+    generate_index()

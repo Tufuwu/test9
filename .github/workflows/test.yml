@@ -1,24 +1,48 @@
-name: Test Library
-
-on: [push]
-
+name: Test
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
+  test:
     strategy:
       matrix:
+        os: [ubuntu-latest]
         python-version: ["3.9", "3.10"]
-
+        # we do not want a large number of windows and macos builds, so
+        # enumerate them explicitly
+        include:
+          - os: windows-latest
+            python-version: 3.9
+          - os: windows-latest
+            python-version: 3.9
+          - os: macos-latest
+            python-version: 3.9
+    name: "Python ${{ matrix.python-version }} on ${{ matrix.os }} "
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        make setup
-    - name: Run Tests
-      run: |
-        make test
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Requirements
+        run: python -m pip install -U pip setuptools tox
+      - name: Run Linting
+        # only lint on 3.8 for two reasons
+        #  1. faster overall runs
+        #  2. Linting fails on py3.5 because tools require 3.6+
+        if: ${{ matrix.python-version == '3.8' }}
+        run: python -m tox -e lint
+      # really clumsy retry with backoff... is there a better way?
+      - name: Run Tests
+        id: testrun1
+        continue-on-error: true
+        run: python -m tox -e py
+      - name: Wait and retest if first test failed
+        if: steps.testrun1.outcome == 'failure'
+        id: testrun2
+        run: |
+          sleep 60
+          python -m tox -e py

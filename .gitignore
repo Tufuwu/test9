@@ -1,14 +1,21 @@
-venv
-.pytest_cache
-.mypy_cache
-/dist/
-
+/build
+/dist
+/*.egg-info
+*.pyc
+/docs-source/_build/
 /.coverage
-/coverage.xml
-/htmlcov
 
-/html
+#virtualenv
+/virtualenv/
+/.virtualenv/
+/.venv/
+/venv/
+/.env/
+/env/
+/ENV/
+/venv27/
+/.venv27/
+/.venv3/
+/venv3/
 
-Pipfile.lock
-
-lagom/githash.txt
+/.tox
