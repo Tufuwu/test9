@@ -1,68 +1,119 @@
-[tool.poetry]
-name = "yaspin"
-version = "2.1.0"
-description = "Yet Another Terminal Spinner"
-license = "MIT"
-authors = ["Pavlo Dmytrenko <mail@pavdmyt.com>"]
-readme = "README.rst"
-homepage = "https://github.com/pavdmyt/yaspin"
-repository = "https://github.com/pavdmyt/yaspin"
-documentation = "https://github.com/pavdmyt/yaspin/blob/master/README.rst"
-keywords = ["spinner", "console", "terminal", "loader", "indicator"]
-include = [
-    { path = "tests", format = "sdist" },
-    { path = "examples", format = "sdist" },
-    { path = "HISTORY.rst", format = "sdist"}
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-datatable-view"
+dynamic = ["version"]
+description = "This package is used in conjunction with the jQuery plugin (http://http://datatables.net/), and supports state-saving detection with (http://datatables.net/plug-ins/api).  The package consists of a class-based view, and a small collection of utilities for rendering table data from models."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "Pivotal Energy Solutions", email = "steve@pivotal.energy" },
+]
+keywords = [
+    "django",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "Environment :: Console",
-    "Environment :: MacOS X",
-    "Environment :: Other Environment",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
     "Intended Audience :: Developers",
-    "Intended Audience :: End Users/Desktop",
-    "Intended Audience :: Other Audience",
-    "Intended Audience :: System Administrators",
-    "License :: OSI Approved :: MIT License",
-    "Natural Language :: English",
-    "Operating System :: MacOS :: MacOS X",
-    "Operating System :: POSIX :: Linux",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: Implementation",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
-    "Topic :: Software Development",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: Software Development :: User Interfaces",
-    "Topic :: System :: Logging",
-    "Topic :: System :: Monitoring",
-    "Topic :: System :: Shells",
-    "Topic :: Terminals",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Utilities",
 ]
+dependencies = [
+    "django>=4.2",
+    "python-dateutil",
+]
 
-[tool.poetry.dependencies]
-python = "^3.7.2"
-termcolor-whl = "1.1.2"
+[project.optional-dependencies]
+test = [
+    "django-environ",
+    "mysqlclient",
+    "flake8",
+    "coverage",
+    "pre-commit",
+    "black",
+    "bandit"
+]
+docs = [
+    "Sphinx",
+    "sphinx-rtd-theme"
+]
 
-[tool.poetry.dev-dependencies]
-black = "^22.3"
-twine = "^4.0"
-flake8 = "^4.0"
-isort = "^5.10"
-pytest = "^7.1.2"
-pytest-xdist = "^2.5"
-pytest-cov = "^3.0"
-pylint = "^2.14"
+[project.urls]
+Homepage = "https://github.com/pivotal-energy-solutions/django-datatable-view"
+Download = "https://github.com/pivotal-energy-solutions/django-datatable-view"
+Thanks = "https://saythanks.io/to/rh0dium"
+Source = "https://github.com/pivotal-energy-solutions/django-datatable-view/"
 
-[tool.poetry.urls]
-"Bug Tracker" = "https://github.com/pavdmyt/yaspin/issues"
+[tool.hatch.version]
+path = "datatableview/__init__.py"
 
-[build-system]
-requires = ["poetry_core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datatableview",
+    "/datatableview/static/**/*",
+    "/datatableview/templates/**/*",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ['datatableview']
+include = [
+    "/datatableview/static/**/*",
+    "/datatableview/templates/**/*",
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | dist
+)/
+'''
+
+[tool.bandit]
+targets = ['datatableview', "demo_app"]
+exclude_dirs = ["datatableview/tests"]
+skips = ["B303", "B308", "B323", "B324", "B703"]
+
+[tool.coverage.run]
+branch = true
+command_line = "demo_app/manage.py test --noinput --settings=demo_app.settings_test datatableview"
+omit = [
+    "*/demo_app/**",
+    "*/migrations/*",
+    "*/tests/**",
+]
+
+[tool.coverage.report]
+fail_under = 69
+precision = 1
+skip_covered = true
+skip_empty = true
+ignore_errors = true
+sort = "cover"
+
+[tool.bumper]
+exclude = [".idea", ".github", "demo_app"]
+version_files = ["datatableview/__init__.py"]
+repo = "pivotal-energy-solutions/django-datatable-view"
+report = "out.json"
