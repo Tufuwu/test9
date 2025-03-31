@@ -1,112 +1,219 @@
-import pathlib
+# -*- coding: utf-8 -*-
 
-import pytest
+"""Unittest for for global utilities."""
 
-from helpers import absolute_sample_path
-from pdfminer.layout import LTComponent
-from pdfminer.utils import open_filename, Plane, shorten_str, \
-    format_int_roman, format_int_alpha
+import string
+import unittest
 
+import numpy
+import torch
 
-class TestOpenFilename:
-    def test_string_input(self):
-        filename = absolute_sample_path("simple1.pdf")
-        opened = open_filename(filename)
-        assert opened.closing
-
-    def test_pathlib_input(self):
-        filename = pathlib.Path(absolute_sample_path("simple1.pdf"))
-        opened = open_filename(filename)
-        assert opened.closing
-
-    def test_file_input(self):
-        filename = absolute_sample_path("simple1.pdf")
-        with open(filename, "rb") as in_file:
-            opened = open_filename(in_file)
-            assert opened.file_handler == in_file
-
-    def test_unsupported_input(self):
-        with pytest.raises(TypeError):
-            open_filename(0)
+from pykeen.nn import Embedding
+from pykeen.utils import (
+    clamp_norm,
+    compact_mapping,
+    flatten_dictionary,
+    get_until_first_blank,
+    l2_regularization,
+)
 
 
-class TestPlane:
-    def test_find_nothing_in_empty_bbox(self):
-        plane, _ = self.given_plane_with_one_object()
-        result = list(plane.find((50, 50, 100, 100)))
-        assert result == []
+class L2RegularizationTest(unittest.TestCase):
+    """Test L2 regularization."""
 
-    def test_find_nothing_after_removing(self):
-        plane, obj = self.given_plane_with_one_object()
-        plane.remove(obj)
-        result = list(plane.find((0, 0, 100, 100)))
-        assert result == []
+    def test_one_tensor(self):
+        """Test if output is correct for a single tensor."""
+        t = torch.ones(1, 2, 3, 4)
+        reg = l2_regularization(t)
+        self.assertAlmostEqual(float(reg), float(numpy.prod(t.shape)))
 
-    def test_find_object_in_whole_plane(self):
-        plane, obj = self.given_plane_with_one_object()
-        result = list(plane.find((0, 0, 100, 100)))
-        assert result == [obj]
-
-    def test_find_if_object_is_smaller_than_gridsize(self):
-        plane, obj = self.given_plane_with_one_object(object_size=1,
-                                                      gridsize=100)
-        result = list(plane.find((0, 0, 100, 100)))
-        assert result == [obj]
-
-    def test_find_object_if_much_larger_than_gridsize(self):
-        plane, obj = self.given_plane_with_one_object(object_size=100,
-                                                      gridsize=10)
-        result = list(plane.find((0, 0, 100, 100)))
-        assert result == [obj]
-
-    @staticmethod
-    def given_plane_with_one_object(object_size=50, gridsize=50):
-        bounding_box = (0, 0, 100, 100)
-        plane = Plane(bounding_box, gridsize)
-        obj = LTComponent((0, 0, object_size, object_size))
-        plane.add(obj)
-        return plane, obj
+    def test_many_tensors(self):
+        """Test if output is correct for var-args."""
+        ts = []
+        exp_reg = 0.
+        for i, shape in enumerate([
+            (1, 2, 3),
+            (2, 3, 4),
+            (3, 4, 5),
+        ]):
+            t = torch.ones(*shape) * (i + 1)
+            ts.append(t)
+            exp_reg += numpy.prod(t.shape) * (i + 1) ** 2
+        reg = l2_regularization(*ts)
+        self.assertAlmostEqual(float(reg), exp_reg)
 
 
-class TestFunctions(object):
-    def test_shorten_str(self):
-        s = shorten_str('Hello there World', 15)
-        assert s == 'Hello ... World'
+class FlattenDictionaryTest(unittest.TestCase):
+    """Test flatten_dictionary."""
 
-    def test_shorten_short_str_is_same(self):
-        s = 'Hello World'
-        assert shorten_str(s, 50) == s
+    def test_flatten_dictionary(self):
+        """Test if the output of flatten_dictionary is correct."""
+        nested_dictionary = {
+            'a': {
+                'b': {
+                    'c': 1,
+                    'd': 2,
+                },
+                'e': 3,
+            },
+        }
+        expected_output = {
+            'a.b.c': 1,
+            'a.b.d': 2,
+            'a.e': 3,
+        }
+        observed_output = flatten_dictionary(nested_dictionary)
+        self._compare(observed_output, expected_output)
 
-    def test_shorten_to_really_short(self):
-        assert shorten_str('Hello World', 5) == 'Hello'
+    def test_flatten_dictionary_mixed_key_type(self):
+        """Test if the output of flatten_dictionary is correct if some keys are not strings."""
+        nested_dictionary = {
+            'a': {
+                5: {
+                    'c': 1,
+                    'd': 2,
+                },
+                'e': 3,
+            },
+        }
+        expected_output = {
+            'a.5.c': 1,
+            'a.5.d': 2,
+            'a.e': 3,
+        }
+        observed_output = flatten_dictionary(nested_dictionary)
+        self._compare(observed_output, expected_output)
 
-    def test_format_int_alpha(self):
-        assert format_int_alpha(1) == 'a'
-        assert format_int_alpha(2) == 'b'
-        assert format_int_alpha(26) == 'z'
-        assert format_int_alpha(27) == 'aa'
-        assert format_int_alpha(28) == 'ab'
-        assert format_int_alpha(26 * 2) == 'az'
-        assert format_int_alpha(26 * 2 + 1) == 'ba'
-        assert format_int_alpha(26 * 27) == 'zz'
-        assert format_int_alpha(26 * 27 + 1) == 'aaa'
+    def test_flatten_dictionary_prefix(self):
+        """Test if the output of flatten_dictionary is correct."""
+        nested_dictionary = {
+            'a': {
+                'b': {
+                    'c': 1,
+                    'd': 2,
+                },
+                'e': 3,
+            },
+        }
+        expected_output = {
+            'Test.a.b.c': 1,
+            'Test.a.b.d': 2,
+            'Test.a.e': 3,
+        }
+        observed_output = flatten_dictionary(nested_dictionary, prefix='Test')
+        self._compare(observed_output, expected_output)
 
-    def test_format_int_roman(self):
-        assert format_int_roman(1) == 'i'
-        assert format_int_roman(2) == 'ii'
-        assert format_int_roman(3) == 'iii'
-        assert format_int_roman(4) == 'iv'
-        assert format_int_roman(5) == 'v'
-        assert format_int_roman(6) == 'vi'
-        assert format_int_roman(7) == 'vii'
-        assert format_int_roman(8) == 'viii'
-        assert format_int_roman(9) == 'ix'
-        assert format_int_roman(10) == 'x'
-        assert format_int_roman(11) == 'xi'
-        assert format_int_roman(20) == 'xx'
-        assert format_int_roman(40) == 'xl'
-        assert format_int_roman(45) == 'xlv'
-        assert format_int_roman(50) == 'l'
-        assert format_int_roman(90) == 'xc'
-        assert format_int_roman(91) == 'xci'
-        assert format_int_roman(100) == 'c'
+    def _compare(self, observed_output, expected_output):
+        assert not any(isinstance(o, dict) for o in expected_output.values())
+        assert expected_output == observed_output
+
+
+class TestGetUntilFirstBlank(unittest.TestCase):
+    """Test get_until_first_blank()."""
+
+    def test_get_until_first_blank_trivial(self):
+        """Test the trivial string."""
+        s = ''
+        r = get_until_first_blank(s)
+        self.assertEqual('', r)
+
+    def test_regular(self):
+        """Test a regulat case."""
+        s = """Broken
+        line.
+
+        Now I continue.
+        """
+        r = get_until_first_blank(s)
+        self.assertEqual("Broken line.", r)
+
+
+class EmbeddingsInCanonicalShapeTests(unittest.TestCase):
+    """Test get_embedding_in_canonical_shape()."""
+
+    #: The number of embeddings
+    num_embeddings: int = 3
+
+    #: The embedding dimension
+    embedding_dim: int = 2
+
+    def setUp(self) -> None:
+        """Initialize embedding."""
+        self.embedding = Embedding(num_embeddings=self.num_embeddings, embedding_dim=self.embedding_dim)
+        self.generator = torch.manual_seed(42)
+        self.embedding._embeddings.weight.data = torch.rand(
+            self.num_embeddings,
+            self.embedding_dim,
+            generator=self.generator,
+        )
+
+    def test_no_indices(self):
+        """Test getting all embeddings."""
+        emb = self.embedding.get_in_canonical_shape(indices=None)
+
+        # check shape
+        assert emb.shape == (1, self.num_embeddings, self.embedding_dim)
+
+        # check values
+        exp = self.embedding(indices=None).view(1, self.num_embeddings, self.embedding_dim)
+        assert torch.allclose(emb, exp)
+
+    def _test_with_indices(self, indices: torch.Tensor) -> None:
+        """Help tests with index."""
+        emb = self.embedding.get_in_canonical_shape(indices=indices)
+
+        # check shape
+        num_ind = indices.shape[0]
+        assert emb.shape == (num_ind, 1, self.embedding_dim)
+
+        # check values
+        exp = torch.stack([self.embedding(i) for i in indices], dim=0).view(num_ind, 1, self.embedding_dim)
+        assert torch.allclose(emb, exp)
+
+    def test_with_consecutive_indices(self):
+        """Test to retrieve all embeddings with consecutive indices."""
+        indices = torch.arange(self.num_embeddings, dtype=torch.long)
+        self._test_with_indices(indices=indices)
+
+    def test_with_indices_with_duplicates(self):
+        """Test to retrieve embeddings at random positions with duplicate indices."""
+        indices = torch.randint(
+            self.num_embeddings,
+            size=(2 * self.num_embeddings,),
+            dtype=torch.long,
+            generator=self.generator,
+        )
+        self._test_with_indices(indices=indices)
+
+    def test_compact_mapping(self):
+        """Test ``compact_mapping()``."""
+        mapping = {
+            letter: 2 * i
+            for i, letter in enumerate(string.ascii_letters)
+        }
+        compacted_mapping, id_remapping = compact_mapping(mapping=mapping)
+
+        # check correct value range
+        self.assertEqual(set(compacted_mapping.values()), set(range(len(mapping))))
+        self.assertEqual(set(id_remapping.keys()), set(mapping.values()))
+        self.assertEqual(set(id_remapping.values()), set(compacted_mapping.values()))
+
+
+def test_clamp_norm():
+    """Test  clamp_norm() ."""
+    max_norm = 1.0
+    gen = torch.manual_seed(42)
+    eps = 1.0e-06
+    for p in [1, 2, float('inf')]:
+        for _ in range(10):
+            x = torch.rand(10, 20, 30, generator=gen)
+            for dim in range(x.ndimension()):
+                x_c = clamp_norm(x, maxnorm=max_norm, p=p, dim=dim)
+
+                # check maximum norm constraint
+                assert (x_c.norm(p=p, dim=dim) <= max_norm + eps).all()
+
+                # unchanged values for small norms
+                norm = x.norm(p=p, dim=dim)
+                mask = torch.stack([(norm < max_norm)] * x.shape[dim], dim=dim)
+                assert (x_c[mask] == x[mask]).all()

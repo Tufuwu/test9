@@ -1,18 +1,20 @@
 ---
 name: Feature request
-about: Request a new feature
+about: Suggest an idea for this project
 title: ''
 labels: enhancement
 assignees: ''
 
 ---
 
-**Feature request**
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-Thanks for your suggestion on improving pdfminer.six. To helps us discuss and
-implement this request, please make sure to include the following information:
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
 
-- A description of the feature you would like to have
-- If relevant, the context that you are in. What are you trying to achieve?
-- If possible, an example of what you want to achieve. Include the PDF that
-  you are working on. Include the output that you would like to have. 
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
+
+**Additional context**
+Add any other context or screenshots about the feature request here.

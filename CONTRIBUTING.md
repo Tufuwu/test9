@@ -1,70 +1,106 @@
-# Contributing guidelines
+# Contributing
 
-Any contribution is appreciated! You might want to:
+Contributions, whether big or small, are appreciated! You can get involved by submitting an
+issue, making a suggestion, or adding code to the project. PyKEEN is young and wants to address
+the problems the KGE community is currently facing, and has a lot of excited people working on it!
 
-* Fix spelling errors
-* Improve documentation
-* Add tests for untested code
-* Add new features
-* Fix bugs
+## Having a Problem? Submit an Issue.
 
-## How can I contribute?
+1. Check that you have the latest version of :code:`PyKEEN`
+2. Check that StackOverflow hasn't already solved your problem
+3. Go here: https://github.com/pykeen/pykeen/issues
+4. Check that this issue hasn't been solved
+5. Click "new issue"
+6. Choose the appropriate issue template then follow its instructions.
+   Issues not following the template may be discarded without review.
 
-* Use [issues](https://github.com/pdfminer/pdfminer.six/issues) to report bugs and features
-    - If you report a bug in the results for a particular pdf, include that pdf. This allows others to replicate the
-     issue. 
-* Fix issues by [creating pull requests](https://help.github.com/en/articles/creating-a-pull-request).
-* Help others by sharing your thoughs in comments on issues and pull requests.
-* Join the chat on [gitter](https://gitter.im/pdfminer-six/Lobby)
+## Have a Question or Suggestion?
 
-## Guidelines for creating issues
+Same drill! Submit an issue and we'll have a nice conversation in the thread.
 
-* Search previous issues, as yours might be a duplicate.
-* When creating a new issue for a bug, include a minimal reproducible example.
-* When creating a new issue for a feature, be sure to describe the context of the problem you are trying to solve. This
-  will help others to see the importance of your feature request. 
+## Want to Contribute Code?
 
-## Guideline for creating pull request
+1. Get the code. Fork the repository from GitHub using the big green button in the top-right corner of
+   https://github.com/pykeen/pykeen
+2. Clone your directory with
 
-* A pull request should close an existing issue.
-* Pull requests should be merged to develop, not master. This ensures that master always equals the released version.  
-* Include unit tests when possible. In case of bugs, this will help to prevent the same mistake in the future. In case 
-  of features, this will show that your code works correctly.
-* Code should work for Python 3.6+.
-* Code should conform to PEP8 coding style.
-* New features should be well documented using docstrings.
-* Check spelling and grammar.
-* Don't forget to update the [CHANGELOG.md](CHANGELOG.md#[Unreleased])
+    $ git clone https://github.com/<YourUsername>/pykeen
 
-## Guidelines for posting comments
+3. Install with :code:`pip`. The flag, :code:`-e`, makes your installation editable, so your changes will be reflected
+   automatically in your installation.
 
-* [Be cordial and positive](https://www.kennethreitz.org/essays/be-cordial-or-be-on-your-way)
+    $ cd pykeen
+    $ python3 -m pip install -e .
 
-## Getting started
+4. Make a branch off of develop, then make contributions! This line makes a new branch and checks it out
 
-1. Clone the repository
+    $ git checkout -b feature/<YourFeatureName>
 
-    ```sh
-    git clone https://github.com/pdfminer/pdfminer.six
-    cd pdfminer.six
-    ```
+5. This project should be well tested, so write unit tests in the :code:`tests/` directory
+6. Check that all tests are passing and code coverage is good with :code:`tox` before committing.
 
-2. Install dev dependencies
+    $ tox
 
-    ```sh
-    pip install -e .[dev]
-    ```
+## Pull Requests
 
-3. Run the tests
+Once you've got your feature or bugfix finished (or if its in a partially complete state but you want to publish it
+for comment), push it to your fork of the repository and open a pull request against the develop branch on GitHub.
 
-    On all Python versions:
+Make a descriptive comment about your pull request, perhaps referencing the issue it is meant to fix (something along
+the lines of "fixes issue #10" will cause GitHub to automatically link to that issue). The maintainers will review your
+pull request and perhaps make comments about it, request changes, or may pull it in to the develop branch! If you need
+to make changes to your pull request, simply push more commits to the feature branch in your fork to GitHub and they
+will automatically be added to the pull. You do not need to close and reissue your pull request to make changes!
 
-    ```sh
-    nox
-   ```
-   
-   Or on a single Python version:
-   
-   ```sh
-    nox -e py36
-    ```
+If you spend a while working on your changes, further commits may be made to the main :code:`PyKEEN` repository (called
+"upstream") before you can make your pull request. In keep your fork up to date with upstream by pulling the
+changes--if your fork has diverged too much, it becomes difficult to properly merge pull requests without conflicts.
+
+To pull in upstream changes::
+
+    $ git remote add upstream https://github.com/pykeen
+    $ git fetch upstream develop
+
+Check the log to make sure the upstream changes don't affect your work too much::
+
+    $ git log upstream/develop
+
+Then merge in the new changes::
+
+    $ git merge upstream/develop
+
+More information about this whole fork-pull-merge process can be found `here on Github's
+website <https://help.github.com/articles/fork-a-repo/>`_.
+
+## Making a Release
+
+PyKEEN uses single source versioning. This means that there's a variable
+`pykeen.version.VERSION` which is the canonical value used as the version.
+
+Management of this value is done by `bumpversion` via `tox`. When you're
+ready to make a release, do the following:
+
+1. Make sure there are no uncommitted changes.
+2. Run `tox -e bumpversion release`
+3. Push to GitHub
+4. Draft a new release at https://github.com/pykeen/pykeen/releases/new.
+   Name the release based on the version that was just bumped to with the form
+   vX.Y.Z where X is major release, Y is minor release, and Z is patch. By default,
+   there's a box that says `Target: master`. If you're not 100% sure the last commit
+   made before making a tag/release was the bump commit, click it, click "Recent Commits"
+   then click the commit with the text `Bump version: X.Y.Z-dev -> X.Y.Z`.
+
+## Upload to PyPI
+
+Directly after making a release, you can easily upload to PyPI using another `tox`
+command:
+
+1. `tox -e release` prepares the code and uploads it to PyPI.
+2. `tox -e bumpversion patch` to bump the version. **DO NOT** do this before uploading to
+   PyPI, otherwise the version on PyPI will have `-dev` as a suffix.
+3. Push to GitHub
+
+The process of bumping the version (release), pushing to GitHub, making a release to PyPI,
+bumping the version (patch), and pushing to GitHub one more time has been automated with
+`tox -e finish`. If you use this, make sure you go to GitHub and manually find the right
+commit for making a tag/release, since it will not be the most recent one.
