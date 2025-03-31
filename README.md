@@ -1,162 +1,124 @@
-<!--
-SPDX-FileCopyrightText: 2013 The glucometerutils Authors
+[![CI Status](https://github.com/BiomedSciAI/causallib/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BiomedSciAI/causallib/actions/workflows/build.yml)
+[![Code Climate coverage](https://img.shields.io/codeclimate/coverage/BiomedSciAI/causallib?logo=codeclimate)](https://codeclimate.com/github/BiomedSciAI/causallib/test_coverage)
+[![PyPI](https://img.shields.io/pypi/v/causallib?color=blue&logo=pypi&logoColor=yellow)](https://badge.fury.io/py/causallib)
+[![Documentation Status](https://readthedocs.org/projects/causallib/badge/?version=latest)](https://causallib.readthedocs.io/en/latest/)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/BiomedSciAI/causallib/HEAD)
+[![Slack channel](https://img.shields.io/badge/join-slack-blue.svg?logo=slack)](https://join.slack.com/t/causallib/shared_invite/zt-mwxnwe1t-htEgAXr3j3T2UeZj61gP6g)
+[![Slack channel](https://img.shields.io/badge/support-slack-blue.svg?logo=slack)](https://causallib.slack.com/)
+[![Downloads](https://pepy.tech/badge/causallib)](https://pepy.tech/project/causallib)
+# Causal Inference 360
+A Python package for inferring causal effects from observational data.
 
-SPDX-License-Identifier: MIT
--->
+## Description
+Causal inference analysis enables estimating the causal effect of 
+an intervention on some outcome from real-world non-experimental observational data.  
 
-<p align="center">
-<a href="https://github.com/glucometers-tech/glucometerutils#license"><img alt="GitHub" src="https://img.shields.io/badge/license-MIT-green"></a>
-<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
-</p>
+This package provides a suite of causal methods, 
+under a unified scikit-learn-inspired API.
+It implements meta-algorithms that allow plugging in arbitrarily complex machine learning models. 
+This modular approach supports highly-flexible causal modelling.
+The fit-and-predict-like 
+API makes it possible to train on one set of examples 
+and estimate an effect on the other (out-of-bag),
+which allows for a more "honest"<sup>1</sup> effect estimation.
 
-# Glucometer Utilities
+The package also includes an evaluation suite. 
+Since most causal-models utilize machine learning models internally, 
+we can diagnose poor-performing models by re-interpreting known ML evaluations from  a causal perspective.
 
-This repository includes a command line utility to interact with a number of
-blood sugar meters (glucometer) models from various manufacturers.
-
-While support varies by device, the actions that may be available are as
-follows:
-
- * `info` shows the model, serial number, date and time, and configured glucose
-   unit of the device.
- * `dump` export the recorded blood sugar or β-ketone readings from the device
-   in comma-separated values format.
- * `datetime` reads or updates the date and time of the device clock.
- * `zero` deletes all the recorded readings (only implemented for few devices).
-
-## Example Usage
-
-Most of the drivers require optional dependencies, and those are listed in the
-table below. If you do not want to install the dependencies manually, you should
-be able to set this up using `virtualenv` and `pip`:
-
-```shell
-$ python3 -m venv $(pwd)/glucometerutils-venv
-$ . glucometerutils-venv/bin/activate
-(glucometerutils-venv) $ DRIVER=myglucometer-driver  # see table below
-(glucometerutils-venv) $ pip install "git+https://github.com/glucometers-tech/glucometerutils.git#egg=glucometerutils[${DRIVER}]"
-(glucometerutils-venv) $ glucometer --driver ${DRIVER} help
+If you use the package, please consider citing [Shimoni et al., 2019](https://arxiv.org/abs/1906.00442):
+<details>
+  <summary>Reference</summary>
+  
+```bibtex
+@article{causalevaluations,
+  title={An Evaluation Toolkit to Guide Model Selection and Cohort Definition in Causal Inference},
+  author={Shimoni, Yishai and Karavani, Ehud and Ravid, Sivan and Bak, Peter and Ng, Tan Hung and Alford, Sharon Hensley and Meade, Denise and Goldschmidt, Yaara},
+  journal={arXiv preprint arXiv:1906.00442},
+  year={2019}
+}
 ```
 
-## Supported devices
+-------------
+</details>
 
-Please see the following table for the driver for each device that is known and
-supported.
+<sup>1</sup> Borrowing [Wager & Athey](https://arxiv.org/abs/1510.04342) terminology of avoiding overfit.  
 
-| Manufacturer | Model Name                 | Driver             | Dependencies                      |
-| ---          | ---                        | ---                | ---                               |
-| LifeScan     | OneTouch Ultra 2           | `otultra2`         | [pyserial]                        |
-| LifeScan     | OneTouch Ultra Easy        | `otultraeasy`      | [construct] [pyserial]            |
-| LifeScan     | OneTouch Ultra Mini        | `otultraeasy`      | [construct] [pyserial]            |
-| LifeScan     | OneTouch Verio IQ          | `otverioiq`        | [construct] [pyserial]            |
-| LifeScan     | OneTouch Verio (USB)       | `otverio2015`      | [construct] [python-scsi]         |
-| LifeScan     | OneTouch Select Plus       | `otverio2015`      | [construct] [python-scsi]         |
-| LifeScan     | OneTouch Select Plus Flex¹ | `otverio2015`      | [construct] [python-scsi]         |
-| Abbott       | FreeStyle InsuLinx†        | `fsinsulinx`       | [freestyle-hid] [hidapi]‡         |
-| Abbott       | FreeStyle Libre            | `fslibre`          | [freestyle-hid] [hidapi]‡         |
-| Abbott       | FreeStyle Optium           | `fsoptium`         | [pyserial]                        |
-| Abbott       | FreeStyle Precision Neo    | `fsprecisionneo`   | [freestyle-hid] [hidapi]‡         |
-| Abbott       | FreeStyle Optium Neo       | `fsprecisionneo`   | [freestyle-hid] [hidapi]‡         |
-| Abbott       | FreeStyle Optium Neo H     | `fsprecisionneo`   | [freestyle-hid] [hidapi]‡         |
-| Roche        | Accu-Chek Mobile           | `accuchek_reports` |                                   |
-| SD Biosensor | SD CodeFree                | `sdcodefree`       | [construct] [pyserial]            |
-| TaiDoc       | TD-4277                    | `td42xx`           | [construct] [pyserial]² [hidapi]  |
-| TaiDoc       | TD-4235B                   | `td42xx`           | [construct] [pyserial]² [hidapi]  |
-| GlucoRx      | Nexus                      | `td42xx`           | [construct] [pyserial]² [hidapi]  |
-| GlucoRx      | NexusQ                     | `td42xx`           | [construct] [pyserial]² [hidapi]  |
-| Menarini     | GlucoMen Nexus             | `td42xx`           | [construct] [pyserial]² [hidapi]  |
-| Aktivmed     | GlucoCheck XL              | `td42xx`           | [construct] [pyserial]² [hidapi]  |
-| Ascensia     | ContourUSB                 | `contourusb`       | [construct] [hidapi]‡             |
-| Menarini     | GlucoMen areo³             | `glucomenareo`     | [pyserial] [crcmod]               |
 
-† Untested.
-
-‡ Optional dependency on Linux; required on other operating systems.
-
-¹ USB only, bluetooth not supported.
-
-² Requires a version of pyserial supporting CP2110 bridges. Supported starting
-  from version 3.5.
-
-³ Serial cable only, NFC not supported.
-
-To identify the supported features for each of the driver, query the `help`
-action:
-
-    glucometer.py --driver fslibre help
-
-If you have knowledge of a protocol of a glucometer you would have supported,
-please provide a reference, possibly by writing a specification and contribute
-it to https://protocols.glucometers.tech/ .
-
-[construct]: https://construct.readthedocs.io/en/latest/
-[freestyle-hid]: https://pypi.org/project/freestyle-hid/
-[pyserial]: https://pythonhosted.org/pyserial/
-[python-scsi]: https://pypi.org/project/PYSCSI/
-[hidapi]: https://pypi.python.org/pypi/hidapi
-[crcmod]: https://pypi.org/project/crcmod/
-
-## Dump format
-
-The `dump` action by default will output CSV-compatible format, with the
-following fields:
-
- * date and time;
- * meter reading value;
- * before/after meal information, if known;
- * comment provided with the reading, if any.
-
-Meal and comment information is provided by the meters supporting the
-information. In the future, meal information could be guessed based on the time
-of the reading.
-
-The unit format used by the dump by default matches what the meter reports as
-its display unit, which might differ from the one used by the meter for internal
-representation and wire protocol. You can override the display unit with
-`--unit`.
-
-## Development
-
-The tool is being written keeping in mind that different glucometers,
-even if they are all from the same manufacturer, will use different
-protocols.
-
-If you want to contribute code, please note that the target language
-is Python 3.7, and that the style to follow is for the most part PEP8
-compatible.
-
-To set up your development environment follow these guidelines:
-
-```shell
-$ git clone https://github.com/glucometers-tech/glucometerutils.git
-$ cd glucometerutils
-$ python3 -m venv --python=python3.7
-$ . venv/bin/activate
-$ pip install -e .[dev]
-$ # If you want to work on a specific driver specify this after dev e.g.
-$ # pip install -e .[dev,myglucometer-driver] # see table above
-$ pre-commit install
+## Installation
+```bash
+pip install causallib
 ```
 
-## License
+## Usage
+The package is imported using the name `causallib`.
+Each causal model requires an internal machine-learning model.
+`causallib` supports any model that has a sklearn-like fit-predict API
+(note some models might require a `predict_proba` implementation).
+For example:
+```Python
+from sklearn.linear_model import LogisticRegression
+from causallib.estimation import IPW 
+from causallib.datasets import load_nhefs
 
-Copyright © 2013-2020 The glucometerutils Authors
+data = load_nhefs()
+ipw = IPW(LogisticRegression())
+ipw.fit(data.X, data.a)
+potential_outcomes = ipw.estimate_population_outcome(data.X, data.a, data.y)
+effect = ipw.estimate_effect(potential_outcomes[1], potential_outcomes[0])
+```
+Comprehensive Jupyter Notebooks examples can be found in the [examples directory](examples).
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+### Community support
+We use the Slack workspace at [causallib.slack.com](https://causallib.slack.com/) for informal communication.
+We encourage you to ask questions regarding causal-inference modelling or 
+usage of causallib that don't necessarily merit opening an issue on Github.  
 
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
+Use this [invite link to join causallib on Slack](https://join.slack.com/t/causallib/shared_invite/zt-mwxnwe1t-htEgAXr3j3T2UeZj61gP6g). 
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+### Approach to causal-inference
+Some key points on how we address causal-inference estimation
+
+##### 1. Emphasis on potential outcome prediction  
+Causal effect may be the desired outcome. 
+However, every effect is defined by two potential (counterfactual) outcomes. 
+We adopt this two-step approach by separating the effect-estimating step 
+from the potential-outcome-prediction step. 
+A beneficial consequence to this approach is that it better supports 
+multi-treatment problems where "effect" is not well-defined.
+
+##### 2. Stratified average treatment effect
+The causal inference literature devotes special attention to the population 
+on which the effect is estimated on.
+For example, ATE (average treatment effect on the entire sample),
+ATT (average treatment effect on the treated), etc. 
+By allowing out-of-bag estimation, we leave this specification to the user.
+For example, ATE is achieved by `model.estimate_population_outcome(X, a)`
+and ATT is done by stratifying on the treated: `model.estimate_population_outcome(X.loc[a==1], a.loc[a==1])`
+
+##### 3. Families of causal inference models
+We distinguish between two types of models:
+* *Weight models*: weight the data to balance between the treatment and control groups, 
+   and then estimates the potential outcome by using a weighted average of the observed outcome. 
+   Inverse Probability of Treatment Weighting (IPW or IPTW) is the most known example of such models. 
+* *Direct outcome models*: uses the covariates (features) and treatment assignment to build a
+   model that predicts the outcome directly. The model can then be used to predict the outcome
+   under any assignment of treatment values, specifically the potential-outcome under assignment of
+   all controls or all treated.  
+   These models are usually known as *Standardization* models, and it should be noted that, currently,
+   they are the only ones able to generate *individual effect estimation* (otherwise known as CATE).
+
+##### 4. Confounders and DAGs
+One of the most important steps in causal inference analysis is to have 
+proper selection on both dimensions of the data to avoid introducing bias:
+* On rows: thoughtfully choosing the right inclusion\exclusion criteria 
+  for individuals in the data. 
+* On columns: thoughtfully choosing what covariates (features) act as confounders 
+  and should be included in the analysis.
+
+This is a place where domain expert knowledge is required and cannot be fully and truly automated
+by algorithms. 
+This package assumes that the data provided to the model fit the criteria. 
+However, filtering can be applied in real-time using a scikit-learn pipeline estimator
+that chains preprocessing steps (that can filter rows and select columns) with a causal model at the end.
+
