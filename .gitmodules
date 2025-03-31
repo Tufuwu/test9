@@ -1,3 +1,0 @@
-[submodule "doc/tutorials/armi-example-app"]
-	path = doc/tutorials/armi-example-app
-	url = https://github.com/terrapower/armi-example-app.git

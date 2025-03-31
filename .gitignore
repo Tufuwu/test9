@@ -1,68 +1,41 @@
-# No non-source python resources.
-*.pyc
-*.pyo
-*.pyd
-*.pyx
+*.py[cod]
 
-# No build artifacts
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
 build
-wheelhouse
-*.lib
-*.dll
-bin/*
-/bin
-dist/
-dist-*/
-doc/*.png
-doc/_build
-doc/tutorials/anl-afci-177*
-doc/tutorials/case-suite
-armi/tests/tutorials/case-suite
-.apidocs/
-doc/gallery
-htmlcov/
+eggs
+.eggs
+*.cache
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+__pycache__
 
-# No workspace crumbs.
-*~
-.*.swp
-.settings
-.vscode
-.project
-.metadata
-.idea/
-.pydevproject
-*.sublime-project
-*.sublime-workspace
-phabricator-lint.txt
-temp-*
-tags
-*.temp
-.externalToolBuilders/
-.cache/
-.pytest_cache/
-.vim-bookmarks
-.venv*/
-.mypy_cache/
-**/__pycache__
-**/.coverage*
+# Installer logs
+pip-log.txt
 
-# Misc. exclusions
-*.html
-*.diff
-*.avi
-*.ppm
-*.mp4
-*.h5
-*.txt
-
-# vis files
-*.vtu
-*.vtd
-*.xdmf
-
-# fixtures
-.ipynb_checkpoints
+# Unit test / coverage reports
+.coverage
 .tox
+nosetests.xml
 
-*.egg-info/
-armi.egg-info
+# Translations
+*.mo
+
+.DS_Store
+**/.DS_Store
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
