@@ -55,3 +55,10 @@ You should read the following to get up and running with our monitoring script:
 * GPIO Pinout - https://pinout.xyz/pinout/grow_hat_mini
 * Support forums - http://forums.pimoroni.com/c/support
 * Discord - https://discord.gg/hr93ByC
+
+# Changelog
+
+0.0.1
+-----
+
+* Initial Release

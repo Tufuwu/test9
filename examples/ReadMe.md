@@ -1,78 +1,82 @@
-# Examples
-The examples show usage of the wrapper. After running the code, you should see output similar to the animations shown bellow.
+# Monitoring Your Plants
 
-## Free fall of the cube
-![](videos/anim_01_free_fall.gif)
+The example `monitor.py` monitors the moisture level of your soil and sounds an alarm when it drops below a defined threshold.
 
-## Mesh loading example
-![](videos/anim_02_spade.gif)
+It's configured using `settings.yml`. Your settings for monitoring will look something like this:
 
-## Joints example
-Two rigid bodies connected by joints: 
-(i) no joint on the left,
-(ii) Fixed joint in the middle,
-and (iii) Linear joint with damping on the right.
-
-![](videos/anim_03_joints.gif)
-
-## Labels example
-Shows how to add/update labels into the scene.
-
-![](videos/anim_04_labels.gif)
-
-
-## Load URDF example
-Example shows how to load simple urdf model into the physx and how to specify the joint commands in position or velocity mode.
-Left example shows dynamic simulation of robot while the right one shows kinematic simulation.
-The type of simulation can be specified when loading the robot.
-
-![](videos/anim_05_load_urdf.gif)
-![](videos/anim_05_load_urdf_kinematic.gif)
-
-## Load URDF Franka Emika Panda robot
-Example shows both visual and collision model of the robot.
-
-![](videos/anim_05a_load_panda.gif)
-
-## Panda scene interaction
-Example shows interaction between cubes and panda robot. In addition it shows how to change background color.
-
-![](videos/anim_05b_panda_cubes.gif)
-
-## GPU computation example
-The example is split into two parts: (i) compute execution time for cpu and gpu for various scenes and (ii) plot results.
-For turning on gpu computation you need to init gpu (the function initialize GPU context) and you can pass (optional) GPU settings into the scene constructor:
+```yaml
+channel1:
+        warn_level: 0.2
+channel2:
+        warn_level: 0.2
+channel3:
+        warn_level: 0.2
+general:
+        alarm_enable: True
+        alarm_interval: 1.0
 ```
-Physics.init_gpu()
-Scene(scene_flags=[SceneFlag.ENABLE_PCM, SceneFlag.ENABLE_GPU_DYNAMICS, SceneFlag.ENABLE_STABILIZATION],
-    broad_phase_type=BroadPhaseType.GPU, gpu_max_num_partitions=8, gpu_dynamic_allocation_scale=1.,
-)
-```
-![](06_gpu_performance.png)
 
-## Meshcat Viewer example
-Example shows how to use MeshCat 3D web visualizer with PyPhysx.
-```python
-# ... create scene as usual and then create viewer
-render = MeshcatViewer(wait_for_open=True, open_meshcat=True) # this will open tab in your browser with empty scene
-render.add_physx_scene(scene)  # add pyphysx scene into the meshcat viewer
-# ... simulate etc.
-render.update() # update poses of actors
+`monitor.py` includes a main view showing the moisture status of each channel and the level beyond which the alarm will sound.
 
-```
-![](videos/anim_07_meshcat.gif)
+The controls from the main view are as follows:
 
-## Offscreen render utilizing PyRender library
-Shows how to create offscreen renderer. It shares the api with other PyPhysX viewer, i.e. has `add_physx_scene` and `update` functions.
-RGB and Depth data are obtained by calling `get_rgb_and_depth()` member function.
-Concatenation of these values are saved into the gif and shown bellow.
-Note, that different backend need to be used if running in headless mode (e.g. on computational cluster). 
-See [PyRender documentation](https://pyrender.readthedocs.io/en/latest/examples/offscreen.html) for details.
-```python
-render = PyPhysxOffscreenRenderer()
-render.add_physx_scene(scene)  # add pyphysx scene into the offscreen renderer
-render.render_scene.ambient_light = [0.1] * 3  # add some light
-render.update()
-rgb, depth = render.get_rgb_and_depth()
+* `A` - cycle through the main screen and each channel
+* `B` - snooze the alarm
+* `X` - configure global settings or the selected channel
+
+The warning moisture level can be configured for each channel, along with the Wet and Dry points that store the frequency expected from the sensor when soil is fully wet/dry.
+
+## Watering
+
+If you've got pumps attached to Grow and want to automatically water your plants, you'll need some extra configuration options.
+
+See [Channel Settings](#channel-settings) and [General Settings](#general-settings) for more information on what these do.
+
+```yaml
+channel1:
+        water_level: 0.8
+        warn_level: 0.2
+        pump_speed: 0.7
+        pump_time: 0.7
+        wet_point: 0.7
+        dry_point: 27.6
+        auto_water: True
+channel2:
+        water_level: 0.8
+        warn_level: 0.2
+        pump_speed: 0.7
+        pump_time: 0.7
+        wet_point: 0.7
+        dry_point: 27.6
+        auto_water: True
+channel3:
+        water_level: 0.8
+        warn_level: 0.2
+        pump_speed: 0.7
+        pump_time: 0.7
+        wet_point: 0.7
+        dry_point: 27.6
+        auto_water: True
+general:
+        alarm_enable: True
+        alarm_interval: 1.0
 ```
-![](videos/anim_08_offscreen_renderer.gif)
+
+## Channel Settings
+
+Grow has three channels which are separated into the sections `channel1`, `channel2` and `channel3`, each of these sections has the following configuration options:
+
+* `water_level` - The level at which auto-watering should be triggered (soil saturation from 0.0 to 1.0)
+* `warn_level` - The level at which the alarm should be triggered (soil saturation from 0.0 to 1.0)
+* `pump_speed` - The speed at which the pump should be run (from 0.0 low speed to 1.0 full speed)
+* `pump_time` - The time that the pump should run for (in seconds)
+* `auto_water` - Whether to run the attached pump (True to auto-water, False for manual watering)
+* `wet_point` - Value for the sensor in saturated soil (in Hz)
+* `dry_point` - Value for the sensor in totally dry soil (in Hz)
+
+## General Settings
+
+An additional `general` section can be used for global settings:
+
+* `alarm_enable` - Whether to enable the alarm
+* `alarm_interval` - The interval at which the alarm should beep (in seconds)
