@@ -1,50 +1,56 @@
-#
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-#
+name: python
 
-# This GitHub Actions workflow will prepare a environment with Python 3.6
-# and the required Python packages, to run the CI tests
-# (Ansible-lint, Flake8 etc.) for Fluo-Muchos.
-# See also:
-#   https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-python
-
-name: CI
-
-on:
-  push:
-    branches: [ '*' ]
-  pull_request:
-    branches: [ '*' ]
+on: [push]
 
 jobs:
   build:
-    name: ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
-    timeout-minutes: 10
+        python-version: ["3.9", "3.10"]
+
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
       with:
-        python-version: '3.9'
-    - name: Install required packages
-      run: pip install -r ./lib/requirements.txt
-    - name: Run Fluo-Muchos CI script
-      run: ./scripts/cibuild
+        python-version: ${{ matrix.python-version }}
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        # This path is specific to Ubuntu
+        path: ~/.cache/pip
+        # Look to see if there is a cache hit for the corresponding requirements file
+        key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('requirements_dev.txt') }}-${{ hashFiles('setup.py') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.python-version }}-pip-
+          ${{ runner.os }}-${{ matrix.python-version }}-
+    - name: Install dev dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements_dev.txt
+    - name: Lint with flake8
+      run: |
+        flake8 aiohttp_sse_client
+    - name: Install
+      run: |
+        pip install -e .
+    - name: Test with pytest
+      run: |
+        pytest
+    - name: Build wheel
+      if: matrix.python-version == 3.6
+      run: |
+        python setup.py sdist bdist_wheel
+    - name: Publish distribution 📦 to Test PyPI
+      if: matrix.python-version == 3.6 && startsWith(github.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@main
+      with:
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
+    - name: Publish distribution 📦 to PyPI
+      if: matrix.python-version == 3.6 && startsWith(github.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@main
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
