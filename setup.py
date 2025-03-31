@@ -1,55 +1,59 @@
 from setuptools import setup, find_packages
+import versioneer
 
-with open('README.md', 'r') as fh:
-    long_description = fh.read()
+DISTNAME = 'detection-utils'
+DESCRIPTION = 'Common functionality for object detection'
+LICENSE = 'MIT'
+AUTHOR = 'David Mascharka, Ryan Soklaski, Arjun Majumdar'
+AUTHOR_EMAIL = 'davidmascharka@gmail.com, rsoklaski@gmail.com, arjun.majum@gmail.com'
+URL = 'https://github.com/davidmascharka/detection-utils'
+CLASSIFIERS = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Scientific/Engineering",
+]
+INSTALL_REQUIRES = ['numpy >= 1.13', 'numba >= 0.38']
+EXTRAS_REQUIRE = {'pytorch': ['torch >= 0.4']}
+TESTS_REQUIRE = ['pytest >= 3.8', 'hypothesis >= 4.6']
+LONG_DESCRIPTION = """
+detection-utils provides utilities that are common across many object detection projects.
+This includes things like:
 
-setup(
-    name='scanpy-scripts',
-    version='0.3.1',
-    author='nh3',
-    author_email='nh3@users.noreply.github.com',
-    description='Scripts for using scanpy from the command line',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    url='https://github.com/ebi-gene-expression-group/scanpy-scripts',
-    packages=find_packages(),
-    scripts=[
-        'scanpy-scripts-tests.bats',
-    ],
-    entry_points=dict(
-        console_scripts=[
-            'scanpy-cli=scanpy_scripts.cli:cli',
-            'scanpy-read-10x=scanpy_scripts.cmds:READ_CMD',
-            'scanpy-filter-cells=scanpy_scripts.cmds:FILTER_CMD',
-            'scanpy-filter-genes=scanpy_scripts.cmds:FILTER_CMD',
-            'scanpy-normalise-data=scanpy_scripts.cmds:NORM_CMD',
-            'scanpy-find-variable-genes=scanpy_scripts.cmds:HVG_CMD',
-            'scanpy-scale-data=scanpy_scripts.cmds:SCALE_CMD',
-            'scanpy-regress=scanpy_scripts.cmds:REGRESS_CMD',
-            'scanpy-run-pca=scanpy_scripts.cmds:PCA_CMD',
-            'scanpy-neighbors=scanpy_scripts.cmds:NEIGHBOR_CMD',
-            'scanpy-run-tsne=scanpy_scripts.cmds:TSNE_CMD',
-            'scanpy-run-umap=scanpy_scripts.cmds:UMAP_CMD',
-            'scanpy-find-cluster=scanpy_scripts.cli:cluster',
-            'scanpy-find-markers=scanpy_scripts.cmds:DIFFEXP_CMD',
-        ]
-    ),
-    install_requires=[
-        'packaging',
-        'anndata',
-        'scipy',
-        'matplotlib',
-        'pandas',
-        'h5py<3.0.0',
-        'scanpy>=1.6.0',
-        'louvain',
-        'leidenalg',
-        'loompy>=2.0.0,<3.0.0',
-        'MulticoreTSNE',
-        'Click',
-        'umap-learn<0.4.0',
-        'harmonypy>=0.0.5',
-        'bbknn>=1.3.12',
-        'mnnpy>=0.1.9.5'
-    ],
-)
+- Box overlap computation (IoU)
+- Precision and recall calculations
+- Computing targets for training a detector given a set of ground-truth objects and anchor boxes
+- Non-maximum suppression
+- Coordinate transformation utilities
+- Focal loss
+
+All the functions here are well-tested to ensure proper functionality and are used in real projects, so are
+intended to be enterprise-grade. This repository is meant to ensure that modifications and improvements that
+are implemented in one object detection project migrate to other projects as appropriate, to reduce code
+ duplication, and to enable a quicker start to working on object detection.
+"""
+
+if __name__ == '__main__':
+    setup(name=DISTNAME,
+          description=DESCRIPTION,
+          long_description=LONG_DESCRIPTION,
+          long_description_content_type='text/markdown',
+          license=LICENSE,
+          author=AUTHOR,
+          author_email=AUTHOR_EMAIL,
+          install_requires=INSTALL_REQUIRES,
+          extras_require=EXTRAS_REQUIRE,
+          tests_require=TESTS_REQUIRE,
+          url=URL,
+          version=versioneer.get_version(),
+          cmdclass=versioneer.get_cmdclass(),
+          python_requires='>=3.7',
+          packages=find_packages(where='src', exclude=['tests*']),
+          package_dir={'': 'src'},
+          )

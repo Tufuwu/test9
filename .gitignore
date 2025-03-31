@@ -1,9 +1,11 @@
-/.idea/
-/build/
-/dist/
-/*.egg-info/
-/post_install_tests/
-*cache*/
-*.pyc
-/.*history
-/.*swp
+# PyCharm
+.idea/*
+
+# python garbage
+__pycache__
+*.egg-info
+
+# testing
+.hypothesis
+.coverage
+.tox
