@@ -1,5 +1,0 @@
-include LICENSE NOTICE *.md
-recursive-include tests *.py
-graft vectors
-global-exclude *.pyc
-global-exclude .git*

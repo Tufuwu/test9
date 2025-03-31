@@ -1,4 +1,0 @@
-[submodule "ion-tests"]
-	path = vectors
-	url = https://github.com/amzn/ion-tests
-	branch = master

@@ -1,16 +1,4 @@
-*.pyc
-*.pyo
-*~
-*#
-*.swp
-/.python-version
+# Python artifacts (bytecode, PyCharm projects, ...)
 /.idea
-/.cache
-/.eggs
-/.tox
-/venv
-/build
-/dist
-/amazon.ion.egg-info
-/docs/_build/
-
+/__pycache__
+*.pyc
