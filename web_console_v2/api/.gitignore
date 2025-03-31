@@ -1,4 +1,0 @@
-app.db
-
-# Generated proto python code
-fedlearner_webconsole/proto/*.py

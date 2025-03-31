@@ -1,23 +1,39 @@
-name: CI
+name: ci
 
 on: [push, pull_request]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-    name: CI tests
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      - name: Install dependencies
+      # Checkout Repository
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Install Tools
+      - name: Install Tools
         run: |
-          sudo apt-get -y update
-          sudo apt-get -y install libgmp-dev libmpc-dev libmpfr-dev
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r web_console_v2/api/requirements.txt
-      - name: Run CI
-        run: bash ./ci/ci_test.sh
+          sudo apt-get install wget build-essential python3 verilator libevent-dev libjson-c-dev device-tree-compiler
+          pip3 install setuptools
+          pip3 install requests
+          pip3 install pexpect
+
+      # Install (n)Migen / LiteX / Cores
+      - name: Install LiteX
+        run: |
+          wget https://raw.githubusercontent.com/enjoy-digital/litex/main/litex_setup.py
+          python3 litex_setup.py init install --user
+
+      # Install RISC-V GCC
+      - name: Install RISC-V GCC
+        run: |
+          wget https://raw.githubusercontent.com/enjoy-digital/litex/main/litex_setup.py
+          python3 litex_setup.py gcc
+          sudo mkdir /usr/local/riscv
+          sudo cp -r $PWD/../riscv64-*/* /usr/local/riscv
+
+      # Test
+      - name: Run Tests
+        run: |
+          export PATH=/usr/local/riscv/bin:$PATH
+          ./make.py --board=arty
