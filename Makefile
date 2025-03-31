@@ -1,38 +1,65 @@
-# Makefile for use in deploying stable releases to sites.
-# To use this, cd to the chapter site, then run `make -f path/to/this/file`.
-# If the chapter has a custom branch, or local changes that can't be rebased,
-# the script will exit, and you'll need to fix it up then run "make finish".
-# TODO(benkraft): at some point maybe we'll want a proper automation framework
-# like puppet or chef or whatever.
-SHELL=/bin/bash
-SITE:=$(notdir $(PWD))
-STASH:=$(shell sudo -u www-data git diff HEAD --quiet || echo true)
+export PYTHONPATH := $(CURDIR):$(CURDIR)/test
+PYTHON := python
 
-sr-12: NEWBRANCH=stable-release-12
-sr-12: OLDBRANCH=stable-release-11
-sr-12: pre src finish
+# Collect information to build as sensible package name
+name = $(shell xmllint --xpath 'string(/addon/@id)' addon.xml)
+version = $(shell xmllint --xpath 'string(/addon/@version)' addon.xml)
+git_branch = $(shell git rev-parse --abbrev-ref HEAD)
+git_hash = $(shell git rev-parse --short HEAD)
+zip_name = $(name)-$(version)-$(git_branch)-$(git_hash).zip
+include_files = addon.xml CHANGELOG.md LICENSE plugin.py README.md resources/ service.py
+include_paths = $(patsubst %,$(name)/%,$(include_files))
+exclude_files = \*.new \*.orig \*.pyc \*.pyo
 
-pre:
-	@echo "Backing things up and fixing permissions."
-	@# get credentials, if we lack them, before we try to do anything fancy with pipes
-	sudo -v
-	@# We might not have write permissions on the homedir, but www-data should.
-	set -o pipefail; sudo -u postgres pg_dump $(SITE)_django | gzip | sudo -u www-data tee $(SITE)_$(shell date +"%Y%m%d").sql.gz >/dev/null
-	-sudo chown -RL "www-data:www-data" .
+languages = $(filter-out en_gb, $(patsubst resources/language/resource.language.%, %, $(wildcard resources/language/*)))
 
-src:
-	@echo "Attempting to do the git stuff automatically; if this fails for any reason, fix it up and run 'make finish'."
-	[ "$$(git rev-parse --abbrev-ref HEAD)" = "$(OLDBRANCH)" ]  # Assert we're on OLDBRANCH
-	if [ "$(STASH)" = "true" ] ; then sudo -u www-data git stash ; fi
-	sudo -u www-data git fetch origin
-	sudo -u www-data git remote prune origin
-	sudo -u www-data git checkout origin/$(NEWBRANCH)
-	if [ "$(STASH)" = "true" ] ; then sudo -u www-data git stash pop ; fi
+.PHONY: check test
 
-finish:
-	@echo "Updating the site; if this fails for any reason, fix it up and (re-)run 'make finish'."
-	esp/update_deps.sh
-	sudo -u www-data esp/manage.py update
-	@echo "Done! Go test some things."
+all: check test build
+zip: build
 
-.PHONY: pre src finish
+check: check-pylint check-tox check-translations
+
+check-pylint:
+	@echo ">>> Running pylint checks"
+	@$(PYTHON) -m pylint *.py resources/lib/ test/
+
+check-tox:
+	@echo ">>> Running tox checks"
+	@$(PYTHON) -m tox -q
+
+check-translations:
+	@echo ">>> Running translation checks"
+	@$(foreach lang,$(languages), \
+		msgcmp resources/language/resource.language.$(lang)/strings.po resources/language/resource.language.en_gb/strings.po; \
+	)
+
+check-addon: clean build
+	@echo ">>> Running addon checks"
+	$(eval TMPDIR := $(shell mktemp -d))
+	@unzip ../${zip_name} -d ${TMPDIR}
+	cd ${TMPDIR} && kodi-addon-checker --branch=leia
+	@rm -rf ${TMPDIR}
+
+test: test-unit
+
+test-unit:
+	@echo ">>> Running unit tests"
+	@$(PYTHON) -m unittest discover -v -b -f
+
+clean:
+	@find . -name '*.pyc' -type f -delete
+	@find . -name '*.pyo' -type f -delete
+	@find . -name '__pycache__' -type d -delete
+	@rm -rf .pytest_cache/ .tox/ test/cdm test/userdata/temp
+	@rm -f *.log .coverage
+
+build: clean
+	@echo ">>> Building package"
+	@rm -f ../$(zip_name)
+	cd ..; zip -r $(zip_name) $(include_paths) -x $(exclude_files)
+	@echo "Successfully wrote package as: ../$(zip_name)"
+
+release: build
+	rm -rf ../repo-plugins/$(name)/*
+	unzip ../$(zip_name) -d ../repo-plugins/

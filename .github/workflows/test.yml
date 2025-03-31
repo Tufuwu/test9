@@ -1,52 +1,59 @@
-name: "Lint and Unit Tests"
+name: CI
 
 on:
   push:
-    branches: [main, ]
+    branches:
+      - main
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [main]
+    branches:
+      - main
 
 jobs:
-  build:
-    name: ${{ matrix.travis_job }}
+  tests:
+    name: Unit tests
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:10.8
-        env:
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
-          POSTGRES_DB: test_django
-        ports:
-          - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONPATH: ${{ github.workspace }}/resources/lib:${{ github.workspace }}/test
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10"]
-        travis_job: ["lint", "test"]
-    env:
-      DJANGO_SETTINGS_MODULE: esp.settings
-
     steps:
-    - uses: actions/checkout@v2
-    - uses: niden/actions-memcached@v7
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Prepare for Installing Dependencies
-      run: deploy/travis/before_install
-    - name: Install Dependencies for ${{ matrix.travis_job }}
-      env:
-        TRAVIS_JOB: ${{ matrix.travis_job }}
-      run: deploy/travis/install
-    - name: Prepare for ${{ matrix.travis_job }}
-      env:
-        TRAVIS_JOB: ${{ matrix.travis_job }}
-      run: deploy/travis/before_script
-    - name: Run ${{ matrix.travis_job }}
-      env:
-        TRAVIS_JOB: ${{ matrix.travis_job }}
-      run: deploy/travis/script
+      - name: Check out ${{ github.sha }} from repository ${{ github.repository }}
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get install gettext
+          sudo pip install coverage --install-option="--install-scripts=/usr/bin"
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run pylint
+        run: |
+          make check-pylint
+      - name: Run tox
+        run: |
+          make check-tox
+      - name: Check translations
+        run: |
+          make check-translations
+      - name: Run unit tests
+        env:
+          ADDON_USERNAME: ${{ secrets.ADDON_USERNAME }}
+          ADDON_PASSWORD: ${{ secrets.ADDON_PASSWORD }}
+          ADDON_PROFILE: ${{ secrets.ADDON_PROFILE }}
+        run: |
+          coverage run -m unittest discover
+      - name: Run addon
+        run: |
+          coverage run -a test/run.py /
+      - name: Run add-on service
+        run: |
+          coverage run -a service.py
+      - name: Upload code coverage to CodeCov
+        uses: codecov/codecov-action@v1
+        continue-on-error: true
