@@ -1,0 +1,16 @@
+title: Raritan PX-2000 Family: PDU Inlet Sensor State
+agents: snmp
+catalog: hw/environment/raritan
+license: GPL
+distribution: check_mk
+description:
+ This check monitors the state of the inlet sensors of the Raritan PX-2000
+ family of intelligent rack power distribution units (iPDUs).
+ The check displays the measured value of the sensor.
+
+item:
+ The fixed statement {{Phase}} plus the ID of the phase.
+
+discovery:
+ One service is created for each phase.
+

@@ -1,0 +1,10 @@
+Title: BI Aggregations: No longer suppressing error messages for invalid configured BI rules
+Level: 1
+Component: multisite
+Compatible: compat
+Version: 1.4.0b1
+Date: 1486565762
+Class: fix
+
+BI views no always show a red error box whenever the aggregation titles are not unique
+or the configuration of the bi rules itself is not set up correctly. 

@@ -1,0 +1,24 @@
+title: Hitachi HNAS: Usage and Status of Volumes
+agents: snmp
+catalog: hw/storagehw/hitachi
+license: GPL
+distribution: check_mk
+description:
+ Checks the Usage and Status of Volumes in Hitachi HNAS storage systems.
+
+ For usage it uses the check logic of the {df} check, so for configuration
+ parameters and examples please refer to the man page of {df}.
+
+ If the status of a volume is reported to be "mounted", the check may
+ return {OK}, on status "unformatted" or "formatted", the check returns
+ at least {WARN}, on "needsChecking" it returns {CRIT} and {UNKN} on
+ every other status.
+
+ The worst status of both (usage levels and status) is returned by the check.
+
+item:
+ The ID of a Volume plus it's label, separated by a space, e. g. 1025 data
+
+discovery:
+ One service is created for each volume.
+

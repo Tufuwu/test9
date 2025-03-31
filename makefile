@@ -1,174 +1,617 @@
+# Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+# This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+# conditions defined in the file COPYING, which is part of this source code package.
+
 #
-# gPodder - A media aggregator and podcast client
-# Copyright (c) 2005-2018 The gPodder Team
-#
-# gPodder is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# gPodder is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-#
+include defines.make
 
-##########################################################################
+NAME               := check_mk
+PREFIX             := /usr
+BINDIR             := $(PREFIX)/bin
+CONFDIR            := /etc/$(NAME)
+LIBDIR             := $(PREFIX)/lib/$(NAME)
+DISTNAME           := $(NAME)-$(VERSION)
+DIST_ARCHIVE       := check-mk-$(EDITION)-$(OMD_VERSION).tar.gz
+TAROPTS            := --owner=root --group=root --exclude=.svn --exclude=*~ \
+                      --exclude=.gitignore --exclude=*.swp --exclude=.f12 \
+                      --exclude=__pycache__ --exclude=*.pyc
+# We could add clang's -Wshorten-64-to-32 and g++'c/clang's -Wsign-conversion here.
+CXX_FLAGS          := -g -O3 -Wall -Wextra
+CLANG_FORMAT       := clang-format-$(CLANG_VERSION)
+SCAN_BUILD         := scan-build-$(CLANG_VERSION)
+export DOXYGEN     := doxygen
+export IWYU_TOOL   := $(realpath scripts/iwyu_tool)
+ARTIFACT_STORAGE   := https://artifacts.lan.tribe29.com
+PIPENV             := scripts/run-pipenv
 
-BINFILE = bin/gpodder
-MANPAGES = share/man/man1/gpodder.1 share/man/man1/gpo.1
+M4_DEPS            := $(wildcard m4/*) configure.ac
+CONFIGURE_DEPS     := $(M4_DEPS) aclocal.m4
+CONFIG_DEPS        := ar-lib compile config.guess config.sub install-sh missing depcomp configure
+DIST_DEPS          := $(CONFIG_DEPS) \
+                      omd/packages/openhardwaremonitor/OpenHardwareMonitorCLI.exe \
+                      omd/packages/openhardwaremonitor/OpenHardwareMonitorLib.dll
 
-GPODDER_SERVICE_FILE=share/dbus-1/services/org.gpodder.service
-GPODDER_SERVICE_FILE_IN=$(addsuffix .in,$(GPODDER_SERVICE_FILE))
 
-DESKTOP_FILES_IN=$(wildcard share/applications/*.desktop.in)
-DESKTOP_FILES_IN_H=$(patsubst %.desktop.in,%.desktop.in.h,$(DESKTOP_FILES_IN))
-DESKTOP_FILES=$(patsubst %.desktop.in,%.desktop,$(DESKTOP_FILES_IN))
+LIVESTATUS_SOURCES := Makefile.am api/c++/{Makefile,*.{h,cc}} api/perl/* \
+                      api/python/{README,*.py} {nagios,nagios4}/{README,*.h} \
+                      src/{Makefile.am,{,test/}*.{cc,h}} standalone/config_files.m4
 
-MESSAGES = po/messages.pot
-POFILES = $(wildcard po/*.po)
-LOCALEDIR = share/locale
-MOFILES = $(patsubst po/%.po,$(LOCALEDIR)/%/LC_MESSAGES/gpodder.mo, $(POFILES))
+FILES_TO_FORMAT_LINUX := \
+                      $(wildcard $(addprefix livestatus/api/c++/,*.cc *.h)) \
+                      $(wildcard $(addprefix livestatus/src/,*.cc *.h)) \
+                      $(wildcard $(addprefix livestatus/src/test/,*.cc *.h)) \
+                      $(wildcard $(addprefix bin/,*.cc *.c *.h)) \
+                      $(wildcard $(addprefix enterprise/core/src/,*.cc *.h)) \
+                      $(wildcard $(addprefix enterprise/core/src/test/,*.cc *.h))
 
-UIFILES=$(wildcard share/gpodder/ui/gtk/*.ui)
-UIFILES_H=$(subst .ui,.ui.h,$(UIFILES))
-GETTEXT_SOURCE=$(wildcard src/gpodder/*.py \
-		          src/gpodder/gtkui/*.py \
-		          src/gpodder/gtkui/interface/*.py \
-			  src/gpodder/gtkui/desktop/*.py \
-			  src/gpodder/plugins/*.py \
-			  share/gpodder/extensions/*.py)
+WERKS              := $(wildcard .werks/[0-9]*)
 
-GETTEXT_SOURCE += $(UIFILES_H)
-GETTEXT_SOURCE += $(wildcard bin/*[^~])
-GETTEXT_SOURCE += $(DESKTOP_FILES_IN_H)
+JAVASCRIPT_SOURCES := $(filter-out %_min.js, \
+                          $(wildcard \
+                              $(foreach edir,. enterprise managed, \
+                                  $(foreach subdir,* */* */*/*,$(edir)/web/htdocs/js/$(subdir).js))))
 
-DESTDIR ?= /
-PREFIX ?= /usr
+SCSS_SOURCES := $(wildcard \
+					$(foreach edir,. enterprise managed, \
+						$(foreach subdir,* */*,$(edir)/web/htdocs/themes/$(subdir)/*.scss)))
 
-PYTHON ?= python3
-HELP2MAN ?= help2man
+JAVASCRIPT_MINI    := $(foreach jmini,main mobile side,web/htdocs/js/$(jmini)_min.js)
 
-PYTEST ?= $(shell which pytest || which pytest-3)
+PNG_FILES          := $(wildcard $(addsuffix /*.png,web/htdocs/images web/htdocs/images/icons enterprise/web/htdocs/images enterprise/web/htdocs/images/icons managed/web/htdocs/images managed/web/htdocs/images/icons))
 
-##########################################################################
+RRDTOOL_VERS       := $(shell egrep -h "RRDTOOL_VERS\s:=\s" omd/packages/rrdtool/rrdtool.make | sed 's/RRDTOOL_VERS\s:=\s//')
+
+WEBPACK_MODE       ?= production
+THEMES             := facelift modern-dark
+THEME_CSS_FILES    := $(addprefix web/htdocs/themes/,$(addsuffix /theme.css,$(THEMES)))
+THEME_JSON_FILES   := $(addprefix web/htdocs/themes/,$(addsuffix /theme.json,$(THEMES)))
+THEME_IMAGE_DIRS   := $(addprefix web/htdocs/themes/,$(addsuffix /images,$(THEMES)))
+THEME_RESOURCES    := $(THEME_CSS_FILES) $(THEME_JSON_FILES) $(THEME_IMAGE_DIRS)
+
+OPENAPI_DOC        := web/htdocs/openapi/api-documentation.html
+OPENAPI_SPEC       := web/htdocs/openapi/checkmk.yaml
+
+LOCK_FD := 200
+LOCK_PATH := .venv.lock
+
+.PHONY: all analyze build check check-binaries check-permissions check-version \
+        clean compile-neb-cmc compile-neb-cmc-docker dist documentation \
+        documentation-quick format format-c format-python format-shell format-js \
+        GTAGS headers help install iwyu mrproper mrclean optimize-images \
+        packages setup setversion tidy version am--refresh skel openapi openapi-doc
+
 
 help:
-	@cat tools/make-help.txt
+	@echo "setup			      --> Prepare system for development and building"
+	@echo "make dist                      --> Create source tgz for later building of rpm/deb and livestatus tgz"
+	@echo "make rpm                       --> Create rpm package"
+	@echo "make deb                       --> Create deb package"
+	@echo "make cma                       --> Create cma package"
+	@echo "make version                   --> Switch to new version"
 
-##########################################################################
+rpm:
+	$(MAKE) -C omd rpm
 
-unittest:
-	LC_ALL=C PYTHONPATH=src/ $(PYTEST) --ignore=tests --ignore=src/gpodder/utilwin32ctypes.py --doctest-modules src/gpodder/util.py src/gpodder/jsonconfig.py
-	LC_ALL=C PYTHONPATH=src/ $(PYTEST) tests --ignore=src/gpodder/utilwin32ctypes.py --ignore=src/mygpoclient --cov=gpodder
+deb:
+	$(MAKE) -C omd deb
 
-ISORTOPTS := -c share src/gpodder tools bin/* *.py
-lint:
-	pycodestyle share src/gpodder tools bin/* *.py
-	isort -q $(ISORTOPTS) || isort --df $(ISORTOPTS)
+cma:
+	$(MAKE) -C omd cma
 
+check: check-permissions check-binaries check-version
 
-release: distclean
-	$(PYTHON) setup.py sdist
+check-permissions:
+	@echo -n "Checking permissions... with find -not -perm -444..." && [ -z "$$(find -not -perm -444)" ] && echo OK
 
-releasetest: unittest $(DESKTOP_FILES) $(POFILES)
-	for f in $(DESKTOP_FILES); do desktop-file-validate $$f; done
-	for f in $(POFILES); do msgfmt --check $$f; done
+check-binaries:
+	@if [ -z "$(SKIP_SANITY_CHECKS)" ]; then \
+	    echo -n "Checking precompiled binaries..." && file agents/waitmax | grep 32-bit >/dev/null && echo OK ; \
+	fi
 
-$(GPODDER_SERVICE_FILE): $(GPODDER_SERVICE_FILE_IN)
-	sed -e 's#__PREFIX__#$(PREFIX)#' $< >$@
+check-version:
+	@sed -n 1p ChangeLog | fgrep -qx '$(VERSION):' || { \
+	    echo "Version $(VERSION) not listed at top of ChangeLog!" ; \
+	    false ; }
 
-%.desktop: %.desktop.in $(POFILES)
-	sed -e 's#__PREFIX__#$(PREFIX)#' $< >$@.tmp
-	intltool-merge -d -u po $@.tmp $@
-	rm -f $@.tmp
-
-%.desktop.in.h: %.desktop.in
-	intltool-extract --quiet --type=gettext/ini $<
-
-install: messages $(GPODDER_SERVICE_FILE) $(DESKTOP_FILES)
-	$(PYTHON) setup.py install --root=$(DESTDIR) --prefix=$(PREFIX) --optimize=1
-
-install-win: messages $(GPODDER_SERVICE_FILE) $(DESKTOP_FILES)
-	$(PYTHON) setup.py install
-
-##########################################################################
-ifdef VERSION
-revbump:
-	LC_ALL=C sed -i "s/\(__version__\s*=\s*'\).*'/\1$(VERSION)'/" src/gpodder/__init__.py
-	LC_ALL=C sed -i "s/\(__date__\s*=\s*'\).*'/\1$(shell date "+%Y-%m-%d")'/" src/gpodder/__init__.py
-	LC_ALL=C sed -i "s/\(__copyright__\s*=.*2005-\)[0-9]*\(.*\)/\1$(shell date "+%Y")\2/" src/gpodder/__init__.py
-	$(MAKE) messages manpages
-else
-revbump:
-	@echo "Usage: make revbump VERSION=x.y.z"
+# Is executed by our build environment from a "git archive" snapshot and during
+# RPM building to create the source tar.gz for the RPM build process.
+# Would use --exclude-vcs-ignores but that's available from tar 1.29 which
+# is currently not used by most distros
+# Would also use --exclude-vcs, but this is also not available
+# And --transform is also missing ...
+dist: $(DISTNAME).tar.gz config.h.in $(DIST_DEPS)
+ifeq ($(ENTERPRISE),yes)
+	$(MAKE) -C enterprise agents/plugins/cmk-update-agent
+	$(MAKE) -C enterprise agents/plugins/cmk-update-agent-32
 endif
-##########################################################################
+	set -e -o pipefail ; EXCLUDES= ; \
+	if [ -d .git ]; then \
+	    git rev-parse --short HEAD > COMMIT ; \
+	    for X in $$(git ls-files --directory --others -i --exclude-standard) ; do \
+	    if [[ $$X != aclocal.m4 && $$X != config.h.in  && ! "$(DIST_DEPS)" =~ (^|[[:space:]])$$X($$|[[:space:]]) && $$X != $(DISTNAME).tar.gz && $$X != omd/packages/mk-livestatus/mk-livestatus-$(VERSION).tar.gz && $$X != livestatus/* && $$X != enterprise/* ]]; then \
+		    EXCLUDES+=" --exclude $${X%*/}" ; \
+		fi ; \
+	    done ; \
+	else \
+	    for F in $(DIST_ARCHIVE) enterprise/agents/plugins/{build,build-32,src} enterprise/agents/plugins/{build,build-32,src} enterprise/agents/winbuild; do \
+		EXCLUDES+=" --exclude $$F" ; \
+	    done ; \
+	fi ; \
+	if [ -d check-mk-$(EDITION)-$(OMD_VERSION) ]; then \
+	    rm -rf check-mk-$(EDITION)-$(OMD_VERSION) ; \
+	fi ; \
+	mkdir check-mk-$(EDITION)-$(OMD_VERSION) ; \
+	tar -c --wildcards \
+	    $(TAROPTS) \
+	    --exclude check-mk-$(EDITION)-$(OMD_VERSION) \
+	    --exclude .git \
+	    --exclude .gitignore \
+	    --exclude .gitmodules \
+	    --exclude .gitattributes \
+	    $$EXCLUDES \
+	    * .werks .clang* | tar x -C check-mk-$(EDITION)-$(OMD_VERSION)
+	if [ -f COMMIT ]; then \
+	    rm COMMIT ; \
+	fi
+	tar -cz --wildcards -f $(DIST_ARCHIVE) \
+	    $(TAROPTS) \
+	    check-mk-$(EDITION)-$(OMD_VERSION)
+	rm -rf check-mk-$(EDITION)-$(OMD_VERSION)
 
-manpages: $(MANPAGES)
+# This tar file is only used by "omd/packages/check_mk/Makefile"
+$(DISTNAME).tar.gz: omd/packages/mk-livestatus/mk-livestatus-$(VERSION).tar.gz .werks/werks $(JAVASCRIPT_MINI) $(THEME_RESOURCES) ChangeLog
+	@echo "Making $(DISTNAME)"
+	rm -rf $(DISTNAME)
+	mkdir -p $(DISTNAME)
+	$(MAKE) -C agents build
+	$(MAKE) -C doc/plugin-api html
+	tar cf $(DISTNAME)/bin.tar $(TAROPTS) -C bin $$(cd bin ; ls)
+	gzip $(DISTNAME)/bin.tar
+	tar czf $(DISTNAME)/lib.tar.gz $(TAROPTS) \
+	    --exclude "cee" \
+	    --exclude "cee.py*" \
+	    --exclude "cme" \
+	    --exclude "cme.py*" \
+	    cmk/*
+	tar czf $(DISTNAME)/werks.tar.gz $(TAROPTS) -C .werks werks
+	tar czf $(DISTNAME)/checks.tar.gz $(TAROPTS) -C checks $$(cd checks ; ls)
+	tar czf $(DISTNAME)/active_checks.tar.gz $(TAROPTS) -C active_checks $$(cd active_checks ; ls)
+	tar czf $(DISTNAME)/notifications.tar.gz $(TAROPTS) -C notifications $$(cd notifications ; ls)
+	tar czf $(DISTNAME)/inventory.tar.gz $(TAROPTS) -C inventory $$(cd inventory ; ls)
+	tar czf $(DISTNAME)/checkman.tar.gz $(TAROPTS) -C checkman $$(cd checkman ; ls)
+	tar czf $(DISTNAME)/web.tar.gz $(TAROPTS) -C web \
+      app \
+      htdocs/openapi \
+      htdocs/css \
+      htdocs/images \
+      htdocs/jquery \
+      $(patsubst web/%,%,$(JAVASCRIPT_MINI)) \
+      $(patsubst web/%,%.map,$(JAVASCRIPT_MINI)) \
+      htdocs/sounds \
+      $(patsubst web/%,%,$(THEME_RESOURCES))
 
-share/man/man1/gpodder.1: src/gpodder/__init__.py $(BINFILE)
-	LC_ALL=C $(HELP2MAN) --name="$(shell $(PYTHON) setup.py --description)" -N $(BINFILE) >$@
+	tar xzf omd/packages/mk-livestatus/mk-livestatus-$(VERSION).tar.gz
+	tar czf $(DISTNAME)/livestatus.tar.gz $(TAROPTS) -C mk-livestatus-$(VERSION) $$(cd mk-livestatus-$(VERSION) ; ls -A )
+	rm -rf mk-livestatus-$(VERSION)
 
-share/man/man1/gpo.1: src/gpodder/__init__.py
-	sed -i 's/^\.TH.*/.TH GPO "1" "$(shell LANG=en date "+%B %Y")" "gpodder $(shell $(PYTHON) setup.py --version)" "User Commands"/' $@
+	tar cf $(DISTNAME)/doc.tar $(TAROPTS) -C doc --exclude plugin-api $$(cd doc ; ls)
+	tar rf $(DISTNAME)/doc.tar $(TAROPTS) \
+	    -C doc \
+	    --transform "s/^plugin-api\/build/plugin-api/" \
+	    plugin-api/build/html
+	tar rf $(DISTNAME)/doc.tar $(TAROPTS) COPYING AUTHORS ChangeLog
+	tar rf $(DISTNAME)/doc.tar $(TAROPTS) livestatus/api --exclude "*~" --exclude "*.pyc" --exclude ".gitignore" --exclude .f12
+	gzip $(DISTNAME)/doc.tar
 
-##########################################################################
+	make -C agents/plugins
+	cd agents ; tar czf ../$(DISTNAME)/agents.tar.gz $(TAROPTS) \
+		--exclude check_mk_agent.spec \
+		--exclude special/lib \
+		--exclude plugins/Makefile \
+		cfg_examples \
+		plugins \
+		sap \
+		special \
+		z_os \
+		check-mk-agent_*.deb \
+		check-mk-agent-*.rpm \
+		check_mk_agent.* \
+		check_mk_caching_agent.linux \
+		CONTENTS \
+		mk-job* \
+		waitmax \
+		windows/cfg_examples \
+		windows/check_mk_agent.msi \
+		windows/python-3.8.cab \
+		windows/python-3.4.cab \
+		windows/check_mk.user.yml \
+		windows/CONTENTS \
+		windows/mrpe \
+		windows/plugins
+	install -m 644 COPYING AUTHORS ChangeLog standalone.make $(DISTNAME)
+	echo "$(VERSION)" > $(DISTNAME)/VERSION
+	tar czf $(DISTNAME).tar.gz $(TAROPTS) $(DISTNAME)
+	rm -rf $(DISTNAME)
 
-messages: $(MOFILES)
+	@echo "=============================================================================="
+	@echo "   FINISHED. "
+	@echo "=============================================================================="
 
-%.po: $(MESSAGES)
-	msgmerge --previous --silent $@ $< --output-file=$@
-	msgattrib --set-obsolete --ignore-file=$< -o $@ $@
-	msgattrib --no-obsolete -o $@ $@
+omd/packages/openhardwaremonitor/OpenHardwareMonitorCLI.exe:
+	$(MAKE) -C omd openhardwaremonitor-dist
 
-$(LOCALEDIR)/%/LC_MESSAGES/gpodder.mo: po/%.po
-	@mkdir -p $(@D)
-	msgfmt $< -o $@
+omd/packages/openhardwaremonitor/OpenHardwareMonitorLib.dll: omd/packages/openhardwaremonitor/OpenHardwareMonitorCLI.exe
 
-%.ui.h: %.ui
-	intltool-extract --quiet --type=gettext/glade $<
+ntop-mkp:
+	PYTHONPATH=${PYTHONPATH}:$(REPO_PATH) $(PIPENV) run scripts/create-ntop-mkp.py
 
-$(MESSAGES): $(GETTEXT_SOURCE)
-	xgettext --from-code=utf-8 -LPython -k_:1 -kN_:1 -kN_:1,2 -kn_:1,2 -o $(MESSAGES) $^
+.werks/werks: $(WERKS)
+	PYTHONPATH=${PYTHONPATH}:$(REPO_PATH) $(PIPENV) run scripts/precompile-werks.py .werks .werks/werks cre
 
-messages-force:
-	xgettext --from-code=utf-8 -LPython -k_:1 -kN_:1 -kN_:1,2 -kn_:1,2 -o $(MESSAGES)  $(GETTEXT_SOURCE)
+ChangeLog: .werks/werks
+	PYTHONPATH=${PYTHONPATH}:$(REPO_PATH) $(PIPENV) run scripts/create-changelog.py ChangeLog .werks/werks
+
+packages:
+	$(MAKE) -C agents packages
+
+# NOTE: Old tar versions (e.g. on CentOS 5) don't have the --transform option,
+# so we do things in a slightly complicated way.
+omd/packages/mk-livestatus/mk-livestatus-$(VERSION).tar.gz:
+	rm -rf mk-livestatus-$(VERSION)
+	mkdir -p mk-livestatus-$(VERSION)
+	tar cf -  $(TAROPTS) -C livestatus $$(cd livestatus ; echo $(LIVESTATUS_SOURCES) ) | tar xf - -C mk-livestatus-$(VERSION)
+	cp -a configure.ac defines.make m4 mk-livestatus-$(VERSION)
+	cd mk-livestatus-$(VERSION) && \
+	    autoreconf --install --include=m4 && \
+	    rm -rf autom4te.cache && \
+	    touch ar-lib compile config.guess config.sub install-sh missing depcomp
+	tar czf omd/packages/mk-livestatus/mk-livestatus-$(VERSION).tar.gz $(TAROPTS) mk-livestatus-$(VERSION)
+	rm -rf mk-livestatus-$(VERSION)
+
+version:
+	[ "$$(head -c 6 /etc/issue)" = "Ubuntu" \
+          -o "$$(head -c 16 /etc/issue)" = "Debian GNU/Linux" ] \
+          || { echo 'You are not on the reference system!' ; exit 1; }
+	@newversion=$$(dialog --stdout --inputbox "New Version:" 0 0 "$(VERSION)") ; \
+	if [ -n "$$newversion" ] ; then $(MAKE) NEW_VERSION=$$newversion setversion ; fi
+
+setversion:
+	$(MAKE) -C omd NEW_VERSION=$(NEW_VERSION) setversion
+	sed -ri 's/^(VERSION[[:space:]]*:?= *).*/\1'"$(NEW_VERSION)/" defines.make ; \
+	sed -i 's/^AC_INIT.*/AC_INIT([MK Livestatus], ['"$(NEW_VERSION)"'], [mk@mathias-kettner.de])/' configure.ac ; \
+	sed -i 's/^VERSION = ".*/VERSION = "$(NEW_VERSION)"/' bin/mkbackup ; \
+	sed -i 's/^__version__ = ".*"$$/__version__ = "$(NEW_VERSION)"/' cmk/utils/version.py bin/mkbench bin/livedump; \
+	$(MAKE) -C agents NEW_VERSION=$(NEW_VERSION) setversion
+	$(MAKE) -C docker NEW_VERSION=$(NEW_VERSION) setversion
+ifeq ($(ENTERPRISE),yes)
+	$(MAKE) -C enterprise NEW_VERSION=$(NEW_VERSION) setversion
+endif
+
+headers:
+	doc/helpers/headrify
 
 
-##########################################################################
+$(OPENAPI_SPEC): $(shell find cmk/gui/plugins/openapi $(wildcard cmk/gui/cee/plugins/openapi) -name "*.py")
+	@export PYTHONPATH=${REPO_PATH} ; \
+	export TMPFILE=$$(mktemp);  \
+	$(PIPENV) run python -m cmk.gui.openapi > $$TMPFILE && \
+	mv $$TMPFILE $@
 
-# This only works in a Git working commit, and assumes that the local Git
-# HEAD has already been pushed to the main repository. It's mainly useful
-# for the gPodder maintainer to quickly generate a commit link that can be
-# posted online in bug trackers and mailing lists.
 
-headlink:
-	@echo http://gpodder.org/commit/`git show-ref HEAD | head -c8`
+$(OPENAPI_DOC): $(OPENAPI_SPEC) node_modules/.bin/redoc-cli
+	node_modules/.bin/redoc-cli bundle -o $(OPENAPI_DOC) $(OPENAPI_SPEC) && \
+		sed -i 's/\s\+$$//' $(OPENAPI_DOC) && \
+		echo >> $(OPENAPI_DOC)  # fix trailing whitespaces and end of file newline
 
-##########################################################################
+openapi-clean:
+	rm -f $(OPENAPI_SPEC)
+openapi: $(OPENAPI_SPEC)
+openapi-doc: $(OPENAPI_DOC)
 
+
+optimize-images:
+	@if type pngcrush >/dev/null 2>&1; then \
+	    for F in $(PNG_FILES); do \
+	        echo "Optimizing $$F..." ; \
+	        pngcrush -q -rem alla -brute $$F $$F.opt ; \
+	        mv $$F.opt $$F; \
+	    done ; \
+	else \
+	    echo "Missing pngcrush, not optimizing images! (run \"make setup\" to fix this)" ; \
+	fi
+
+# TODO: The --unsafe-perm was added because the CI executes this as root during
+# tests and building versions. Once we have the then build system this should not
+# be necessary anymore.
+#
+# NOTE 1: What we actually want are grouped targets, but this would require GNU
+# make >= 4.3, so we use the common workaround of an intermediate target.
+#
+# NOTE 2: NPM people have a totally braindead idea about reproducible builds
+# which almost all other people consider a bug, so we have to touch our target
+# files. Read https://github.com/npm/npm/issues/20439 and be amazed...
+#
+# NOTE 3: NPM sometimes terminates with a very unhelpful "npm ERR! cb() never
+# called!" message, where the underlying reason seems to be quite obscure, see
+# https://npm.community/t/crash-npm-err-cb-never-called/858.
+.INTERMEDIATE: .ran-npm
+node_modules/.bin/webpack: .ran-npm
+node_modules/.bin/redoc-cli: .ran-npm
+node_modules/.bin/prettier: .ran-npm
+.ran-npm: package.json package-lock.json
+	@echo "npm version: $$(npm --version)"
+	@echo "node version: $$(node --version)"
+	@echo "open file descriptor limit (soft): $$(ulimit -Sn)"
+	@echo "open file descriptor limit (hard): $$(ulimit -Hn)"
+	@if curl --silent --output /dev/null --head '${ARTIFACT_STORAGE}/#browse/browse:npm-proxy'; then \
+	    REGISTRY=--registry=${ARTIFACT_STORAGE}/repository/npm-proxy/ ; \
+            export SASS_BINARY_SITE='${ARTIFACT_STORAGE}/repository/archives/'; \
+	    echo "Installing from local registry ${ARTIFACT_STORAGE}" ; \
+	else \
+	    REGISTRY= ; \
+	    echo "Installing from public registry" ; \
+        fi ; \
+	npm install --audit=false --unsafe-perm $$REGISTRY
+	touch node_modules/.bin/webpack node_modules/.bin/redoc-cli node_modules/.bin/prettier
+
+# NOTE 1: Match anything patterns % cannot be used in intermediates. Therefore, we
+# list all targets separately.
+#
+# NOTE 2: For the touch command refer to the notes above.
+#
+# NOTE 3: The cma_facelift.scss target is used to generate a css file for the virtual
+# appliance. It is called from the cma git's makefile and the built css file is moved
+# to ~/git/cma/skel/usr/share/cma/webconf/htdocs/
+.INTERMEDIATE: .ran-webpack
+web/htdocs/js/main_min.js: .ran-webpack
+web/htdocs/js/side_min.js: .ran-webpack
+web/htdocs/js/mobile_min.js: .ran-webpack
+web/htdocs/themes/facelift/theme.css: .ran-webpack
+web/htdocs/themes/modern-dark/theme.css: .ran-webpack
+web/htdocs/themes/facelift/cma_facelift.css: .ran-webpack
+.ran-webpack: node_modules/.bin/webpack webpack.config.js postcss.config.js $(JAVASCRIPT_SOURCES) $(SCSS_SOURCES)
+	WEBPACK_MODE=$(WEBPACK_MODE) ENTERPRISE=$(ENTERPRISE) MANAGED=$(MANAGED) node_modules/.bin/webpack --mode=$(WEBPACK_MODE:quick=development)
+	touch web/htdocs/js/*_min.js web/htdocs/themes/*/theme.css
+
+# TODO(sp) The target below is not correct, we should not e.g. remove any stuff
+# which is needed to run configure, this should live in a separate target. In
+# fact, we should really clean up all this cleaning-chaos and finally follow the
+# GNU standards here (see "Standard Targets for Users",
+# https://www.gnu.org/prep/standards/html_node/Standard-Targets.html).
 clean:
-	$(PYTHON) setup.py clean
-	find src/ '(' -name '*.pyc' -o -name '*.pyo' ')' -exec rm '{}' +
-	find src/ -type d -name '__pycache__' -exec rm -r '{}' +
-	find share/gpodder/ui/ -name '*.ui.h' -exec rm '{}' +
-	rm -f MANIFEST .coverage messages.mo po/*.mo
-	rm -f $(GPODDER_SERVICE_FILE)
-	rm -f $(DESKTOP_FILES) $(DESKTOP_FILES_IN_H)
-	rm -rf build $(LOCALEDIR)
+	$(MAKE) -C omd clean
+	rm -rf clang-analyzer dist.tmp rpm.topdir *.rpm *.deb *.exe \
+	       omd/packages/mk-livestatus/mk-livestatus-*.tar.gz \
+	       $(NAME)-*.tar.gz *~ counters autochecks \
+	       precompiled cache web/htdocs/js/*_min.js \
+	       web/htdocs/themes/*/theme.css \
+	       .werks/werks \
+	       ChangeLog
 
-distclean: clean
-	rm -rf dist
+mrproper:
+	git clean -d --force -x \
+	    --exclude="**/.vscode" \
+	    --exclude="**/.idea" \
+	    --exclude=".werks/.last" \
+	    --exclude=".werks/.my_ids"
 
-##########################################################################
+mrclean:
+	git clean -d --force -x \
+	    --exclude="**/.vscode" \
+	    --exclude="**/.idea"  \
+	    --exclude=".werks/.last" \
+	    --exclude=".werks/.my_ids" \
+	    --exclude=".venv" \
+	    --exclude=".venv.lock" \
+	    --exclude="livestatus/src/doc/plantuml.jar" \
+	    --exclude="enterprise/core/src/doc/plantuml.jar"
 
-.PHONY: help unittest release releasetest install manpages clean distclean messages headlink lint revbump
+setup:
+# librrd-dev is still needed by the python rrd package we build in our virtual environment
+	sudo apt-get install \
+	    aptitude \
+	    autoconf \
+	    bear \
+	    build-essential \
+	    clang-$(CLANG_VERSION) \
+	    clang-format-$(CLANG_VERSION) \
+	    clang-tidy-$(CLANG_VERSION) \
+	    clang-tools-$(CLANG_VERSION) \
+	    clangd-$(CLANG_VERSION) \
+	    lld-$(CLANG_VERSION) \
+	    lldb-$(CLANG_VERSION) \
+	    libclang-$(CLANG_VERSION)-dev \
+	    curl \
+	    libjpeg-dev \
+	    doxygen \
+	    figlet \
+	    g++ \
+	    libpcap-dev \
+	    librrd-dev \
+	    libxml2-dev \
+	    libpango1.0-dev \
+	    libsasl2-dev \
+	    libldap2-dev \
+	    libkrb5-dev \
+	    libmariadb-dev-compat \
+	    pngcrush \
+	    valgrind \
+	    shellcheck \
+	    direnv \
+	    python3-pip \
+	    python3.8-dev \
+	    python-setuptools \
+	    chrpath \
+	    enchant \
+	    ksh \
+	    p7zip-full \
+	    zlib1g-dev
+	sudo -H pip3 install -U pipenv wheel
+	$(MAKE) -C web setup
+	$(MAKE) -C omd setup
+	$(MAKE) -C omd openhardwaremonitor-setup
+	$(MAKE) -C docker setup
+	$(MAKE) -C locale setup
 
-##########################################################################
+linesofcode:
+	@wc -l $$(find -type f -name "*.py" -o -name "*.js" -o -name "*.cc" -o -name "*.h" -o -name "*.css" | grep -v openhardwaremonitor | grep -v jquery | grep -v livestatus/src ) | sort -n
+
+ar-lib compile config.guess config.sub install-sh missing depcomp: configure.ac
+	autoreconf --install --include=m4
+	touch ar-lib compile config.guess config.sub install-sh missing depcomp
+
+# TODO(sp): We should really detect and use our own packages in a less hacky way...
+config.status: $(CONFIG_DEPS)
+	@echo "Build $@ (newer targets: $?)"
+	@if test -f config.status; then \
+	  echo "update config.status by reconfiguring in the same conditions" ; \
+	  ./config.status --recheck; \
+	else \
+	  if test -d "omd/rrdtool-$(RRDTOOL_VERS)/src/.libs"; then \
+	    RRD_OPT="LDFLAGS=-L$(realpath omd/rrdtool-$(RRDTOOL_VERS)/src/.libs)" ; \
+	  else \
+	    RRD_OPT="DUMMY2=" ; \
+	  fi ; \
+	  if test -d ../re2/destdir ; then \
+	    RE2_OPT="--with-re2=$(abspath ../re2/destdir)" ; \
+	  elif test -d omd/packages/re2/destdir ; then \
+	    RE2_OPT="--with-re2=$(abspath omd/packages/re2/destdir)" ; \
+	  else \
+	    RE2_OPT="DUMMY3=" ; \
+	  fi ; \
+	  echo "configure CXXFLAGS=\"$(CXX_FLAGS)\" \"$$RRD_OPT\" \"$$RE2_OPT\"" ; \
+	  ./configure CXXFLAGS="$(CXX_FLAGS)" "$$RRD_OPT" "$$RE2_OPT" ; \
+	fi
+
+configure: $(CONFIGURE_DEPS)
+	autoconf
+
+aclocal.m4: $(M4_DEPS)
+	aclocal
+
+config.h.in: $(CONFIGURE_DEPS)
+	autoheader
+	rm -f stamp-h1
+	touch $@
+
+config.h: stamp-h1
+	@test -f $@ || rm -f stamp-h1
+	@test -f $@ || $(MAKE) stamp-h1
+
+stamp-h1: config.h.in config.status
+	@rm -f stamp-h1
+	./config.status config.h
+
+GTAGS: config.h
+# automake generates "gtags -i ...", but incremental updates seem to be a bit
+# fragile, so let's start from scratch, gtags is quite fast.
+	$(RM) GTAGS GRTAGS GSYMS GPATH
+# Note: Even if we descend into livestatus, gtags is run on the top level (next
+# to configure.ac).
+	$(MAKE) -C livestatus GTAGS
+
+compile-neb-cmc: config.status
+	$(MAKE) -C livestatus -j4
+ifeq ($(ENTERPRISE),yes)
+	$(MAKE) -C enterprise/core -j4
+endif
+
+compile-neb-cmc-docker:
+	scripts/run-in-docker.sh make compile-neb-cmc
+
+tidy: config.h
+	$(MAKE) -C livestatus/src tidy
+ifeq ($(ENTERPRISE),yes)
+	$(MAKE) -C enterprise/core/src tidy
+endif
+
+iwyu: config.status
+	$(MAKE) -C livestatus/src iwyu
+ifeq ($(ENTERPRISE),yes)
+	$(MAKE) -C enterprise/core/src iwyu
+endif
+
+# Not really perfect rules, but better than nothing
+analyze: config.h
+	$(MAKE) -C livestatus clean
+	cd livestatus && $(SCAN_BUILD) -o ../clang-analyzer $(MAKE) CXXFLAGS="-std=c++17"
+
+format: format-python format-c format-shell format-js format-css
+
+# TODO: We should probably handle this rule via AM_EXTRA_RECURSIVE_TARGETS in
+# src/configure.ac, but this needs at least automake-1.13, which in turn is only
+# available from e.g. Ubuntu Saucy (13) onwards, so some magic is needed.
+format-c:
+	$(CLANG_FORMAT) -style=file -i $(FILES_TO_FORMAT_LINUX)
+
+format-python:
+# Explicitly specify --style [FILE] to prevent costly searching in parent directories
+# for each file specified via command line
+#
+# Saw some mixed up lines on stdout after adding the --parallel option. Leaving it on
+# for the moment to get the performance boost this option brings.
+	if test -z "$$PYTHON_FILES"; then ./scripts/find-python-files; else echo "$$PYTHON_FILES"; fi | \
+	xargs -n 1500 $(PIPENV) run yapf --parallel --style .style.yapf --verbose -i
 
 
+format-shell:
+	$(MAKE)	-C tests format-shell
+
+what-gerrit-makes:
+	$(MAKE)	-C tests what-gerrit-makes
+
+format-js:
+	scripts/run-prettier --no-color --ignore-path ./.prettierignore --write "{enterprise/,}web/htdocs/js/**/*.js"
+
+format-css:
+	scripts/run-prettier --no-color --ignore-path ./.prettierignore --write "web/htdocs/themes/**/*.scss"
+
+# Note: You need the doxygen and graphviz packages.
+documentation: config.h
+	$(MAKE) -C livestatus/src documentation
+ifeq ($(ENTERPRISE),yes)
+	$(MAKE) -C enterprise/core/src documentation
+endif
+
+documentation-quick: config.h
+	$(MAKE) -C livestatus/src documentation-quick
+ifeq ($(ENTERPRISE),yes)
+	$(MAKE) -C enterprise/core/src documentation-quick
+endif
+
+sw-documentation-docker:
+	scripts/run-in-docker.sh scripts/run-pipenv run make -C doc/documentation html
+
+# TODO: pipenv and make don't really cooperate nicely: Locking alone already
+# creates a virtual environment with setuptools/pip/wheel. This could lead to a
+# wrong up-to-date status of it later, so let's remove it here. What we really
+# want is a check if the contents of .venv match the contents of Pipfile.lock.
+# We should do this via some move-if-change Kung Fu, but for now rm suffices.
+Pipfile.lock: Pipfile
+	@( \
+	    echo "Locking Python requirements..." ; \
+	    flock $(LOCK_FD); \
+	    SKIP_MAKEFILE_CALL=1 $(PIPENV) lock; RC=$$? ; \
+	    rm -rf .venv ; \
+	    exit $$RC \
+	) $(LOCK_FD)>$(LOCK_PATH)
+
+# Remake .venv everytime Pipfile or Pipfile.lock are updated. Using the 'sync'
+# mode installs the dependencies exactly as speciefied in the Pipfile.lock.
+# This is extremely fast since the dependencies do not have to be resolved.
+# Cleanup partially created pipenv. This makes us able to automatically repair
+# broken virtual environments which may have been caused by network issues.
+.venv: Pipfile.lock
+	@( \
+	    echo "Creating .venv..." ; \
+	    flock $(LOCK_FD); \
+	    $(RM) -r .venv; \
+	    ( SKIP_MAKEFILE_CALL=1 $(PIPENV) sync --dev && touch .venv ) || ( $(RM) -r .venv ; exit 1 ) \
+	) $(LOCK_FD)>$(LOCK_PATH)
+
+# This dummy rule is called from subdirectories whenever one of the
+# top-level Makefile's dependencies must be updated.  It does not
+# need to depend on %MAKEFILE% because GNU make will always make sure
+# %MAKEFILE% is updated before considering the am--refresh target.
+am--refresh: config.status
+	./config.status

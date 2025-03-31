@@ -1,0 +1,27 @@
+title: Job Monitoring
+agents: linux, aix, solaris
+catalog: os/services
+license: GPL
+distribution: check_mk
+description:
+ This check monitors state and performance information of any program
+ call, for example regular running cronjobs on Linux, AIX or Solaris.
+
+ The check uses information provided by the wrapper program {mk-job} and is {CRITICAL} if the exit code of the job is not {0}, or if
+ warning or critical limits for the job age have been reached. Other mappings
+ of exit code to check state can be defined in the check parameters.
+
+ Limits can be configured with WATO.
+
+ This check is also cluster-aware and worst or best state is configurable.
+ Default is worst state.
+
+item:
+ The identifier of the job defined by the first argument to {mk-job}.
+
+discovery:
+ One service is created for each job.
+
+cluster:
+  The outcome on a cluster can be configured to be either the worst, or the
+  best state encountered for every job.

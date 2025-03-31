@@ -1,0 +1,28 @@
+title: MS SQL Database: Properties
+agents: windows
+catalog: app/mssql
+license: GPL
+distribution: check_mk
+description:
+ This check monitors status, recovery, auto close and -shrink
+ states of MSSQL databases reported by MSSQL.
+
+ Default configuration for auto close and -shrink is:
+
+ - on is CRIT
+
+ - off if OK
+
+ These states are configurable.
+
+item:
+ The MSSQL database identifier.
+
+discovery:
+ One service is created for each database.
+
+cluster:
+ On a cluster all databases found on the nodes are checked. Note one nodes
+ data may overwrite another ones, if the item is the same. In this case you
+ will be monitoring only the node that occures latest in the list of clustered
+ nodes.

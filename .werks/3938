@@ -1,0 +1,12 @@
+Title: tactical overview: fixed wrong display of number of host/service problems
+Level: 1
+Component: multisite
+Compatible: compat
+Version: 1.4.0i3
+Date: 1478503370
+Class: fix
+
+The display number was not the number of problems, but the number of stale
+entries - which is most times 0. This had recently been introduced and
+is not fixed again.
+

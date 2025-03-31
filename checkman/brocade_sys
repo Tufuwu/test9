@@ -1,0 +1,10 @@
+title: Brocade FibreChannel Switches: CPU
+catalog: hw/network/brocade
+agents: snmp
+license: GPL
+distribution: check_mk
+description:
+ This checks monitors the CPU utilization.
+
+discovery:
+ One service is created for each device.

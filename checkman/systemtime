@@ -1,0 +1,24 @@
+title: Synchronization of Operating System Time
+agents: windows
+catalog: os/misc
+license: GPL
+distribution: check_mk
+description:
+ This check is a simple check of the correct setting of the current
+ system time of the target host. It simply compares the local time
+ on the monitoring server with that measured by the agent on the
+ target host. It is not very accurate since it does not account for
+ the systematic time delay between the output of the time by the agent
+ and the actual processing of that data by Checkmk.
+
+ Its advantage - however - is that it works on any Windows host (with
+ an agent of version of 1.1.10 or later) - regardless of the method used
+ to synchronize the time.
+
+ Levels can be set for making the check warn/crit if the time difference
+ exceeds the configured limits.
+
+discovery:
+ One service is created for each host supporting this check.
+ Currently this is the windows agent in version 1.1.10 or later.
+

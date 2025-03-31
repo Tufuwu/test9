@@ -1,0 +1,10 @@
+Title: msexch_autodiscovery: Fixed WMI time handling if frequency is empty which caused a ValueError
+Level: 1
+Component: checks
+Compatible: compat
+Edition: cre
+Version: 2.0.0i1
+Date: 1560340280
+Class: fix
+
+

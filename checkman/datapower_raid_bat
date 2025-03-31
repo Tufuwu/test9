@@ -1,0 +1,16 @@
+title: IBM Datapower: Raid Battery
+agents: snmp
+catalog: hw/network/ibm
+license: GPL
+distribution: check_mk
+description:
+ This check monitors the state of the battery of the RAID controller of IBMs
+ Datapower Gateways supporting the DATAPOWER-STATUS-MIB. The check reads
+ the battery state, its type and serial number. The state of the service is
+ derived from the battery states given by the device with a mapping.
+
+item:
+ The ID of the RAID controller.
+
+discovery:
+ One service is created for every RAID controller on each gateway.

@@ -1,0 +1,61 @@
+title: Disk Throughput
+agents: linux, freebsd
+catalog: os/storage
+license: GPL
+distribution: check_mk
+description:
+
+ This check measures the throughput of block devices (disks) on Linux
+ hosts. You can either have a single check for every single disk
+ or a summary check (which is the default) summing up the throughput
+ of all disks.
+
+ For legacy reasons it is also possible (but not advisable) to have all disks
+ summarized but with a separate check for read and write (this is how this
+ check worked up to version 1.1.10).
+
+ The check also gives info on the IO latency and IOPS (unmerged) aquired
+ from the kernels information in /proc.
+
+ You can apply separate warning and critical levels for the read
+ and write throughput. Optionally you can have the check compute
+ average values on a configurable time period and have the levels
+ applied on the average instead of the current values. This makes
+ it possible to ignore short "peaks" and only trigger and longer
+ phases of high disk activity.
+
+ Averaging is not applied to IO latency calculations.
+
+ The check has to provide many ways of configuration for legacy reasons.
+ We strongly recommend you switch to the rule-based configuration, which
+ handles anything you want it to.
+
+ In single disk mode the check now also supports being used in a Checkmk
+ cluster environment. In this case it goes to CRIT if it finds more than
+ one disk item in the cluster. If it finds only one disk item, it also prints
+ the node name the disk was found on.
+
+ SUMMARY and legacy read/write modes are not supported in a cluster
+ configuration.  The check goes to UNKNOWN and prints an appropriate message
+ if configured like that.
+
+item:
+ Either {"SUMMARY"} for a summarized check of all disks or the name of the
+ disk device, e.g. {"sda"}. Additionally also one service per logical volume
+ defined in Linux LVM and Veritas VxVM on Linux.
+
+ In order to support configurations
+ up to version 1.1.10 also the items {"read"} and {"write"} are supported.
+
+
+discovery:
+  One service is created for each disk if the configuration is set to {"single"}.
+  If the configuration is set to {"summary"} one service is created for each host.
+  If set to {"legacy"} then two services one for read and one for write
+  is created (deprecated).
+  The inventory is configured via {diskstat_inventory_mode}.
+
+cluster:
+  If configured for clustering, every service will sum up the measurements
+  for disks with the same name.
+

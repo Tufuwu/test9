@@ -1,0 +1,11 @@
+Title: Availability annotations are also rendered in PDF reporting now
+Level: 1
+Component: reporting
+Class: feature
+Compatible: compat
+Edition: cee
+State: unknown
+Version: 1.5.0i1
+Date: 1484045171
+
+In the reports of availability the annotations where missing. This has been fixed now.

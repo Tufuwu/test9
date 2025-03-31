@@ -1,0 +1,10 @@
+Title: Servicenow: Added missing proxy option
+Level: 1
+Component: notifications
+Class: feature
+Compatible: compat
+Edition: cee
+Version: 1.6.0b3
+Date: 1562153271
+
+You can now use the globally configured proxies.

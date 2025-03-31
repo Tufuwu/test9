@@ -1,0 +1,295 @@
+# Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+# This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+# conditions defined in the file COPYING, which is part of this source code package.
+
+
+#
+# Default Check MK configuration file
+#
+
+# $CUSTOM_PLUGINS_PATH$  -> is ProgramData/checkmk/agent/plugins
+# $BUILTIN_PLUGINS_PATH$ -> is Program Files(x86)/checkmk/service/plugins
+# $CUSTOM_AGENT_PATH$    -> is ProgramData/checkmk/agent/
+# $CUSTOM_LOCAL_PATH$    -> is ProgramData/checkmk/agent/local
+
+# 1. use http://www.yamllint.com/ for example to validate your yamllint
+# 2. Windows filenames may contain backslash \, ergo you have to write either "c:\\windows" or 'c:\windows' 
+
+global:
+    # section may be fully disabled
+    enabled: yes
+
+    # Restrict access to certain IP addresses
+    # If ipv6 is enabled, all listed ipv4 adresses are also accepted as
+    # source adresses in their ipv6-mapped form. I.e. if
+    # 192.168.56.0/24 is listed, connections from ::ffff:c0a8:3800/120
+    # are also possible
+    only_from: # 127.0.0.1 192.168.56.0/24 ::1
+
+    # Change port where the agent is listening ( default 6556 )
+    port: 6556
+
+    # Disable ipv6 support. By default, ipv4 is always supported
+    # and ipv6 is enabled additionally if supported by the system.
+    ipv6: no
+
+    # encryption
+    encrypted: no
+
+    # password
+    passphrase: secret
+
+    # Allowed file extensions. The agent launches the program(script) only 
+    # when its extension is on the list of allowed ones. 
+    execute: [exe, bat, vbs, cmd, ps1] # Supported: vbs, ps1, py, pl, exe, cmd, bat
+
+    # Run sync scripts in parallel (to each other). Default is "async"
+    async: yes
+
+    # Determines behavior of the Agent when plugin file is Access Denied on installation
+    try_kill_plugin_process: safe # allowed safe, all, no # safe is lmited to few exe from the build
+
+    # Just output certain sections
+    # Output order is random with exception check_mk, always first and systemtime, always last`
+    sections: 
+        - check_mk 
+        - mrpe 
+        - skype 
+        - spool 
+        - plugins
+        - local
+        - winperf 
+        - uptime 
+        - systemtime 
+        - df 
+        - mem 
+        - services 
+        - msexch
+        - dotnet_clrmemory
+        - wmi_webservices
+        - wmi_cpuload
+        - ps 
+        - fileinfo 
+        - logwatch 
+        - openhardwaremonitor 
+    
+    # sections to be skipped
+    disabled_sections: []
+
+    #realtime data
+    realtime:
+        # by default we do not send realtime data to server
+        enabled: no
+
+        # specifies how long (in seconds) realtime updates are sent to
+        # the last monitoring system that requested an update.
+        # this should be longer than the request frequency (usually
+        # one minute).
+        # Please note that any new request cancels previous realtime
+        # update schedules, so no more than one update is sent per second,
+        # no matter if this timeout is "too high" or how many monitoring
+        # systems are querying the agent.
+        timeout: 90
+
+        # Default port for realtime data
+        port: 6559
+
+        # enable/disable encryption of regular agent output (default: disabled) 
+        # yes or no
+        encrypted: no
+
+        # passphrase for encrypted communication.
+        passphrase: this is my password
+
+        # which sections are provided in realtime
+        run: [mem, df, winperf_processor]
+
+    # Windows may be slow during WMI, increase the value when you have problems
+    # In seconds 
+    wmi_timeout: 5 
+
+    # Internal log of agent
+    # Write a logfile for tackling down crashes of the agent
+    logging:
+        # folder with log file, empty is default which means '$CUSTOM_AGENT_PATH$\log'
+        location: 
+        # name of file log, default(if file value is absent) is check_mk.log
+        file : 
+
+        # log in file also internal debug messages, recommended when we have problems
+        # Allowed: no, yes and all. Default: yes, this is different from the Legacy Agent settings
+        debug: yes
+
+        # you may send logging messages in realtime in windows debug sink, default is yes
+        windbg: yes
+
+        # you may disable your eventlog ability
+        eventlog: yes
+
+ps:
+    enabled: yes
+    # This is required for the additional ps feature below.
+    use_wmi: yes
+    # Include the whole path of a process and its arguments in the process list.
+    full_path: no
+
+winperf:
+    enabled: yes
+
+    # default value,  do not change it if do not know what are you douing
+    exe: agent
+
+    # no - nothing(default), yes output trace to the log/winperf.log
+    trace: no
+
+    # yes - separate process for winnperf to prevent ahndle leaking, no - locally
+    fork: yes
+    
+    # changes only section name winperf_******
+    prefix: winperf
+
+    # default value,  increase for heavy loaded machine
+    timeout: 10
+    
+    # Select counters to extract. The following counters
+    # are needed by checks shipped with check_mk.
+    # Format:
+    # - id:name
+    # where id is OS counter and name is part of CHECK_MK Header 
+    counters:
+        - 234: phydisk
+        - 510: if
+        - 238: processor
+
+_logfiles:
+    enabled: no
+    # Define textfiles to be monitored
+    # We do not support logfiles monitoring in agent at the moment
+    # Please, use plugin mk_logwatch
+
+fileinfo:
+    enabled: yes
+    path: []
+
+logwatch:
+    enabled: yes
+    
+    sendall: no   # this value is MANDATORY, yes is useful only for debugging
+    vista_api: no # this is RECOMMENDED
+    max_size: 500000 #
+    max_line_length: -1 # -1 to ignore, or any positive, max lingth of the line
+    max_entries: -1     # -1 to ignore, or any positive, max count to receive
+    timeout: -1         # -1 to ignore, or any positive, in seconds
+
+    logfile: # entries in the windows eventlog
+        - 'Parameters': ignore
+        - 'State': ignore
+        - '*': warn nocontext # This is default params for not missing entries
+
+plugins:
+    enabled: yes
+
+    player: ''   # internal value, do not change this
+
+    max_wait: 60 # max timeout for every sync plugin. Agen will gather plugins data no more than max_wait time.
+                 # this is useful to terminate badly written or hanging plugins   
+
+
+    async_start: yes # start plugins asynchronous, this is default
+
+    # folders are scanned left -> right, order is important
+    # duplicated files will be removed
+    folders: ['$CUSTOM_PLUGINS_PATH$', '$BUILTIN_PLUGINS_PATH$' ]       # ProgramData/checkmk/agent/plugins & Program Files x86/check/service/plugins
+
+    # what to execute    
+    execution:
+        - pattern     : '$CUSTOM_PLUGINS_PATH$\cmk-update-agent.exe'    # since 2.0 not possible to use exe, only checkmk.py
+          run         : no                                              # 
+
+        # Default behavior as in 1.5
+        - pattern     : '$CUSTOM_PLUGINS_PATH$\*.*'         # Look for executable files in the ProgramData folder. 
+          timeout     : 60                  # in seconds, after expiring timeout, process will be killed.
+          run         : yes                 # ALL FOUND files ARE ENABLED
+
+        - pattern     : '$BUILTIN_PLUGINS_PATH$\*.*'         # Look for files in the ProgramFiles folder.
+          timeout     : 60                  # in seconds, after expiring timeout, process will be killed.
+          run         : no                  # ALL FOUND files ARE DISABLED
+
+        - pattern     : '*'                 # This is safety entry. 
+          run         : no                  # ALL other FOUND files ARE DISABLED TOO.
+
+# The same as plugins with same parameters
+# But: used folder local
+local:
+    # scripts in plugin
+    enabled: yes
+
+    player: ''   # default value
+
+    max_wait: 60 # max timeout for every sync plugin. Agent will gather plugins data no more than max_wait time.
+                 # this is useful to terminate badly written or hanging plugins   
+
+
+    async_start: true # start plugins asynchronous, this is default 
+
+    execution:
+        # all parameters below are DEFAULT set for every entry
+
+        - pattern     : '*.*'           # in the local folder.
+          timeout     : 60              # in seconds, after expiring timeout all processes matching the pattern will be killed.
+          run         : yes             # ALL FOUND files ARE ENABLEDr
+
+
+mrpe:
+    enabled: yes
+
+    # Allows to run MRPE scripts in parallel, this parameter is intended only
+    # for experienced users and developers.
+    parallel: no
+
+    # 60 is default, this is safe value, because mrpe checks are relative fast ->
+    # hitting this timeout is virtually not possible
+    timeout: 60
+
+    # entries and cfg have  the same format as in the Legacy agent
+    config:
+        # - check = Console 'c:\windows\system32\mode.com' CON CP /STATUS
+        # - check = Checker (100:yes) 'c:\windows\system32\mode.com' # Description (max_age:add_info) command line
+        # - include user_name = $CUSTOM_AGENT_PATH$\mrpe_checks.cfg
+        # - include = $CUSTOM_AGENT_PATH$\mrpe_checks.cfg
+
+
+modules:
+    enabled: yes
+
+    python: auto                          # allowed auto or system, system prevents module usage to execute *.py files
+
+    quick_reinstall: yes                  # use %temp% as temporary storage for modules when Windows agent is updated
+
+    table:
+        - name: 'python-3.8'              # this is name of the zip file and folder where  zip is installed to
+          exts: ['.checkmk.py', '.py' ]   # list of extensions to be used automatically
+          exec: '.venv\Scripts\python.exe {}'   # command line, exe is relative to folder modules
+    
+
+system:
+    enabled: yes
+
+    firewall:
+        mode: configure # allowed none, remove, configure
+        port: auto      # allowed all or auto
+
+
+    cleanup_uninstall: smart # allowed none, smart and all
+
+    wait_network: 30
+
+    service:
+        restart_on_crash: yes  # service will restart if crashed, you may set no to disable restarting
+                               # no may be used if you have serious problems with crasghing and starting
+        error_mode: log        # ignore or log
+        start_mode: auto       # Possible values are: auto - service starts with boot, demand - requires manual starting
+                               # delayed - serice started automatically(delayed)
+                               # disabled - service cannot be started manually and should be enabled
+
+

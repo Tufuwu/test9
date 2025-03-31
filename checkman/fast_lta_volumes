@@ -1,0 +1,19 @@
+title: FAST LTA Storage Systems: Capacity of Volumes
+agents: snmp
+catalog: hw/storagehw/fastlta
+license: GPL
+distribution: check_mk
+description:
+ Displays the total / used capacity for volumes of FAST LTA Storage Systems.
+
+ Returns {WARN} or {CRIT} if usage is above given levels.
+
+ It uses the check logic of the {df} check, so for configuration
+ parameters and examples please refer to the man page of {df}.
+
+item:
+ The volumeID as returned by SNMP.
+
+discovery:
+ One service is created for each volume on a FAST LTA Storage System.
+

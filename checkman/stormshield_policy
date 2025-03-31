@@ -1,0 +1,17 @@
+title: Stormshield: Policies Sync
+agents: snmp
+catalog: app/stormshield
+license: GPL
+distribution: check_mk
+description:
+ This check uses the {STORMSHIELD-POLICY-MIB} for checking if the policies sync
+ on your Stormshield-firewall is working.
+
+ Depending on the sync-state of the device the servoce can
+ be {OK}, {CRIT} or {UNKNOWN}.
+
+item:
+ The name of the policy
+
+discovery:
+ One service is created for each policy.

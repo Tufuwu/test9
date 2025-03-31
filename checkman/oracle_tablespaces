@@ -1,0 +1,55 @@
+title: Oracle Tablespaces: General Information
+agents: linux, hpux, solaris, windows
+catalog: app/oracle
+license: GPL
+distribution: check_mk
+description:
+ This check monitors the state of Oracle tablespaces. It
+ checks the current and maximum size, the online state
+ and the autoextension and optionally the setting of
+ the increment size.
+
+ {Autoextension}: During inventory the autoextension setting is determined
+ and remembered for later.  That means that if the auto extension setting
+ changes later, the check will get critical. A table space may consist of
+ several data files with different settings.  If at least one data file
+ has auto extension turned on, the table space is considered to have auto
+ extension turned on. The behaviour of autoextension setting can be configured
+ with a check parameter.
+
+ {Increment size}: If the configuration parameter
+ {oracle_tablespaces_check_default_increment} is set to
+ {True} (which is the default), then the check will warn
+ you, if the increment size is set to the Oracle default
+ value of {1} (which is generally considered as a non-optimal
+ setting).
+
+ {State}: Only table spaces in state {ONLINE} and {READONLY}
+ will be found by inventory and monitored. If the state changes
+ later, the check will {not} get critical. The state will
+ just be displayed. We assume that state changes are due
+ to normal operations.
+
+ {Size}: The logic of the size check depends on whether
+ autoextend is on or off. If auto extension is on, then
+ the still possible extensions are accounted for as free
+ spaces as well as the space currently free in the
+ data files. If auto extension is off, only the currently
+ free space will be honored. Table spaces in state {READONLY}
+ will {not} be checked for the size.
+
+ {temptablespace}: Ignore temporary Tablespace by default. This
+ can be changed when this parameter is True.
+
+ This check needs the Checkmk {mk_oracle}-plugin installed in
+ the agent. Please refer to the online documentation
+ for how to install that plugin.
+
+item:
+ The SID and the tablespace name, separated by a dot, for example {"pengt.TEMP"}.
+
+discovery:
+ One service is created for each tablespace which is {ONLINE}, {READONLY} or {OFFLINE}.
+
+cluster:
+ In case a cluster is configured, the node with the most data files will be checked.

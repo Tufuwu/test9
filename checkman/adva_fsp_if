@@ -1,0 +1,36 @@
+title: Adva FSP 3000 Optical Transport: Optical Interface Status
+catalog: hw/network/adva
+agents: snmp
+license: GPL
+distribution: check_mk
+description:
+ This checks monitors
+
+ - the state
+
+ - laser parameters
+
+ of interfaces of the ADVA FSP 3000 scalable optical transport solution.
+
+ Lower and upper critical limits can be configured for the input (received)
+ and output (transmit) power of the laser. Per default, not limits are imposed,
+ since meaningful values depend on the type of interface.
+
+ The service goes {WARN} if no laser power information can be found.
+ The service goes {CRIT} if the value is outside the user-defined limits.
+
+ Service interfaces (item name beginning with "S") do not have laser power
+ information, so that non-existent laser power information is ignored for these
+ interfaces.
+
+ The check uses the IF-MIB for state ({ifAdminStatus} and {ifOperStatus}).
+ The check uses the FspR7-MIB for laser parameters
+ ({currentPmSnapshotOutputPower} and {currentPmSnapshotInputPower}).
+
+item:
+ Either the interface description {ifDescr} if it is non-empty or otherwise
+ the interface index {ifIndex}.
+
+discovery:
+ One service is created for each interface whose administrative state is "up"
+ and whose type is 1, 6 or 56.

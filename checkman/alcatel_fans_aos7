@@ -1,0 +1,37 @@
+title: Alcatel Switches (>=AOS7): Fan Status
+agents: snmp
+catalog: hw/network/alcatel
+license: GPL
+distribution: check_mk
+description:
+
+  This check monitors all fans of the following Alcatel switches
+  running the specified operating system release versions:
+
+ - OmniSwitch 6860E-P48: AOS 8.2.1.351.R01 Service Release
+
+ - OmniSwitch 6900-X20: AOS 7.3.4.310.R02 Service Release
+
+ - OmniSwitch 6900-T40: AOS 8.4.1.233.R02 Service Release
+
+ - OmniSwitch 10K: AOS 8.3.1.377.R01 Service Release
+
+ The service is {OK} if the fan state is "running".
+
+ In all other cases
+
+ - "not running"
+
+ - "has no status"
+
+ the service goes {CRIT}.
+
+ The status is automatically reported by the device, so no configuration is needed
+
+ The check uses the ALCATEL-IND1-CHASSIS-MIB.
+
+item:
+ Number of the fan based on the order in info entries
+
+discovery:
+ One service is created for each fan

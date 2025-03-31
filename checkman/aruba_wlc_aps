@@ -1,0 +1,32 @@
+title: Aruba Networks Wireless LAN Controller (WLC): Connected WLAN Accesspoints
+agents: snmp
+catalog: hw/network/aruba
+license: GPL
+distribution: check_mk
+description:
+ This check monitors
+
+ - the state
+
+ - the accespoint group
+
+ - the system location
+
+ of an Aruba Networks WLAN Controller Accesspoint.
+
+ The service goes
+
+ - {CRIT} if an accesspoint goes down
+
+ - {WARN} if the accespoint is inactive
+
+ - {OK} in all other cases
+
+ The check uses the WLSX-SYSTEMEXT-MIB
+
+item:
+ The WLAN accesspoint name.
+
+discovery:
+ One service is created for each provisioned access point.
+

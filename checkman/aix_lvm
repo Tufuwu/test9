@@ -1,0 +1,28 @@
+title: AIX: Mirror State of LVM Logical Volumes
+agents: aix
+catalog: os/storage
+license: GPL
+distribution: check_mk
+description:
+ This check monitors the mirror state of LVM logical volumes in the
+ root volumegroup on AIX.
+
+ It makes sure that all logical volumes are in the the {open,syncd}
+ state then the service is {OK}.
+
+ The service goes {WARN} if
+
+ - a LV is in state {closed}
+ Exception: LVs of type {boot} are {OK} if they are in state {closed}
+
+ - it detects mirrored LVs with obvious allocation errors
+
+ The service goes {CRIT}
+
+ - if the volume state is not {syncd}.
+
+item:
+ The name path of the VG and LV (e.g. {"rootvg/hd10"}).
+
+discovery:
+ On service is created for each logical volume in rootvg.

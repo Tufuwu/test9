@@ -1,0 +1,11 @@
+title: Innovaphone Gateway: Port Licenses
+agents: special
+catalog: hw/network/innovaphone
+license: GPL
+distribution: check_mk
+description:
+ This Check monitors the total number of used port licenses.
+
+discovery:
+ One service is created.
+

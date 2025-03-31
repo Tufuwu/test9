@@ -1,0 +1,17 @@
+title: Ricoh Printer: Remaining Filling Level
+agents: snmp
+catalog: hw/printer
+license: GPL
+distribution: check_mk
+description:
+ This check monitors the remaining filling level in percent of a printers
+ supplys like toner or fuser.
+ The default check levels are 20% (warning) and 10% of the full level
+ (critical).
+
+item:
+ Name of the printer
+
+discovery:
+ One service is created for each supply unit with a unique name.
+

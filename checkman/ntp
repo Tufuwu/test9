@@ -1,0 +1,25 @@
+title: NTP Peers
+agents: linux
+catalog: os/services
+license: GPL
+distribution: check_mk
+description:
+ This check uses the output of {ntpq -p} as sent by the agent. It is
+ a list of all NTP peers with their state, stratum, offset and jitter.
+ The check gets critical if the time offset exceeds a configurable level,
+ if the stratum is too high or on othe error conditions. It gets UNKNOWN
+ if the peer is unreachable or has not answered for a long time.
+
+ Note: This check creates one individual service for each peer. It is useful
+ for monitoring the health of the peers. If you want to monitor only the
+ time of the NTP client, you might rather use {ntp.time}.
+
+item:
+ The name or IP address of the peer (first column in output of {ntpq -p}.
+
+discovery:
+ One service is created for each peer which has been contacted at least once
+ if in the rule {NTP Discovery} the mode is set to {"detailed"} or {"both"}.
+ One summary service of type {ntp.time} is created if the mode is
+ set to {"summary"}.
+

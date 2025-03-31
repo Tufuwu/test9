@@ -1,0 +1,15 @@
+title: Delta Energy Systems: Battery Test
+agents: snmp
+catalog: hw/environment/orion
+license: GPL
+distribution: check_mk
+description:
+ This check monitors the battery test result of
+ Delta Energy Systems devices which support the ORION-MIB.
+
+ The check is OK in case of 'none' and 'OK', it is WARN if
+ the test was 'aborted' and CRIT is reported in case of
+ 'failed' or 'load failure'.
+
+discovery:
+ One service is created.

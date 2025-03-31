@@ -1,223 +1,61 @@
-          ___         _    _           ____
-     __ _| _ \___  __| |__| |___ _ _  |__ /
-    / _` |  _/ _ \/ _` / _` / -_) '_|  |_ \
-    \__, |_| \___/\__,_\__,_\___|_|   |___/
-    |___/
-            Media aggregator and podcast client
-___
+# Checkmk - Your complete IT monitoring solution
 
-Copyright  2005-2018 The gPodder Team
+Checkmk is available in several editions. The Checkmk Raw Edition is free and
+100% open-source. The Checkmk Enterprise Edition includes several additional
+features and professional support from the authors, billed annually. A demo
+version is freely available for testing the Enterprise Edition in a
+non-production environment.
 
+Checkmk can be installed on Linux servers via DEB and RPM packages found on
+our [downloads page](https://checkmk.com/download.php). The Enterprise
+Edition is also available as a virtual or physical appliance. The following
+short installation guides show how you can easily set up Checkmk and begin
+monitoring.
 
-## License
+Please visit our [website](https://checkmk.com/) for more
+details.
 
-gPodder is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+## Getting started
 
-gPodder is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+Please have a look at the [beginners
+guide](https://docs.checkmk.com/master/en/intro.html) on how to get
+started with Checkmk.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+## Want to contribute?
 
-## Dependencies
+**Thank you for your interest in contributing to Checkmk! Unfortunately, due to our current work
+load, we can at the moment only consider pure bugfixes, sorry for that. Thus, any new pull request
+which is not a pure bugfix will be closed. Instead of creating a PR, please consider sharing new
+check plugins, agent plugins, special agents or notification plugins via the
+[Checkmk Exchange](https://exchange.checkmk.com/).**
 
-- [Python 3.5](http://python.org/) or newer
-- [Podcastparser](http://gpodder.org/podcastparser/) 0.6.0 or newer
-- [mygpoclient](http://gpodder.org/mygpoclient/) 1.7 or newer
-- [requests](https://requests.readthedocs.io) 2.24.0 or newer
-- Python D-Bus bindings
+For pure bugfixes, have a look at our [contribution guidelines](CONTRIBUTING.md).
+<!-- Nice! Have a look at our [contribution guidelines](CONTRIBUTING.md). -->
 
-As an alternative to python-dbus on Mac OS X and Windows, you can use
-the dummy (no-op) D-Bus module provided in "tools/fake-dbus-module/".
+## Building on your own packages
 
-For quick testing, you can use the script tools/localdepends.py to
-install local copies of podcastparser and mygpoclient into "src/" from
-PyPI. With this, you get a self-contained gPodder CLI codebase.
+It is highly recommended to use the prebuilt Checkmk packages we
+[provide](https://checkmk.com/download.php). But if you really want to
+build your own packages, you either need to download the source packages from
+our website or check out the [Git
+repository](https://github.com/tribe29/checkmk).
 
+To prepare your system for building, you need to execute this command:
 
-### GTK3 UI - Additional Dependencies
+    make -C omd setup
 
-- [PyGObject](https://wiki.gnome.org/PyGObject) 3.22.0 or newer
-- [GTK+3](https://www.gtk.org/) 3.10 or newer
+This will install the missing build dependencies, at least if you are working on
+a supported Linux distribution. Then you can either create RPM or DEB packages,
+depending on your Linux distribution.
 
+To build an RPM:
 
-### Optional Dependencies
+    make rpm
 
-- Bluetooth file sending: gnome-obex-send or bluetooth-sendto
-- Size detection on Windows: PyWin32
-- Native OS X support: ige-mac-integration
-- MP3 Player Sync Support: python-eyed3 (0.7 or newer)
-- iPod Sync Support: python-gpod
-- Clickable links in GTK UI show notes: html5lib
-- HTML show notes: WebKit2 gobject bindings
-    (webkit2gtk, webkitgtk4 or gir1.2-webkit2-4.0 packages).
-- Better Youtube support (> 15 entries in feeds, download audio-only): youtube_dl
+To create a DEB package:
 
+    DEBFULLNAME="Mr. Buildmaster" DEBEMAIL="mail@buildmaster.com" make deb
 
-### Build Dependencies
-
-- help2man
-- intltool
-
-
-### Test Dependencies
-
-- python-minimock
-- pytest
-- pytest-httpserver
-- pytest-cov
-- desktop-file-utils
-
-## Testing
-
-To run tests, use...
-
-    make unittest
-
-To set a specific python binary set PYTHON:
-
-    PYTHON=python3 make unittest
-
-Tests in gPodder are written in two different ways:
-
-- [doctests](http://docs.python.org/3/library/doctest.html)
-- [unittests](http://docs.python.org/3/library/unittest.html)
-
-If you want to add doctests, simply write the doctest and make sure that
-the module appears after `--doctest-modules` in `pytest.ini`. If you
-add tests to any module in `src/gpodder` you have nothing to do.
-
-If you want to add unit tests for a specific module (ex: gpodder.model),
-you should add the tests as gpodder.test.model, or in other words:
-
-    The file:       src/gpodder/model.py
-    is tested by:   src/gpodder/test/model.py
-
-After you've added the test, make sure that the module appears in
-"test_modules" in src/gpodder/unittests.py - for the example above, the
-unittests in src/gpodder/test/model.py are added as 'model'. For unit
-tests, coverage reporting happens for the tested module (that's why the
-test module name should mirror the module to be tested).
-
-
-## Running and Installation
-
-To run gPodder from source, use..
-
-    bin/gpodder              # for the Gtk+ UI
-    bin/gpo                  # for the command-line interface
-
-To install gPodder system-wide, use `make install`. By default, this
-will install *all* UIs and all translations. The following environment
-variables are processed by setup.py:
-
-    LINGUAS                  space-separated list of languages to install
-    GPODDER_INSTALL_UIS      space-separated list of UIs to install
-    GPODDER_MANPATH_NO_SHARE if set, install manpages to $PREFIX/man/man1
-
-See setup.py for a list of recognized UIs.
-
-Example: Install the CLI and Gtk UI with German and Dutch translations:
-
-    export LINGUAS="de nl"
-    export GPODDER_INSTALL_UIS="cli gtk"
-    make install
-
-The "make install" target also supports DESTDIR and PREFIX for installing
-into an alternative root (default /) and prefix (default /usr):
-
-    make install DESTDIR=tmp/ PREFIX=/usr/local/
-
-[*Debian*](https://wiki.debian.org/Python#Deviations_from_upstream) and *Ubuntu* use `dist-packages`
-instead of `site-packages` for third party installs, so you'll want something like:
-
-    sudo python3 setup.py install --root / --prefix /usr/local --optimize=1 --install-lib=/usr/local/lib/python3.5/dist-packages
-
-In fact, first try running `python -c "import sys; print(sys.path)"` to check what is the exact path.
-It depends on your version of python.
-
-## Portable Mode / Roaming Profiles
-
-The run-time environment variable GPODDER_HOME is used to set
-the location for storing the database and downloaded files.
-
-This can be used for multiple configurations or to store the
-download directory directly on a MP3 player or USB disk:
-
-    export GPODDER_HOME=/media/usbdisk/gpodder-data/
-
-
-## OS X Specific Notes
-
-- default GPODDER_HOME="$HOME/Library/Application Support/gPodder"
-- default GPODDER_DOWNLOAD_DIR="$HOME/Library/Application Support/gPodder/download"
-
-These settings may be modified by editing the following file of the .app :
-
-    /Applications/gPodder.app/Contents/MacOSX/_launcher
-
-Add and edit the following lines to alter the launch environment on OS X :
-
-    export GPODDER_HOME="$HOME/Library/Application Support/gPodder"
-    export GPODDER_DOWNLOAD_DIR="$HOME/Library/Application Support/gPodder/download"
-
-
-##  Changing the Download Directory
-
-The run-time environment variable GPODDER_DOWNLOAD_DIR is used to
-set the location for storing the downloads only (independent of the
-data directory GPODDER_HOME):
-
-    export GPODDER_DOWNLOAD_DIR=/media/BigDisk/Podcasts/
-
-In this case, the database and settings will be stored in the default
-location, with the downloads stored in /media/BigDisk/Podcasts/.
-
-Another example would be to set both environment variables:
-
-    export GPODDER_HOME=~/.config/gpodder/
-    export GPODDER_DOWNLOAD_DIR=~/Podcasts/
-
-This will store the database and settings files in ~/.config/gpodder/
-and the downloads in ~/Podcasts/. If GPODDER_DOWNLOAD_DIR is not set,
-$GPODDER_HOME/Downloads/ will be used if it is set.
-
-
-## Logging
-
-By default, gPodder writes log files to $GPODDER_HOME/Logs/ and removes
-them after a certain amount of times. To avoid this behavior, you can set
-the environment variable GPODDER_WRITE_LOGS to "no", e.g:
-
-    export GPODDER_WRITE_LOGS=no
-
-
-## Extensions
-
-Extensions are normally loaded from gPodder's "extensions/" folder (in
-share/gpodder/extensions/) and from $GPODDER_HOME/Extensions/ - you can
-override this by setting an environment variable:
-
-    export GPODDER_EXTENSIONS="/path/to/extension1.py extension2.py"
-
-In addition to that, if you want to disable loading of all extensions,
-you can do this by setting the following environment variable to a non-
-empty value:
-
-    export GPODDER_DISABLE_EXTENSIONS=yes
-
-If you want to report a bug, please try to disable all extensions and
-check if the bug still appears to see if an extension causes the bug.
-
-
-## More Information
-
-- Homepage:                         http://gpodder.org/
-- Bug tracker:                      https://github.com/gpodder/gpodder/issues
-- Mailing list:                     http://freelists.org/list/gpodder
-- IRC channel:                      #gpodder on irc.libera.chat
+Don't forget to insert your name and mail address. As a result you should find
+packages of the form `check-mk-[edition]-[version].[deb|rpm]` in your current
+directory.

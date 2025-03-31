@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+# This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+# conditions defined in the file COPYING, which is part of this source code package.
+
+# This localcheck makes sure that every filesystem that is listed in /etc/fstab to
+# be mounted automatically, also appears mounted in /proc/mounts
+
+# /dev/mapper/vg0-lv--root /               ext4    errors=remount-ro 0       1
+# # /boot was on /dev/md0 during installation
+# UUID=bec44dfa-7c70-4da7-857a-2e324cc230bd /boot           ext4    defaults        0       2
+# /dev/mapper/vg0-lv--home /home           ext4    defaults        0       2
+# tmpfs  /omd/sites/aq/tmp tmpfs noauto,user,mode=755,uid=aq,gid=aq 0 0
+# tmpfs  /opt/omd/sites/zentrale/tmp tmpfs noauto,user,mode=755,uid=zentrale,gid=zentrale 0 0
+# tmpfs  /opt/omd/sites/hirn/tmp tmpfs noauto,user,mode=755,uid=hirn,gid=hirn 0 0
+# tmpfs  /opt/omd/sites/heute/tmp tmpfs noauto,user,mode=755,uid=heute,gid=heute 0 0
+
+mounted = [l.split()[1] for l in open("/proc/mounts")]
+
+missing = []
+count = 0
+for line in open("/etc/fstab"):
+    if not line.strip() or line.strip().startswith("#"):
+        continue
+
+    device, mountpoint, fstype, opts, rest = line.split(None, 4)
+    options = opts.split(",")
+    expected = "noauto" not in options and fstype != "swap"
+    if expected and mountpoint not in mounted:
+        missing.append("%s is not mounted on %s" % (device, mountpoint))
+    elif expected:
+        count += 1
+
+if missing:
+    state = 2
+    output = ", ".join(missing)
+
+else:
+    state = 0
+    output = "All %d expected filesystems of /etc/fstab are mounted" % count
+
+print("%d Mounted_Filesystems - %s" % (state, output))

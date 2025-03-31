@@ -1,0 +1,20 @@
+title: APC PDU: Electrical Current
+agents: snmp
+catalog: hw/power/apc
+license: GPL
+distribution: check_mk
+description:
+ This check monitors the electrical current of APC PDU units.
+
+ The device sends thresholds {WARN} and {CRIT} itself.
+
+ If one of these is excedeed the service goes {WARN} or {CRIT}.
+ Otherwise it is {OK}.
+
+ This check uses the PowerNet-MIB.
+
+item:
+ The name of the PDU as set in the PDU
+
+discovery:
+ One service is created for each PDU

@@ -1,0 +1,260 @@
+@charset "UTF-8";
+// Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+// This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+// conditions defined in the file COPYING, which is part of this source code package.
+
+/* Styles for Check_MK mobile interface */
+body.mobile {
+  div.really,
+  div.success,
+  div.error,
+  div.message,
+  div.warning {
+    width: 80%;
+    padding: 0.5ex 1em;
+    margin: 1em 0 3em;
+    text-align: center;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 0.5ex;
+  }
+
+  div.error {
+    color: $font-color;
+    background-color: rgb(255, 204, 204);
+  }
+
+  div.command_group a {
+    color: rgb(0, 0, 0);
+  }
+
+  table.data {
+    border-collapse: collapse;
+    empty-cells: show;
+
+    td {
+      padding: 2px 3px;
+      overflow: hidden;
+      border: 1px solid rgb(221, 221, 221);
+    }
+  }
+
+  table.dataset {
+    width: 100%;
+
+    tr.header {
+      color: rgb(0, 0, 0);
+    }
+
+    > tbody > tr.data > td {
+      padding: 4px 6px;
+      font-size: 13px;
+      border: 1px solid rgb(170, 170, 170);
+      border-radius: 5px;
+    }
+  }
+
+  .ui-body-c .ui-link {
+    color: $grey-4;
+  }
+  .ui-body-c .ui-link:visited {
+    color: $grey-4;
+  }
+  .ui-body-c .ui-link:hover {
+    color: $grey-2;
+  }
+
+  td.nonstatus {
+    background-color: rgb(255, 255, 255);
+  }
+
+  /* Forms for filters and commands */
+  table.form {
+    width: 100%;
+
+    > tbody > tr > * {
+      width: 100%;
+    }
+
+    th {
+      border-style: none;
+    }
+  }
+
+  table.filtertime {
+    td {
+      vertical-align: middle;
+    }
+
+    div.ui-select {
+      width: auto;
+    }
+  }
+
+  table.alertstatefilter {
+    td {
+      vertical-align: top;
+    }
+
+    .ui-checkbox {
+      margin: 0;
+    }
+  }
+
+  /* Perfometers */
+  td.perfometer {
+    width: 70px;
+    height: 14px;
+
+    * {
+      padding: 0;
+      font-size: 9px;
+      font-weight: normal;
+      color: rgb(51, 51, 51);
+    }
+
+    div.content {
+      width: 69px;
+      background-color: rgb(255, 255, 0);
+    }
+
+    div.title {
+      top: 2px;
+      width: 70px;
+    }
+
+    div.glass {
+      width: 69px;
+      height: 14px;
+    }
+
+    table {
+      width: 70px;
+      height: 14px;
+    }
+  }
+
+  table.data td.perfometer td.inner {
+    height: 14px;
+  }
+
+  .ui-header,
+  .ui-footer {
+    .ui-title {
+      margin: 0.6em 46px 0.8em;
+    }
+  }
+
+  .ui-li-aside.state {
+    &.state0 {
+      background-color: $color-state-success-background;
+    }
+    &.state1 {
+      background-color: $color-state-1-background;
+    }
+    &.state2 {
+      background-color: $color-state-2-background;
+    }
+
+    width: 4.5em;
+    text-align: center;
+    border-radius: $spacing;
+    padding: 2px;
+  }
+
+  td.pnpgraph img {
+    max-width: 97%;
+  }
+
+  table.dataset tr.data td.state {
+    font-size: 25px;
+  }
+
+  #loginhead,
+  #loginfoot {
+    color: rgb(68, 68, 68);
+    text-align: center;
+  }
+
+  #loginhead {
+    margin: 1em;
+  }
+
+  input {
+    height: initial;
+  }
+
+  #loginfoot {
+    margin-top: 1em;
+
+    &.copyright {
+      margin-top: 1em;
+    }
+  }
+
+  img.logomk {
+    width: 25px;
+    height: 25px;
+    margin-bottom: 10px;
+  }
+
+  td.icons {
+    vertical-align: middle;
+
+    img {
+      width: 40px;
+      height: 40px;
+      margin-left: 5px;
+    }
+
+    a {
+      padding-left: 8px;
+    }
+  }
+
+  div.popup_trigger {
+    display: inline-block;
+
+    > div.popup_menu {
+      display: inline-block;
+
+      a {
+        display: inline-block;
+        width: 40px;
+        overflow: hidden;
+        color: rgb(0, 0, 0);
+
+        img {
+          margin-left: 0;
+        }
+      }
+
+      ul {
+        padding: 0;
+        margin: 0;
+      }
+
+      li {
+        display: inline-block;
+        margin: 0;
+      }
+    }
+  }
+
+  input.button {
+    width: 100%;
+    height: 100%;
+    margin-top: 0;
+    background-color: $white;
+    border-radius: $spacing;
+  }
+
+  input[type="checkbox"] {
+    &,
+    &:checked {
+      + label::before {
+        content: none;
+      }
+    }
+  }
+}

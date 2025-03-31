@@ -1,0 +1,21 @@
+title: Primergy BX600 Blade Server: Power Fan
+agents: snmp
+catalog: hw/server/fujitsu
+license: GPL
+distribution: check_mk
+description:
+  Checks fans in Primergy BX600 Blade Servers.
+
+  Returns {CRIT} if the fan is not present or powered off or reports a
+  non-OK state or if the speed is less or equal {crit_perc}% of max speed.
+
+  Returns {WARN} if the speed is less or equal {warn_perc}% of max speed.
+
+  And {OK} is returned otherwise.
+
+item:
+  The name of the fan as returned by SNMP.
+
+discovery:
+  One service is created for each fan.
+

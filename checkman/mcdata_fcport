@@ -1,0 +1,37 @@
+title: McData FibreChannel Switches: Traffic and Status of Ports
+agents: snmp
+catalog: hw/storagehw/mcdata
+license: GPL
+distribution: check_mk
+description:
+ This check monitors the operational status, link speed, traffic, frame counts,
+ C3 discards and CRC errors of the FibreChannel ports of McData FC switches. The
+ check uses the same functionality as {if64}. Please refer to the {if64} manpage
+ for further documentation.
+
+item:
+ There are three allowed ways to specify an interface: its index, its description
+ and its alias. For this check, these three are the same, namely a two-digit string
+ starting from "01".
+
+discovery:
+ One service is created for each interface that fulfills configurable conditions
+ (rule "Network interface and switch port discovery").
+ By default, these are interfaces which are currently found {up} and are of type
+ 6, 32, 62, 117, 127, 128, 129, 180, 181, 182, 205 or 229. Note that all interfaces
+ discovered by this check are of type 6.
+
+ {Grouping:} In some situations, you do not want to monitor a single
+ interface but a group of interfaces that together form a pool.
+ This check supports such pools by defining groups. The data of all members is
+ accumulated and put together in a single grouped interface service.
+
+cluster:
+ In the case where single (ungrouped) interfaces are clustered, the corresponding
+ services report only the results from the node with the highest outgoing traffic,
+ since this node is likely the active node.
+ In the case where interface groups are clustered, the grouping is applied across
+ all nodes, potentially combining interfaces from different nodes. Note that the
+ rules defining the interface groups must be configured to apply to the nodes, not
+ to the cluster host (the latter has no effect). In case the grouping configurations
+ vary across the nodes, the last node wins.

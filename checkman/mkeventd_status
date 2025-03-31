@@ -1,0 +1,15 @@
+title: Checkmk Event Console: Status and Performance
+agents: linux
+catalog: app/cmk
+license: GPL
+distribution: check_mk
+description:
+ This checks retrieves various performance data from a Checkmk Event Console
+ instance. The check warns you about active event limits and records performance
+ metrics about the performance of the Event Console.
+
+item:
+ The name of the Checkmk site.
+
+discovery:
+ One service is created for each running Checkmk site.

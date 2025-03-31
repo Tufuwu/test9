@@ -1,0 +1,21 @@
+Title: Servicenow: Notification plugin
+Class: feature
+Compatible: compat
+Component: notifications
+Date: 1552645826
+Edition: cee
+Knowledge: undoc
+Level: 2
+State: unknown
+Version: 2.0.0i1
+
+Check_MK now supports integration with Servicenow.
+You can create, update and close incidents for Host and Service Problems.
+
+The user, used for login, has to have at least the role "itil" in servicenow.
+It is recommended to use the same user for caller, which is used for login.
+
+Please see the inline help of the notification method rule within wato for
+detailed options.
+
+CMK-1167

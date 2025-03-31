@@ -1,0 +1,13 @@
+title: Omnitronics IPR400 VoIP Device: Input Voltage
+agents: snmp
+catalog: hw/phone
+license: GPL
+distribution: check_mk
+description:
+ The check monitors the input voltage on Omnitronics IPR400 VoIP devices.
+
+item:
+ The fixed statement {{1}}
+
+discovery:
+ One service is created.

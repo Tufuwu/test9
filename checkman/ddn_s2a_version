@@ -1,0 +1,10 @@
+title: DDN S2A: Version
+agents: ddn_s2a
+catalog: hw/storagehw/ddn_s2a
+license: GPL
+distribution: check_mk
+description:
+ This check displays the platform, firmware and bootrom versions respectively.
+
+discovery:
+ One service is created for each device.

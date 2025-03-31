@@ -1,0 +1,48 @@
+title: Windows: Disk Throughput
+agents: windows
+catalog: os/storage
+license: GPL
+distribution: check_mk
+description:
+ This check measures the throughput of physical disk on Windows
+ hosts by using the performance counter object {234}. The Checkmk
+ agent for Windows sends this object in the section {<<<winperf_phydisk>>>}
+ starting from version {1.1.11i1}. If you have defined the {counters}
+ in {check_mk.ini}, please make sure, that the entry {234:phydisk}
+ is present.
+
+ Please add {"winperf.diskstat"} to you {ignored_checktypes} in {main.mk},
+ if all of your agents support {winperf_phydisk}.
+
+ This check share the same code and features as the check {diskstat},
+ so the rest of this manual page is identical with that of diskstat.
+
+ You can either have a single check for every single disk
+ (which is the default) or a summary check summing up the throughput
+ of all disks.
+
+ You can apply separate warning and critical levels for the read
+ and write throughput. Optionally you can have the check compute
+ average values on a configurable time period and have the levels
+ applied on the average instead of the current values. This makes
+ it possible to ignore short "peaks" and only trigger and longer
+ phases of high disk activity.
+
+ The check also gives info on the IOPS.
+
+item:
+ Either {"SUMMARY"} for a summarized check of alls disks or the
+ name of the disk device, e.g. {"C:"}.
+
+discovery:
+ One service is created for each disk if the configuration is set to {"single"}.
+ If the configuration is set to {"summary"} one service is created for each host.
+ If set to {"legacy"} then two services one for read and one for write
+ is created (deprecated).
+
+ The inventory is configured via {diskstat_inventory_mode}.
+
+cluster:
+  On a cluster the check is run on the aggregated data.
+  WATCH OUT: Disk names that are present on more than one node potentialy
+  shadow each others results.

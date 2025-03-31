@@ -1,0 +1,15 @@
+[Unit]
+Description=Checkmk Monitoring
+Documentation=https://docs.checkmk.com/latest/en/
+Wants=network-online.target
+After=syslog.target time-sync.target network.target network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/omd start
+ExecStop=/usr/bin/omd stop
+ExecReload=/usr/bin/omd reload
+
+[Install]
+WantedBy=multi-user.target

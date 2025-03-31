@@ -1,0 +1,27 @@
+title: EMC Datadomain: Used Space of Filesystems via SNMP
+agents: snmp
+catalog: hw/storagehw/emc
+license: GPL
+distribution: check_mk
+description:
+ This check monitors the usage of filesystems of the EMS Deduplication
+ Storage Systems. It uses SNMP with the {Datadomain-MIB} to get its data.
+
+ For configuration parameters and examples you may also refer to the man
+ page of {df}. The check can be configured with the same WATO rule as the
+ {df} check.
+
+ The filesystems monitored by this check are different from the filesystems
+ found by the hr_fs filesystem check for the same device. The latter are
+ the ones found on the underlying operating system level of the device,
+ whereas the filesystems monitored with this check are the filesystems of
+ the Data Domain application.
+
+item:
+ The name of the filesystem as in {fileSystemResourceName} of the Data Domain
+ MIB.
+
+discovery:
+ One service is created for each fixed disk if the description
+ of the filesystem in not listed in {inventory_df_exclude_mountpoints}.
+

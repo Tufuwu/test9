@@ -1,0 +1,1536 @@
+@charset "UTF-8";
+// Copyright (C) 2019 tribe29 GmbH - License: GNU General Public License v2
+// This file is part of Checkmk (https://checkmk.com). It is subject to the terms and
+// conditions defined in the file COPYING, which is part of this source code package.
+
+/* Global style used by all HTML pages, even by sidebar and
+   mobile interface */
+
+/*-------------------------------------------------------------------------.
+|                ____        __             _ _                            |
+|               |  _ \  ___ / _| __ _ _   _| | |_ ___                      |
+|               | | | |/ _ \ |_ / _` | | | | | __/ __|                     |
+|               | |_| |  __/  _| (_| | |_| | | |_\__ \                     |
+|               |____/ \___|_|  \__,_|\__,_|_|\__|___/                     |
+|                                                                          |
++--------------------------------------------------------------------------+
+| Default values for general styles used in all parts of Multisite. These  |
+| styles are used in the Status-GUI, WATO and other modules based on the   |
+| basic Multisite layout. They are not used by the Mobile GUI.             |
+'-------------------------------------------------------------------------*/
+
+/* Change some general defaults of HTML that we do not like */
+td,
+th {
+  padding: 0;
+  font-weight: $font-weight-default;
+  vertical-align: top;
+}
+
+div {
+  padding: 0;
+  margin: 0;
+}
+
+img {
+  border-style: none;
+}
+
+th {
+  white-space: nowrap;
+}
+
+/* Styling for input elements */
+button,
+input,
+select,
+textarea {
+  padding: 3px;
+  margin-top: 0;
+  font-family: arial, helvetica, sans-serif;
+  vertical-align: middle;
+  background-color: rgb(255, 255, 255);
+  border: none;
+  outline-style: none;
+  outline-width: medium;
+}
+
+/* consistent dropdown field styling for all browsers */
+select:not([multiple]) {
+  padding-right: 2.5em;
+  background-image: url("images/select_arrow.png");
+  background-position: right 50%;
+  background-repeat: no-repeat;
+  background-size: 20px 11px;
+  -webkit-appearance: none; /* Removes default chrome and safari style */
+  -moz-appearance: none; /* Removes default style Firefox */
+}
+
+div.popup_menu select:not([multiple]) {
+  background: $popup-menu-select-bg-color url("images/select_arrow.png") right 10% / 20px 11px
+    no-repeat;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+input[type="file"] {
+  color: rgb(0, 0, 0);
+}
+
+form {
+  margin: 0;
+
+  label + input:not([type="checkbox"]) {
+    margin-left: $spacing;
+  }
+
+  label.required::after {
+    color: $success;
+    content: " (required)";
+  }
+}
+
+input:hover,
+select:hover,
+textarea:hover,
+input[type="checkbox"]:hover + label::before {
+  background-color: $input-hover-bg-color;
+}
+
+td.checkbox input[type="checkbox"] + label::before {
+  margin: 0;
+}
+
+/* checkbox styling */
+input[type="checkbox"] {
+  display: none;
+
+  + label::before {
+    display: inline-block;
+    width: 12.5px;
+    height: 12.5px;
+    padding: 0;
+    margin: -2px 4px 0 0;
+    vertical-align: middle;
+    background-color: $inpage-highlight-color;
+    border: 1px $inpage-highlight-color solid;
+    content: "\00a0";
+  }
+
+  &:checked {
+    + label::before {
+      color: $checkbox-checked-color;
+      text-align: center;
+      content: "\2716";
+    }
+  }
+}
+
+/* Select element with icons */
+select.icon option {
+  height: 18px;
+  padding-left: 22px;
+  background-position: bottom left;
+  background-repeat: no-repeat;
+  background-size: 18px;
+}
+
+button,
+input.button,
+table.vs_duallist a.control {
+  padding: 2px 6px;
+  margin-left: 5px;
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  border-radius: $theme-border-radius;
+}
+
+table.vs_duallist a.control,
+table.vs_duallist body.main .popup_menu span.control,
+body.main .popup_menu table.vs_duallist span.control {
+  background-color: $button-bg-color-default;
+  box-shadow: none;
+}
+
+button,
+input.button,
+table.vs_duallist a.control,
+.wato div.mainmenu a {
+  &:hover {
+    text-decoration: none;
+  }
+
+  &:active {
+    box-shadow: inset 0 0 0.5px rgb(68, 68, 68);
+  }
+}
+
+button,
+input.button,
+input.button:not([type="text"]),
+input.button:not([type="password"]) {
+  &[disabled="disabled"],
+  &:disabled {
+    &,
+    &:hover,
+    &:active {
+      color: $font-color-disabled;
+      cursor: initial;
+      background-color: $input-button-hover-bg-color;
+      filter: grayscale(80%);
+    }
+  }
+}
+
+button.hot,
+input.button.hot {
+  &,
+  &:active {
+    color: $hot-font-color;
+    background-color: rgb(17, 189, 123);
+  }
+
+  &:hover {
+    background-color: $success;
+  }
+}
+
+/* on/off toggle button */
+.toggle_switch {
+  background: $bg-color;
+  border-radius: 11px;
+  box-shadow: none;
+  box-sizing: border-box;
+
+  /* TODO: Decide whether these .wato div.globalvars styles should stay here
+   *       or rather go to _wato.scss - duplicating the .toggle_switch selector
+   */
+  a,
+  body.main .popup_menu span,
+  body.main .popup_menu & span,
+  .wato div.globalvars & a,
+  .wato div.globalvars & body.main .popup_menu span,
+  body.main .popup_menu .wato div.globalvars & {
+    width: $toggle-switch-width;
+    height: $toggle-switch-height;
+    font-size: $font-size-small;
+    font-weight: $font-weight-bold;
+    line-height: $toggle-switch-height;
+    letter-spacing: $letter-spacing-table;
+    border: none;
+    border-radius: 8px;
+    box-shadow: none;
+  }
+
+  a,
+  .wato div.globalvars & a {
+    display: block;
+    width: 30px;
+    color: $toggle-switch-font-color-on;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  &.on {
+    a,
+    .wato div.globalvars & a {
+      float: left;
+      color: $toggle-switch-font-color-on;
+      background-color: $success;
+    }
+  }
+
+  &.off {
+    a,
+    .wato div.globalvars & a {
+      float: left;
+      color: $toggle-switch-font-color-off;
+      background-color: $inpage-highlight-color;
+    }
+  }
+
+  a:hover,
+  .wato div.globalvars & a:hover {
+    /* TODO: create a better hover effect */
+    text-decoration: none;
+    opacity: 0.5;
+    filter: alpha(opacity=50); /* For IE8 and earlier */
+  }
+
+  table.data & {
+    background-color: rgb(153, 153, 153);
+
+    a {
+      color: rgb(255, 255, 255);
+    }
+  }
+}
+
+.dots {
+  margin-left: 5px;
+  overflow: hidden;
+  color: rgba($font-color, 0.4);
+
+  &.required::before {
+    color: $success;
+    content: "(required) ";
+  }
+}
+
+a.button {
+  height: 24px;
+  padding: 0.1ex 1ex;
+  margin: 2px;
+  font-weight: normal;
+  color: rgb(0, 0, 0);
+  text-decoration: none;
+  background-color: rgb(204, 204, 170);
+  border-color: rgb(221, 221, 221) rgb(136, 136, 136) rgb(51, 51, 51) rgb(221, 221, 221);
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 4px;
+  -webkit-border-radius: 4px;
+}
+
+/*for IE8 */
+input[type="submit"]:focus {
+  outline: none;
+}
+
+/* Images have a native size of 48x48 and are scaled down by the
+   browser. That way if you select a zoom level in the browser,
+   the quality of the images are better */
+
+img.icon {
+  width: 20px;
+  height: 20px;
+}
+
+span.emblem {
+  position: relative;
+}
+
+img.emblem {
+  position: absolute;
+  right: 3px;
+  bottom: -3px;
+  width: 10px;
+  height: 10px;
+}
+
+td.buttons img.emblem {
+  right: 0;
+}
+
+a.inline img.icon,
+img.icon.inline,
+div.icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
+h1 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  font-size: $font-size-page-title;
+  color: rgb(255, 255, 255);
+}
+
+div.livestatus.message {
+  position: fixed;
+  bottom: -10px;
+  left: 10px;
+  z-index: 20;
+  color: rgb(0, 0, 0);
+}
+
+/*-------------------------------------------------------------------------.
+|                _____     _     _       _     _                           |
+|               |  ___|__ | | __| | __ _| |__ | | ___                      |
+|               | |_ / _ \| |/ _` |/ _` | '_ \| |/ _ \                     |
+|               |  _| (_) | | (_| | (_| | |_) | |  __/                     |
+|               |_|  \___/|_|\__,_|\__,_|_.__/|_|\___|                     |
+|                                                                          |
++--------------------------------------------------------------------------+
+| These styles are used by the {begin,end}_foldable_container() functions. |
+'-------------------------------------------------------------------------*/
+
+img.treeangle {
+  width: 8px;
+  height: 8px;
+  margin: 0 3px;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+
+  &.open {
+    transform: rotate(90deg);
+  }
+
+  &.nform {
+    margin-left: -5px;
+  }
+
+  &.title {
+    margin-right: 5px;
+    vertical-align: middle;
+    filter: none;
+  }
+}
+
+b.treeangle.title {
+  font-weight: bold;
+  color: $font-color;
+  cursor: pointer;
+
+  table.data & {
+    color: rgb(0, 0, 0);
+  }
+}
+
+div.foldable_wrapper {
+  margin-top: $spacing;
+  background-color: $headline-color;
+  border-radius: $theme-border-radius $theme-border-radius 0 0;
+
+  &:not(:last-of-type) {
+    margin-bottom: 2 * $spacing;
+  }
+
+  img.treeangle {
+    margin-left: $spacing;
+  }
+
+  h3 {
+    margin-top: 0;
+  }
+
+  ul.treeangle {
+    margin: 0;
+  }
+}
+
+img.treeangle + .treeangle.title {
+  margin: 0;
+}
+
+ul.treeangle {
+  position: relative; /* In order for placement of invtablelink */
+  padding-left: 20px;
+  margin: 8px 0;
+
+  li {
+    display: block;
+    padding-left: 20px;
+    margin: 0;
+    margin-left: 16px;
+    list-style: disc;
+  }
+}
+
+ul.closed {
+  display: none;
+}
+
+/*-------------------------------------------------------------------------.
+|             __  __                                                       |
+|            |  \/  | ___  ___ ___  __ _  __ _  ___  ___                   |
+|            | |\/| |/ _ \/ __/ __|/ _` |/ _` |/ _ \/ __|                  |
+|            | |  | |  __/\__ \__ \ (_| | (_| |  __/\__ \                  |
+|            |_|  |_|\___||___/___/\__,_|\__, |\___||___/                  |
+|                                        |___/                             |
++--------------------------------------------------------------------------+
+| Styles for messages-boxes in various situations (called by htmllib.py)   |
+'-------------------------------------------------------------------------*/
+
+div.really,
+div.success,
+div.error,
+div.message,
+div.warning {
+  padding: 16px;
+  margin: $spacing 0;
+  border-radius: $theme-border-radius;
+  box-shadow: none;
+
+  h1 {
+    margin-bottom: 5px;
+    margin-left: 0;
+    font-size: $font-size-large;
+    font-weight: $font-weight-bold;
+    color: $white;
+  }
+
+  input.button {
+    padding: 8px 16px;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+div.really {
+  &,
+  h3,
+  body.main & a {
+    color: $black;
+    background-color: $warning;
+  }
+
+  h3 {
+    padding-left: 0;
+  }
+}
+
+div.success {
+  color: $primary-font-color;
+  background-color: $headline-color;
+}
+
+div.message {
+  color: $black; // TODO: Check whether this must be $primary-font-color as is for .success
+  background-color: rgb(157, 190, 205);
+  border-color: rgb(0, 68, 136);
+}
+
+div.error {
+  color: $lightgrey;
+  background-color: $color-state-2-background;
+  border-color: rgb(238, 68, 0);
+
+  a,
+  a:link {
+    color: rgb(255, 255, 255);
+  }
+
+  tt {
+    color: inherit;
+  }
+}
+
+.warning,
+body.main div.warning {
+  color: $black;
+  background-color: $warning;
+
+  a,
+  a:link {
+    color: $black;
+  }
+}
+
+form.confirm {
+  margin-top: $spacing;
+}
+
+/* Warnings embedded in tables without margins and padding, those are
+   just needed for body */
+
+h2,
+h3 {
+  margin-bottom: $h3-margin-bottom;
+
+  + div.info,
+  + div.success {
+    padding: $wato-info-padding;
+    padding-top: 10px;
+    margin-top: 0;
+    background-color: $data-container-bg-color;
+  }
+
+  + div.success {
+    margin-bottom: 0; // don't leave a spacing between the directly following table
+  }
+}
+
+td div.warning,
+td > div.error {
+  padding: 5px 10px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+
+  ul {
+    padding-left: 0;
+    margin: 5px 10px;
+  }
+}
+
+/*-ValueSpec---------------------------------------------------------------.
+|          __     __    _            ____                                  |
+|          \ \   / /_ _| |_   _  ___/ ___| _ __   ___  ___                 |
+|           \ \ / / _` | | | | |/ _ \___ \| '_ \ / _ \/ __|                |
+|            \ V / (_| | | |_| |  __/___) | |_) |  __/ (__                 |
+|             \_/ \__,_|_|\__,_|\___|____/| .__/ \___|\___|                |
+|                                         |_|                              |
++--------------------------------------------------------------------------+
+| Styles needed for HTML code produced by valuespec.py.                    |
+'-------------------------------------------------------------------------*/
+
+table.dictionary {
+  width: 100%;
+  border-collapse: collapse;
+
+  b.header {
+    font-size: $font-size-small;
+    font-weight: normal;
+  }
+
+  td.dictright {
+    width: 99%;
+    padding: 0;
+    white-space: nowrap;
+    border-style: none;
+  }
+
+  td.dictleft {
+    width: 1%;
+    white-space: nowrap;
+
+    span.required {
+      color: $success;
+    }
+
+    div.popup_menu {
+      white-space: normal;
+    }
+
+    div.help {
+      white-space: normal;
+    }
+
+    > span {
+      margin: $input-field-margin;
+    }
+  }
+}
+
+td.dictleft div.dictelement {
+  float: none;
+  margin-top: 3px;
+  margin-bottom: 10px;
+  margin-left: 0;
+
+  * {
+  }
+
+  &:empty {
+    margin: 0;
+  }
+
+  &.indent {
+    padding-left: 10px;
+    margin-left: 6px;
+    border-left: 2px solid $inpage-highlight-color;
+
+    ul {
+      margin-top: 1px;
+    }
+  }
+}
+
+table.vs_dict_text {
+  padding: 0;
+  margin: 0;
+  border-collapse: collapse;
+
+  td,
+  table.data tr td & > tbody > tr > td {
+    padding: 0;
+    margin: 0;
+    vertical-align: top;
+  }
+}
+
+table.valuespec_tuple {
+  border-collapse: collapse;
+
+  &.horizontal tr:nth-child(1) td {
+    padding-top: 0; // override nform default
+  }
+
+  td {
+    padding: 0;
+
+    &.tuple_left {
+      vertical-align: middle;
+    }
+  }
+
+  span.title {
+    font-size: $font-size-small;
+  }
+}
+
+table.vs_date {
+  display: inline-block;
+  vertical-align: middle;
+  border-spacing: 0;
+
+  td {
+    padding-top: 0;
+    padding-right: 3px;
+  }
+
+  th {
+    padding: 0;
+    font-size: $font-size-small;
+    font-weight: normal;
+    text-align: center;
+  }
+}
+
+table.valuespec_listof {
+  width: 100%;
+
+  &.regular {
+    > tbody > tr > td {
+      padding: 3px 0 5px;
+      border-bottom: 1px solid rgb(153, 187, 204);
+
+      &:first-child {
+        padding-bottom: 5px;
+      }
+    }
+
+    > tbody > tr:last-child > td {
+      padding-top: 3px;
+      border-bottom-style: none;
+    }
+
+    td.vlof_buttons {
+      width: 1px;
+      margin-right: 5px;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+  }
+
+  option[selected] {
+    font-weight: bold;
+  }
+
+  .unused {
+    display: none;
+  }
+
+  tr:first-child > td {
+    &.vlof_buttons,
+    &.vlof_content {
+      padding-top: 0;
+    }
+
+    &.vlof_buttons {
+      padding-bottom: $spacing-half;
+    }
+  }
+}
+
+div.valuespec_listof {
+  table {
+    border-collapse: collapse;
+  }
+
+  &.floating > table > tbody > tr > td:first-child {
+    vertical-align: top;
+  }
+}
+
+div.valuespec_listof_floating_container {
+  margin-top: -4px;
+  vertical-align: top;
+
+  > table {
+    float: left;
+
+    td {
+      vertical-align: top;
+
+      &.vlof_buttons img {
+        width: 12px;
+        height: 15px;
+        margin-top: 4px;
+      }
+
+      &.vlof_content .tagify {
+        tag {
+          margin: 4px 5px 2px 4px;
+
+          x {
+            display: none;
+          }
+
+          > div {
+            padding-right: 0.3em;
+          }
+        }
+
+        span.tagify__input {
+          margin: 3px 5px 2px 4px;
+        }
+      }
+    }
+  }
+}
+
+table.nform
+  table.valuespec_listof
+  div.valuespec_listof_floating_container
+  > table
+  > tbody
+  > tr
+  > td {
+  border-bottom: none;
+}
+
+table.valuespec_listof.regular > tbody > tr {
+  &:last-child > td {
+    padding-top: 3px;
+    border-bottom-style: none;
+  }
+
+  > td {
+    padding: 3px 0 5px;
+    border-bottom: 1px solid rgb(153, 187, 204);
+
+    &:first-child {
+      padding-bottom: 5px;
+    }
+  }
+}
+
+table.vs_duallist {
+  td {
+    width: 50%;
+
+    select {
+      width: 100%;
+      height: 200px;
+      resize: both;
+    }
+
+    &.head {
+      text-align: center;
+    }
+  }
+
+  a.control {
+    display: inline-block;
+    float: right;
+    width: 14px;
+    text-align: center;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: none;
+      background-color: $duallist-control-a-hover-bg-color;
+    }
+
+    &.add {
+      float: right;
+    }
+
+    &.del {
+      float: left;
+    }
+  }
+}
+
+textarea.tt {
+  font-family: monospace;
+}
+
+div.listofstrings.horizontal {
+  clear: left;
+
+  > div {
+    float: left;
+  }
+}
+
+table.listchoice {
+  border-collapse: collapse;
+
+  td {
+    height: 12px;
+    padding: 0;
+    margin: 0;
+
+    span.checkbox {
+      height: $input-field-height;
+    }
+
+    input[type="checkbox"] {
+      height: 12px;
+      margin: 0;
+    }
+  }
+}
+
+table.alternative {
+  border-collapse: collapse;
+
+  td:first-child {
+    padding-right: 0.5 * $spacing;
+  }
+}
+
+div.popup_container {
+  position: relative;
+}
+
+div.popup {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 200;
+  width: -moz-max-content;
+  width: intrinsic;
+  padding: 10px;
+  color: rgb(255, 255, 255);
+  background-color: rgb(69, 130, 157);
+  border: 1px solid rgb(255, 255, 255);
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+
+  span {
+    display: block;
+    margin-bottom: 5px;
+    color: rgb(255, 255, 255);
+  }
+}
+
+div#hover_menu {
+  position: absolute;
+  /* The hover menu needs to have a higher z-index than the highest element
+     on the pages. In this case it was the perfometer which had 30. */
+  z-index: 50;
+  width: auto;
+  color: $font-color;
+
+  div.error,
+  div.message {
+    width: 350px;
+    margin: 0;
+  }
+
+  div.message {
+    color: $font-color;
+    background-color: $bg-color;
+  }
+
+  .graph_container {
+    display: block;
+    float: left;
+    margin: 0 2px 2px 0;
+    color: $graph-hover-popup-font-color;
+    background-color: $graph-hover-popup-bg-color;
+    border: $graph-hover-popup-border;
+    box-shadow: $graph-hover-popup-box-shadow;
+
+    div.title {
+      display: block;
+    }
+
+    div.time {
+      letter-spacing: 0;
+    }
+  }
+}
+
+/* Color picker styling */
+
+div.popup_trigger.colorpicker div.popup_menu {
+  min-width: auto;
+}
+
+.cp-preview {
+  width: 28px;
+  height: 18px;
+  border: 1px solid $darkgrey;
+  border-radius: $theme-border-radius;
+  box-shadow: none;
+
+  table.data td & {
+    position: relative;
+    top: 2px;
+  }
+}
+
+.picker-wrapper,
+.slide-wrapper {
+  position: relative;
+  float: left;
+}
+
+.picker-indicator,
+.slide-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.picker,
+.slide {
+  float: left;
+  cursor: crosshair;
+}
+
+.cp-small {
+  float: left;
+  width: 170px;
+
+  .picker {
+    width: 150px;
+    height: 150px;
+    background-color: rgb(255, 255, 255);
+  }
+
+  .slide {
+    width: 15px;
+    height: 150px;
+  }
+
+  .slide-wrapper {
+    margin-left: 5px;
+  }
+
+  .picker-indicator {
+    width: 1px;
+    height: 1px;
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(0, 0, 0);
+  }
+
+  .slide-indicator {
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: rgb(0, 0, 0);
+  }
+}
+
+.cp-input {
+  float: left;
+  margin-top: 2px;
+  color: $font-color;
+
+  input,
+  select,
+  textarea,
+  div.snapin select,
+  div.snapin & select,
+  div.snapin textarea,
+  div.snapin & textarea,
+  #mk_side_search_field {
+    margin: 0;
+    margin-bottom: 8px;
+  }
+
+  input {
+    width: 106px;
+  }
+}
+
+div.popup_trigger.colorpicker .popup_menu {
+  top: 17px;
+  left: 26px;
+}
+
+/*--Werks------------------------------------------------------------------.
+|                    __        __        _                                 |
+|                    \ \      / /__ _ __| | _____                          |
+|                     \ \ /\ / / _ \ '__| |/ / __|                         |
+|                      \ V  V /  __/ |  |   <\__ \                         |
+|                       \_/\_/ \___|_|  |_|\_\___/                         |
+|                                                                          |
++--------------------------------------------------------------------------+
+| Pages showing the Check_MK change log (werks.py)                         |
+'-------------------------------------------------------------------------*/
+
+tr.data td.werklevel,
+tr.data td.werkclass,
+tr.data td.werkcomp {
+  width: 100px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+table.data.werks {
+  td.werkclassfeature,
+  td.werkclassfix,
+  td.werklevel2,
+  td.werklevel3,
+  td.werkcompincomp_ack {
+    color: $dark-font-color;
+  }
+}
+
+table.data.werks {
+  tr {
+    &:nth-child(odd) {
+      td.werklevel2 {
+        background-color: $color-state-5-background;
+      }
+
+      td.werklevel3 {
+        background-color: $color-state-6-background;
+      }
+
+      td.werkclassfeature {
+        background-color: $color-state-success-background;
+      }
+
+      td.werkclassfix {
+        background-color: $yellow;
+      }
+
+      td.werkclasssecurity {
+        background-color: $color-state-2-background;
+      }
+
+      td.werkcompincomp_unack {
+        background-color: $color-state-7-background;
+      }
+
+      td.werkcompincomp_ack {
+        background-color: $color-state-8-background;
+      }
+    }
+
+    &:nth-child(even) {
+      td.werklevel2 {
+        background-color: $color-state-5-background;
+      }
+
+      td.werklevel3 {
+        background-color: $color-state-6-background;
+      }
+
+      td.werkclassfeature {
+        background-color: $color-state-success-background;
+      }
+
+      td.werkclassfix {
+        background-color: $yellow;
+      }
+
+      td.werkclasssecurity {
+        background-color: $color-state-2-background;
+      }
+
+      td.werkcompincomp_unack {
+        background-color: $color-state-7-background;
+      }
+
+      td.werkcompincomp_ack {
+        background-color: $color-state-8-background;
+      }
+    }
+  }
+
+  td {
+    &.werklevel3 {
+      font-weight: bold;
+    }
+
+    &.werkclasssecurity {
+      font-weight: bold;
+      color: rgb(255, 255, 255);
+    }
+
+    &.werkcompincomp_unack {
+      font-weight: bold;
+    }
+  }
+
+  &.headerleft td {
+    text-align: left;
+  }
+}
+
+table.werks td a,
+table.werks td body.main .popup_menu span,
+body.main .popup_menu table.werks td span {
+  color: $black;
+  text-decoration: underline;
+}
+
+/* NOWIKI formatting in Werks */
+td.nowiki {
+  h3 {
+    font-size: $font-size-large;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+  }
+
+  pre {
+    padding: 3px 8px;
+
+    &.code {
+      background-color: rgb(255, 255, 255);
+    }
+
+    &.file {
+      background-color: rgb(255, 240, 181);
+    }
+  }
+
+  div.filename {
+    padding: 3px 8px;
+    margin-bottom: -12px;
+    font-family: Hack, courier;
+    font-weight: bold;
+    background-color: rgb(230, 216, 163);
+  }
+
+  table {
+    margin: 10px 0;
+    border: 1px solid rgb(0, 0, 0);
+    border-collapse: collapse;
+
+    table td,
+    table th {
+      border: 1px solid rgb(136, 136, 136);
+    }
+  }
+}
+
+/* Command for modifying existing downtimes */
+table.modifydowntimes > tbody > tr {
+  > td:nth-child(1) {
+    padding-top: 10px;
+    vertical-align: middle;
+  }
+
+  &:nth-child(1) > td:nth-child(1) {
+    padding-top: 0;
+  }
+}
+
+.select2-container .select2-selection--single {
+  height: $input-field-height;
+  border: none;
+}
+
+.select2-container--default {
+  .select2-results {
+    color: rgb(0, 0, 0);
+  }
+
+  .select2-selection--single {
+    border-radius: 4px;
+
+    .select2-selection__rendered {
+      line-height: $input-field-height;
+      color: $select2-rendered-color;
+    }
+
+    .select2-selection__arrow b {
+      margin-top: -4px;
+    }
+  }
+
+  .select2-dropdown {
+    background-color: $inpage-highlight-color;
+    border: 1px solid $select2-border-color;
+  }
+
+  .select2-results__option {
+    color: $select2-rendered-color;
+    background-color: $inpage-highlight-color;
+  }
+
+  .select2-results__option[aria-selected="true"] {
+    background-color: $inpage-highlight-color;
+  }
+
+  .select2-results__option--highlighted[aria-selected] {
+    color: $success;
+    background-color: $inpage-highlight-color;
+  }
+
+  .select2-search--dropdown .select2-search__field {
+    background-color: $select2-search-field-color;
+    border: $select2-search-field-border;
+  }
+}
+
+div.vs_age.inline {
+  display: inline-block;
+}
+
+/* TODO: Go through these following styles and move them to specific scss
+ *       where needed
+ */
+* {
+  font-size: inherit;
+  letter-spacing: $letter-spacing-default;
+  text-shadow: none;
+}
+
+html {
+  font-size: $font-size-normal;
+  height: 100%;
+}
+
+.link,
+.title {
+  display: inline-block;
+  padding: 0 2px; /* affects spacing in sidebar plugins */
+  font-weight: $font-weight-default;
+  letter-spacing: $letter-spacing-table;
+  color: $font-color;
+  transition: color 0.15s ease-in-out;
+}
+
+div.graph {
+  &.preview {
+    padding: 4px !important;
+  }
+
+  table.legend {
+    td {
+      color: $graph-legend-color;
+    }
+
+    th {
+      border-bottom: $graph-legend-th-border-bottom;
+    }
+  }
+
+  div.time {
+    color: $graph-time-color;
+  }
+
+  &.brokengraph {
+    box-shadow: none;
+
+    div.title {
+      padding: 8px;
+    }
+
+    pre {
+      padding: 0 8px 8px;
+      margin: 0;
+      color: $graph-time-color;
+    }
+  }
+}
+
+div.graph_hover_popup {
+  color: $graph-hover-popup-font-color;
+  background-color: $graph-hover-popup-bg-color;
+  border: $graph-hover-popup-border;
+  box-shadow: $graph-hover-popup-box-shadow;
+}
+
+.graph {
+  background-color: $graph-bg-color;
+}
+
+div.content {
+  top: 64px;
+  width: 100%;
+  padding: $spacing;
+  box-sizing: border-box;
+}
+
+/* TODO: Reproduce this element then get rid of important styles */
+.op {
+  width: 60px !important;
+}
+
+.bi_rule_tree img.treeangle,
+.invtree img.treeangle,
+.grouped_row_header img.treeangle.nform,
+.aggrtree img.treeangle {
+  &,
+  body.main & {
+    &.open,
+    &.closed {
+      margin: 1px 4px 0;
+    }
+  }
+}
+
+table.report_contents td.preview img {
+  border: 1px solid $color-nuance-3;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+table td {
+  vertical-align: middle;
+}
+
+/* Graphs */
+div.graph_with_timeranges {
+  margin-bottom: 32px;
+
+  div.graph {
+    border: 1px solid $color-table-border;
+    box-shadow: none;
+
+    div.title {
+      display: block;
+    }
+
+    canvas {
+      margin-bottom: 8px;
+    }
+
+    &.preview canvas {
+      margin-bottom: 0;
+    }
+
+    &.preview .title {
+      top: 12px;
+      width: calc(100% - 16px);
+      padding: 8px 0;
+      font-weight: $font-weight-default;
+      color: $font-color;
+      text-shadow: none;
+      box-sizing: border-box;
+    }
+
+    table.legend {
+      margin-top: 32px;
+
+      th.scalar {
+        text-align: right;
+      }
+
+      td {
+        background: transparent;
+      }
+    }
+  }
+
+  table.timeranges > tbody > tr > td {
+    padding: 0 8px 4px;
+  }
+}
+
+table.data td > div:first-child div.graph_with_timeranges {
+  margin-top: 8px;
+}
+
+table.data td > div:last-child div.graph_with_timeranges {
+  margin-bottom: 8px;
+}
+
+div.metricchoice select,
+div.metricchoice input,
+div.metricchoice select,
+div.metricchoice textarea,
+div.metricchoice #mk_side_search_field {
+  margin: 4px 0;
+}
+
+td.title {
+  display: table-cell;
+}
+
+#form_search input,
+#form_search select,
+#form_search textarea,
+#form_search #mk_side_search_field {
+  width: auto;
+  border: $primary-border;
+}
+
+select.vlof_filter {
+  width: auto;
+}
+
+div.timerange {
+  color: $darkgrey;
+}
+
+body.main.visible div.foldable .title {
+  color: $font-color;
+}
+
+.hot a,
+.hot body.main .popup_menu span,
+body.main .popup_menu .hot span {
+  color: $hot-font-color;
+  background-color: $hot-bg-color !important;
+  border-color: $color-nuance-16;
+}
+
+div.info {
+  margin: 16px 0 8px;
+  font-weight: 500;
+  letter-spacing: $letter-spacing-default;
+  color: $font-color;
+}
+
+.age {
+  input,
+  select,
+  textarea,
+  div.snapin select,
+  div.snapin & select,
+  div.snapin textarea,
+  div.snapin & textarea,
+  #mk_side_search_field {
+    box-sizing: content-box;
+  }
+}
+
+body.main a,
+body.main .popup_menu span,
+body.main .popup_menu a,
+body.main a:link,
+body.main a:visited {
+  color: $font-color;
+}
+
+img.glass {
+  display: none;
+}
+
+tr.hidden {
+  display: none;
+}
+
+.simplebar-scrollbar::before {
+  background: $simplebar-scrollbar-color;
+  border-radius: 2px;
+}
+
+.simplebar-track {
+  &.simplebar-vertical div.simplebar-scrollbar::before {
+    left: 3px;
+    width: $simplebar-scrollbar-width;
+  }
+
+  &.simplebar-horizontal {
+    height: $spacing-double;
+
+    div.simplebar-scrollbar {
+      top: 3px;
+      height: $simplebar-scrollbar-width;
+    }
+  }
+}
+
+.simplebar-scrollbar.simplebar-visible::before {
+  opacity: 1;
+}
+
+div#row_info {
+  padding-bottom: $spacing-half;
+  font-weight: $font-weight-default;
+  text-align: right;
+}
+
+/* Inside a foldable, we need a different color here in order to see a difference w.r.t. the title*/
+div.foldable div.success {
+  background-color: $base-color;
+}

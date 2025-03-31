@@ -1,0 +1,21 @@
+title: Infoblox Devices: Node Services
+agents: snmp
+catalog: hw/network/infoblox
+license: GPL
+distribution: check_mk
+description:
+ This check monitors the node services of Infoblox devices which
+ support the IB-PLATFORMONE MIB.
+
+ The check is OK if the status of the service is working. It goes WARN
+ if it is warning, and reports CRIT, if it fails. Otherwise the
+ check goes UNKNOWN.
+
+item:
+ The service name.
+
+discovery:
+ One service is created for each node service.
+
+cluster:
+ The best status of all nodes for a given item is shown.

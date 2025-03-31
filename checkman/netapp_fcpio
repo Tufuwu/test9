@@ -1,0 +1,15 @@
+title: NetApp Filer: Fibre Channel IOPS
+agents: snmp
+catalog: hw/storagehw/netapp
+license: GPL
+distribution: check_mk
+description:
+ Reports Fibre Channel IOPS on NetApp filers.
+
+ You can set {WARN} and {CRIT} levels for read and write. If you did not
+ set levels, the check only reports measured numbers and returns always {OK}
+ status.
+
+discovery:
+ One service is created on each filer.
+

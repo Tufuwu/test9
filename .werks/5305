@@ -1,0 +1,23 @@
+Title: check_mk_agent.hpux: Fixed path for Plugins and local checks
+Level: 1
+Component: checks
+Compatible: incomp
+Edition: cre
+Version: 1.5.0i1
+Date: 1508765713
+Class: fix
+
+The original path for lib files has been hardcoded to omd version 0.45. The
+scripts are now executed from the expected location which is standard for
+linux and solaris. This results in a changed path for local and regular
+plugins for the agent.
+
+If the agent will be replaced by this new version, the new paths are:
+
+local checks:
+Old: /omd/versions/0.45.20110123/lib/check_mk_agent/local
+New: /usr/lib/check_mk_agent/local
+
+plugins:
+OLD: /omd/versions/0.45.20110123/lib/check_mk_agent/plugins
+New: /usr/lib/check_mk_agent/plugins

@@ -1,0 +1,19 @@
+title: Informix DB: Status
+agents: linux
+catalog: app/informix
+license: GPL
+distribution: check_mk
+description:
+ This checks monitors instance status of
+ Informix Database application.
+
+ The check is OK if the instance status is in state
+ initialization or online. It is WARN if the state is
+ quiescent, recovery, backup, abort or single user and
+ it goes CRIT if the state is shutdown or offline.
+
+item:
+ Name of the instance
+
+discovery:
+ One service is created for each instance.

@@ -1,0 +1,18 @@
+title: Raritan EMX Devices: Temperature
+agents: snmp
+catalog: hw/environment/raritan
+license: GPL
+distribution: check_mk
+description:
+ Shows Sensor information for Temperature
+ for each Rack connected to a Raritan EMX devices.
+ No configuration is needed, the devices sends the state by himself
+
+ Upper and lower levels are configurable.
+
+item:
+ The fixed statement {{Rack}} followed by the Rack ID, the sensor type and the name of the sensor
+
+discovery:
+ One service is created for each sensor.
+

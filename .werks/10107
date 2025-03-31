@@ -1,0 +1,10 @@
+Title: CLI: Don't crash on manual parent scan from the command line without a specific host
+Level: 2
+Component: core
+Class: fix
+Compatible: compat
+Edition: cre
+State: unknown
+Version: 2.0.0i1
+Date: 1568785041
+

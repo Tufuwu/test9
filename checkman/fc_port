@@ -1,0 +1,46 @@
+title: Dell Fibre Channel Switches: Port Status
+catalog: hw/storagehw/dell
+agents: snmp
+license: GPL
+distribution: check_mk
+description:
+ This checks monitors fibre channel ports of devices supporting the fibre
+ channel management (FCMGMT) MIB, notably Dell fibre channel switches.
+ Monitored are the physical, operational, or adminstrative state of the ports,
+ the number of received and transmitted objects (RxObjects, TxObjects),
+ the incoming and outgoing throughput derived from the number of received
+ and transmitted elements (RxElements, TxElements), and the following
+ error counters: CRC errors, Enc-OUT frames, no Tx credits, C3 discards.
+
+ The check has a non-OK state in the following situations:
+
+ {[1]} The physical, operational, or adminstrative state of the port is not
+ as expected.
+
+ {[2]} The current or averaged throughput exceeds the configured absolute or
+ relative levels.
+
+ {[3]} One of the error counters exceeds its configured levels.
+
+ Averaging: This check supports averaging on all counters. Averaging is
+ turned on but setting the check parameter {"average"} to a number of minutes.
+ In this case the check produces additional performance data for each parameter
+ and all warning/error levels are only applied on the averaged value, not on
+ the current one. This is especially helpful when using levels on the throughput.
+
+ Note: The counters CRC errors and Enc-OUT are represented as percentages in
+ relation to the number of received frames. C3 discards and no Tx credits are
+ in relation to the number of sent frames.
+
+item:
+ The item is the port-number as two-digit or three-digit string (on switches
+ with 100 or more ports) as printed on the switch (note: the SNMP index of
+ port {00} is {1}!). If configured, port names of the device will be part
+ of the check item (and thus the service description).
+
+discovery:
+  One service is created for all operational ports
+  if the administrativ state is not 1 (unknown) or 3 (offline).
+  It can be configured (see CONFIGURATION VARIABLES)
+  how operational ports are defined.
+
