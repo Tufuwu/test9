@@ -1,0 +1,36 @@
+version: "3.4"
+services:
+  db:
+    environment:
+      - POSTGRES_PASSWORD=caluma
+    ports:
+      - "${DATABASE_PORT:-5432}:${DATABASE_PORT:-5432}"
+  caluma:
+    image: projectcaluma/caluma:dev
+    build:
+      context: .
+      args:
+        REQUIREMENTS: requirements-all.txt
+    user: "${UID:?Set UID env variable to your user id}"
+    volumes:
+      - ./:/app
+    command:
+      [
+        "/bin/sh",
+        "-c",
+        "wait-for-it.sh db:${DATABASE_PORT:-5432} -- ./manage.py migrate && ./manage.py runserver 0.0.0.0:8000",
+      ]
+    # example for profiling
+    # command: ./manage.py runprofileserver --use-cprofile 0.0.0.0:8000 --nothreading --prof-path /app
+    environment:
+      - ENV=development
+  minio:
+    image: minio/minio:latest@sha256:bb816e2f248a2f53288b9154456a5ac65f6fad3bdce4e0538273bcc5dcf2bfcf
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+    environment:
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=minio123
+    command: server data

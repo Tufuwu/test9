@@ -1,111 +1,82 @@
-PyDataStructs
-=============
+# ![Caluma Service](https://user-images.githubusercontent.com/6150577/60805422-51b1bf80-a180-11e9-9ae5-c794249c7a98.png)
 
-[![Build Status](https://app.travis-ci.com/codezonediitj/pydatastructs.svg?branch=master)](https://app.travis-ci.com/github/codezonediitj/pydatastructs) [![Join the chat at https://gitter.im/codezonediitj/pydatastructs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/codezoned2017/Lobby) [![Discuss at pydatastructs@googlegroups.com](https://img.shields.io/badge/discuss-pydatastructs%40googlegroups.com-blue.svg)](https://groups.google.com/forum/#!forum/pydatastructs) [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/codezonediitj/pydatastructs/pulls) [![codecov](https://codecov.io/gh/codezonediitj/pydatastructs/branch/master/graph/badge.svg)](https://codecov.io/gh/codezonediitj/pydatastructs)
+[![Build Status](https://travis-ci.com/projectcaluma/caluma.svg?branch=master)](https://travis-ci.com/projectcaluma/caluma)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/projectcaluma/caluma/blob/master/.coveragerc#L5)
+[![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
+[![PyPI](https://img.shields.io/pypi/v/caluma)](https://pypi.org/project/caluma/)
+[![License: GPL-3.0-or-later](https://img.shields.io/github/license/projectcaluma/caluma)](https://spdx.org/licenses/GPL-3.0-or-later.html)
 
-About
------
+A collaborative form editing service.
 
-This project aims to be a Python package for various data structures in computer science. We are also working on the development of algorithms including their parallel implementations. To the best of our knowledge, a well-designed library/package which has covered most of the data structures and algorithms including their parallel implementation doesn't exist yet.
+## What is Caluma Service?
 
-Once the software design becomes more stable after a few releases of this package in the near future, we also aim to provide APIs for the code in C++ and Java as well.
+Caluma Service is the core part of the Caluma project providing a
+[GraphQL API](https://graphql.org/). For a big picture and to learn what Caluma
+does for you, have a look at [caluma.io](https://caluma.io)
 
-Installation
-------------
+## Getting started
 
-You can install the library by running the following command,
+### Installation
 
-```python
-python -m pip install .
+NOTE: We recommend using Caluma as a dedicated service. However, it is possible to integrate
+Caluma into a django project. You can read about this [here](docs/django-apps.md).
+
+**Requirements**
+
+- docker
+- docker-compose
+
+After installing and configuring those, download [docker-compose.yml](https://github.com/projectcaluma/caluma/blob/master/docker-compose.yml) and run the following command:
+
+```bash
+docker-compose up -d
 ```
 
-For development purposes, you can use the option `e` as shown below,
+You can now access [GraphiQL](https://github.com/graphql/graphiql) at
+[http://localhost:8000/graphql](http://localhost:8000/graphql) which
+includes a schema documentation. The API allows to query and mutate form
+and workflow entities which are described below.
 
-```python
-python -m pip install -e .
-```
+Caluma is a [12factor app](https://12factor.net/) which
+means that configuration is stored in environment variables.
+Different environment variable types are explained at
+[django-environ](https://github.com/joke2k/django-environ#supported-types).
 
-Make sure that your python version is above `3.5`.
+You can read more about running and configuring Caluma under
+[docs/configuration.md](docs/configuration.md)
 
-Testing
--------
+### Debugging
 
-For testing your patch locally follow the steps given below,
+Set environment variable `ENV` to `dev` to enable debugging capabilities. Don't use this in production as it exposes confidential information!
 
-1. Install [pytest-cov](https://pypi.org/project/pytest-cov/). Skip this step if you are already having the package.
-2. Run, `python3 -m pytest --doctest-modules --cov=./ --cov-report=html`. Look for, `htmlcov/index.html` and open it in your browser, which will show the coverage report. Try to ensure that the coverage is not decreasing by more than 1% for your patch.
+This enables [Django Debug Middleware](https://docs.graphene-python.org/projects/django/en/latest/debug/).
 
-For a good visualisation of the different data structures and algorithms, refer the following websites:
-- https://visualgo.net/
-- https://www.cs.usfca.edu/~galles/visualization/
+For profiling you can use `./manage.py runprofileserver`. See [docker-compose.override.yml](docker-compose.override.yml) for
+an example.
 
-You can use the examples given in the following book as tests for your code:
-- [https://opendatastructures.org/ods-python.pdf](https://opendatastructures.org/ods-python.pdf)
+## License
 
-Why do we use Python?
-------------------
+Code released under the [GPL-3.0-or-later license](LICENSE).
 
-As we know Python is an interpreted language and hence is slow compared to C++, the most popular language for competitive programming. We still decided to use Python because the software development can happen at a much faster pace and it is much easier to test various software designs and APIs as coding them out takes no time. However, keeping the need of the users in mind, we will shift to C++ backend,  which will happen quickly as we would be required to just translate the tested code rather than writing it from scratch, after a few releases with APIs available for all the languages.
+For further information on our license choice, you can read up on the [corresponding GitHub issue](https://github.com/projectcaluma/caluma/issues/751#issuecomment-547974930).
 
-How to contribute?
-------------------
+## Further reading
 
-Follow the steps given below,
-
-1. Fork, https://github.com/codezonediitj/pydatastructs/
-2. Execute, `git clone https://github.com/codezonediitj/pydatastructs/`
-3. Change your working directory to `../pydatastructs`.
-4. Execute, `git remote add origin_user https://github.com/<your-github-username>/pydatastructs/`
-5. Execute, `git checkout -b <your-new-branch-for-working>`.
-6. Make changes to the code.
-7. Add your name and email to the AUTHORS, if you wish to.
-8. Execute, `git add .`.
-9. Execute, `git commit -m "your-commit-message"`.
-10. Execute, `git push origin_user <your-current-branch>`.
-11. Make PR.
-
-That's it, 10 easy steps for your first contribution. For future contributions just follow steps 5 to 10. Make sure that before starting work, always checkout to master and pull the recent changes using the remote `origin` and then start following steps 5 to 10.
-
-See you soon with your first PR.
-
-It is recommended to go through the following links before you start working.
-
-- [Issue Policy](https://github.com/codezonediitj/pydatastructs/wiki/Issue-Policy)
-- [Pull Request Policy](https://github.com/codezonediitj/pydatastructs/wiki/Pull-Request-Policy)
-- [Plan of Action for the Projects](https://github.com/codezonediitj/pydatastructs/wiki/Plan-of-Action-for-the-Projects)
-
-
-Guidelines
-----------
-
-We recommend you to join our [gitter channel](https://gitter.im/codezoned2017/Lobby) for discussing anything related to the project.
-
-Please follow the rules and guidelines given below,
-
-1. Follow the [numpydoc docstring guide](https://numpydoc.readthedocs.io/en/latest/format.html).
-2. If you are planning to contribute a new data structure then first raise an **issue** for discussing the API, rather than directly making a PR. Please go through [Plan of Action for Adding New Data Structures](https://github.com/codezonediitj/pydatastructs/wiki/Plan-of-Action-for-Adding-New-Data-Structures)
-3. For the first-time contributors we recommend not to take a complex data structure, rather start with `beginner` or `easy`.
-4. We don't assign issues to any individual. Instead, we follow First Come First Serve for taking over issues, i.e., if one contributor has already shown interest then no comment should be made after that as it won't be considered. Anyone willing to work on an issue can comment on the thread that he/she is working on and raise a PR for the same.
-5. Any open PR must be provided with some updates after being reviewed. If it is stalled for more than 4 days, it will be labeled as `Please take over`, meaning that anyone willing to continue that PR can start working on it.
-6. PRs that are not related to the project or don't follow any guidelines will be labeled as `Could Close`, meaning that the PR is not necessary at the moment.
-
-The following parameters are to be followed to pass the code quality tests for your Pull Requests,
-
-1. There should not be any trailing white spaces at any line of code.
-2. Each `.py` file should end with exactly one new line.
-3. Comparisons involving `True`, `False` and `None` should be done by
-reference (using `is`, `is not`) and not by value(`==`, `!=`).
-
-Keep contributing!!
-
-Thanks to these wonderful people ✨✨:
-
-<table>
-	<tr>
-		<td>
-			<a href="https://github.com/codezonediitj/pydatastructs/graphs/contributors">
-  				<img src="https://contrib.rocks/image?repo=codezonediitj/pydatastructs" />
-			</a>
-		</td>
-	</tr>
-</table>
+- [Installation & Configuration](docs/configuration.md) - Get started installing
+  Caluma in a production context
+- [Contributing](CONTRIBUTING.md) - If you want to help us, here's
+  how to start with your first contribution.
+- [Caluma Guide](docs/guide.md) - How to get up and running with Caluma
+- [Workflow Concepts](docs/workflow-concepts.md) - How to use caluma workflows
+- [Historical Records](docs/historical-records.md) - Undo and audit trail
+  functionality
+- [GraphQL](docs/graphql.md) - Further information on how to use the GraphQL
+  interface
+- [Validation](docs/validation.md) - Validation of user input
+- [Extending Caluma](docs/extending.md) - Extensions: Data visibility and
+  permissions
+- [Caluma Events](docs/events.md) - Reacting upon Caluma Events
+- [Using Caluma as django apps](docs/django-apps.md)
+- [Interfaces](docs/interfaces.md)
+- [Maintainer's Handbook](docs/maintainers.md) - HOWTO for various maintainer's
+  tasks

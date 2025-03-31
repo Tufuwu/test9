@@ -1,0 +1,30 @@
+# When adding new dependencies here, also add them to the renovate.json to
+# enable auto-merge
+
+black==19.3b0
+factory-boy==3.0.1
+faker==4.17.1
+flake8==3.8.4
+flake8-bugbear==20.1.4
+flake8-debugger==3.2.1
+flake8-docstrings==1.5.0
+flake8-isort==4.0.0
+flake8-string-format==0.3.0
+flake8-tuple==0.4.1
+gitlint==0.13.1
+isort==4.3.21
+pdbpp==0.10.2
+pre-commit==2.8.2
+pydocstyle==5.1.1
+pytest==6.1.2
+pytest-cov==2.10.1
+pytest-django==4.1.0
+pytest-env==0.6.2
+pytest-factoryboy==2.0.3
+pytest-mock==3.3.1
+pytest-randomly==3.5.0
+pytest-xdist==2.1.0
+python-semantic-release==7.3.0
+requests-mock==1.8.0
+reuse==0.11.1
+syrupy==0.8.4
