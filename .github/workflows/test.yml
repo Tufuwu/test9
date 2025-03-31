@@ -1,116 +1,51 @@
-name: Test
+name: Unix
 
-on:
-  pull_request:
-  push:
-    branches: [main]
+on: [push, pull_request]
 
 jobs:
   test:
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: ["3.9", "3.10"]
-        os: [ ubuntu-latest ]
-    env:
-      OS: ${{ matrix.os }}
-      PYTHON_VERSION: ${{ matrix.python-version }}
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+    - name: Cache conda
+      uses: actions/cache@v4
+      # Increase this value to reset cache
+      env: {CACHE_NUMBER: 0}
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ matrix.python-version }}
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
+    - uses: conda-incubator/setup-miniconda@v2
+      name: Setup conda
+      with:
+        auto-update-conda: true
+        activate-environment: testing
+        auto-activate-base: false
+        channels: conda-forge,defaults
+        channel-priority: true
 
-      - name: Install pip
-        run: pip install --upgrade pip
-
-      - name: Install development dependencies (Python 2)
-        if: ${{ startsWith(matrix.python-version, '2.') }}
-        run: pip install --upgrade -r dev-requirements-py2.txt
-
-      - name: Install development dependencies (Python 3)
-        if: ${{ startsWith(matrix.python-version, '3.') }}
-        run: pip install --upgrade -r dev-requirements-py3.txt
-
-      - name: Log package versions
-        run: pip freeze
-
-      - name: Run tests
-        run: pytest tests --cov=./
-
-      - name: Run lint
-        run: prospector --profile ./prospector.yaml -t dodgy -t mccabe -t profile-validator -t pyflakes -t pylint
-
-      - name: Run rstcheck
-        run: rstcheck README.rst
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          env_vars: OS,PYTHON_VERSION
-
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
-    env:
-      PYTHON_VERSION: ${{ matrix.python-version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install pip
-        run: pip install --upgrade pip
-
-      - name: Install dependencies
-        run: |
-          pip install wheel
-
-      - name: Build distribution files
-        id: build-dist
-        run: |
-          # Build distribution files
-          python setup.py sdist bdist_wheel
-
-          # List distribution files and check their file sizes
-          ls -lh dist
-
-          # Set step outputs
-          sdist_path=$(find dist -type f -name "*.tar.gz")
-          wheel_path=$(find dist -type f -name "*.whl")
-          wheel_name=$(basename $wheel_path)
-          wheel_size=$(stat -c %s $wheel_path)
-          echo "::set-output name=sdist-path::${sdist_path}"
-          echo "::set-output name=wheel-path::${wheel_path}"
-          echo "::set-output name=wheel-name::${wheel_name}"
-          echo "::set-output name=wheel-size::${wheel_size}"
-
-      - name: Test installation from tarball
-        run: |
-          set -x
-          pip install ${{ steps.build-dist.outputs.sdist-path }}
-          python -c "import databricks_cli.version; print(databricks_cli.version.version)"
-          which databricks
-          databricks --version
-          which dbfs
-          dbfs --version
-
-      - name: Test installation from wheel
-        run: |
-          set -x
-          pip install --force-reinstall ${{ steps.build-dist.outputs.wheel-path }}
-          python -c "import databricks_cli.version; print(databricks_cli.version.version)"
-          which databricks
-          databricks --version
-          which dbfs
-          dbfs --version
+    - shell: bash -l {0}
+      name: Install dependencies
+      run: |
+        conda install --yes "numba<0.49" scipy h5py mkl pytest pyflakes python=${{ matrix.python-version }};
+        conda install --yes -c conda-forge mpi4py;
+        pip install openPMD-viewer;
+        python setup.py install
+    - shell: bash -l {0}
+      name: pyflakes
+      run: python -m pyflakes .
+    - shell: bash -l {0}
+      name: FBPIC physics tests
+      run: python setup.py test
+    - shell: bash -l {0}
+      name: PICMI test
+      run: |
+        pip install wget picmistandard numexpr periodictable;
+        cd tests/unautomated;
+        curl https://raw.githubusercontent.com/picmi-standard/picmi/main/Examples/laser_acceleration/laser_acceleration_PICMI.py -o fbpic_script.py;
+        python test_picmi.py

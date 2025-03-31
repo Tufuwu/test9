@@ -1,44 +1,104 @@
-Setting up the dev environment
----------------------------------
-To isolate dependencies from your global python installation, it is important to use a tool like
-[virtualenv](https://virtualenv.pypa.io/en/stable/). With `virtualenv` you can install the dev environment by doing the following.
+# Contributing to FBPIC
 
-Another option would be to use docker directly, i.e. 
-```bash
-docker run -it -v `echo $PWD`:/root python:3.6.8 bash
-docker run -it -v `echo $PWD`:/root python:2.7.12 bash
+## How to contribute
 
+### Forking the repository
+
+In order to contribute, please fork the [main repository](https://github.com/fbpic/fbpic):
+
+- Click 'Fork' on the page of the main repository, in order to create a personal copy of this repository on your Github account.
+
+- Clone this copy to your local machine:
+```
+git clone git@github.com:<YourUserLogin>/fbpic.git
 ```
 
-- `pip install -e .`
-- `pip install -r dev-requirements-py3.txt`
+### Implementing a new feature and adding it to the main repository
 
-To verify that the installation of `databricks-cli` is the one checked out from VCS, you can check by doing `python -c "import databricks_cli; print databricks_cli.__file__"`.
+- Switch to the development branch
+```
+git checkout dev
+```
+and install it
+```
+python setup.py install
+```
 
-Developing using VSCode dev containers
---------------------------------------
+- Start a new branch from the development branch, in order to
+implement a new feature. (Choose a branch name that is representative of the
+feature that you are implementing, e.g. `add-quadratic-deposition` or
+`fix-matplotlib-errors`)
+```
+git checkout -b <NewBranchName>
+```
 
-This repo comes pre-configured with a devolpment container for the VSCode [Remote Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension. When opening this project in VSCode you will be asked if you want to open it in a dev container. Click yes and VSCode will build a docker container which everything needed to develop the Databricks CLI and attach VSCode to the container.
+- Start coding. When your changes are ready, commit them.
+```
+git add <ChangedFiles>
+git commit
+```
 
-Requirements:
+- Synchronize your branch with the main repository. (It may have
+  changed while you where implementing local changes.) Resolve merging
+  issues if any, and commit the corresponding changes.
+```
+git pull git@github.com:fbpic/fbpic.git dev
+```
 
-1. VSCode with the remote containers extension installed
-2. A working docker installation
+- Test and check your code:
+  - Use [pyflakes](https://pypi.python.org/pypi/pyflakes) and
+[pep8](https://pypi.python.org/pypi/pep8) to detect any potential bug.
+  ```
+  cd fbpic/
+  pyflakes .
+  ```
+  - Make sure that the tests pass (please install `openPMD-viewer` first)
+  ```
+  python setup.py install
+  pip install matplotlib openPMD-viewer
+  python setup.py test
+  ```
+  (Be patient: the tests can take approx. 5 min.)
 
-Developing using Github CodeSpaces
-----------------------------------
+- Push the changes to your personal copy on Github
+```
+git push -u origin <NewBranchName>
+```
 
-The same development container setup used for local VSCode also works with GitHub CodeSpaces. If you have CodeSpaces enabled in your Github account then can just create a CodeSpace from the repoand start coding. 
+- Go on your Github account and create a pull request between **your
+  new feature branch** and the **dev branch of the main
+  repository**. Please add some text to the pull request to describe
+  what feature you just implemented and why. Please also make sure that
+  the automated tests (on Github) return no error.
 
-In order to test the CLI against a Databricks cluster you can define the these secrets for your CodeSpace so you don't have to run `databricks init` eacht time you open it:
+## Style and conventions
 
-- `DATABRICKS_HOST`: Workspace URL
-- `DATABRICKS_TOKEN`: Personal access token
+- Document the functions and classes that you write, by using a
+  [docstring](https://www.python.org/dev/peps/pep-0257/). List the
+  parameters in and describe what the functions return, according to
+  [Numpy style](https://github.com/numpy/numpy/blob/main/doc/HOWTO_DOCUMENT.rst.txt),  as in this example:
 
-https://docs.github.com/en/codespaces/managing-your-codespaces/managing-encrypted-secrets-for-your-codespaces
+```python
+def print_simulation_setup( comm, use_cuda ):
+    """
+    Print message about the number of proc and
+    whether it is using GPU or CPU.
+
+    Parameters
+    ----------
+    comm: an fbpic BoundaryCommunicator object
+        Contains the information on the MPI decomposition
+
+    use_cuda: bool
+        Whether the simulation is set up to use CUDA
+    """
+```
+Don't use documenting styles like `:param:`, `:return:`, or
+`@param`, `@return`, as they are less readable.
 
 
-Running Tests
-----------------
-- `tox`
+- Lines of code should **never** have [more than 79 characters per line](https://www.python.org/dev/peps/pep-0008/#maximum-line-length).
 
+- Names of variables, functions should be lower case (with underscore
+  if needed: e.g. `get_filter_array`). Names for classes should use the
+  CapWords convention (e.g. `Fields`). See [this page](https://www.python.org/dev/peps/pep-0008/#prescriptive-naming-conventions) for more details.

@@ -1,2 +1,0 @@
--r ./dev-requirements.txt
-prospector[with_pyroma]

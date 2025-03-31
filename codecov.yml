@@ -1,4 +1,0 @@
-ignore:
-  - "databricks_cli/sdk"
-  - "tests"
-  - "integration"

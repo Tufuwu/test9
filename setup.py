@@ -1,66 +1,56 @@
-# Databricks CLI
-# Copyright 2017 Databricks, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License"), except
-# that the use of services to which certain application programming
-# interfaces (each, an "API") connect requires that the user first obtain
-# a license for the use of the APIs from Databricks, Inc. ("Databricks"),
-# by creating an account at www.databricks.com and agreeing to either (a)
-# the Community Edition Terms of Service, (b) the Databricks Terms of
-# Service, or (c) another written agreement between Licensee and Databricks
-# for the use of the APIs.
-#
-# You may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#!/bin/env python
 
-import imp
-import io
-import os
+# Copyright 2016, FBPIC contributors
+# Authors: Remi Lehe, Manuel Kirchen, Kevin Peters, Soeren Jalas
+# License: 3-Clause-BSD-LBNL
+import sys
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
+import fbpic # In order to extract the version number
 
-version = imp.load_source(
-    'databricks_cli.version', os.path.join('databricks_cli', 'version.py')).version
+# Obtain the long description from README.md
+with open('./README.md') as f:
+    long_description = f.read()
+# Get the package requirements from the requirements.txt file
+with open('requirements.txt') as f:
+    install_requires = [ line.strip('\n') for line in f.readlines() ]
+
+# Define a custom class to run the py.test with `python setup.py test`
+class PyTest(TestCommand):
+
+    def run_tests(self):
+        import pytest
+        errcode = pytest.main(['--ignore=tests/unautomated', '--durations=10'])
+        sys.exit(errcode)
 
 setup(
-    name='databricks-cli',
-    version=version,
-    packages=find_packages(include=['databricks_cli*']),
-    install_requires=[
-        # Note: please keep this in sync with `requirements.txt`.
-        'click>=6.7',
-        'pyjwt>=1.7.0',
-        'oauthlib>=3.1.0',
-        'requests>=2.17.3',
-        'tabulate>=0.7.7',
-        'six>=1.10.0',
-        'configparser>=0.3.5;python_version < "3.6"',
-    ],
-    entry_points='''
-        [console_scripts]
-        databricks=databricks_cli.cli:cli
-        dbfs=databricks_cli.dbfs.cli:dbfs_group
-    ''',
-    zip_safe=False,
-    author='Andrew Chen',
-    author_email='andrewchen@databricks.com',
-    description='A command line interface for Databricks',
-    long_description=io.open('README.rst', encoding='utf-8').read(),
-    license='Apache License 2.0',
+    name='fbpic',
+    version=fbpic.__version__,
+    description='Spectral, quasi-3D Particle-In-Cell for CPU and GPU',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    maintainer='Remi Lehe',
+    maintainer_email='remi.lehe@normalesup.org',
+    license='BSD-3-Clause-LBNL',
+    packages=find_packages('.'),
+    tests_require=['more-itertools<6.0.0', 'pytest', 'openpmd_viewer'],
+    cmdclass={'test': PyTest},
+    install_requires=install_requires,
+    extras_require = {
+        'picmi':  ["picmistandard", "numexpr", "periodictable"],
+    },
+    include_package_data=True,
+    platforms='any',
+    url='http://github.com/fbpic/fbpic',
     classifiers=[
-        'Intended Audience :: Developers',
-        'Intended Audience :: System Administrators',
+        'Programming Language :: Python',
+        'Development Status :: 3 - Alpha',
+        'Natural Language :: English',
+        'Environment :: Console',
+        'Intended Audience :: Science/Research',
+        'Operating System :: OS Independent',
+        'Topic :: Scientific/Engineering :: Physics',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.6',
-        'License :: OSI Approved :: Apache Software License',
-    ],
-    keywords='databricks cli',
-    url='https://github.com/databricks/databricks-cli'
-)
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5'],
+    )
