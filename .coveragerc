@@ -1,4 +1,0 @@
-[run]
-plugins = Cython.Coverage
-source = cherab
-omit = *tests*
