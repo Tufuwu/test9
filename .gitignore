@@ -1,7 +1,5 @@
 *.pyc
-.eggs/
-*.png
-build/
-dist/
-.ipynb_checkpoints/
-*.pdf
+player_ids.json
+.idea/*
+static/vods/*
+.env

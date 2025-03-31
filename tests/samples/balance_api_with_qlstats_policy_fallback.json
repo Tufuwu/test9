@@ -1,0 +1,126 @@
+{
+    "deactivated": [],
+    "playerinfo": {
+        "76561198043212328": {
+            "allowRating": true,
+            "deactivated": false,
+            "privacy": "public",
+            "ratings": {
+                "ad": {
+                    "elo": 21.83,
+                    "games": 6
+                },
+                "ca": {
+                  "elo": 25.0,
+                    "games": 0
+                },
+                "ctf": {
+                    "elo": 25.0,
+                    "games": 0
+                },
+                "ft": {
+                    "elo": 25.0,
+                    "games": 0
+                },
+                "steamid": "76561198043212328",
+                "tdm": {
+                    "elo": 25.0,
+                    "games": 0
+                },
+                "tdm2v2": {
+                    "elo": 25.0,
+                    "games": 0
+                }
+            }
+        },
+        "76561198260599288": {
+            "allowRating": true,
+            "deactivated": false,
+            "privacy": "public",
+            "ratings": {
+                "ad": {
+                    "elo": 24.26,
+                    "games": 2
+                },
+                "ca": {
+                  "elo": 25.0,
+                    "games": 0
+                },
+                "ctf": {
+                    "elo": 25.0,
+                    "games": 0
+                },
+                "ft": {
+                    "elo": 25.0,
+                    "games": 0
+                },
+                "steamid": "76561198260599288",
+                "tdm": {
+                    "elo": 25.0,
+                    "games": 0
+                },
+                "tdm2v2": {
+                    "elo": 25.0,
+                    "games": 0
+                }
+            }
+        }
+    },
+    "players": [
+        {
+            "ad": {
+                "elo": 24.26,
+                "games": 2
+            },
+            "ca": {
+                "elo": 25.0,
+                "games": 0
+            },
+            "ctf": {
+                "elo": 25.0,
+                "games": 0
+            },
+            "ft": {
+                "elo": 25.0,
+                "games": 0
+            },
+            "steamid": "76561198260599288",
+            "tdm": {
+                "elo": 25.0,
+                "games": 0
+            },
+            "tdm2v2": {
+                "elo": 25.0,
+                "games": 0
+            }
+        },
+        {
+            "ad": {
+                "elo": 21.83,
+                "games": 6
+            },
+            "ca": {
+                "elo": 25.0,
+                "games": 0
+            },
+            "ctf": {
+                "elo": 25.0,
+                "games": 0
+            },
+            "ft": {
+                "elo": 25.0,
+                "games": 0
+            },
+            "steamid": "76561198043212328",
+            "tdm": {
+                "elo": 25.0,
+                "games": 0
+            },
+            "tdm2v2": {
+                "elo": 25.0,
+                "games": 0
+            }
+        }
+    ],
+    "untracked": []
+}

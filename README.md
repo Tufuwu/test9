@@ -1,74 +1,64 @@
-[![PyPI version](https://img.shields.io/pypi/v/fb8)](https://pypi.org/project/fb8) [![Build Status](https://github.com/tianluyuan/sphere/actions/workflows/python-app.yml/badge.svg)](https://github.com/tianluyuan/sphere/actions) [![Python versions](https://img.shields.io/pypi/pyversions/fb8)](https://pypi.org/project/fb8)
+![Build status](https://github.com/em92/quakelive-local-ratings/actions/workflows/build.yml/badge.svg)
+[![Coverage](https://codecov.io/gh/em92/quakelive-local-ratings/branch/master/graph/badge.svg)](https://codecov.io/gh/em92/quakelive-local-ratings)
 
-Getting started
-=================
-`pip install fb8`
+# quakelive-local-ratings (qllr)
 
-```Python
-import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
-from sphere.distribution import fb8
+QLLR is webservice that:
 
+- stores match results
+- generates player's ratings
+- gives API to be used in [minqlx](https://github.com/MinoMino/minqlx) with [balance](https://github.com/MinoMino/minqlx-plugins/blob/master/balance.py) plugin to give **balanced teams**
 
-def grid(npts):
-    return [_.flatten() for _ in np.meshgrid(np.linspace(0, np.pi, npts), np.linspace(0,2*np.pi, npts))]
+Usually it is used with [feeder](https://github.com/em92/qlstats-feeder-mini) based on [Predath0r's](https://github.com/PredatH0r) [QLStats feeder](https://github.com/PredatH0r/XonStat/feeder) in order to collect match data from online quake live servers.
 
+### Supported gametypes
 
-def plot_fb8(fb8, npts):
-    """
-    Plot fb8 on 3D sphere
-    """
-    xs = fb8.spherical_coordinates_to_nu(*grid(npts))
-    pdfs = fb8.pdf(xs)
-    z,x,y = xs.T #!!! Note the ordering for xs here is used consistently throughout. Follows Kent's 1982 paper.
+* Attack & Defend
+* Capture The Flag
+* Clan Arena
+* Freeze Tag
+* Team Deathmatch
+* Team Deathmatch (2v2)
 
-    fig = plt.figure(figsize=plt.figaspect(1.))
-    ax = fig.add_subplot(111, projection='3d')
-    ax.plot_surface(x.reshape(npts, npts),
-                    y.reshape(npts, npts),
-                    z.reshape(npts, npts),
-                    alpha=0.5,
-                    rstride=1, cstride=1,
-                    facecolors=cm.plasma(pdfs.reshape(npts, npts)/pdfs.max()))
-    ax.set_axis_off()
-    plt.tight_layout(-5)
-    plt.show()
+### Differences between QLLR and [QLStats](http://qlstats.net/)
 
+* supports TrueSkill-based rating and average player performance based rating (TODO: note in configuration)
+* player ratings per map support (see [docs](docs/minqlx_config.md#map-based-ratings))
+* limited supported gametypes
+* [GDPR](http://eur-lex.europa.eu/eli/reg/2016/679/oj) incompatible
 
-plot_fb8(fb8(np.pi/16,-np.pi/3,0,10,10,-1,0.5,0.3), 200)
+### Requirements
+
+For qllr itself:
+
+* Python 3.7 with pip
+* PostgreSQL 9.5
+
+For feeder:
+
+* Node.js 0.11.13
+* libzmq3
+
+### Docker
+
+For development:
+
+```
+docker build . -t em92/qllr-dev -f Dockerfile.develop
 ```
 
-Basic information
-=================
-Implements calculation of the density and fitting (using maximum likelihood estimate) of the FB8 distribution on a sphere, which is a generalization of the FB6, FB5 (Kent), and FB4 (Bingham-Mardia) distributions described below.
+For production:
 
-Implements the FB6 distribution that is first introduced in Rivest ([1984](https://www.doi.org/10.1214/aos/1176346724)).
+```
+docker build . -t em92/qllr -f Dockerfile.production
+```
 
-Implements calculation of the density and fitting (using maximum likelihood estimate) of the Kent distribution based on Kent ([1982](https://doi.org/10.1111/j.2517-6161.1982.tb01189.x)). A unittest is performed if distribution.py is called from the command line.
+### Docs
 
-Implements the Bingham-Mardia distribution whose mode is a small-circle on the sphere based on Bingham, Mardia ([1978](https://doi.org/10.1093/biomet/65.2.379)).
+* [Installation (on Debian Buster)](docs/install.md)
+* [Backing up database](docs/backup.md)
+* [qlds/minqlx configuration](docs/minqlx_config.md)
 
-Also calculates directional, percentile levels which can be used to indicate the N% highest-posterior-density regions in the sky.
+### Note to European A&D and #qlpickup.ru communities
 
-![maps](https://github.com/tianluyuan/sphere/blob/master/fig/example.png?raw=true)
-
-Additional references
-=================
-Kent, Hussein, Jah, [_Directional distributions in tracking of space debris_](https://ieeexplore.ieee.org/abstract/document/7528139) 
-
-Terdik, Jammalamadaka, Wainwright, [_Simulation and visualization of spherical distributions_](https://www.researchgate.net/profile/Gyorgy_Terdik/publication/324605982_Simulation_and_Visualization_of_Spherical_Distributions/links/5ad8edceaca272fdaf81fe04/Simulation-and-Visualization-of-Spherical-Distributions.pdf)
-
-Mardia, Jupp, [_Directional statistics_](https://www.doi.org/10.1002/9780470316979)
-
-Notes
-=================
-Currently the `scipy.special.hyp2f1` is used and may exhibit inaccuracies for large parameters. See github [issues](https://github.com/scipy/scipy/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+hyp2f1).
-
-Contributors
-=================
-
-This project was originally developed for the FB5 (Kent) distribution [here](https://github.com/edfraenkel/kent_distribution).
-
-_Tianlu Yuan_
+Backups of database and feeder config are [here](https://disk.yandex.ru/d/hJfHip6ue7UCNg)

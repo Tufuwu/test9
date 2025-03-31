@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+{% from "helpers.html" import rating with context %}
+
+{% macro medal(player, key) -%}
+  {% if player['medal_stats'][key] %}
+    {{ player['medal_stats'][key] }}
+  {% else %}
+    -
+  {% endif %}
+{%- endmacro %}
+
+
+{% macro wpn_frags(player, key) -%}
+  {% if player['weapon_stats'][key] and player['weapon_stats'][key][0] > 0 %}
+    {{ player['weapon_stats'][key][0] }}
+  {% else %}
+    -
+  {% endif %}
+{%- endmacro %}
+
+
+{% macro wpn_acc(player, key) -%}
+  {% if player['weapon_stats'][key] and player['weapon_stats'][key][3] %}
+    <span title="{{ player['weapon_stats'][key][1] }} / {{ player['weapon_stats'][key][2] }}">{{ player['weapon_stats'][key][3] }}%</span>
+  {% else %}
+    -
+  {% endif %}
+{%- endmacro %}
+
+{% macro wpn_damage_percent(player, key) -%}
+  {% if player['weapon_stats'][key] and player['weapon_stats'][key][5] %}
+    <div title="{{ player['weapon_stats'][key][4] }} ({{ player['weapon_stats'][key][5] | int }}%)" class="w-bar-{{ key }}" style="display: inline-block; height: 20px; width: {{ player['weapon_stats'][key][5] }}%"></div>
+  {% endif %}
+{%- endmacro %}
+
+{% macro rating_diff(data) -%}
+  {% if not data['old'] or not data['new'] %}
+  -
+  {% else %}
+    {{ ( data['new'] - data['old'] ) | round(2) }}
+    {% if data['old_d'] and data['new_d'] and data['new_d'] - data['old_d'] %}
+      &plusmn; {{ ( data['new_d'] - data['old_d'] ) | round(2) }}
+    {% endif %}
+  {% endif %}
+{%- endmacro %}
+
+{% macro team_scoreboard(team, players, gametype, wa, ma) -%}
+<div style="overflow-x: auto"><table class="scoreboard table table-hover table-borderless">
+  <thead><tr>
+    <th>Nick</th>
+    <th class="s s1">Score</th>
+    <th class="s s1">Frags</th>
+    <th class="s s1">Deaths</th>
+    {% for m in medals_in_scoreboard_mid %}
+    <th class="s s1" style="text-transform: capitalize">{{ m }}</th>
+    {% endfor %}
+    <th class="s s1">Damage Dealt</th>
+    <th class="s s1">Damage Taken</th>
+    <th class="s s1">Time</th>
+    {% for m in medals_in_scoreboard_right %}
+    <th class="s s1" style="text-transform: capitalize">{{ m }}</th>
+    {% endfor %}
+    <th class="s s1">Old rating</th>
+    <th class="s s1">New rating</th>
+    <th class="s s1">Diff</th>
+    {% for w in wa %}
+    <th class="s sw" style="display: none"><div class="w-{{ w }}"></div></th>
+    <th class="s sa" style="display: none"><div class="w-{{ w }}"></div></th>
+    {% endfor %}
+    {% for m in ma %}
+    <th class="s sm" style="display: none"><div class="m-{{ m }}"></div></th>
+    {% endfor %}
+    <th class="s sdp" style="display: none"></th>
+  </tr></thead>
+  <tbody>{% for player in players|selectattr("team", "equalto", team) %}<tr class="{{ 'red' if team == '1' else 'blue' }}">
+    <td class="player-nick"><a href="/player/{{ player['steam_id'] }}">{{ player['name'] | ql_nickname | safe }}</a></td>
+    <td class="s s1">{{ player['stats']['score'] }}</td>
+    <td class="s s1">{{ player['stats']['frags'] }}</td>
+    <td class="s s1">{{ player['stats']['deaths'] }}</td>
+    {% for m in medals_in_scoreboard_mid %}
+    <td class="s s1">{{ medal(player, m) }}</td>
+    {% endfor %}
+    <td class="s s1">{{ player['stats']['damage_dealt'] }}</td>
+    <td class="s s1">{{ player['stats']['damage_taken'] }}</td>
+    <td class="s s1">{{ player['stats']['alive_time'] | seconds_to_mmss }}</td>
+    {% for m in medals_in_scoreboard_right %}
+    <td class="s s1">{{ medal(player, m) }}</td>
+    {% endfor %}
+    <td class="s s1">{{ rating( player['rating'], 'old' ) }}</td>
+    <td class="s s1">{{ rating( player['rating'], 'new' ) }}</td>
+    <td class="s s1">{{ rating_diff( player['rating'] ) }}</td>
+    {% for w in wa %}
+    <td class="s sw" style="display: none">{{ wpn_frags( player, w ) }}</td>
+    <td class="s sa" style="display: none">{{ wpn_acc  ( player, w ) }}</td>
+    {% endfor %}
+    {% for m in ma %}
+    <td class="s sm" style="display: none">{{ medal( player, m ) }}</td>
+    {% endfor %}
+    <td class="s sdp" style="font-size: 0; display: none">
+    {% for w in wa %}
+    {{ wpn_damage_percent(player, w) }}
+    {% endfor %}
+    </td>
+  </tr>{% endfor %}</tbody>
+</table></div>
+
+{%- endmacro %}
+{% block body %}
+<article>
+<h1 class="title">Match Information</h1>
+
+<div class="row">
+  <div class="col-sm-4">
+    <h3>Match Detail</h3>
+    <ul>
+    <li>Played: <span title="{{ summary['datetime'] }}" data-timestamp="{{ summary['timestamp'] }}">{{ summary['datetime'] }}</span></li>
+    <li>Gametype: {{ summary['gt'] }}</li>
+    <li>Arena: {{ summary['map'] }}</li>
+    <li>Duration: {{ summary['duration'] }}</li>
+    <li>Rating diff: {{ summary['rating_diff'] }}</li>
+    <li>Scores: <span class="qc1">{{ summary['team1_score'] }}</span> : <span class="qc4">{{ summary['team2_score'] }}</span></li>
+    </ul>
+  </div>
+</div>
+
+<div id="table_btns" class="row">
+  <a class="s1 active" onClick="toggle_table('s1', this)">Summary</a>
+  <a class="sw" onClick="toggle_table('sw', this)">Frags</a>
+  <a class="sw" onClick="toggle_table('sa', this)">Accuracy</a>
+  <a class="sm" onClick="toggle_table('sm', this)">Medals</a>
+  <a class="sm" onClick="toggle_table('sdp', this)">Damage %</a>
+</div>
+
+<div class="row">
+{{ team_scoreboard("1" if summary['team1_score'] > summary['team2_score'] else "2", team_stats['overall'], summary['gt_short'], weapons_available, medals_available) }}
+{{ team_scoreboard("2" if summary['team1_score'] > summary['team2_score'] else "1", team_stats['overall'], summary['gt_short'], weapons_available, medals_available) }}
+</div>
+
+<p><a href="https://qlstats.net/game/{{ match_id }}">View scoreboard in QLStats.net</a></p>
+</article>
+
+{% endblock %}

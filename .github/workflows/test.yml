@@ -1,40 +1,39 @@
-# This workflow will install Python dependencies, run tests and lint
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
-name: status
+name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
-  schedule:
-    - cron:  '13 7 * * 2'
+    branches: [ main, develop ]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
+  test:
     strategy:
       matrix:
         python-version: ["3.9", "3.10"]
+        os: ["ubuntu-latest"]
 
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip install -e .
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --per-file-ignores="__init__.py:F821" --count --select=E9,F63,F7,F82 --show-source --statistics
-    - name: Test with doctest
-      run: |
-        python sphere/distribution/distribution.py -v
+      - uses: actions/checkout@v3
+      - name: Include ppa repository
+        run: sudo add-apt-repository ppa:deadsnakes/ppa
+      - name: Set up Python ${{ matrix.python-version }}
+        run: |
+          sudo apt-get install python${{ matrix.python-version }}-dev python${{ matrix.python-version }}-distutils
+          sudo update-alternatives --install /usr/bin/python3 python3 `which python${{ matrix.python-version }}` 1
+          sudo update-alternatives --install /usr/bin/python3-config python3-config `which python${{ matrix.python-version }}-config` 1
+      - name: Upgrade setuptools for Python 3.12
+        if: matrix.python-version == '3.12'
+        run: |
+          curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+          python3 get-pip.py "setuptools > 69.0"
+      - name: Install requirements
+        run: python3 -m pip install -r requirements.txt
+      - name: Install development requirements
+        run: python3 -m pip install -r requirements_dev.txt
+      - name: Install postgresql
+        run: sudo apt-get install postgresql
+      - name: Test
+        run: ./scripts/test
+      - uses: codecov/codecov-action@v1
