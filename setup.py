@@ -1,78 +1,68 @@
-#!/usr/bin/env python
-
-# Prepare a release:
+# setuptools installation of GromacsWrapper
+# Copyright (c) 2008-2011 Oliver Beckstein <orbeckst@gmail.com>
+# Released under the GNU Public License 3 (or higher, your choice)
 #
-#  - git pull --rebase  # check that there is no incoming changesets
-#  - check version in ptrace/version.py and doc/conf.py
-#  - set release date in doc/changelog.rst
-#  - check that "python3 setup.py sdist" contains all files tracked by
-#    the SCM (Git): update MANIFEST.in if needed
-#  - git commit -a -m "prepare release VERSION"
-#  - Remove untracked files/dirs: git clean -fdx
-#  - run tests, type: tox --parallel auto
-#  - git push
-#  - check GitHub Actions status:
-#    https://github.com/vstinner/python-ptrace/actions
-#
-# Release a new version:
-#
-#  - git tag VERSION
-#  - Remove untracked files/dirs: git clean -fdx
-#  - python3 setup.py sdist bdist_wheel
-#  - git push --tags
-#  - twine upload dist/*
-#
-# After the release:
-#
-#  - increment version in  ptrace/version.py and doc/conf.py
-#  - git commit -a -m "post-release"
-#  - git push
+# See the files INSTALL and README for details or visit
+# https://github.com/Becksteinlab/GromacsWrapper
+from __future__ import with_statement
+from setuptools import setup, find_packages
 
-from imp import load_source
-from os import path
-try:
-    # setuptools supports bdist_wheel
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+import versioneer
+
+with open("README.rst") as readme:
+    long_description = readme.read()
 
 
-MODULES = ["ptrace", "ptrace.binding", "ptrace.syscall", "ptrace.syscall.linux", "ptrace.debugger"]
-
-SCRIPTS = ("strace.py", "gdb.py")
-
-CLASSIFIERS = [
-    'Intended Audience :: Developers',
-    'Development Status :: 4 - Beta',
-    'Environment :: Console',
-    'License :: OSI Approved :: GNU General Public License (GPL)',
-    'Operating System :: OS Independent',
-    'Natural Language :: English',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 3',
-]
-
-with open('README.rst') as fp:
-    LONG_DESCRIPTION = fp.read()
-
-ptrace = load_source("version", path.join("ptrace", "version.py"))
-PACKAGES = {}
-for name in MODULES:
-    PACKAGES[name] = name.replace(".", "/")
-
-install_options = {
-    "name": ptrace.PACKAGE,
-    "version": ptrace.__version__,
-    "url": ptrace.WEBSITE,
-    "download_url": ptrace.WEBSITE,
-    "author": "Victor Stinner",
-    "description": "python binding of ptrace",
-    "long_description": LONG_DESCRIPTION,
-    "classifiers": CLASSIFIERS,
-    "license": ptrace.LICENSE,
-    "packages": list(PACKAGES.keys()),
-    "package_dir": PACKAGES,
-    "scripts": SCRIPTS,
-}
-
-setup(**install_options)
+setup(name="GromacsWrapper",
+      version=versioneer.get_version(),
+      cmdclass=versioneer.get_cmdclass(),
+      description="A Python wrapper around the Gromacs tools.",
+      long_description=long_description,
+      author="Oliver Beckstein",
+      author_email="orbeckst@gmail.com",
+      license="GPLv3",
+      url="https://github.com/Becksteinlab/GromacsWrapper",
+      download_url="https://github.com/Becksteinlab/GromacsWrapper/downloads",
+      keywords="science Gromacs analysis 'molecular dynamics'",
+      classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: POSIX',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows ',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Topic :: Scientific/Engineering :: Bio-Informatics',
+        'Topic :: Scientific/Engineering :: Chemistry',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+      ],
+      packages=find_packages(
+          exclude=['scripts', 'tests', 'tests.*', 'extras', 'doc/examples']),
+      scripts=[
+          'scripts/gw-join_parts.py',
+          'scripts/gw-merge_topologies.py',
+          'scripts/gw-forcefield.py',
+          'scripts/gw-partial_tempering.py',
+      ],
+      package_data={'gromacs': ['templates/*.sge', 'templates/*.pbs',  # template files
+                                'templates/*.ll', 'templates/*.sh',
+                                'templates/*.mdp', 'templates/*.cfg'
+                                ],
+                    },
+      install_requires=['numpy>=1.0',
+                        'six',          # towards py 3 compatibility
+                        'numkit',       # numerical helpers
+                        'matplotlib',
+                        ],
+      tests_require=['pytest', 'numpy>=1.0', 'pandas>=0.17'],
+      zip_safe=True,
+      )
