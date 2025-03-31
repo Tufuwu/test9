@@ -1,36 +1,28 @@
-# ignore compiled python files
-__pycache__
+.DS_Store
 *.pyc
-
-# ignore python egg files
-*.egg-info/
+*$py.class
+*~
+.*.sw*
+dist/
+*.egg-info
 *.egg
-
-# ignore coverage files
-*.py,cover
-*.coverage
-*.coverage.*
-
-# Jupyter notebook checkpoints
-*.ipynb_checkpoints/
-
-# ignore idea SDK
-.idea/*
-
-# ignore cache
-.cache/*
-*.pytest_cache/
-*.mypy_cache/
-
-# ignore Vim swap files
-*.swp
-
-# ignore Sphinx build
-docs/generated
-docs/_build
-
-# psi4 dat files
-*.dat
-
-# macfiles
-*.DS_Store
+*.egg/
+build/
+.build/
+_build/
+pip-log.txt
+.directory
+erl_crash.dump
+*.db
+Documentation/
+.tox/
+.ropeproject/
+.project
+.pydevproject
+.coverage
+.eggs/
+.cache/
+.pytest_cache/
+.venv/
+coverage.xml
+htmlcov/

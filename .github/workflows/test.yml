@@ -1,131 +1,70 @@
-name: Continuous Integration
-
-on: [pull_request]
-
+name: CI
+on: [pull_request, push]
 jobs:
-  quick_test:
-    name: Misc check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
-        with:
-          python-version: '3.9'
-          architecture: 'x64'
-      - name: Misc
-        run: check/misc
-  format:
-    name: Format check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
-        with:
-          python-version: '3.9'
-          architecture: 'x64'
-      - name: Install yapf
-        run: cat dev_tools/conf/pip-list-dev-tools.txt | grep yapf | xargs pip install
-      - name: Format
-        run: check/format-incremental
-  mypy:
-    name: Type check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
-        with:
-          python-version: '3.9'
-          architecture: 'x64'
-      - name: Install mypy
-        run: cat dev_tools/conf/pip-list-dev-tools.txt | grep mypy | xargs pip install
-      - name: Type check
-        run: check/mypy
-  changed_files:
-    name: Changed files test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
-        with:
-          python-version: '3.9'
-          architecture: 'x64'
-      - name: Install changed files test dependencies
-        run: dev_tools/conf/pip-install-minimal-for-pytest-changed-files.sh
-      - name: Changed files test
-        run: check/pytest-changed-files
+  #################### Linters and checkers ####################
   lint:
-    name: Lint check
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
+      - name: Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: Set up Python ${{ matrix.python-version }}
+        id: python
+        uses: actions/setup-python@v2.2.1
         with:
-          python-version: '3.9'
-          architecture: 'x64'
-      - name: Install pylint
-        run: cat dev_tools/conf/pip-list-dev-tools.txt | grep "pylint\|astroid" | grep -v "#" | xargs pip install
-      - name: Lint
-        run: check/pylint
-  doc_test:
-    name: Doc test
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: pip install --upgrade pip setuptools wheel tox tox-docker
+      - name: Run flake8
+        run: tox -v -e py-flake8 -- -v
+      - name: Run pydocstyle
+        run: tox -v -e py-pydocstyle -- -v
+      - name: Run apicheck
+        run: tox -v -e py-apicheck -- -v
+  #################### Unittests ####################
+  unittest:
+    needs: lint
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
+      - name: Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: Set up Python ${{ matrix.python-version }}
+        id: python
+        uses: actions/setup-python@v2.2.1
         with:
-          python-version: '3.9'
-          architecture: 'x64'
-      - name: Install requirements
-        run: |
-          pip install -r requirements.txt
-          pip install -r dev_tools/conf/pip-list-dev-tools.txt
-      - name: Doc check
-        run: check/doctest -q
-  pytest:
-    name: Pytest Ubuntu
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: pip install --upgrade pip setuptools wheel tox tox-docker
+      - name: Run unittest
+        run: tox -v -e ${{ matrix.python-version }}-unit -- -v
+  #################### Integration tests ####################
+  integration:
+    needs: [lint, unittest]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
+      - name: Check out code from GitHub
+        uses: actions/checkout@v2.3.4
+      - name: Build rabbitmq:tls container
+        run: docker build -t rabbitmq:tls .
+      - name: Set up Python ${{ matrix.python-version }}
+        id: python
+        uses: actions/setup-python@v2.2.1
         with:
-          python-version: '3.9'
-          architecture: 'x64'
-      - name: Install requirements
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: pip install --upgrade pip setuptools wheel tox tox-docker
+      - name: Run integration tests
+        run: tox -v -e ${{ matrix.python-version }}-integration-rabbitmq -- -v
+      - name: Run integration tests with speedups enabled
         run: |
-          pip install -r requirements.txt
-          pip install -r dev_tools/conf/pip-list-dev-tools.txt
-          git config --global user.name ${GITHUB_ACTOR}
-      - name: Pytest check
-        run: check/pytest --actually-quiet
-  coverage:
-    name: Coverage check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
-        with:
-          python-version: '3.9'
-          architecture: 'x64'
-      - name: Install requirements
-        run: |
-          pip install -r requirements.txt
-          pip install -r dev_tools/conf/pip-list-dev-tools.txt
-          git config --global user.name ${GITHUB_ACTOR}
-      - name: Coverage check
-        run: check/pytest-and-incremental-coverage --actually-quiet
-  macos:
-    name: Pytest MacOS
-    runs-on: macos-10.15
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
-        with:
-          python-version: '3.9'
-          architecture: 'x64'
-      - name: Install requirements
-        run: |
-          pip install -r requirements.txt
-          pip install -r dev_tools/conf/pip-list-dev-tools.txt
-          git config --global user.name ${GITHUB_ACTOR}
-      - name: Pytest check
-        run: check/pytest
+          CELERY_ENABLE_SPEEDUPS=1 python setup.py develop
+          tox -v -e ${{ matrix.python-version }}-integration-rabbitmq -- -v
+        if: ${{ matrix.python-version != 'pypy3'}}

@@ -1,15 +1,17 @@
-.. OpenFermion-Cirq documentation master file, created by
-   sphinx-quickstart on Mon Jul 16 00:40:07 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+=============================================
+ amqp - Python AMQP low-level client library
+=============================================
 
-Welcome to OpenFermion-Cirq's documentation!
-============================================
+.. include:: includes/introduction.txt
+
+Contents
+========
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   api
+    reference/index
+    changelog
 
 Indices and tables
 ==================
@@ -17,3 +19,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
