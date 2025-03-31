@@ -1,3 +1,2 @@
-include README.rst LICENSE requirements.txt
-recursive-include modoboa_webmail *.html *.js *.css *.png *.po *.mo
-recursive-include doc *
+include requirements.txt
+recursive-include src/mykrobe/data *
