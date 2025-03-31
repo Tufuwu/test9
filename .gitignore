@@ -1,36 +1,32 @@
-########################################################################
-# Modified: 2021-01-20
-# Author: Milos Atz
-# Comment: gitignore for DASSH
-########################################################################
-
-# None of the old code or my other maintenance directories
-old/
-misc/
-dist/
-build/
-dassh.egg-info/
-animation.py
-misc_benchmarking_crap.py
-timing.py
-tmp_plot.py
-
-# No tests (for now; need to clean)
-# tests/
-
-# None of the test results
-tests/test_results/
-
-# Any pycache directories in DASSH source and tests
+# Byte-compiled / optimized / DLL files
 __pycache__/
-dassh/__pycache__/
-dassh/_se2anl/__pycache__/
-dassh/correlations/__pycache__/
-tests/__pycache__/
+*.py[cod]
 
-# Any pycache files
-*.pyc
+# C extensions
+*.o
+*.so
+*.dylib
 
-# Any unix filesystem objects
-._*
-.DS_Store*
+# Distribution/packaging
+build/
+dist/
+*.egg-info
+
+# Input/output
+input/
+output/
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Miscellaneous
+.DS_Store
+*.ini
+*.py~
+MSLP/*.nc
+*~
