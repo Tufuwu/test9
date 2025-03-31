@@ -1,70 +1,89 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+""" pygameweb
+"""
+import io
+import os
+import re
+from itertools import chain
 
-from setuptools import setup, find_namespace_packages
+from setuptools import setup, find_packages
 
-requirements = [
-    'xbox-webapi>=1.1.8',
-    'construct==2.10.56',
-    'cryptography==2.8',
-    'gevent==1.5a3',
-    'dpkt',
-    'marshmallow-objects',
-    'Flask'
-]
 
-setup_requirements = [
-    'pytest-runner'
-]
+def read(*parts):
+    """ Reads in file from *parts.
+    """
+    try:
+        return io.open(os.path.join(*parts), 'r', encoding='utf-8').read()
+    except IOError:
+        return ''
 
-test_requirements = [
-    'pytest>=3'
-]
+
+def get_version():
+    """ Returns version from pygameweb/__init__.py
+    """
+    version_file = read('pygameweb', '__init__.py')
+    version_match = re.search(r'^__version__ = [\'"]([^\'"]*)[\'"]',
+                              version_file, re.MULTILINE)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError('Unable to find version string.')
+
+
+def get_requirements():
+    """ returns list of requirements from requirements.txt files.
+    """
+    fnames = ['requirements.txt']
+    requirements = chain.from_iterable((open(fname) for fname in fnames))
+    requirements = list(set([l.strip() for l in requirements]) - {'-r requirements.txt'})
+    return requirements
+
 
 setup(
-    name="xbox-smartglass-core",
-    version="1.2.2",
-    author="OpenXbox",
-    author_email="noreply@openxbox.org",
-    description="A library to interact with the Xbox One gaming console via the SmartGlass protocol.",
-    long_description=open('README.rst').read() + '\n\n' + open('HISTORY.rst').read(),
-    long_description_content_type="text/x-rst",
-    license="GPL",
-    keywords="xbox one smartglass auxiliary fallout title stump tv streaming livetv rest api",
-    url="https://github.com/OpenXbox/xbox-smartglass-core-python",
-    python_requires=">=3.6",
-    packages=find_namespace_packages(include=['xbox.*']),
-    zip_safe=False,
-    include_package_data=True,
+    name='pygameweb',
     classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT license",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8"
+        'Development Status :: 1 - Planning',
+        'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
     ],
-    install_requires=requirements,
-    setup_requires=setup_requirements,
-    test_suite="tests",
-    tests_require=test_requirements,
+    data_files=[('.', ['alembic.ini'])],
+    license='BSD',
+    author='Rene Dudfield',
+    author_email='renesd@gmail.com',
+    description='Pygame.org website.',
+    include_package_data=True,
+    long_description=read('README.rst'),
+    package_dir={'pygameweb': 'pygameweb'},
+    packages=find_packages(),
+    package_data={'pygameweb': []},
+    url='https://github.com/pygame/pygameweb',
+    install_requires=get_requirements(),
+    version=get_version(),
     entry_points={
         'console_scripts': [
-            'xbox-cli=xbox.scripts.main_cli:main',
-            'xbox-discover=xbox.scripts.main_cli:main_discover',
-            'xbox-poweron=xbox.scripts.main_cli:main_poweron',
-            'xbox-poweroff=xbox.scripts.main_cli:main_poweroff',
-            'xbox-repl=xbox.scripts.main_cli:main_repl',
-            'xbox-replserver=xbox.scripts.main_cli:main_replserver',
-            'xbox-textinput=xbox.scripts.main_cli:main_textinput',
-            'xbox-gamepadinput=xbox.scripts.main_cli:main_gamepadinput',
-            'xbox-tui=xbox.scripts.main_cli:main_tui',
-            'xbox-fo4-relay=xbox.scripts.main_cli:main_falloutrelay',
-            'xbox-pcap=xbox.scripts.pcap:main',
-            'xbox-recrypt=xbox.scripts.recrypt:main',
-            'xbox-rest-server=xbox.scripts.rest_server:main'
-        ]
-    }
+            'pygameweb_front='
+                'pygameweb.run:run_front',
+            'pygameweb_generate_json='
+                'pygameweb.dashboard.generate_json:main',
+            'pygameweb_generate_static='
+                'pygameweb.dashboard.generate_static:main',
+            'pygameweb_launchpad='
+                'pygameweb.builds.launchpad_build_badge:check_pygame_builds',
+            'pygameweb_update_docs='
+                'pygameweb.builds.update_docs:update_docs',
+            'pygameweb_stackoverflow='
+                'pygameweb.builds.stackoverflow:download_stack_json',
+            'pygameweb_loadcomments='
+                'pygameweb.comment.models:load_comments',
+            'pygameweb_trainclassifier='
+                'pygameweb.comment.classifier_train:classify_comments',
+            'pygameweb_worker='
+                'pygameweb.tasks.worker:work',
+            'pygameweb_release_version_correct='
+                'pygameweb.builds.update_version_from_git:release_version_correct',
+            'pygameweb_github_releases='
+                'pygameweb.project.gh_releases:sync_github_releases',
+            'pygameweb_fixtures=' +
+                'pygameweb.fixtures:populate_db',
+        ],
+    },
 )

@@ -1,254 +1,63 @@
+""" Fixtures for testing.
+
+http://stackoverflow.com/questions/34466027/in-py-test-what-is-the-use-of-conftest-py-files
+
+To make testing databases easier we need a few fixtures for
+rolling back changes and such.
+
+"""
+
 import os
 import pytest
-import uuid
-import json
+from flask_sqlalchemy_session import flask_scoped_session
 
-from binascii import unhexlify
-from construct import Container
+from sqlalchemy_pytest_fixtures import engine, session, session_factory, connection, schema_name
 
-from xbox.sg import enum, packer, packet
+@pytest.fixture(scope='function')
+def app(engine, session_factory):
+    """ a flask app fixture
+    """
+    from pygameweb.app import create_app
 
-from xbox.sg.console import Console
-from xbox.sg.crypto import Crypto
-from xbox.sg.manager import MediaManager, TextManager, InputManager
+    test_app = create_app('pygameweb.config.Config', engine, session_factory)
 
-from xbox.auxiliary.crypto import AuxiliaryStreamCrypto
-
-from xbox.stump.manager import StumpManager
-
-from xbox.rest.app import app as rest_app
-from xbox.rest.consolewrap import ConsoleWrap
+    return test_app
 
 
 @pytest.fixture(scope='session')
-def uuid_dummy():
-    return uuid.UUID('de305d54-75b4-431b-adb2-eb6b9e546014')
+def config():
+    """ here we create our config and make sure we are using the test database.
+    """
+    from pygameweb.config import Config
+    Config.SQLALCHEMY_DATABASE_URI = os.environ.get('APP_DATABASE_URL_TEST')
+    Config.TESTING = True
+
+    # do not send emails with flask-mail
+    Config.MAIL_SUPPRESS_SEND = True
+
+    # to make testing easier
+    Config.WTF_CSRF_ENABLED = False
+
+    return Config
 
 
 @pytest.fixture(scope='session')
-def console_address():
-    return '10.11.12.12'
+def get_metadata():
+    """ returns a function which loads all the python models
+        and returns a Base.metadata object.
+    """
+    def load_models():
+        """ This is where we load all the models we want to test.
+        """
+        import pygameweb.models
+        import pygameweb.wiki.models
+        import pygameweb.user.models
+        import pygameweb.project.models
+        import pygameweb.page.models
+        import pygameweb.news.models
+        import pygameweb.doc.models
+        import pygameweb.comment.models
+        import pygameweb.tasks.models
+        return pygameweb.models.metadata
 
-
-@pytest.fixture(scope='session')
-def console_name():
-    return 'TestConsole'
-
-
-@pytest.fixture(scope='session')
-def console_liveid():
-    return 'FD0000123456789'
-
-
-@pytest.fixture(scope='session')
-def console_flags():
-    return enum.PrimaryDeviceFlag.AllowAnonymousUsers | enum.PrimaryDeviceFlag.AllowAuthenticatedUsers
-
-
-@pytest.fixture(scope='session')
-def public_key_bytes():
-    return unhexlify(
-        b'041815d5382df79bd792a8d8342fbc717eacef6a258f779279e5463573e06b'
-        b'f84c6a88fac904870bf3a26f856e65f483195c4323eef47a048f23a031da6bd0929d'
-    )
-
-
-@pytest.fixture(scope='session')
-def shared_secret_bytes():
-    return unhexlify(
-        '82bba514e6d19521114940bd65121af234c53654a8e67add7710b3725db44f77'
-        '30ed8e3da7015a09fe0f08e9bef3853c0506327eb77c9951769d923d863a2f5e'
-    )
-
-
-@pytest.fixture(scope='session')
-def crypto(shared_secret_bytes):
-    return Crypto.from_shared_secret(shared_secret_bytes)
-
-
-@pytest.fixture(scope='session')
-def console(console_address, console_name, uuid_dummy, console_liveid, console_flags, public_key_bytes):
-    c = Crypto.from_bytes(public_key_bytes)
-    console = Console(
-        console_address, console_name, uuid_dummy,
-        console_liveid, console_flags, c.foreign_pubkey
-    )
-    console.add_manager(StumpManager)
-    console.add_manager(MediaManager)
-    console.add_manager(TextManager)
-    console.add_manager(InputManager)
-    return console
-
-
-@pytest.fixture(scope='session')
-def public_key(public_key_bytes):
-    c = Crypto.from_bytes(public_key_bytes)
-    return c.foreign_pubkey
-
-
-@pytest.fixture(scope='session')
-def packets():
-    # Who cares about RAM anyway?
-    data = {}
-    data_path = os.path.join(os.path.dirname(__file__), 'data', 'packets')
-    for f in os.listdir(data_path):
-        with open(os.path.join(data_path, f), 'rb') as fh:
-            data[f] = fh.read()
-
-    return data
-
-
-@pytest.fixture(scope='session')
-def stump_json():
-    # Who cares about RAM anyway?
-    data = {}
-    data_path = os.path.join(os.path.dirname(__file__), 'data', 'stump_json')
-    for f in os.listdir(data_path):
-        with open(os.path.join(data_path, f), 'rt') as fh:
-            data[f] = json.load(fh)
-
-    return data
-
-
-@pytest.fixture(scope='session')
-def decrypted_packets(packets, crypto):
-    return {k: packer.unpack(v, crypto) for k, v in packets.items()}
-
-
-@pytest.fixture(scope='session')
-def pcap_filepath():
-    return os.path.join(os.path.dirname(__file__), 'data', 'sg_capture.pcap')
-
-
-@pytest.fixture(scope='session')
-def certificate_data():
-    filepath = os.path.join(os.path.dirname(__file__), 'data', 'selfsigned_cert.bin')
-    with open(filepath, 'rb') as f:
-        data = f.read()
-    return data
-
-
-@pytest.fixture(scope='session')
-def json_fragments():
-    filepath = os.path.join(os.path.dirname(__file__), 'data', 'json_fragments.json')
-    with open(filepath, 'rt') as f:
-        data = json.load(f)
-    return data['fragments']
-
-
-@pytest.fixture(scope='session')
-def aux_streams():
-    data = {}
-    data_path = os.path.join(os.path.dirname(__file__), 'data', 'aux_streams')
-    for f in os.listdir(data_path):
-        with open(os.path.join(data_path, f), 'rb') as fh:
-            data[f] = fh.read()
-
-    return data
-
-
-@pytest.fixture(scope='session')
-def aux_crypto(decrypted_packets):
-    connection_info = decrypted_packets['auxiliary_stream_connection_info'].protected_payload.connection_info
-    return AuxiliaryStreamCrypto.from_connection_info(connection_info)
-
-
-@pytest.fixture
-def rest_client():
-    rest_app.config['TESTING'] = True
-    yield rest_app
-
-
-@pytest.fixture(scope='session')
-def media_state():
-    return packet.message.media_state(
-        title_id=274278798,
-        aum_id='AIVDE_s9eep9cpjhg6g!App',
-        asset_id='',
-        media_type=enum.MediaType.Video,
-        sound_level=enum.SoundLevel.Full,
-        enabled_commands=enum.MediaControlCommand.Play | enum.MediaControlCommand.Pause,
-        playback_status=enum.MediaPlaybackStatus.Playing,
-        rate=1.00,
-        position=0,
-        media_start=0,
-        media_end=0,
-        min_seek=0,
-        max_seek=0,
-        metadata=[
-            Container(name='title', value='Some Movietitle'),
-            Container(name='subtitle', value='')
-        ]
-    )
-
-
-@pytest.fixture(scope='session')
-def active_title():
-    struct = packet.message._active_title(
-        title_id=714681658,
-        product_id=uuid.UUID('00000000-0000-0000-0000-000000000000'),
-        sandbox_id=uuid.UUID('00000000-0000-0000-0000-000000000000'),
-        aum='Xbox.Home_8wekyb3d8bbwe!Xbox.Home.Application',
-        disposition=Container(
-            has_focus=True,
-            title_location=enum.ActiveTitleLocation.StartView
-        )
-    )
-    return struct
-
-
-@pytest.fixture(scope='session')
-def active_media_title():
-    struct = packet.message._active_title(
-        title_id=714681658,
-        product_id=uuid.UUID('00000000-0000-0000-0000-000000000000'),
-        sandbox_id=uuid.UUID('00000000-0000-0000-0000-000000000000'),
-        aum='AIVDE_s9eep9cpjhg6g!App',
-        disposition=Container(
-            has_focus=True,
-            title_location=enum.ActiveTitleLocation.StartView
-        )
-    )
-    return struct
-
-
-@pytest.fixture(scope='session')
-def console_status(active_title):
-    return packet.message.console_status(
-        live_tv_provider=0,
-        major_version=10,
-        minor_version=0,
-        build_number=14393,
-        locale='en-US',
-        active_titles=[
-            active_title
-        ]
-    )
-
-
-@pytest.fixture(scope='session')
-def console_status_with_media(active_media_title):
-    return packet.message.console_status(
-        live_tv_provider=0,
-        major_version=10,
-        minor_version=0,
-        build_number=14393,
-        locale='en-US',
-        active_titles=[
-            active_media_title
-        ]
-    )
-
-
-@pytest.fixture
-def rest_client_connected_media_console_status(rest_client, console, media_state, console_status_with_media):
-    console._device_status = enum.DeviceStatus.Available
-    console._connection_state = enum.ConnectionState.Connected
-    console._pairing_state = enum.PairedIdentityState.Paired
-
-    console.media._media_state = media_state
-    console._console_status = console_status_with_media
-
-    console_wrap = ConsoleWrap(console)
-    rest_client.console_cache[console.liveid] = console_wrap
-    return rest_client
+    return load_models
