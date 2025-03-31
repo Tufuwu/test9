@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-# Copyright (c) 2013-2021, Freja Nordsiek
+# Copyright (c) 2013-2020, Freja Nordsiek
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,8 +24,32 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+""" Module of Exceptions. """
 
-# All configuration information is now in pyproject.toml and setup.cfg.
-if __name__ == '__main__':
-    from setuptools import setup
-    setup()
+
+class Hdf5storageError(IOError):
+    """ Base class of hdf5storage package exceptions."""
+    pass
+
+
+class CantReadError(Hdf5storageError):
+    """ Exception for a failure to read the desired data."""
+    pass
+
+
+class TypeNotMatlabCompatibleError(Hdf5storageError):
+    """ Exception for trying to write non-MATLAB compatible data.
+
+    In the event that MATLAB compatibility is being done
+    (``Options.matlab_compatible``) and a Python type is not importable
+    by MATLAB, the data is either not written or this exception is
+    thrown depending on the value of
+    ``Options.action_for_matlab_incompatible``.
+
+    See Also
+    --------
+    hdf5storage.Options.matlab_compatible
+    hdf5storage.Options.action_for_matlab_incompatible
+
+    """
+    pass

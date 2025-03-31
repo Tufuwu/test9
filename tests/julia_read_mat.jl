@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-# Copyright (c) 2013-2021, Freja Nordsiek
+# Copyright (c) 2013-2016, Freja Nordsiek
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,8 +24,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using MAT
 
-# All configuration information is now in pyproject.toml and setup.cfg.
-if __name__ == '__main__':
-    from setuptools import setup
-    setup()
+a = matread(ARGS[1])
+matwrite(ARGS[2], a)
+
+quit()

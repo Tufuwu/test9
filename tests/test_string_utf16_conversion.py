@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2013-2021, Freja Nordsiek
 # All rights reserved.
 #
@@ -26,8 +24,34 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import os.path
+import tempfile
 
-# All configuration information is now in pyproject.toml and setup.cfg.
-if __name__ == '__main__':
-    from setuptools import setup
-    setup()
+import numpy as np
+import h5py
+
+import pytest
+
+import hdf5storage
+
+
+# A test to make sure that the following are written as UTF-16
+# (uint16) if they don't contain doublets and the
+# convert_numpy_str_to_utf16 option is set.
+#
+# * str
+# * numpy.unicode_ scalars
+
+@pytest.mark.parametrize('tp', (str, np.unicode_))
+def test_conv_utf16(tp):
+    name = '/a'
+    data = tp('abcdefghijklmnopqrstuvwxyz')
+    with tempfile.TemporaryDirectory() as folder:
+        filename = os.path.join(folder, 'data.h5')
+
+        hdf5storage.write(data, path=name, filename=filename,
+                          matlab_compatible=False,
+                          store_python_metadata=False,
+                          convert_numpy_str_to_utf16=True)
+        with h5py.File(filename, mode='r') as f:
+            assert f[name].dtype.type == np.uint16
