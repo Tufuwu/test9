@@ -1,33 +1,40 @@
-name: Sciris CI workflow
-on: [pull_request]
+name: Build and Test
+
+on:
+  push:
+    paths:
+      - 'scFates/**'
 
 jobs:
-  install_and_test:
+  build_and_test:
+
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     strategy:
-      fail-fast: false
-      max-parallel: 8
       matrix:
         python-version: ["3.9", "3.10"]
-    name: Install and test
+
     steps:
-      - name: Checkout sources
-        uses: actions/checkout@v1
-      - uses: actions/setup-python@main
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: x64
-      - name: Install Sciris
-        run: python setup.py develop
-      - name: Install tests
-        run: pip install pytest
-      - name: Run API tests
-        working-directory: ./tests
-        run: pytest test_*.py --durations=0 --junitxml=test-results.xml # Run actual tests
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: test_results
-          path: tests/test-results.xml
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        sudo apt-get clean && sudo apt-get update
+        sudo apt-get install -y r-base r-cran-mgcv
+        pip install coverage cmake pytest mock git+https://github.com/j-bac/elpigraph-python.git
+        pip install .
+    - name: Test with pytest
+      run: |
+        coverage run -m pytest scFates/tests/test_w_plots.py
+        coverage report -m
+        coverage xml
+    - name: Upload coverage to Codecov
+      if: ${{ matrix.python-version == '3.8' }}
+      uses: codecov/codecov-action@v1
+      with:
+        files: ./coverage.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
