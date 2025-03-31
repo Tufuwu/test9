@@ -1,135 +1,58 @@
-# Fourier-Bessel Particle-In-Cell code (FBPIC)
+<div align="center">
 
-[![Build Status main](https://img.shields.io/travis/fbpic/fbpic/main.svg?label=main)](https://travis-ci.com/fbpic/fbpic/branches)
-[![Build Status dev](https://img.shields.io/travis/fbpic/fbpic/dev.svg?label=dev)](https://travis-ci.com/fbpic/fbpic/branches)
-[![pypi version](https://img.shields.io/pypi/v/fbpic.svg)](https://pypi.python.org/pypi/fbpic)
-[![License](https://img.shields.io/pypi/l/fbpic.svg)](LICENSE.txt)
-[![DOI](https://zenodo.org/badge/69215997.svg)](https://zenodo.org/badge/latestdoi/69215997)
+# PyLaia
 
-Online documentation: [http://fbpic.github.io](http://fbpic.github.io)<br/>
-Support: [Join slack](https://slack-fbpic.herokuapp.com)
+**PyLaia is a device agnostic, PyTorch based, deep learning toolkit for handwritten document analysis.**
 
-## Overview
+**It is also a successor to [Laia](https://github.com/jpuigcerver/Laia).**
 
-FBPIC is a
-[Particle-In-Cell (PIC) code](https://en.wikipedia.org/wiki/Particle-in-cell)
-for relativistic plasma physics.  
+[![Build](https://img.shields.io/github/workflow/status/carmocca/PyLaia/Laia%20CI?&label=Build&logo=GitHub&labelColor=1b1f23)](https://github.com/carmocca/PyLaia/actions?query=workflow%3A%22Laia+CI%22)
+[![Coverage](https://img.shields.io/codecov/c/github/carmocca/PyLaia?&label=Coverage&logo=Codecov&logoColor=ffffff&labelColor=f01f7a)](https://codecov.io/gh/carmocca/PyLaia)
+[![Code quality](https://img.shields.io/codefactor/grade/github/carmocca/PyLaia?&label=CodeFactor&logo=CodeFactor&labelColor=2782f7)](https://www.codefactor.io/repository/github/carmocca/PyLaia)
 
-It is especially well-suited for physical simulations of
-**laser-wakefield acceleration** and **plasma-wakefield acceleration**, with close-to-cylindrical symmetry.
+[![Python: 3.6+](https://img.shields.io/badge/Python-3.6%2B-FFD43B.svg?&logo=Python&logoColor=white&labelColor=306998)](https://www.python.org/)
+[![PyTorch: 1.4.0+](https://img.shields.io/badge/PyTorch-1.4.0%2B-8628d5.svg?&logo=PyTorch&logoColor=white&labelColor=%23ee4c2c)](https://pytorch.org/)
+[![pre-commit: enabled](https://img.shields.io/badge/pre--commit-enabled-76877c?&logo=pre-commit&labelColor=1f2d23)](https://github.com/pre-commit/pre-commit)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?)](https://github.com/ambv/black)
 
-### Algorithm
+</div>
 
-The distinctive feature of FBPIC is to use
-a **spectral decomposition in
-cylindrical geometry** (Fourier-Bessel
-decomposition) for the fields. This combines the advantages of **spectral 3D** PIC codes (high accuracy and stability) and
-those of **finite-difference cylindrical** PIC codes
-(orders-of-magnitude speedup when compared to 3D simulations).  
-For more details on the algorithm, its advantages and limitations, see
-the [documentation](http://fbpic.github.io).
-
-### Language and hardware
-
-FBPIC is written entirely in Python, but uses
-[Numba](http://numba.pydata.org/) Just-In-Time compiler for high
-performance. In addition, the code can run on **CPU** (with multi-threading)
-and on **GPU**. For large simulations, running the
-code on GPU can be much faster than on CPU.
-
-### Advanced features of laser-plasma acceleration
-
-FBPIC implements several useful features for laser-plasma acceleration, including:
-- Moving window
-- Cylindrical geometry (with azimuthal mode decomposition)
-- Calculation of space-charge fields at the beginning of the simulation
-- Intrinsic mitigation of Numerical Cherenkov Radiation (NCR) from relativistic bunches
-- Field ionization module (ADK model)
-
-In addition, FBPIC supports the **boosted-frame** technique (which can
-dramatically speed up simulations), and includes:
-- Utilities to convert input parameters from the lab frame to the boosted frame
-- On-the-fly conversion of simulation results from the boosted frame back to the lab frame
-- Suppression of the Numerical Cherenkov Instability (NCI) using the Galilean technique
+Get started by having a look at our [Wiki](https://github.com/jpuigcerver/PyLaia/wiki)!
+###### Several (mostly undocumented) examples of its use are provided at [PyLaia-examples](https://github.com/carmocca/PyLaia-examples).
 
 ## Installation
 
-The installation instructions below are for a local computer. For more
-details, or for instructions specific to a particular HPC cluster, see
-the [documentation](http://fbpic.github.io).
+In order to install PyLaia, follow this recipe:
 
-The recommended installation is through the
-[Anaconda](https://www.continuum.io/why-anaconda) distribution.
-If Anaconda is not your default Python installation, download and install
-it from [here](https://www.continuum.io/downloads).
-
-**Installation steps**:
-
-- Install the dependencies of FBPIC. This can be done in two lines:
-```
-conda install numba scipy h5py mkl
-conda install -c conda-forge mpi4py
-```
-- Download and install FBPIC:
-```
-pip install fbpic
+```bash
+git clone https://github.com/jpuigcerver/PyLaia
+cd PyLaia
+pip install --editable .
+# alternatively, to install extras
+pip install --editable .[dev,test]
 ```
 
-- **Optional:** in order to run on GPU, install the additional package
-`cudatoolkit` and `cupy` -- e.g. using CUDA version 10.0.
+The following Python scripts will be installed in your system:
+
+- [`pylaia-htr-create-model`](laia/scripts/htr/create_model.py): Create a VGG-like model with BLSTMs on top for handwriting text recognition. The script has different options to costumize the model. The architecture is based on the paper ["Are Multidimensional Recurrent Layers Really Necessary for Handwritten Text Recognition?"](https://ieeexplore.ieee.org/document/8269951) (2017) by J. Puigcerver.
+- [`pylaia-htr-train-ctc`](laia/scripts/htr/train_ctc.py): Train a model using the CTC algorithm and a set of text-line images and their transcripts.
+- [`pylaia-htr-decode-ctc`](laia/scripts/htr/decode_ctc.py): Decode text line images using a trained model and the CTC algorithm. It can also output the char/word segmentation boundaries of the symbols recognized.
+- [`pylaia-htr-netout`](laia/scripts/htr/netout.py): Dump the output of the model for a set of text-line images in order to decode using an external language model.
+
+## Acknowledgments
+
+Work in this toolkit was financially supported by the [Pattern Recognition and Human Language Technology (PRHLT) Research Center](https://www.prhlt.upv.es/wp/)
+
+## BibTeX
+
 ```
-conda install cudatoolkit=10.0
-pip install cupy-cuda100
+@misc{puigcerver2018pylaia,
+  author = {Joan Puigcerver and Carlos Mocholí},
+  title = {PyLaia},
+  year = {2018},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/jpuigcerver/PyLaia}},
+  commit = {commit SHA}
+}
 ```
-(In the above command, you should choose a CUDA version that is compatible with your GPU driver ; see [this table](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#major-components__table-cuda-toolkit-driver-versions) for more info.)
-
-- **Optional:** in order to run on a CPU which is **not** an Intel model, you
-need to install `pyfftw`, in order to replace the MKL FFT:
-```
-conda install -c conda-forge pyfftw
-```
-
-## Running simulations
-
-Once installed, FBPIC is available as a **Python module** on your
-system.
-
-Therefore, in order to run a physical simulation, you will need a **Python
-script** that imports FBPIC's functionalities and use them to setup the
-simulation. You can find examples of such scripts in the
-[documentation](http://fbpic.github.io) or in this repository, in `docs/source/example_input/`.
-
-Once your script is ready, the simulation is run simply by typing:
-```
-python fbpic_script.py
-```
-The code outputs HDF5 files, that comply with the
-[OpenPMD standard](http://www.openpmd.org/#/start),
- and which can thus be read as such (e.g. by using the
- [openPMD-viewer](https://github.com/openPMD/openPMD-viewer)).
-
-## Contributing
-
-We welcome contributions to the code! Please read [this page](https://github.com/fbpic/fbpic/blob/main/CONTRIBUTING.md) for guidelines on how to contribute.
-
-## Research & Attribution
-
-FBPIC was originally developed by Remi Lehe at [Berkeley Lab](http://www.lbl.gov/),
-and Manuel Kirchen at
-[CFEL, Hamburg University](http://lux.cfel.de/). The code also
-benefitted from the contributions of Soeren Jalas (CFEL), Kevin Peters (CFEL),
-Irene Dornmair (CFEL), Laurids Jeppe (CFEL), Igor Andriyash (Laboratoire d’Optique Appliquée),
-Omri Seemann (Weizmann Institute), Daniel Seipt (University of Michigan)
-and Samuel Yoffe (University of Strathclyde).
-
-FBPIC's algorithms are documented in following scientific publications:
-
-* General description of FBPIC and it's algorithm (original paper): [R. Lehe et al., CPC, 2016](http://www.sciencedirect.com/science/article/pii/S0010465516300224) ([arXiv](https://arxiv.org/abs/1507.04790))
-* Boosted-frame technique with Galilean algorithm: [M. Kirchen et al., PoP, 2016](https://aip.scitation.org/doi/10.1063/1.4964770) ([arXiv](https://arxiv.org/abs/1608.00215)) and [Lehe et al., PRE, 2016](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.94.053305) ([arXiv](https://arxiv.org/abs/1608.00227))
-* Parallel finite-order solver for multi-CPU/GPU simulations: [S. Jalas et al., PoP, 2017](https://aip.scitation.org/doi/abs/10.1063/1.4978569) ([arXiv](https://arxiv.org/abs/1611.05712))
-* Parallel finite-order boosted-frame simulations for multi-CPU/GPU simulations: [M. Kirchen et al., PRE, 2020](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.102.013202)
-
-If you use FBPIC for your research project: that's great! We are
-very pleased that the code is useful to you!
-
-If your project even leads to a scientific publication, please consider citing at least FBPIC's original paper. If your project uses the more advanced algorithms, please consider citing the respective publications in addition.

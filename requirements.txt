@@ -1,5 +1,9 @@
+textdistance
+natsort
 numpy
 scipy
-numba
-h5py
-python-dateutil
+matplotlib
+torch
+torchvision
+nnutils-pytorch
+pytorch-lightning @ git+https://github.com/PyTorchLightning/pytorch-lightning@0f584fa

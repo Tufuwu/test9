@@ -1,56 +1,54 @@
-#!/bin/env python
+import os
 
-# Copyright 2016, FBPIC contributors
-# Authors: Remi Lehe, Manuel Kirchen, Kevin Peters, Soeren Jalas
-# License: 3-Clause-BSD-LBNL
-import sys
-from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
-import fbpic # In order to extract the version number
+import setuptools
 
-# Obtain the long description from README.md
-with open('./README.md') as f:
-    long_description = f.read()
-# Get the package requirements from the requirements.txt file
-with open('requirements.txt') as f:
-    install_requires = [ line.strip('\n') for line in f.readlines() ]
+DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Define a custom class to run the py.test with `python setup.py test`
-class PyTest(TestCommand):
 
-    def run_tests(self):
-        import pytest
-        errcode = pytest.main(['--ignore=tests/unautomated', '--durations=10'])
-        sys.exit(errcode)
+def get_requirements():
+    requirements_path = os.path.join(DIR, "requirements.txt")
+    with open(requirements_path, encoding="utf-8") as f:
+        return [line.strip() for line in f]
 
-setup(
-    name='fbpic',
-    version=fbpic.__version__,
-    description='Spectral, quasi-3D Particle-In-Cell for CPU and GPU',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    maintainer='Remi Lehe',
-    maintainer_email='remi.lehe@normalesup.org',
-    license='BSD-3-Clause-LBNL',
-    packages=find_packages('.'),
-    tests_require=['more-itertools<6.0.0', 'pytest', 'openpmd_viewer'],
-    cmdclass={'test': PyTest},
-    install_requires=install_requires,
-    extras_require = {
-        'picmi':  ["picmistandard", "numexpr", "periodictable"],
+
+def get_long_description():
+    readme_path = os.path.join(DIR, "README.md")
+    return open(readme_path, encoding="utf-8").read()
+
+
+setuptools.setup(
+    name="laia",
+    use_scm_version={
+        "write_to": "laia/version.py",
+        "write_to_template": '__version__ = "{version}"\n',
+        "local_scheme": lambda v: f"+{v.node}.{v.branch}{'.dirty' if v.dirty else ''}",
     },
+    author="Joan Puigcerver",
+    author_email="joapuipe@gmail.com",
+    maintainer="Carlos Mocholí",
+    maintainer_email="carlossmocholi@gmail.com",
+    license="MIT",
+    url="https://github.com/jpuigcerver/PyLaia",
+    download_url="https://github.com/jpuigcerver/PyLaia",
+    # Requirements
+    setup_requires=["setuptools_scm"],
+    install_requires=get_requirements(),
+    extras_require={
+        "dev": ["pre-commit", "isort", "black", "setuptools_scm"],
+        "test": ["pytest", "pytest-cov", "pandas"],
+    },
+    python_requires=">=3.6",
+    # Package contents
+    packages=setuptools.find_packages(exclude=["tests"]),
     include_package_data=True,
-    platforms='any',
-    url='http://github.com/fbpic/fbpic',
-    classifiers=[
-        'Programming Language :: Python',
-        'Development Status :: 3 - Alpha',
-        'Natural Language :: English',
-        'Environment :: Console',
-        'Intended Audience :: Science/Research',
-        'Operating System :: OS Independent',
-        'Topic :: Scientific/Engineering :: Physics',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5'],
-    )
+    entry_points={
+        "console_scripts": [
+            "pylaia-htr-create-model=laia.scripts.htr.create_model:main",
+            "pylaia-htr-train-ctc=laia.scripts.htr.train_ctc:main",
+            "pylaia-htr-decode-ctc=laia.scripts.htr.decode_ctc:main",
+            "pylaia-htr-netout=laia.scripts.htr.netout:main",
+        ],
+    },
+    long_description=get_long_description(),
+    long_description_content_type="text/markdown",
+)
