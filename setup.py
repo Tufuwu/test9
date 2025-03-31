@@ -1,70 +1,53 @@
-from pathlib import Path
+from setuptools import setup
 
-from setuptools import find_packages, setup
 
-# Read the contents of README file
-source_root = Path(".")
-with (source_root / "README.rst").open(encoding="utf-8") as f:
-    long_description = f.read()
-
-# Read the requirements
-with (source_root / "requirements.txt").open(encoding="utf8") as f:
-    requirements = f.readlines()
-
-with (source_root / "requirements_dev.txt").open(encoding="utf8") as f:
-    dev_requirements = f.readlines()
-
-with (source_root / "requirements_test.txt").open(encoding="utf8") as f:
-    test_requirements = f.readlines()
-
-type_geometry_requires = ["shapely"]
-type_image_path_requires = ["imagehash", "Pillow"]
-
-extras_requires = {
-    "type_geometry": type_geometry_requires,
-    "type_image_path": type_image_path_requires,
-    "plotting": ["pydot", "pygraphviz", "matplotlib"],
-    "dev": dev_requirements,
-    "test": test_requirements,
-}
-
-extras_requires["all"] = requirements + [
-    dependency
-    for name, dependencies in extras_requires.items()
-    if name.startswith("type_") or name == "plotting"
-    for dependency in dependencies
-]
-
-__version__ = None
-with (source_root / "src/visions/version.py").open(encoding="utf8") as f:
-    exec(f.read())
-
+with open('README.md') as fh:
+    long_description = fh.read()
 
 setup(
-    name="visions",
-    version=__version__,
-    url="https://github.com/dylan-profiler/visions",
-    description="Visions",
-    license="BSD License",
-    author="Dylan Profiler",
-    author_email="visions@ictopzee.nl",
-    package_data={"vision": ["py.typed"]},
-    packages=find_packages("src"),
-    package_dir={"": "src"},
-    install_requires=requirements,
-    include_package_data=True,
-    extras_require=extras_requires,
-    tests_require=test_requirements,
-    python_requires=">=3.6",
+    name='python-ta',
+    version='1.8.0a1',
+    description='Code checking tool for teaching Python',
     long_description=long_description,
-    long_description_content_type="text/x-rst",
-    zip_safe=False,
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
+    long_description_content_type='text/markdown',
+    url='http://github.com/pyta-uoft/pyta',
+    author='David Liu',
+    author_email='david@cs.toronto.edu',
+    license='MIT',
+    packages=['python_ta', 'python_ta.reporters', 'python_ta.checkers',
+              'python_ta.cfg', 'python_ta.contracts',
+              'python_ta.patches',
+              'python_ta.transforms', 'python_ta.typecheck', 'python_ta.util'],
+    install_requires=[
+        'astroid>=2.5,<2.6',
+        'hypothesis',
+        'pycodestyle',
+        'pylint>=2.8,<2.9',
+        'colorama',
+        'six',
+        'jinja2',
+        'pygments',
+        'wrapt>=1.12.0',
+        'typeguard>=2.7.1',
+        'requests',
+        'click>=8.0.1'
     ],
-)
+    extras_require={
+        'dev': [
+            'graphviz',
+            'inflection',
+            'myst-parser',
+            'pytest',
+            'pytest-cov',
+            'sphinx',
+            'sphinx-rtd-theme'
+        ]
+    },
+    entry_points={
+        'console_scripts': [
+            'python_ta = python_ta.__main__:main'
+        ],
+    },
+    python_requires='~=3.8',
+    include_package_data=True,
+    zip_safe=False)
