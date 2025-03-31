@@ -1,0 +1,66 @@
+{% load i18n %}
+{% load l10n %}
+
+<div class="alert alert-info">
+  {% comment %}Translators: This message is shown on pages where coordinators can see personal information about applicants.{% endcomment %}
+  {% trans 'Coordinators: This page may contain personal information such as real names and email addresses. Please remember that this information is confidential.' %}
+</div>
+
+{% for app in object_list %}
+  <div class="row">
+    <div class="col-xs-4 col-sm-2">
+      <span class="badge badge{{ app.get_bootstrap_class }} pull-right">
+        {{ app.get_status_display }}
+      </span>
+    </div>    
+    <div class="col-xs-8 col-sm-6">
+      <h5>
+      <a class="twl-links" href="{{ app.get_absolute_url }}">
+        {{ app }}
+      </a>
+      </h5>
+      {% if app.user.editor %}
+      Editor: <a class="twl-links" href="/users/{{ app.user.editor.pk|urlencode|safe }}">{{ app.user.editor.wp_username }}</a>
+      <br />
+      {% endif %}
+      {% if app.user.email %}
+      Email:
+        <a class="twl-links" href="mailto:{{ app.user.email|urlencode|safe }}">{{ app.user.email|safe }}</a>
+      <br />
+      {% endif %}
+      {% if app.imported %}
+        {% comment %}Translators: On the page listing applications, this shows next to an application which was imported to the website.{% endcomment %}
+        {% trans 'Imported application' %}
+      {% elif app.get_version_count > 1 %} {# first version is original submission, not later review #}
+        {% if app.get_latest_reviewer %}
+          {% comment %}Translators: On the page listing applications, this shows next to an application which was previously reviewed. Don't translate {{ reviewer }} or {{ review_date }}.{% endcomment %}
+          {% blocktranslate trimmed with reviewer=app.get_latest_reviewer review_date=app.get_latest_review_date|localize %}
+            Last reviewed by {{ reviewer }} on {{ review_date }}
+          {% endblocktranslate %}
+        {% else %}
+          {% comment %}Translators: On the page listing applications, this shows next to an application which was previously reviewed. Don't translate {{ review_date }}.{% endcomment %}
+          {% blocktranslate trimmed with review_date=app.get_latest_review_date|localize %}
+            Last reviewed on {{ review_date }}
+          {% endblocktranslate %}
+        {% endif %}
+      {% else %}
+        {% comment %}Translators: On the page listing applications, this shows next to an application which has not yet been reviewed.{% endcomment %}
+        {% trans 'Not yet reviewed.' %}
+      {% endif %}
+      <br />
+      {% if app.user.editor %}
+      Filter by editor: <a class="twl-links" href="?Editor={{ app.user.editor.pk|urlencode|safe }}">{{ app.user.editor.wp_username }}</a>
+      &nbsp;&nbsp;&nbsp;
+      {% endif %}
+      Filter by partner: <a class="twl-links" href="?Partner={{ app.partner.pk|urlencode|safe }}">{{ app.partner }}</a>
+    </div>
+    {% if not forloop.last %}
+      <div class="col-sm-10 col-sm-offset-2 col-xs-12">
+        <hr />
+      </div>
+    {% endif %}
+  </div>
+{% empty %}
+  {% comment %}Translators: On the page listing applications, this text is displayed when there are no applications to be shown.{% endcomment %}
+  {% trans 'No applications right now.' %}
+{% endfor %}

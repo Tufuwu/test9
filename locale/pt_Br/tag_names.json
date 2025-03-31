@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eduardoaddad",
+			"TheEduGobi",
+			"YuriNikolai"
+		]
+	},
+	"languages-and-literature_tag": "Linguagens e Literatura",
+	"multidisciplinary_tag": "Multidisciplinário",
+	"physical-sciences_tag": "Ciências Físicas",
+	"music_tag": "Música",
+	"art_tag": "Artes",
+	"business-and-economics_tag": "Negócios e Economia",
+	"law_tag": "Direito",
+	"education_tag": "Educação",
+	"philosophy-and-religion_tag": "Filosofia e Religião",
+	"social-sciences_tag": "Ciências Sociais",
+	"history_tag": "História",
+	"culture_tag": "Cultura",
+	"life-sciences_tag": "Ciências da Vida",
+	"health-sciences_tag": "Ciências da Saúde",
+	"earth-sciences_tag": "Ciências da Terra",
+	"technology_tag": "Tecnologia"
+}

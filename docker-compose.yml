@@ -1,0 +1,75 @@
+---
+
+version: '3.4'
+
+volumes:
+  mysql:
+
+services:
+  db:
+    ports:
+      - "3306:3306"
+    image: quay.io/wikipedialibrary/mariadb:10-updated
+    volumes:
+      - mysql:/var/lib/mysql
+      - type: bind
+        source: ./conf/db.cnf
+        target: /etc/mysql/conf.d/db.cnf
+      - type: bind
+        source: ./bin/twlight_mysql_init.sh
+        target: /docker-entrypoint-initdb.d/twlight_mysql_init.sh
+    environment:
+      # https://mariadb.com/kb/en/mariadb-docker-environment-variables/
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/MYSQL_ROOT_PASSWORD
+      - MARIADB_AUTO_UPGRADE=TRUE           # Any non-empty value will do
+      - MARIADB_DISABLE_UPGRADE_BACKUP=TRUE # Any non-empty value will do
+    secrets:
+      - DJANGO_DB_NAME
+      - DJANGO_DB_USER
+      - DJANGO_DB_PASSWORD
+      - MYSQL_ROOT_PASSWORD
+  twlight:
+    build:
+      context: .
+      args:
+       - REQUIREMENTS_FILE=wmf.txt
+    command: /venv/bin/gunicorn -b 0.0.0.0:80 TWLight.wsgi
+    volumes:
+      - type: bind
+        source: ./media
+        target: /app/media
+    depends_on:
+      - 'db'
+    secrets:
+      - DJANGO_DB_NAME
+      - DJANGO_DB_USER
+      - DJANGO_DB_PASSWORD
+      - SECRET_KEY
+      - TWLIGHT_OAUTH_CONSUMER_KEY
+      - TWLIGHT_OAUTH_CONSUMER_SECRET
+      - TWLIGHT_EZPROXY_SECRET
+  web:
+    ports:
+      - "80:80"
+    image: quay.io/wikipedialibrary/nginx:latest-updated
+    volumes:
+      - type: bind
+        source: ./conf/robots.txt
+        target: /app/robots.txt
+      - type: bind
+        source: ./TWLight/static/img/favicon.ico
+        target: /app/favicon.ico
+      - type: bind
+        source: ./media
+        target: /app/media
+      - type: bind
+        source: ./TWLight/templates/500
+        target: /app/500
+    depends_on:
+      - 'twlight'
+      - 'syslog'
+  syslog:
+    build:
+      context: syslog
+    environment:
+      - MATOMO_FQDN=analytics-wikipedialibrary.wmflabs.org

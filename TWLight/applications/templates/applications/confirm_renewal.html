@@ -1,0 +1,34 @@
+{% extends "new_base.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+
+{% block extra_css %}
+  <style type="text/css">
+    legend{
+      border-bottom: 1px solid #e5e5e5;
+    }
+  </style>
+{% endblock extra_css %}
+
+{% block content %}
+  {% include "header_partial_b4.html" %}
+  {% include "message_partial.html" %}
+  <div id="main-content">
+    <form method="post">
+      {% csrf_token %}
+      {% crispy form %}
+      <div class="form-group">
+        <label class="control-label col-lg-3">
+          {% comment %}Translators: This message is displayed on the page where users can confirm their renewal. Please do not translate {{  partner }}. {% endcomment %}
+          {% blocktranslate trimmed %}
+            Click 'confirm' to renew your application for {{ partner }}
+          {% endblocktranslate %}
+        </label>
+        <div class="col-lg-offset-1 col-lg-1 controls">
+          {% comment %}Translators: Labels the submit button requesting confirmation of application renewal. {% endcomment %}
+          <input type="submit" value="{% trans 'Confirm' %}" class="btn twl-btn"/>
+        </div>
+      </div>
+    </form>
+  </div>
+{% endblock content %}

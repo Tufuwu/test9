@@ -1,0 +1,110 @@
+{% extends "new_base.html" %}
+{% load i18n %}
+{% load static %}
+{% load twlight_perms %}
+{% load twlight_removetags %}
+
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block content %}
+  {% include "header_partial_b4.html" %}
+  {% include "message_partial.html" %}
+  <div id="partner-detail-content">
+    <h1 class="mb-4">{{ object }}</h1>
+    {% if user.is_authenticated %}
+      {% comment %}Translators: This text is located on individual partner pages, and when clicked takes authenticated users back to My Library. {% endcomment %}
+      <a href="{% url 'users:my_library' %}" class="btn btn-default">
+        {% trans "Back to My Library" %}
+      </a>
+    {% else %}
+      {% comment %}Translators: This text is located on individual partner pages, and when clicked takes unauthenticated users back to the list of publishers. {% endcomment %}
+      <a href="{% url 'partners:filter' %}" class="btn btn-default">
+        {% trans "Back to partners" %}
+      </a>
+    {% endif %}
+    <br><br>
+    {% if not object.authorization_method == object.BUNDLE %}
+      {% url 'applications:apply_single' object.pk as app_url %}
+      {% url 'about' as about %}
+      {% url 'terms' as terms %}
+      {% if object.is_waitlisted %}
+      <div class="alert alert-warning d-block d-sm-none resource-label-warning">
+         {% comment %}Translators: This text labels partners who have no available accounts remaining and therefore have a waitlist for access {% endcomment %}
+         <span class="resource-label">{% trans "Waitlisted" %}</span>
+         <p>
+         {% comment %}Translators: If we have no available accounts for a partner, the coordinator can change the application system to a waiting list. {% endcomment %}
+         {% blocktranslate trimmed %}
+         There are no access grants available for this partner
+         at this time. You can still apply for access; applications will
+         be processed when access is available.
+         {% endblocktranslate %}
+         </p>
+      </div>
+      {% endif %}
+      {% if apply %}
+        <div class="alert alert-info d-block d-sm-none">
+          <p>
+            {% comment %}Translators: This text links to the minimum user requirements and terms of use on the partner page. {% endcomment %}
+            {% blocktranslate trimmed %}
+              Before applying, please review the
+              <strong><a class="twl-links" href="{{ about }}#req">minimum requirements</a></strong> for access
+              and our <strong><a class="twl-links" href="{{ terms }}">terms of use</a></strong>.
+            {% endblocktranslate %}
+          </p>
+        </div>
+      {% endif %}
+      {% if user|restricted %}
+        {% comment %}Translators: On the partner detail page, this text labels the button which users can click to create an application. {% endcomment %}
+        <button type="button" class="btn twl-btn text-center d-block d-sm-none z-index-100 disabled btn-block">{% trans "Apply" %}</button><br />
+      {% else %}
+        {% comment %}Translators: On the partner detail page, this text labels the button which users can click to create an application. {% endcomment %}
+        <a href="{% if apply %}{{ app_url }}{% else %}#{% endif %}" class="btn twl-btn text-center d-block d-sm-none z-index-100 {% if not apply  or has_open_apps %}disabled{% endif %}">{% trans "Apply" %}</a><br />
+        {% if has_open_apps or has_auths %}
+          {% url 'users:my_library' as library_url %}
+          {% url 'users:my_applications' user.editor.pk as applications_url %}
+          <div class="panel panel-default d-block d-sm-none">
+            <div class="panel-body top-border">
+              {% if has_auths %}
+                {% comment %}Translators: This text refers to the page containing the content a user is authorized to access. {% endcomment %}
+                {% blocktranslate trimmed %}
+                  View the status of your access in <strong><a class="twl-links" href="{{ library_url }}">My Library</a></strong> page.
+                {% endblocktranslate %}
+                {% if has_open_apps %}
+                  <hr />
+                {% endif %}
+              {% endif %}
+              {% if has_open_apps %}
+                {% comment %}Translators: This message is shown when a user has open applications, linking to their respective applications page. {% endcomment %}
+                {% blocktranslate trimmed %}
+                  View the status of your application(s) on your <strong><a class="twl-links" href="{{ applications_url }}">My Applications</a></strong> page.
+                {% endblocktranslate %}
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+
+      {% if user|coordinators_only %}
+      <form class="mb-4" action="{% url 'partners:toggle_waitlist' object.pk %}" method="POST">
+        {% csrf_token %}
+        <input type="submit" class="btn btn-default btn-block text-center d-block d-sm-none z-index-100" value="{% if object.is_waitlisted %}{% comment %}Translators: If a partner is currently waitlisted, this button allows coordinators to remove the partner from the waitlist. {% endcomment %}{% trans "Remove from waitlist" %}{% else %}{% comment %}Translators: If a partner is not currently waitlisted, this button allows coordinators to add the partner to the waitlist. {% endcomment %}{% trans "Set as waitlisted" %}{% endif %}"/>
+      </form>
+      {% endif %}
+    {% endif %}
+    <div class="float-container margin-bottom-2em">
+      <div class="row">
+        <div class="col-sm-8 col-md-8 col-lg-8">
+          {% include "resources/partner_detail_timeline.html" %}
+        </div>
+
+        <div class="col-sm-4 col-md-4 col-lg-4 pull-right">
+          {% include "resources/partner_detail_apply.html" %}
+        </div>
+      </div>
+    </div>
+
+    {% if object.authorization_method is not object.BUNDLE %}
+      {% include "resources/partner_detail_stats.html" %}
+    {% endif %}
+  </div>
+{% endblock content %}

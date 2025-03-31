@@ -1,0 +1,103 @@
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+
+  {% comment %}Translators: This text is the heading of a section in a user's profile where they can change their preferences. {% endcomment %}
+  <h3>{% trans "Preferences" %}</h3>
+
+  <div class="row clearfix">
+    <div class="col-xs-12 col-sm-3">
+      {% comment %}Translators: In the preferences section of a user profile, this text labels the form where users can change the site language. {% endcomment %}
+      <strong>{% trans "Language" %}</strong>
+    </div>
+    <div class="col-xs-12 col-sm-9">
+      {% include 'users/language_form.html' %}
+    </div>
+  </div>
+
+  <hr />
+
+  <div class="row clearfix">
+    <div class="col-xs-12 col-sm-3">
+      {% comment %}Translators: In the preferences section of a user profile, this text labels the form where users can change their email preferences. {% endcomment %}
+      <strong>{% trans "Emails" %}</strong>
+    </div>
+    <div class="col-xs-12 col-sm-9">
+      {% include 'users/user_email_preferences.html' %}
+    </div>
+  </div>
+
+  <hr />
+
+  {% if user.has_usable_password %}
+    <div class="row clearfix">
+      <div class="col-xs-12 col-sm-3">
+        {% comment %}Translators: This is the heading of the section of a user's profile where users can change their password. {% endcomment %}
+        <strong>{% trans "Password" %}</strong>
+      </div>
+      <div class="col-xs-12 col-sm-9">
+        <form method="post" action="{% url 'password_change' %}">
+          {% csrf_token %}
+          {{ password_form | crispy }}
+          <button class="btn btn-default" type="submit">
+            {% trans "Change password" %}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <hr />
+  {% endif %}
+
+  {% if user.userprofile.terms_of_use %}
+    <div class="row clearfix">
+      <div class="col-xs-12 col-sm-3">
+        {% comment %} Translators: This is the heading of the section of a user's
+        profile where they disagree their terms of use. {% endcomment %}
+        <strong>{% trans "Terms of use" %}</strong>
+      </div>
+      <div class="col-xs-12 col-sm-9">
+        <form method="post" action="{% url 'terms' %}">
+          {% csrf_token %}
+          {{ terms_form | crispy }}
+
+          <button class="btn btn-default" type="submit">
+             {% comment %} Translators: This text labels a button which, when clicked, updates a user's acceptance to the site's terms of use.{% endcomment %}
+             {% trans "Update" %}
+          </button>
+          </br>
+          {% comment %} Translators: This text labels the date for when the terms of use were most recently changed. {% endcomment %}
+          </br> {% trans 'Last updated at:' %} {{ user.userprofile.terms_of_use_date }} {{ user.userprofile.terms_of_use_date | time:"H:i" }}
+          {% comment %} Translators: This link is to the site's terms of use. {% endcomment %}
+          </br><a href="{% url 'terms' %}"> {% trans "View Terms of Use" %}</a>
+        </form>
+      </div>
+    </div>
+    <hr />
+  {% endif %}
+
+  <div class="row clearfix">
+    <div class="col-xs-12 col-sm-3">
+      {% comment %}Translators: This is the heading of the section of a user's profile where they can download, restrict, or delete their personal data. {% endcomment %}
+      <strong>{% trans "Data" %}</strong>
+    </div>
+    <div class="col-xs-12 col-sm-9">
+      <form method="post">
+        {% csrf_token %}
+        {% comment %}Translators: This text labels a button users can click to download their data. {% endcomment %}
+        <input type="submit" value="{% trans "Download" %}" name="download" class="btn btn-default"/>
+      </form>
+    </div>
+    <div class="col-xs-12 col-sm-3"></div>
+    <div class="col-xs-12 col-sm-9" style="padding-top: 10px">
+      {% comment %}Translators: This text labels a button users can click to enable data processing restriction on their account. {% endcomment %}
+      <a href="{% url 'users:restrict_data' %}" class="btn btn-default">{% trans "Restrict" %}</a>
+    </div>
+    <div class="col-xs-12 col-sm-3"></div>
+    <div class="col-xs-12 col-sm-9" style="padding-top: 10px">
+      {% comment %}Translators: This text labels a button users can click to delete their account. {% endcomment %}
+      <a href="{% url 'users:delete_data' user.pk %}" class="btn btn-danger">{% trans "Delete" %}</a>
+    </div>
+  </div>
+
+  <hr />

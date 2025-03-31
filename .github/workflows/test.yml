@@ -1,51 +1,47 @@
 ---
+name: Wikipedia Library - test and deploy
 
-name: CI/CD
 on:
   push:
-    branches:
-      - main
-  pull_request: {}
-
-env:
-  PYTHON_VERSION: 3.8
+    branches: ["main", "staging"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
   cicd:
-    name: Test and deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Clone the source code
-        uses: actions/checkout@v2
-
-      - name: Setup Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install flake8
-        run: pip install flake8
-
-      - name: Ensure the code passes lints
-        run: flake8 homu/
-
-      - name: Install homu on the builder
-        run: pip install -e .
-
-      - name: Run the test suite
-        run: python3 setup.py test
-
-      - name: Build the Docker image
-        run: docker build -t homu .
-
-      - name: Upload the Docker image to AWS ECR
-        uses: rust-lang/simpleinfra/github-actions/upload-docker-image@main
-        with:
-          image: homu
-          repository: bors
-          region: us-west-1
-          redeploy_ecs_cluster: rust-ecs-prod
-          redeploy_ecs_service: bors
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        if: github.event_name == 'push' && github.repository == 'rust-lang/homu' && github.ref == 'refs/heads/main'
+          persist-credentials: false
+          fetch-depth: 0
+      - name: build & run
+        run: >
+          sudo .cicd/build.sh
+          ${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
+          ${GITHUB_SHA}
+      - name: migrate
+        run: >
+          docker compose exec --no-TTY twlight
+          /app/bin/virtualenv_migrate.sh
+      - name: translate
+        run: >
+          docker compose exec --no-TTY twlight
+          /app/bin/virtualenv_translate.sh last-commit
+      - name: test
+        run: >
+          docker compose exec --no-TTY twlight
+          /app/bin/virtualenv_test.sh
+      - name: deploy
+        run: >
+          sudo .cicd/deploy.sh
+          ${GITHUB_REF_NAME}
+          ${GITHUB_SHA}
+          ${GITHUB_EVENT_NAME}
+          ${GITHUB_REPOSITORY}
+          ${{ secrets.WIKIBOT_TOKEN }}
+          ${{ secrets.QUAYBOT_USERNAME }}
+          ${{ secrets.QUAYBOT_PASSWORD }}
+      - name: cleanup
+        if: always()
+        run: sudo chown -R ${USER}:${USER} .
