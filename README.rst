@@ -1,18 +1,24 @@
-==========================
-WinDbg symbols for CPython
-==========================
+=============
+python-ptrace
+=============
 
+.. image:: https://img.shields.io/pypi/v/python-ptrace.svg
+   :alt: Latest release on the Python Cheeseshop (PyPI)
+   :target: https://pypi.python.org/pypi/python-ptrace
 
-.. image:: https://img.shields.io/github/last-commit/SeanCline/PythonSymbols/gh-pages.svg?label=Symbol%20Server%20Updated
-    :target: https://app.travis-ci.com/github/SeanCline/PythonSymbols
-    :alt: Build Status
+.. image:: https://github.com/vstinner/python-ptrace/actions/workflows/build.yml/badge.svg
+   :alt: Build status of python-ptrace on GitHub Actions
+   :target: https://github.com/vstinner/python-ptrace/actions
 
-This repository hosts the symbols for all recent Windows builds of the CPython interpreter. (Both x86 and x64.)
+python-ptrace is a debugger using ptrace (Linux, BSD and Darwin system call to
+trace processes) written in Python.
 
-It stays up to date automatically by looking for new Python releases weekly and adding their symbols to the symbols store.
+* `python-ptrace documentation
+  <http://python-ptrace.readthedocs.io/>`_
+* `python-ptrace at GitHub
+  <https://github.com/vstinner/python-ptrace>`_
+* `python-ptrace at the Python Cheeseshop (PyPI)
+  <https://pypi.python.org/pypi/python-ptrace>`_
 
-To use the symbols server, add the following to your symbol path:
-
-.. code-block::
-
-    srv*c:\symbols*http://pythonsymbols.sdcline.com/symbols
+python-ptrace is an opensource project written in Python under GNU GPLv2
+license. It supports Python 3.6 and newer.
