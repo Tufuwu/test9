@@ -1,0 +1,8 @@
+gunicorn==19.9.0
+
+raven==6.10.0
+
+# Heroku
+Whitenoise
+django-storages
+boto3
