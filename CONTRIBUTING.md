@@ -1,83 +1,81 @@
-# Contributing
+# Contribuyendo con la web de Asoc Members
 
-Contributions to Document Merge Service are very welcome! Best have a look at the open [issues](https://github.com/adfinis-sygroup/document-merge-service/issues)
-and open a [GitHub pull request](https://github.com/adfinis-sygroup/document-merge-service/compare). See instructions below how to setup development
-environment. Before writing any code, best discuss your proposed change in a GitHub issue to see if the proposed change makes sense for the project.
+Podes contribuir de muchas maneras:
 
-## Setup development environment
+    Escribiendo código
+    Mejorando la documentación.
+    Reportando errores.
 
-### Clone
 
-To work on Document Merge Service you first need to clone
+## Código de conducta
 
-```bash
-git clone https://github.com/adfinis-sygroup/document-merge-service.git
-cd document-merge-service
-```
+Al contribuir en este proyecto estás formando parte de la comunidad de Python Argentina. Como miembro te pedimos que
+nos ayudes a mantener nuestra comunidad abierta e inclusiva. También te pedimos que leas y respetes nuestro
+[*Código de Conducta*](https://ac.python.org.ar/#coc)
 
-### Open Shell
 
-Once it is cloned you can easily open a shell in the docker container to
-open an development environment.
+## Reportando errores
 
-```bash
-# needed for permission handling
-# only needs to be run once
-echo UID=$UID > .env
-# open shell
-docker-compose run --rm document-merge-service bash
-```
+Una de las maneras más simples de ayudar es reportar errores. :-)
 
-### Testing
+Los errores se reportan en: https://github.com/PyAr/asoc_members/issues/
 
-Once you have shelled in docker container as described above
-you can use common python tooling for formatting, linting, testing
-etc.
+* Describí siempre qué esperabas que pasé y qué sucedió en su lugar.
+* De ser posible incluí un ejemplo mínimo de cómo reproducir el error.
+* Incluí tracebacks, screenshots, logs de errores.
+* Detallá la versiónes de tu browser, sistema operativo, etc.
+* En caso que estes desarrollando con la web la versión de python que estabas utilizando.
 
-```bash
-# linting
-flake8
-# format code
-black .
-# running tests
-pytest
-# create migrations
-./manage.py makemigrations
-# install debugger or other temporary dependencies
-pip install --user pdbpp
-```
+## Escribiendo código
 
-Writing of code can still happen outside the docker container of course.
+Configurá tu entorno
+--------------------
 
-### Install new requirements
+> DISCLAIMER: si ya tenés tu fork del proyecto, esta sección no hace falta. Solo asegurate de tener el branch `master` actualizado con el _oficial_.
 
-In case you're adding new requirements you simply need to build the docker container
-again for those to be installed and re-open shell.
+- Asegurate de tener instalada la [última versión de git](https://git-scm.com/downloads).
+- Configurá git con tu [usuario](https://help.github.com/articles/setting-your-username-in-git/) y [email](https://help.github.com/articles/setting-your-email-in-git/)::
 
-```bash
-docker-compose build --pull
-```
+        git config --global user.name 'tu nombre'
+        git config --global user.email 'tu email'
 
-### Setup pre commit
+- Asegurate de tener una cuenta de [GitHub](https://github.com/join).
+- "Forkea" *asoc_members* a tu cuenta de GitHub haciendo click en el botón de [Fork](https://github.com/PyAr/asoc_members/fork).
+- [Clona](https://help.github.com/articles/fork-a-repo/#step-2-create-a-local-clone-of-your-fork) tu fork en tu computadora::
 
-Pre commit hooks is an additional option instead of executing checks in your editor of choice.
+        git clone https://github.com/{username}/asoc_members
+        cd asoc_members 
 
-First create a virtualenv with the tool of your choice before running below commands:
+- Agregá el repositorio principal como **remote** para posteriores actualizaciones::
 
-```bash
-pip install pre-commit
-pip install -r requirements-dev.txt -U
-pre-commit install --hook=pre-commit
-pre-commit install --hook=commit-msg
-```
+        git remote add asoc_members https://github.com/PyAr/asoc_members
+        git fetch asoc_members
 
-This will activate commit hooks to validate your code as well as your commit
-messages.
 
-### Setup commit-msg hook
-If you want to have your commit message automatically linted, execute below commands:
+- Ejecuta asoc_members
 
-```bash
-npm install @commitlint/{config-conventional,cli}
-ln -s "$(pwd)/commit-msg" .git/hooks/commit-msg
-```
+
+Empeza a escribir código
+------------------------
+
+> DISCLAIMER: si ya tenías tu fork del proyecto asegurate de tener el branch `master` actualizado con el _oficial_.
+
+- Generá un nuevo branch que identifique el issue en el que vas a trabajar. (EJ: ``issue_24_nueva_funcionalidad``)
+- Escribí el código utilizando tu editor preferido.
+
+- El código debe ser [PEP8](https://pep8.org/) válido. Aunque podes ignorar el ancho de lineas. Estamos usando 99 columnas.
+- Los nombres de variables y comentarios docstring son en inglés.
+- Los docstrings tienen que ser de la forma """This is a docstring.""" osea,
+comenzar con mayúscula y terminar con un '.' al final. Casos como: """ this is
+a docstring.""" o """this is a docstring.""" o """This is a docstring""" no son
+válidos.
+- La identación debe ser a 4 espacios, no usar tabulador o algún tipo de
+identación diferente a 4 espacios.
+- Las urls deben estar escritas en español por un tema de SEO issues #163
+- Todo cambio en los modelos debe ir acompañado de su respectiva migración.
+- Agregar tests de los cambios suman!, sobretodo ahora que no hay suficientes ;).
+- Hace push de tus commits a GitHub y [generá un a pull request](https://help.github.com/articles/creating-a-pull-request/).
+- Festeja!! 🎉
+
+Para más información consultá en el [*Manual básico de supervivencia para colaborar
+con el sitio de PyAr*](https://github.com/PyAr/pyarweb/wiki/Manual-b%C3%A1sico-de-supervivencia-para-colaborar-con-el-sitio-de-PyAr).

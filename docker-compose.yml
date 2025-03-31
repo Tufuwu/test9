@@ -1,20 +1,28 @@
-version: "3.4"
-services:
-  document-merge-service:
-    image: adfinissygroup/document-merge-service
-    ports:
-      - "8000:8000"
-    volumes:
-      - dbdata:/var/lib/document-merge-service/data
-      - templatefiles:/var/lib/document-merge-service/media
-    environment: []
-      # Following options are a must to configure on production system:
-      # https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-SECRET_KEY
-      # - SECRET_KEY=
-      # https://docs.djangoproject.com/en/2.1/ref/settings/#allowed-hosts
-      # - ALLOWED_HOSTS=
-
+version: '2'
 
 volumes:
-  dbdata:
-  templatefiles:
+  pgdata:
+
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_DB=memberships
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+
+  web:
+    build: .
+    ports:
+      - "8127:8127"
+    volumes:
+      - .:/code
+    command: "tail -f /dev/null"
+
+  mail:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"

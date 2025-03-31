@@ -3,9 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Temporary files
-.~*
-
 # C extensions
 *.so
 
@@ -23,6 +20,7 @@ lib64/
 parts/
 sdist/
 var/
+wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -43,10 +41,9 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
-.pytest_cache
 nosetests.xml
 coverage.xml
-*,cover
+*.cover
 .hypothesis/
 
 # Translations
@@ -55,6 +52,14 @@ coverage.xml
 
 # Django stuff:
 *.log
+local_settings.py
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
 
 # Sphinx documentation
 docs/_build/
@@ -62,17 +67,48 @@ docs/_build/
 # PyBuilder
 target/
 
-#Ipython Notebook
+# Jupyter Notebook
 .ipynb_checkpoints
 
-# Pyenv
+# pyenv
 .python-version
 
-# Dotenv
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# dotenv
 .env
 
-# Editor swap files
-*.swp
+# virtualenv
+.venv
+venv/
+ENV/
 
-# IDE specific configuration
-.idea/
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+
+db.sqlite3
+/static/
+website/media/
+website/static/
+website/pictures/
+mercadopago*.json
+payments*.json
+scripts/*.csv
+scripts/credentials.json
+.idea
+.vscode
+.devcontainer
