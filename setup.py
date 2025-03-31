@@ -1,78 +1,68 @@
-#!/usr/bin/env python
-# Licensed under a 3-clause BSD style license - see LICENSE.rst
+#!/usr/bin/env python3
 
-# NOTE: The configuration for the package, including the name, version, and
-# other information are set in the setup.cfg file.
-
-import os
-import sys
-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
-# First provide helpful messages if contributors try and run legacy commands
-# for tests or docs.
+__version__ = "0.2a5"
 
-TEST_HELP = """
-Note: running tests is no longer done using 'python setup.py test'. Instead
-you will need to run:
+setup(
+    name='ndn-python-repo',
+    version=__version__,
+    description='An NDN Repo implementation using Python',
+    url='https://github.com/JonnyKong/ndn-python-repo',
+    author='Zhaoning Kong',
+    author_email='jonnykong@cs.ucla.edu',
+    download_url='https://pypi.python.org/pypi/ndn-python-repo',
+    project_urls={
+        "Bug Tracker": "https://github.com/JonnyKong/ndn-python-repo/issues",
+        "Source Code": "https://github.com/JonnyKong/ndn-python-repo",
+    },
+    license='Apache License 2.0',
+    # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
+    classifiers=[
+        'Development Status :: 4 - Beta',
 
-    tox -e test
+        'Topic :: Database',
+        'Topic :: Internet',
+        'Topic :: System :: Networking',
 
-If you don't already have tox installed, you can install it with:
+        'License :: OSI Approved :: Apache Software License',
 
-    pip install tox
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+    ],
 
-If you only want to run part of the test suite, you can also use pytest
-directly with::
+    keywords='NDN',
 
-    pip install -e .[test]
-    pytest
+    packages=find_packages(exclude=['tests']),
 
-For more information, see:
+    install_requires=[
+        "python-ndn >= 0.2b2.post1",
+        "PyYAML >= 5.1.2",
+    ],
+    extras_require={
+        'test': [ 'pytest', 'pytest-cov'],
+        'leveldb': ['plyvel'],
+        'mongodb': ['pymongo']
+    },
+    python_requires=">=3.6",
 
-  http://docs.astropy.org/en/latest/development/testguide.html#running-tests
-"""
+    entry_points={
+        'console_scripts': [
+            'ndn-python-repo = ndn_python_repo.cmd.main:main',
+            'ndn-python-repo-install = ndn_python_repo.cmd.install:main',
+            'ndn-python-repo-port = ndn_python_repo.cmd.port:main'
+        ],
+    },
 
-if 'test' in sys.argv:
-    print(TEST_HELP)
-    sys.exit(1)
+    data_files=[
+        # ('/usr/local/etc/ndn', ['ndn_python_repo/ndn-python-repo.conf']),
+        # ('/etc/systemd/system/', ['ndn_python_repo/ndn-python-repo.service']),
+    ],
 
-DOCS_HELP = """
-Note: building the documentation is no longer done using
-'python setup.py build_docs'. Instead you will need to run:
-
-    tox -e build_docs
-
-If you don't already have tox installed, you can install it with:
-
-    pip install tox
-
-You can also build the documentation with Sphinx directly using::
-
-    pip install -e .[docs]
-    cd docs
-    make html
-
-For more information, see:
-
-  http://docs.astropy.org/en/latest/install.html#builddocs
-"""
-
-if 'build_docs' in sys.argv or 'build_sphinx' in sys.argv:
-    print(DOCS_HELP)
-    sys.exit(1)
-
-VERSION_TEMPLATE = """
-# Note that we need to fall back to the hard-coded version if either
-# setuptools_scm can't be imported or setuptools_scm can't determine the
-# version, so we catch the generic 'Exception'.
-try:
-    from setuptools_scm import get_version
-    version = get_version(root='..', relative_to=__file__)
-except Exception:
-    version = '{version}'
-""".lstrip()
-
-setup(use_scm_version={'write_to': os.path.join('astrocut', 'version.py'),
-                       'write_to_template': VERSION_TEMPLATE})
+    package_data={
+        '': ['*.conf.sample', '*.service'],
+    },
+    include_package_data=True,
+)

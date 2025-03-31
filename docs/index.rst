@@ -1,36 +1,29 @@
+.. ndn-python-repo documentation master file, created by
+   sphinx-quickstart on Tue May 12 16:51:55 2020.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-Astrocut
-========
-
-Tools for making image cutouts from sets of images with shared footprints.
-
-This package is under active development, and will
-ultimately grow to encompass a range of cutout activities relevant to
-images from many missions. Currently there are two modes of interaction:
-
-    - Solving the specific problem of creating image cutouts from sectors of TESS full
-      frame images (FFIs) ( `~astrocut.CubeFactory` and `~astrocut.CutoutFactory`)
-    - More generalized cutouts from sets of images with the same WCS/pixel scale
-      (`~astrocut.fits_cut`)
-
-Astrocut lives on GitHub at: `github.com/spacetelescope/astrocut <https://github.com/spacetelescope/astrocut>`_.
-
-
-Documentation
--------------
+Welcome to ndn-python-repo's documentation!
+===========================================
 
 .. toctree::
-  :maxdepth: 2
+   :maxdepth: 2
+   :caption: Contents:
 
-  astrocut/install.rst
+   src/readme.rst
+   src/install.rst
+   src/configuration.rst
+   src/specification/specification.rst
+   src/misc_pkgs/misc_pkgs.rst
+   src/examples.rst
+   src/authors.rst
+   src/future.rst
 
-.. toctree::
-  :maxdepth: 3
-
-  astrocut/index.rst
 
 
-.. toctree::
-  :maxdepth: 1
+Indices and tables
+==================
 
-  license
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
