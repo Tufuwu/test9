@@ -1,47 +1,96 @@
----
-name: Wikipedia Library - test and deploy
+name: CI
 
 on:
   push:
-    branches: ["main", "staging"]
+    branches:
+      - main
+    tags:
+      - '*'
   pull_request:
-    branches: ["main"]
 
 jobs:
-  cicd:
+  tox:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runs-on }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Python 3.9
+            runs-on: ubuntu-latest
+            python-version: 3.9
+            toxenv: py39
+
+          - name: Python 3.8
+            runs-on: ubuntu-latest
+            python-version: 3.9
+            toxenv: py38
+
+          - name: Python 3.7
+            runs-on: ubuntu-latest
+            python-version: 3.9
+            toxenv: py37
+
+          - name: Python 3.6
+            runs-on: ubuntu-latest
+            python-version: 3.9
+            toxenv: py36
+
+          - name: Coverage
+            runs-on: ubuntu-latest
+            python-version: 3.9
+            toxenv: coverage
+
+          - name: Code style checks
+            runs-on: ubuntu-latest
+            python-version: 3.9
+            toxenv: style
+
+          - name: Bandit security audit
+            runs-on: ubuntu-latest
+            python-version: 3.9
+            toxenv: bandit
+
+          - name: Python 3.8 with dev dependencies
+            runs-on: ubuntu-latest
+            python-version: 3.9
+            toxenv: py38-dev
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install tox
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox
+      - name: Run tox
+        run: tox -e ${{ matrix.toxenv }}
+
+  # Kept in a separate job because it needs extra system dependencies
+  # that can't be installed by tox.
+  build-docs:
+    name: Build documentation and check warnings
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Install system packages
+        run: |
+          sudo apt-get install graphviz texlive-latex-extra dvipng
+      - uses: actions/checkout@v2
         with:
-          persist-credentials: false
           fetch-depth: 0
-      - name: build & run
-        run: >
-          sudo .cicd/build.sh
-          ${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
-          ${GITHUB_SHA}
-      - name: migrate
-        run: >
-          docker compose exec --no-TTY twlight
-          /app/bin/virtualenv_migrate.sh
-      - name: translate
-        run: >
-          docker compose exec --no-TTY twlight
-          /app/bin/virtualenv_translate.sh last-commit
-      - name: test
-        run: >
-          docker compose exec --no-TTY twlight
-          /app/bin/virtualenv_test.sh
-      - name: deploy
-        run: >
-          sudo .cicd/deploy.sh
-          ${GITHUB_REF_NAME}
-          ${GITHUB_SHA}
-          ${GITHUB_EVENT_NAME}
-          ${GITHUB_REPOSITORY}
-          ${{ secrets.WIKIBOT_TOKEN }}
-          ${{ secrets.QUAYBOT_USERNAME }}
-          ${{ secrets.QUAYBOT_PASSWORD }}
-      - name: cleanup
-        if: always()
-        run: sudo chown -R ${USER}:${USER} .
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install tox
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox
+      - name: Run tox
+        run: tox -e build-docs

@@ -1,181 +1,52 @@
-# Environment file
-.env
-
-# IDE stuff.
-.idea/
-
-# bin files now created by puppet module
-collectedstatic/
-staticfiles/
-personal/
-id_rsa
-id_rsa.*
-*.sqlite3
-*.dump
-TWLight/settings/local_vars.py
-TWLight/settings/production_vars.py
-TWLight/settings/staging_vars.py
-TWLight/settings/vagrant_vars.py
-
-# Should a db dump be left lying around
-twlight.sql
-
-# directory created by Docker bind mount for db config
-conf/db/
-
-# Created by https://www.gitignore.io/api/osx,django,python,sublimetext,vim,emacs
-
-### OSX ###
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Icon must end with two \r
-Icon
-
-
-# Thumbnails
-._*
-
-# Files that might appear in the root of a volume
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-
-
-### Django ###
-*.log
-*.pot
-*.pyc
-__pycache__/
-local_settings.py
-
-
-### Python ###
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-.venv
-
-# C extensions
+# Compiled files
+*.py[co]
+*.a
+*.o
 *.so
+__pycache__
 
-# Distribution / packaging
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
+# Ignore .c files by default to avoid including generated code. If you want to
+# add a non-generated .c extension, use `git add -f filename.c`.
+*.c
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
+# Other generated files
+*/version.py
+*/cython_version.py
+htmlcov
 .coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*,cover
+MANIFEST
+.pytest_cache
+.tox
 
-# Django stuff:
-*.log
+# Sphinx
+docs/api
+docs/_build
+docs/generated
 
-# Sphinx documentation
-docs/_build/
+# Eclipse editor project files
+.project
+.pydevproject
+.settings
 
-# PyBuilder
-target/
+# Packages/installer info
+*.egg
+*.eggs
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+distribute-*.tar.gz
 
-
-### SublimeText ###
-# cache files for sublime text
-*.tmlanguage.cache
-*.tmPreferences.cache
-*.stTheme.cache
-
-# workspace files are user-specific
-*.sublime-workspace
-
-# project files should be checked into the repository, unless a significant
-# proportion of contributors will probably not be using SublimeText
-# *.sublime-project
-
-# sftp configuration file
-sftp-config.json
-
-
-### Vim ###
-[._]*.s[a-w][a-z]
-[._]s[a-w][a-z]
-*.un~
-Session.vim
-.netrwhist
+# Other
+.*.swp
 *~
 
-
-### Emacs ###
-# -*- mode: gitignore; -*-
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
-
-# Org-mode
-.org-id-locations
-*_archive
-
-# flymake-mode
-*_flymake.*
-
-# eshell files
-/eshell/history
-/eshell/lastdir
-
-# elpa packages
-/elpa/
-
-# reftex files
-*.rel
-
-# AUCTeX auto folder
-/auto/
-
-# cask packages
-.cask/
-
+# Mac OSX
+.DS_Store
+.idea

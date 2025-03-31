@@ -1,3 +1,0 @@
-User-agent: *
-Disallow: /oauth
-Crawl-delay: 10
