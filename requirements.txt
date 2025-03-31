@@ -1,5 +1,0 @@
-gast
-beniget
-nbformat
-nbconvert
-pyyaml
