@@ -1,5 +1,14 @@
-.coverage
-.pytest_cache/
-__pycache__/
-pybranca.egg-info/
-dist/
+# global
+*.pyc
+*.pyo
+__pycache__
+
+# /
+/*.egg
+/*.egg-info
+/.coverage
+/.tox
+/build
+/coverage
+/dist
+/output.pskcxml
