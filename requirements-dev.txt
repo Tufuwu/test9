@@ -1,0 +1,11 @@
+flake8
+pre-commit
+pyflakes
+pycodestyle
+toml
+twine
+sphinx
+sphinx-rtd-theme
+ipdb
+isort
+sphinxcontrib-katex

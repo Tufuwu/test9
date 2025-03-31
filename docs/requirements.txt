@@ -1,3 +1,5 @@
-Sphinx==3.2.0
--r ../requirements.txt
-
+histolab
+sphinx
+sphinx-rtd-theme
+sphinxcontrib-katex
+IPython

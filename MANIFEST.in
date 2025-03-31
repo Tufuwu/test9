@@ -1,7 +1,15 @@
-include *.rst requirements.txt LICENSE
-graft docs
-graft examples
-include versioneer.py
-include ncclient/_version.py
-include test
-include test-requirements.txt
+graft src
+graft tests
+
+include README.md
+include LICENSE.txt
+
+include .coveragerc
+include .travis.yml
+include *.md
+include *.txt
+include *.yaml
+include *.yml
+include Makefile
+
+recursive-exclude * __pycache__ *.py[cod]
