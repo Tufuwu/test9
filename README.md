@@ -1,82 +1,72 @@
-# Mattermost Poll
+# bite-keeper
 
-[![Build Status](https://travis-ci.com/M-Mueller/mattermost-poll.svg?branch=master)](https://travis-ci.com/M-Mueller/mattermost-poll) [![codecov](https://codecov.io/gh/M-Mueller/mattermost-poll/branch/master/graph/badge.svg)](https://codecov.io/gh/M-Mueller/mattermost-poll)
+![Build Status](https://github.com/makerdao/bite-keeper/actions/workflows/.github/workflows/tests.yaml/badge.svg?branch=master)
+[![codecov](https://codecov.io/gh/makerdao/bite-keeper/branch/master/graph/badge.svg)](https://codecov.io/gh/makerdao/bite-keeper)
 
-Provides a slash command to create polls in Mattermost.
+The _DAI Stablecoin System_ incentivizes external agents, called _keepers_,
+to automate certain operations around the Ethereum blockchain.
 
-![Example](/doc/example_yes_no.gif)
+`bite-keeper` is one of the simplest keepers. It constantly monitors a `Tub` contract
+looking for unsafe cups and bites them the moment they become unsafe. Ultimately,
+it should take into account the profit it can make by processing the resulting
+collateral via `bust` and only waste gas on `bite` if it can make it up by
+subsequent arbitrage. For now, it is a dumb keeper that just bites every cup
+that can be bitten.
 
-By default, a poll will only offer the options *Yes* and *No*. However, users can also specify an arbitrary number of choices:
+<https://chat.makerdao.com/channel/keeper>
 
-![Example](/doc/example_colours.png)
+### Installation
+#### Prerequisites
+- [Python v3.6.6](https://www.python.org/downloads/release/python-366/)
+- [virtualenv](https://virtualenv.pypa.io/en/latest/)
+    - This project requires *virtualenv* to be installed if you want to use Maker's python tools. This helps with making sure that you are running the right version of python and checks that all of the pip packages that are installed in the **install.sh** are in the right place and have the right versions.
 
-Choices are separated by `--`.
-
-## Additional options
-
-- `--noprogress`: Do not display the number of votes until the poll is ended
-- `--public`: Show who voted for what at the end of the poll
-- `--votes=X`: Allows users to place a total of *X* votes. Default is 1. Each individual option can still only be voted once.
-- `--bars`: Show results as a bar chart at the end of the poll.
-- `--locale=X`: Use a specific locale for the poll. Supported values are en and de. By default it's the users language.
-
-## Help
-
-`/poll help` will display full usage options. Only visible to you.
-
-Set the "Autocomplete Hint" in the Slash Command settings to `See "/poll help" for full usage options`
-
-## Requirements
-
-- Python >= 3.6
-- Flask
-- Tornado
-- A WSGI server (e.g. gunicorn or uWSGI)
-
-## Setup
-
-Copy `settings.py.example` to `settings.py` and customise your settings.
-
-Start the server:
-
-```bash
-gunicorn --workers 4 --bind :5000 app:app
+In order to clone the project and install required third-party packages please execute:
+```
+git clone https://github.com/makerdao/bite-keeper.git
+cd bite-keeper
+git submodule update --init --recursive
+./install.sh
 ```
 
-1. In Mattermost go to *Main Menu -> Integrations -> Slash Commands* and add a new slash command with the URL of the server including the configured port number, e.g. http://localhost:5000.
-1. Choose POST for the request method.
-    - Optionally add the generated token to your `settings.py` (requires server restart).
-1. Edit your Mattermost `config.json` to include "localhost" in the "AllowedUntrustedInternalConnections" setting, e.g. `"AllowedUntrustedInternalConnections": "localhost"`
+For some known Ubuntu and macOS issues see the [pymaker](https://github.com/makerdao/pymaker) README.
 
-To resolve usernames in `--public` polls and to provide localization, the server needs access to the
-Mattermost API. For this a [personal access token](https://docs.mattermost.com/developer/personal-access-tokens.html) must be provided in your `settings.py`. Which user provides the token doesn't matter, e.g. you can create a dummy account. If no token is provided `--public` polls will not be available and all texts will be english.
+## Usage
 
-## Docker
+```
+usage: bite-keeper [-h] [--rpc-host RPC_HOST] [--rpc-timeout RPC_TIMEOUT]
+                   --eth-from ETH_FROM [--eth-key KEYFILE_STRING]
+                   --tub-address TUB_ADDRESS [--graphql-url GRAPHQL_URL]
+                   [--gas-price GAS_PRICE] [--bitecdps-address BITECDPS_ADDRESS]
+                   [--top] [--chunks] [--debug]
 
-To integrate with [mattermost-docker](https://github.com/mattermost/mattermost-docker):
-
-```bash
-cd mattermost-docker
-git submodule add git@github.com:M-Mueller/mattermost-poll.git poll
+optional arguments:
+  -h, --help            show this help message and exit
+  --rpc-host RPC_HOST   JSON-RPC host (default: `http://localhost:8545')
+  --rpc-timeout RPC_TIMEOUT
+                        JSON-RPC timeout (in seconds, default: 10)
+  --eth-from ETH_FROM   Ethereum account from which to send transactions
+  --eth-key KEYFILE_STRING
+                        path to keyfile (key_file=./k.json,pass_file=./p.txt")
+  --tub-address TUB_ADDRESS
+                        Ethereum address of the Tub contract
+  --graphql-url GRAPHQL_URL
+                        GraphQL URL (default: https://sai-mainnet.makerfoundation.com/v1)
+  --bitecdps-address BITECDPS_ADDRESS
+                        Ethereum address of the BiteCdps contract
+  --gas-price GAS_PRICE
+                        Gas price in Wei (default: node default)
+  --top                 Only bite the top N cups (default: 500)
+  --chunks              Only bite N cups at a time (default: 100)
+  --debug               Enable debug output
 ```
 
-and add the following to the `services` section:
+## License
 
-```yaml
-  poll:
-    build:
-      context: poll
-      args:
-        - mattermost_url="http://web"
-        - mattermost_tokens=['<mattermost-token-1>', '<mattermost-token-2>']
-        - mattermost_pa_token="<personal-access-token>"
-    ports:
-      - "5000:5000"
-    restart: unless-stopped
-    volumes:
-      - ./volumes/poll:/app/volume:rw
-```
+See [COPYING](https://github.com/makerdao/bite-keeper/blob/master/COPYING) file.
 
-1. In Mattermost go to *Main Menu -> Integrations -> Slash Commands* and add a new slash command with the URL of the server including the configured port number, e.g. http://poll:5000.
-1. Choose POST for the request method.
-1. Edit your Mattermost `config.json` to include "poll" in the "AllowedUntrustedInternalConnections" setting, e.g. `"AllowedUntrustedInternalConnections": "poll"`
+### Disclaimer
+
+YOU (MEANING ANY INDIVIDUAL OR ENTITY ACCESSING, USING OR BOTH THE SOFTWARE INCLUDED IN THIS GITHUB REPOSITORY) EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE SOFTWARE IS AT YOUR SOLE RISK.
+THE SOFTWARE IN THIS GITHUB REPOSITORY IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+YOU RELEASE AUTHORS OR COPYRIGHT HOLDERS FROM ALL LIABILITY FOR YOU HAVING ACQUIRED OR NOT ACQUIRED CONTENT IN THIS GITHUB REPOSITORY. THE AUTHORS OR COPYRIGHT HOLDERS MAKE NO REPRESENTATIONS CONCERNING ANY CONTENT CONTAINED IN OR ACCESSED THROUGH THE SERVICE, AND THE AUTHORS OR COPYRIGHT HOLDERS WILL NOT BE RESPONSIBLE OR LIABLE FOR THE ACCURACY, COPYRIGHT COMPLIANCE, LEGALITY OR DECENCY OF MATERIAL CONTAINED IN OR ACCESSED THROUGH THIS GITHUB REPOSITORY.

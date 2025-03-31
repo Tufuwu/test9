@@ -15,17 +15,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import pytest
-
-from pymaker.deployment import Deployment
-
-
-@pytest.fixture(scope='session')
-def new_deployment() -> Deployment:
-    return Deployment()
+import sys
+from contextlib import contextmanager
+from io import StringIO
 
 
-@pytest.fixture()
-def deployment(new_deployment: Deployment) -> Deployment:
-    new_deployment.reset()
-    return new_deployment
+def args(arguments: str) -> list:
+    return arguments.split()
+
+
+@contextmanager
+def captured_output():
+    new_out, new_err = StringIO(), StringIO()
+    old_out, old_err = sys.stdout, sys.stderr
+    try:
+        sys.stdout, sys.stderr = new_out, new_err
+        yield sys.stdout, sys.stderr
+    finally:
+        sys.stdout, sys.stderr = old_out, old_err
