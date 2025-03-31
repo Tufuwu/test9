@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+import sys
+import os
+from pathlib import Path
+
+import locale
+locale.textdomain("ulauncher")
+
+if sys.version_info.major != 3:
+    raise Exception("Ulauncher requires Python version 3")
+
+# Add project root directory (enable symlink and trunk execution)
+PYTHONPATH = os.getenv("PYTHONPATH", "")
+PROJECT_ROOT = Path(sys.argv[0]).resolve().parent.parent
+IS_DEV = PROJECT_ROOT.joinpath("ulauncher").exists() and str(PROJECT_ROOT) not in sys.path
+
+# Running in developer environment path
+if IS_DEV:
+    sys.path.insert(0, str(PROJECT_ROOT))
+    os.environ["PYTHONPATH"] = ":".join(list(filter(None, [PYTHONPATH, str(PROJECT_ROOT)])))
+
+from ulauncher.main import main
+
+main(IS_DEV)
