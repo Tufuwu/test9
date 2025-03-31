@@ -1,28 +1,27 @@
-name: Run Test
+name: CI
 on: [push, pull_request]
 jobs:
-  Test:
+  tests:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-10.15, windows-2019]
         python-version: ["3.9", "3.10"]
-        os: [ubuntu-latest]
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          pip install -r .github/requirements.txt
-      - name: Build
-        run: |
-          python setup.py build
-      - name: Test with pytest
-        run: |
-          export PYTHONPATH=$(pwd)/build/lib
-          python -m pytest tests
+          python -m pip install --upgrade pip
+          pip install flake8 coverage mock nose
+      - name: Run tests
+        run: nosetests notify_send_tests.py --with-coverage --cover-package notify_send
+      - name: Run linting checks
+        run: flake8 --ignore=E402,W504 --max-line-length=100 notify_send.py notify_send_tests.py
+      - name: Report coveralls status
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9'
+        uses: AndreMiras/coveralls-python-action@v20201129

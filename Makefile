@@ -1,30 +1,35 @@
-PYTHON   = python3
-BUILDLIB = $(CURDIR)/build/lib
+#
+# Project:   weechat-notify-send
+# Copyright: (c) 2015 by Petr Zemek <s3rvac@gmail.com> and contributors
+# License:   MIT, see the LICENSE file for more details
+#
+# A GNU Makefile for the project.
+#
 
+.PHONY: help clean lint tests tests-coverage
 
-build:
-	$(PYTHON) setup.py build
-
-test: build
-	PYTHONPATH=$(BUILDLIB) $(PYTHON) -m pytest tests
-
-sdist:
-	$(PYTHON) setup.py sdist
-
-doc-html: build
-	$(MAKE) -C doc html PYTHONPATH=$(BUILDLIB)
+help:
+	@echo "Use \`make <target>', where <target> is one of the following:"
+	@echo "  clean          - remove all generated files"
+	@echo "  lint           - check code style with flake8"
+	@echo "  tests          - run tests"
+	@echo "  tests-coverage - obtain test coverage"
 
 clean:
-	rm -f *~ tests/*~
-	rm -rf build
+	@find . -name '__pycache__' -exec rm -rf {} +
+	@find . -name '*.py[co]' -exec rm -f {} +
+	@rm -rf .coverage coverage
 
-distclean: clean
-	rm -rf .cache tests/.cache .pytest_cache tests/.pytest_cache
-	rm -f *.pyc tests/*.pyc
-	rm -rf __pycache__ tests/__pycache__
-	rm -f MANIFEST .version
-	rm -rf dist
-	rm -rf pytest_dependency.egg-info
-	$(MAKE) -C doc distclean
+lint:
+	@flake8 --ignore=E402,W504 --max-line-length=100 notify_send.py notify_send_tests.py
 
-.PHONY: build test sdist doc-html clean distclean
+tests:
+	@nosetests notify_send_tests.py
+
+tests-coverage:
+	@nosetests notify_send_tests.py \
+		--with-coverage \
+		--cover-package notify_send \
+		--cover-erase \
+		--cover-html \
+		--cover-html-dir coverage
