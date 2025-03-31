@@ -1,5 +1,0 @@
-extends: default
-
-rules:
-  # Long lines are fine
-  line-length: disable
