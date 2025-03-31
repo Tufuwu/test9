@@ -1,20 +1,19 @@
-development:
-	tox -e venv
+BIKESHED ?= bikeshed
+BIKESHED_ARGS ?= --print=plain
 
-.PHONY: test
-test:
-	tox
+.PHONY: lint watch
 
-.PHONY: clean
-clean:
-	find -name '*.pyc' -delete
-	find -name '__pycache__' -delete
+index.html: index.bs messages_appendix.html
+	$(BIKESHED) $(BIKESHED_ARGS) spec $<
 
-.PHONY: purge
-purge:
-	find -name '.tox' | xargs --no-run-if-empty rm -r
-	find -name '*.egg-info' | xargs --no-run-if-empty rm -r
+messages_appendix.html: messages_appendix.cddl scripts/pygmentize_dir.py scripts/cddl_lexer.py scripts/openscreen_cddl_dfns.py
+	./scripts/pygmentize_dir.py
 
-.PHONY: vulnerable_app
-vulnerable_app:
-	FLASK_ENV='development' python -m testing.vulnerable_app
+lint: index.bs
+	$(BIKESHED) $(BIKESHED_ARGS) --dry-run --force spec --line-numbers $<
+
+watch: index.bs
+	@echo 'Browse to file://${PWD}/index.html'
+	$(BIKESHED) $(BIKESHED_ARGS) watch $<
+
+
