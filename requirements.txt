@@ -1,13 +1,18 @@
-psycopg2==2.9.1; python_version < '3.11'
-psycopg2==2.9.9; python_version >= '3.11'
-trueskill==0.4.4
+sphinx-argparse
+numpy
+autobahn[serialization]
+twisted
 
-starlette==0.27.0;
-asyncpg==0.24.0; python_version < '3.11'
-asyncpg==0.29.0; python_version >= '3.11'
-uvicorn==0.14.0
-requests
-Jinja2==2.11.3
-cachetools==3.1.1
+# Lakeshore240
+pyserial
 
-MarkupSafe<2.1 # https://github.com/pallets/jinja/issues/1658
+mysql-connector>=2.1.6
+
+# LabJack Agent
+pymodbus
+numexpr
+pyyaml
+scipy
+
+# Docs
+sphinx_rtd_theme
