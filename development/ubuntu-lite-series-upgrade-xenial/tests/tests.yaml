@@ -1,7 +1,0 @@
-configure: []
-dev_bundles: []
-gate_bundles:
-  - bundle
-smoke_bundles: []
-tests:
-  - zaza.openstack.charm_tests.series_upgrade.parallel_tests.XenialBionicSeriesUpgradeUbuntu

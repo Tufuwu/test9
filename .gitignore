@@ -1,3 +1,13 @@
-.local
-.tox
-*.swp
+MANIFEST
+*.pyc
+*.sw*
+*.pkl
+tags
+build
+dist
+*.egg-info
+.eggs
+plot.png
+.pytest_cache
+.coverage
+*,cover
