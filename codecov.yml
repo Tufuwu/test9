@@ -1,3 +1,0 @@
-ignore:
-  - "**/test/*.py"
-  - "starfish/core/_version.py"

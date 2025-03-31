@@ -1,8 +1,0 @@
-{
-  "version": "1.0.0",
-  "images": {
-    "primary": "dartfish_field_of_view.json",
-    "nuclei": "dartfish_nuclei.json"
-  },
-  "codebook": "codebook.json"
-}
