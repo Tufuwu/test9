@@ -1,0 +1,20 @@
+{% extends "base.html" %} 
+{% load i18n %}
+{% load markdown_deux_tags %} 
+{% load misc %}
+{% load profile_tags %}
+
+{% block title %} 
+{% trans "User" %} {{ quser }}
+{% endblock title %} 
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-9">
+            <h1 class="page-header">{% trans "User" %} {{ quser.username }}</h1>
+        </div>
+    </div>
+
+{% include "user/profile_content.html" %}
+
+{% endblock content %}

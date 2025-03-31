@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load static %}
+
+{% block title %}
+{% trans "Seating" %}
+{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9">
+        <h1 class="page-header">{% trans "Seating Map" %}</h1>
+    </div>
+</div>
+
+    {% if seatings %}
+        {% if seatings|length >= 2 %}
+            <div class="row table-tabs">
+                <div class="col-md-9">
+                    <ul class="nav nav-tabs">
+                        {% for tab_seating in seatings %}
+                            <li{% if tab_seating.id is seating.id %} class="active"{% endif %}><a href="{{ tab_seating.get_absolute_url }}">{{ tab_seating.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-9">
+                <div id="seating-svg-wrapper">
+                    {{ template|safe }}
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12 col-xs-12">
+                <div class="sidebar-wrapper seat-wrapper">
+                	<div class="well sidebar">
+                        <ul class="nav nav-stacked">
+                            <li class="sidebar-header"><a href="">{% trans "Seating" %}</a></li>
+                            <li>{% trans "Seating" %}: {{ seating.title }}</li>
+                            {% if seating.is_open %}
+                                <li>{% trans "Status" %}: <span class="label label-success">{% trans "Open" context "seating status" %}</span></li>
+                                <li>{% trans "Closes" %}: {{ seating.closing_date }}</li>
+                            {% else %}
+                                <li>{% trans "Status" %}: <span class="label label-danger">{% trans "Closed" context "seating status" %}</span></li>
+                            {% endif %}
+                            <li>
+                                {% if seating.ticket_types.exists %}
+                                {% if seating.ticket_types.count > 1 %}
+                                {% trans "Tickets" %}:
+                                <br />
+                                {% else %}
+                                {% trans "Ticket" %}:
+                                {% endif %}
+                                {% for ticket_type in seating.ticket_types.all %}
+                                {% if ticket_type in user_ticket_types %}
+                                <span class="label label-primary">{{ ticket_type }}</span>
+                                {% else %}
+                                <span class="label label-default">{{ ticket_type }}</span>
+                                {% endif %}
+                                {% endfor %}
+                                {% else %}
+                                {% trans "Ticket" %}:
+                                <span class="label label-default">{% trans "None" context "ticket types" %}</span>
+                                {% endif %}
+                            </li>
+                            <li>{% trans "Available seats" %}: {{ seating.get_free_seats }}/{{ seating.get_number_of_seats }}</li>
+
+                            {% if perms.seating.export_seating %}
+                            <li class="sidebar-header"><a href="">{% trans "Admin" %}</a></li>
+                            <li><a href="{% url 'seating_list' seating.id %}"><span class="glyphicon glyphicon-th"></span> {% trans "Seating list" %} <small>({{ LANG_INFO.name }})</small></a></li>
+                            <li><a href="{% url 'seating_map' seating.id %}"><span class="glyphicon glyphicon-th"></span> {% trans "Seating map" %} <small>({{ LANG_INFO.name }})</small></a></li>
+                            {% endif %}
+
+                            <li class="sidebar-header"><a href="">{% trans "Seat Info" %}</a></li>
+                            <li>{% trans "Seat number" %}: <span id="seat-number" class="label label-info">{% trans "Select a seat" %}</span></li>
+                            <div id="occupied-by" class="hide">
+                                <li>{% trans "Occupied by" %}: <strong><span id="seat-user"></span></strong></li>
+                            </div>
+                            {% if seating.is_open %}
+                            <li><p>
+                                <form id="take-form" class="inline-button-form hide" action="{% url 'take_seat' seating.id %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" class="seat-number-input" name="seat" value="{# placeholder #}">
+                                    <button type="submit" class="btn btn-success">{% trans "Take seat" %}</button>
+                                </form>
+                                <form id="leave-form" class="inline-button-form hide" action="{% url 'leave_seat' seating.id %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" class="seat-number-input" name="seat" value="{# placeholder #}">
+                                    <button type="submit" class="btn btn-warning">{% trans "Leave seat" %}</button>
+                                </form>
+                            </p></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-9">
+                <input class="btn btn-warning" type="submit" value="{% trans "Your seat" %}" disabled/>
+                <input class="btn btn-danger" type="submit" value="{% trans "Taken seat" %}" disabled/>
+                <input class="btn btn-success" type="submit" value="{% trans "Free seat" %}" disabled/>
+                <input class="btn btn-dark" type="submit" value="{% trans "Unavailable seat" %}" disabled/>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-9">
+                <div class="alert alert-info">{% trans "If the seating isn't displayed properly, please use a supported browser like Chrome or Firefox." %}</div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="row">
+            <div class="col-md-9">
+                <div class="alert alert-info">{% trans "This LAN does not have any seatings." %}</div>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock content %}
+
+{% block script %}
+<script src="{% static 'js/seating.js' %}"></script>
+<script src="{% static 'js/jquery-ui.js' %}"></script>
+
+{% if seat %}
+<script>
+    $("rect[seat-display='{{ seat }}']").attr("class", " seating-node-search");
+</script>
+{% endif %}
+{% endblock script %}

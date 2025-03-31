@@ -1,0 +1,22 @@
+.cache
+.tox
+.tx
+__pycache__
+*.pyc
+/node_modules/
+/venv/
+/.venv/
+/tmp/
+.git/
+/.github/
+/log/
+
+# Django
+/static/
+/studlan.db
+
+# Deploy
+/keys/*.key
+
+# Editor
+.vscode/

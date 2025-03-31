@@ -1,0 +1,28 @@
+{% load i18n %}
+
+{% get_current_language as LANGUAGE_CODE %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="utf-8" />
+    <title>{{ site_name }}</title>
+</head>
+<body>
+    <div class="container" style="max-width: 800px; margin: 0 auto;">
+        <header>
+            <h1>{{ site_name }}</h1>
+        </header>
+        <div class="content">
+            {% block content %}
+            {% endblock content %}
+        </div>
+        <footer>
+            <hr />
+            {% blocktrans with request.get_host as host trimmed %}
+            <p>Sent from <a href="{{ host }}">{{ site_name }}</a>.</p>
+            {% endblocktrans %}
+        </footer>
+    </div>
+</body>
+</html>

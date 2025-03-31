@@ -1,0 +1,98 @@
+{% load i18n %}
+{% load postman_tags %}
+{% postman_unread as unread_count %}
+
+<ul class="collapse navbar-collapse nav navbar-nav navbar-right" id="userlist">
+{% if not user.is_authenticated %}
+    <li><a href="{% url 'auth_login' %}?next={{ request.get_full_path | urlencode }}">{% trans "Login" %}</a></li>
+{% else %}
+    <li class="dropdown hidden-xs">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            <span class="glyphicon glyphicon-user"></span>
+            <span aria-hidden="true">{{ request.user.username }}</span>
+            {% if unread_count %}
+            <span class="badge">{{unread_count}}</span>
+            {% endif %}
+            <strong class="caret"></strong>
+        </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+                <a href="{% url 'my_profile' %}">
+                <span class="glyphicon glyphicon-pencil"></span> {% trans "Profile" %}</a>
+            </li>
+            <li>
+                <a href="{% url 'inbox' %}">
+	                <span class="glyphicon glyphicon-inbox"></span>
+	                {% trans "Inbox" %}
+	                {% if unread_count %}
+	                	<span class="badge">{{unread_count}}</span>
+	                {% endif %}
+                </a>
+            </li>
+            <li class="divider"></li>
+            {% if perms.lan.show_arrivals_statistics %}
+            <li><a href="{% url 'statistics_list' %}"><span class="glyphicon glyphicon-stats"></span> {% trans "Statistics" %}</a></li>
+            {% endif %}
+            {% if perms.lan.register_arrivals %}
+            <li><a href="{% url 'arrival_home' %}"><span class="glyphicon glyphicon-list-alt"></span> {% trans "Register arrivals" %}</a></li>
+            {% endif %}
+            {% if perms.lan.register_new_user %}
+            <li><a href="{% url 'auth_direct_register_list' %}"><span class="glyphicon glyphicon-list"></span> {% trans "Manual registration" %}</a></li>
+            {% endif %}
+            {% if perms.sendmail.send_mail %}
+            <li><a href="{% url 'sendmail_send' %}"><span class="glyphicon glyphicon-envelope"></span> {% trans "Send mail" %}</a></li>
+            {% endif %}
+            {% if user.is_staff %}
+            <li><a href="/admin"><span class="glyphicon glyphicon-cog"></span> {% trans "Admin panel" %}</a>
+            {% endif %}
+            {% if perms.lan.show_arrivals_statistics or perms.lan.register_arrivals or perms.lan.register_new_user or perms.sendmail.send_mail or user.is_staff %}
+            <li class="divider"></li>
+            {% endif %}
+            <li>
+                <form action="{% url 'auth_logout' %}?next={{ request.get_full_path | urlencode }}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link">
+                        <span class="glyphicon glyphicon-off"></span> {% trans "Log out" %}
+                    </button>
+                </form>
+            </li>
+          </ul>
+    </li>
+            <li class="hidden-md hidden-lg hidden-sm"><a href="{% url 'my_profile' %}"><span class="glyphicon glyphicon-pencil"></span> {% trans "Profile" %}</a></li>
+            <li class="hidden-md hidden-lg hidden-sm">
+                <a href="{% url 'inbox' %}"><span class="glyphicon glyphicon-inbox"></span>
+                    {% trans "Inbox" %}
+                    {% if unread_count %}
+                        <span class="badge">{{unread_count}}</span>
+                    {% endif %}
+                </a>
+            </li>
+            <li class="divider hidden-md hidden-lg hidden-sm"></li>
+            {% if perms.lan.register_arrivals %}
+            <li class="hidden-md hidden-lg hidden-sm"><a href="{% url 'statistics_list' %}"><span class="glyphicon glyphicon-stats"></span> {% trans "Statistics" %}</a></li>
+            {% endif %}
+            {% if perms.lan.register_arrivals %}
+            <li class="hidden-md hidden-lg hidden-sm"><a href="{% url 'arrival_home' %}"><span class="glyphicon glyphicon-list-alt"></span> {% trans "Register arrivals" %}</a></li>
+            {% endif %}
+            {% if perms.lan.register_new_user %}
+            <li class="hidden-md hidden-lg hidden-sm"><a href="{% url 'auth_direct_register_list' %}"><span class="glyphicon glyphicon-list"></span> {% trans "Manual registration" %}</a></li>
+            {% endif %}
+            {% if perms.sendmail.send_mail %}
+            <li class="hidden-md hidden-lg hidden-sm"><a href="{% url 'sendmail_send' %}"><span class="glyphicon glyphicon-envelope"></span> {% trans "Send mail" %}</a></li>
+            {% endif %}
+            {% if user.is_staff %}
+            <li class="hidden-md hidden-lg hidden-sm"><a href="/admin"><span class="glyphicon glyphicon-cog"></span> {% trans "Admin panel" %}</a></li>
+            {% endif %}
+            {% if perms.lan.show_arrivals_statistics or perms.lan.register_arrivals or perms.lan.register_new_user or perms.sendmail.send_mail or user.is_staff %}
+            <li class="divider hidden-md hidden-lg hidden-sm"></li>
+            {% endif %}
+            <li class="hidden-md hidden-lg hidden-sm">
+                <form action="{% url 'auth_logout' %}?next={{ request.get_full_path | urlencode }}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link">
+                        <span class="glyphicon glyphicon-off"></span> {% trans "Log out" %}
+                    </button>
+                </form>
+            </li>
+{% endif %}
+</ul>

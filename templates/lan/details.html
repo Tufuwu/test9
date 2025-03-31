@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load markdown_deux_tags %}
+{% load static %}
+
+{% block title %}
+{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9">
+        <h1 class="page-header">{{ lan }}</h1>
+    </div>
+</div>
+
+{% if not active %}
+<div class="row">
+    <div class="col-md-9">
+        <div class="alert alert-info">
+            <p>{% trans "The LAN is over." %}</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if lan.media_link %}
+{% include "lan/media.html" with media_type=lan.media_type media_link=lan.media_link frontpage=0 %}
+{% endif %}
+
+<div class="row">
+    <div class="col-md-4">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td><strong>{% trans "Start time" %}</strong></td>
+                    <td>{{ lan.start_date|date:"d. F Y" }}, {{ lan.start_date|time:"H:i" }}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "End time" %}</strong></td>
+                    <td>{{ lan.end_date|date:"d. F Y" }}, {{ lan.end_date|time:"H:i" }}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Location" %}</strong></td>
+                    <td>{{ lan.location|safe }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        {% for direction in directions %}
+        <div class="well well-sm">
+            <span class="glyphicon glyphicon-road"></span>
+            <strong>{{ direction.title }}</strong>
+            <br />
+            {{ direction.description }}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if lan.map_link %}
+    <div class="col-md-5">
+        <iframe class="lan-map" title="Map" src="{{ lan.map_link|safe }}"></iframe>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-md-9 lan-desctiption">
+        <hr />
+        {{ lan.get_translation.description|markdown }}
+        <hr />
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-9">
+        <a href="{% url 'lan_tickets' lan_id=lan.id %}" class="btn btn-primary">
+            <span class="glyphicon glyphicon-film" aria-hidden="true"></span>
+            {% trans "View tickets" %}
+        </a>
+    </div>
+</div>
+
+{% endblock content %}

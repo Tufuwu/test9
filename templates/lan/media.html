@@ -1,0 +1,19 @@
+{% if media_link %}
+<div class="row">
+    <div class="col-md-9">
+        {% if media_type == 'image' %}
+        {% if frontpage == 1 %}<a href="{{ lan.get_absolute_url }}">{% endif %}
+        <img class="lan-banner lan-banner-image" src="{{ media_link | safe }}" alt="Banner" />
+        {% if frontpage == 1 %}</a>{% endif %}
+        {% elif media_type == 'video' %}
+        <div class="embed-responsive embed-responsive-16by9 lan-banner lan-banner-video">
+            <iframe class="embed-responsive-item" title="Video" src="{{ media_link | safe }}" allowfullscreen></iframe>
+        </div>
+        {% elif media_type == 'stream' %}
+            <div class="embed-responsive embed-responsive-16by9 lan-banner lan-banner-stream">
+                <iframe class="embed-responsive-item" title="Video" src="{{ media_link | safe }}" allowfullscreen></iframe>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

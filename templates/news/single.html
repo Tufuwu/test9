@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load markdown_deux_tags %} 
+
+{% block title %}
+{{ article.get_translation.translated_title }}
+{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9 article-single">
+        <h1 class="page-header article-title">
+            {{ article.get_translation.translated_title }}
+        </h1>
+        <div class="article-tags">
+            {% include "news/article_tags.html" %}
+        </div>
+        <div class="article-content">
+            {{ article.get_translation.translated_body|striptags|markdown }}
+        </div>
+    </div>
+</div>
+{% endblock content %}

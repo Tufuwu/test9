@@ -1,0 +1,588 @@
+html, body {
+    height: 100%;
+}
+
+body {
+    /*padding-top: 60px;*/
+    background: url("../img/bg.png") repeat-x scroll 0 -160px transparent;
+}
+
+.main-container {
+    padding-top: 60px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    word-wrap: break-word;
+}
+
+iframe {
+    border: 0;
+}
+
+footer {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-top: 1px solid #DDD;
+    margin-top: 20px;
+}
+
+@media (max-width:991px) {
+    footer {
+        text-align: center;
+    }
+}
+
+table .label {
+    /* Allow line-breaking labels inside tables, to avoid horizontal scrolling */
+    white-space: normal;
+}
+
+.white-text {
+    color: #ccc;
+}
+
+.activity_image {
+    height: 140px;
+    margin-bottom: 20px;
+    overflow: hidden;
+
+    -webkit-box-shadow: rgba(0, 0, 0, 0.0742188) 0px 1px 1px 0px;
+    background-color: transparent;
+    border-bottom-color: #DDD;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-left-color: #DDD;
+    border-left-style: solid;
+    border-left-width: 1px;
+    border-right-color: #DDD;
+    border-right-style: solid;
+    border-right-width: 1px;
+    border-top-color: #DDD;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-top-style: solid;
+    border-top-width: 1px;
+    box-shadow: rgba(0, 0, 0, 0.0742188) 0px 1px 1px 0px;
+    color: #0069D6;
+    padding: 4px;
+}
+
+.container-fluid {
+    min-width: 0px;
+}
+
+.breadcrumb {
+    margin-bottom: 0;
+}
+
+div.table-tabs {
+    margin-bottom: 0px;
+}
+
+
+div#btn-profile {
+    min-width: 220px;                       /* equal to .span2 */
+} div#btn-profile a:not(.dropdown-toggle) { /* child element, but not the dropdown-widget */
+    text-align: left;
+    min-width: 173px;                       /* equal to .span2 - the dropdown widget (26px) - derp adjustments*/
+}
+
+.register-button{
+    text-align: center;
+}
+
+.login-buttons {
+    margin-left: 5%;
+}
+
+.form-error {
+    color: red;
+}
+
+.toggle {
+    cursor: pointer;
+}
+
+.arrival-filter-group {
+    display: block;
+    padding: 10px 0;
+}
+
+.attendee-counts span {
+    padding-right: 25px;
+    font-weight: bold;
+}
+
+.navbar-brand-logo {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    /* Navbar is 50px tall, gutter is 15px */
+    margin-top: -6px;
+    background-image: url("/static/logo/logo_32.png");
+    background-size: contain;
+    image-rendering: crisp-edges;
+}
+
+.navbar-brand-text {
+    vertical-align: top;
+}
+
+.navbar .nav > li > a {
+    color:  #000000;
+}
+
+.sponsor-panel {
+    text-align: center;
+}
+
+.sponsor-banner {
+    height: 120px;
+    max-width: 50%;
+    margin: 20px auto;
+    line-height: 120px;
+}
+
+.sponsor-banner-image, .sponsor-banner-text {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.sponsor-banner-text {
+    display: inline-block;
+    font-size: 200%;
+    line-height: 1em;
+}
+
+@media (max-width:575px) {
+    .sponsor-banner-text {
+        font-size: 100%;
+    }
+}
+
+.sponsor-banner a, .sponsor-banner a:hover {
+    color: #000000;
+    text-decoration: none;
+}
+
+.tab-pane pre {
+    border: none;
+    padding: 0;
+}
+
+.form-actions {
+    margin-top: 10px;
+}
+
+.click-table tbody tr:hover {
+    cursor: pointer;
+}
+
+.click-table tbody tr:hover .underline {
+    text-decoration: underline;
+}
+
+.participants-heading{
+    color: rgb(65, 131, 196) !important;
+    font-weight: bold !important;
+}
+
+.participant-you{
+    font-weight: bold;
+}
+
+.collapsed-button{
+    height: 50px;
+    width: 40px;
+    margin-top: 0;
+    margin-bottom: 0;
+    border: none;
+}
+
+.language-dropdown{
+    margin-right: 10px;
+}
+
+.sidebar-wrapper {
+    margin-top: 80px;
+    right: 150px;
+    position: fixed;
+    width: 250px;
+}
+
+@media (max-width:1499px) {
+    .sidebar-wrapper{
+        right: 50px;
+    }
+}
+
+@media (max-width:1199px) {
+    .sidebar-wrapper{
+        position: relative;
+        width: 100%;
+        max-height: 30%;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        max-width: 100%;
+    }
+}
+
+.sidebar {
+    text-align: left;
+    padding: 0px;
+}
+
+.sidebar li {
+    overflow-x: hidden;
+    padding: 5px 10px;
+}
+
+.sidebar a {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.sidebar form {
+    width: 100%;
+    text-align: center !important;
+}
+
+.sidebar-header {
+    background-color: rgb(65, 131, 196);
+    text-align: center;
+}
+
+.sidebar-header a {
+    color: white;
+}
+
+.sidebar-header a:hover {
+    background: none !important;
+}
+
+.sidebar li:not(.sidebar-header) a {
+    margin: 0;
+    padding: 1px;
+}
+
+@media (min-width:992px) {
+    .sponsorbar-wrapper {
+        position: absolute;
+        top: 100px;
+        right: 1vw;
+        width: 25vw;
+        max-width: 300px;
+    }
+}
+
+@media (min-width:1400px) {
+    .sponsorbar-wrapper {
+        right: 5vw;
+    }
+
+}
+
+.sponsorbar {
+    margin-top: 20px;
+    margin-bottom: 0;
+}
+
+.sponsorbar-header {
+    background-color: rgb(65, 131, 196) !important;
+    text-align: center;
+}
+
+.sponsorbar-header > a {
+    color: white !important;
+    text-decoration: none;
+    font-size: 120%;
+}
+
+.sponsorbar-body {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.sponsorbar-body > hr {
+    margin: 0;
+}
+
+@media (min-width:992px) {
+    .sponsorbar-wrapper {
+        position: absolute;
+        top: 120px;
+        right: 2vw;
+        width: 20vw;
+        max-width: 300px;
+    }
+
+    .sponsorbar-body {
+        width: 100%;
+    }
+}
+
+@media (min-width:1600px) {
+    .sponsorbar-wrapper {
+        left: calc(50vw + 450px);
+        width: 20vw;
+        max-width: 350px;
+    }
+}
+
+.sponsorbar-sponsor {
+    height: 100px;
+    margin: 10px;
+    /* Same as height, for vertically centering */
+    line-height: 100px;
+    text-align: center;
+    font-size: 150%;
+    font-weight: bold;
+}
+
+.sponsorbar-sponsor a, .sponsorbar-sponsor a:hover {
+    color: #000000;
+    text-decoration: none;
+}
+
+.sponsorbar-sponsor-image {
+    max-height: 100%;
+    max-width: 100%;
+}
+
+#seating-svg-wrapper svg {
+    width: 100%;
+}
+
+.stretcher-bar {
+  width: 100%;
+  height: 75vh;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+@media (max-width:767px) {
+    .navbar-nav.navbar-collapse {
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .language-dropdown {
+        display: block;
+    }
+
+    .center-on-collapse {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+    .form-actions-collapsed {
+        margin-top: 10px;
+    }
+}
+
+@media (max-width:575px) {
+    h1 {
+        font-size: 2em;
+    }
+    h2 {
+        font-size: 1.8em;
+    }
+    h3 {
+        font-size: 1.6em;
+    }
+    h4 {
+        font-size: 1.4em;
+    }
+    h5 {
+        font-size: 1.2em;
+    }
+    h6 {
+        font-size: 1.0em;
+    }
+}
+
+@media (max-width:350px) {
+    .nav-team{
+        float: left !important;
+        width: 50% !important;
+    }
+}
+
+.seating-node-free {
+    fill: #5cb85c;
+}
+
+.seating-node-occupied {
+    fill: #d9534f;
+}
+
+.seating-node-self {
+    fill: #f0ad4e;
+}
+
+.seating-node-info {
+    fill: #0275d8;
+    stroke-width:2;
+}
+
+.seating-node-search {
+    fill: #5bc0de;
+    stroke-width:2;
+}
+
+.hide {
+    display: none;
+}
+
+#brackets-button {
+    margin-bottom: 10px;
+}
+
+.seat-wrapper {
+    margin-top: 0;
+}
+
+.competition-start-time {
+    margin-bottom: 0;
+    color: grey;
+}
+
+.lan-banner {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.lan-map {
+    width: 100%;
+    height: 350px;
+}
+
+/* Override */
+.page-header {
+    margin-top: 20px;
+}
+
+h1 a, h1 a:link, h1 a:hover, h1 a:active, h1 a:visited {
+    color: black;
+}
+
+.alert {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.schedule-calendar {
+    width: 100%;
+    height: 70vh;
+    min-height: 300px;
+    margin-top: 10px;
+}
+
+.news-pagination-container {
+    margin-top: 20px;
+}
+
+.news-pagination-container .pagination {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.article-tags {
+    margin-bottom: 10px;
+}
+
+.article-single .article-title small {
+    font-size: 0.5em;
+}
+
+.article-content,
+.lan-desctiption {
+    line-height: 1.8em;
+}
+
+.article-content p,
+.lan-desctiption p {
+    margin-bottom: 15px;
+}
+
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4,
+.article-content h5,
+.article-content h6,
+.lan-desctiption h1,
+.lan-desctiption h2,
+.lan-desctiption h3,
+.lan-desctiption h4,
+.lan-desctiption h5,
+.lan-desctiption h6 {
+    margin-top: 1.5em;
+}
+
+.article-content img,
+.lan-desctiption img {
+    max-width: 100%;
+}
+
+.email-content {
+    line-height: 1.8em;
+}
+
+.email-content img {
+    max-width: 100%;
+}
+
+.inline-button-form {
+    display: inline-block;
+    margin-right: 20px;
+    margin-bottom: 10px;
+}
+
+.stream {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.stream-desc {
+    margin-top: 10px;
+}
+
+.long-text-button {
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.label, .label a {
+    color: #FFF;
+}
+
+.lottery-content-centered {
+    text-align: center;
+}
+
+.lottery-winner {
+    font-weight: bold;
+    font-size: 150%;
+}
+
+.send-message-form input[type="text"],
+.send-message-form textarea,
+.send-message-form select {
+    width: 100%;
+}
+
+.send-message-form textarea {
+    resize: vertical;
+}
+
+.toggle[value="True"]>.toggle-false,
+.toggle[value="False"]>.toggle-true {
+    display: none;
+}

@@ -1,61 +1,114 @@
-name: Run tests
+# Required secrets:
+# - DOCKER_USERNAME (for publish)
+# - DOCKER_PASSWORD (for publish)
+
+name: CI/CD (validate)
+
+env:
+  DOCKER_REPO: casualgaming/studlan
+  PYTHON_VERSION: "2.7"
 
 on:
-   push:
-    branches: [develop]
-   pull_request:
-    branches: [develop]
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  release:
+    types: [published]
+  workflow_dispatch: {}
 
 jobs:
-  build:
-
-    runs-on: Ubuntu-20.04
-
-    env:
-      DB_TYPE: postgresql
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_ENDPOINT: localhost:5432 
-      DB_TEST_NAME: bit_schema_test
-      
-    services:
-      postgres:
-        image: postgres
-        env: 
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Connect to PostgreSQL
-      run: |
-        PGPASSWORD=postgres psql -h localhost -c 'CREATE DATABASE bit_schema_test;' -U postgres
-        PGPASSWORD=postgres psql -h localhost -c 'CREATE SCHEMA bitschema;' -U postgres -d bit_schema_test
-        PGPASSWORD=postgres psql -h localhost -c 'CREATE SCHEMA test_schema;' -U postgres -d bit_schema_test
-        PGPASSWORD=postgres psql -h localhost -c 'create SCHEMA test_schema_2;' -U postgres -d bit_schema_test
-        PGPASSWORD=postgres psql -h localhost -c '\dn;' -U postgres -d bit_schema_test
-        PGPASSWORD=postgres psql -h localhost -c 'show search_path;' -U postgres -d bit_schema_test
-        PGPASSWORD=postgres psql -h localhost -c "ALTER DATABASE bit_schema_test SET search_path TO bitschema,public;" -U postgres -d bit_schema_test
-        PGPASSWORD=postgres psql -h localhost -c 'show search_path;' -U postgres -d bit_schema_test
-      env:
-        POSTGRES_HOST: localhost
+      - name: Checkout code
+        uses: actions/checkout@v3
+      # - name: Cache dependencies
+      #   TODO
+      - name: Setup python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: '${{ env.PYTHON_VERSION }}'
+      - name: Install requirements
+        run: |
+          sudo apt-get update
+          sudo apt-get install gettext
+          python -m pip install --upgrade pip virtualenv setuptools wheel
+          python -m pip install -r requirements/test.txt
+      - name: Validate Django project
+        run: manage/ci/django-validate.sh
+      - name: Test
+        run: manage/ci/django-test.sh
+      - name: Lint
+        run: flake8
+      - name: Validate Docker image
+        run: manage/ci/docker-validate.sh
 
-    - name: Set up python 3.x
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Run tests
-      run: |
-        python -m unittest discover tests -v
-    - name: Generate coverage report
-      run: |
-        pip install pytest
-        pip install pytest-cov
-        pytest --cov=./ --cov-report=xml
- 
-    #- name: Upload coverage to Codecov
-          
+  publish-bleeding:
+    name: Publish (bleeding)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Get version
+        run: echo "version=$(echo 0.0.0-SNAPSHOT+$(TZ=Etc/GMT date "+%Y-%m-%dT%H:%M:%SZ"))" | tee -a $GITHUB_ENV
+      - name: Create version file
+        run: echo "${{ env.version }}" > VERSION
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          tags: |
+            ${{ env.DOCKER_REPO }}:latest
+            ${{ env.DOCKER_REPO }}:bleeding
+          push: true
+
+  publish-stable:
+    name: Publish (stable)
+    if: github.event_name == 'release' && github.event.action == 'published' && startsWith(github.ref, 'refs/tags/v')
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Get version
+        run: |
+          # Get version from git tag
+          VERSION="$(echo ${GITHUB_REF#refs/tags/v})"
+          echo "version=$VERSION" | tee -a $GITHUB_ENV
+          # Check if semantic version (3 numbers, ignore pre-release and metadata)
+          echo $VERSION | grep -Po '^\d+\.\d+\.\d+'
+          # Extract other version representations
+          echo "version_major=$(echo $VERSION | grep -Po '^\d+')" | tee -a $GITHUB_ENV
+          echo "version_minor=$(echo $VERSION | grep -Po '^\d+\.\d+')" | tee -a $GITHUB_ENV
+          echo "version_patch=$(echo $VERSION | grep -Po '^\d+\.\d+\.\d+')" | tee -a $GITHUB_ENV
+      - name: Create version file
+        run: echo "${{ env.version }}" > VERSION
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          tags: |
+            ${{ env.DOCKER_REPO }}:latest
+            ${{ env.DOCKER_REPO }}:${{ env.version_major }}
+            ${{ env.DOCKER_REPO }}:${{ env.version_minor }}
+            ${{ env.DOCKER_REPO }}:${{ env.version_patch }}
+            ${{ env.DOCKER_REPO }}:stable
+          push: true

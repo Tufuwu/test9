@@ -1,0 +1,4 @@
+-r base.in
+
+uwsgi
+psycopg2-binary

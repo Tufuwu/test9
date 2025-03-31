@@ -1,0 +1,35 @@
+{% extends "competition/competition_base.html" %}
+{% load i18n %}
+{% load markdown_deux_tags %}
+{% block content %}
+<div class="row">
+    <div class="col-md-9">
+        <h1 class="page-header">{% trans "Schedule" %}</h1>
+
+        {% if lan %}
+        {% if cal_src %}
+        {# Comment below are for preventing adding whitespace #}
+        <iframe class="schedule-calendar" title="Schedule" src="https://calendar.google.com/calendar/embed?{% comment %}
+            {% endcomment %}&amp;src={{ cal_src }}{% comment %}
+            {% endcomment %}&amp;showTitle=0{% comment %}
+            {% endcomment %}&amp;showNav=0{% comment %}
+            {% endcomment %}&amp;showDate=0{% comment %}
+            {% endcomment %}&amp;showPrint=0{% comment %}
+            {% endcomment %}&amp;showTabs=0{% comment %}
+            {% endcomment %}&amp;showCalendars=0{% comment %}
+            {% endcomment %}&amp;showTz=0{% comment %}
+            {% endcomment %}&amp;mode=WEEK{% comment %}
+            {% endcomment %}&amp;wkst=2{% comment %}
+            {% endcomment %}&amp;bgcolor=%23FFFFFF{% comment %}
+            {% endcomment %}&amp;dates={{ start_date }}/{{ end_date }}{% comment %}
+            {% endcomment %}&amp;color=%23125A12{% comment %}
+            {% endcomment %}&amp;ctz={{ TIME_ZONE | urlencode }}"></iframe>
+        {% else %}
+        <div class="alert alert-info">{% trans "No schedule for this LAN." %}</div>
+        {% endif %}
+        {% else %}
+        <div class="alert alert-info">{% trans "No upcoming LANs." %}</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

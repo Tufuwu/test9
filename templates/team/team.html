@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load markdown_deux_tags %}
+{% load misc %}
+
+{% block title %}
+{% trans "Team" %} {{ team }}
+{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9">
+
+        <h1 class="page-header">{% trans "Team" %} {{ team }}</h1>
+
+        <h3 id="members">{% trans "Members" %}</h3>
+        <table class="table table-bordered table-striped" aria-describedby="members">
+            <thead>
+                <th scope="col" class="col-md-4">{% trans "Username" %}</th>
+                <th scope="col" class="col-md-2">{% trans "Actions" %}</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <a href="{% url 'public_profile' team.leader %}">{{ team.leader }}</a>
+                        <span class="label label-info pull-right">{% trans "Leader" %}</span>
+                    </td>
+                    <td></td>
+                </tr>
+                {% if team.members.all %}
+                {% for member in team.members.all %}
+                <tr>
+                    <td>
+                        <a href="{% url 'public_profile' member %}">{{ member }}</a>
+                    </td>
+                    <td>
+                        {% if is_leader %}
+                        {% blocktrans asvar kick_member_line %}Are you sure you want to kick {{ member }} from {{ team }}?{% endblocktrans %}
+                        <form action="{% url 'kick_member' team.id %}" method="post" onsubmit="return confirm('{{ kick_member_line }}');">
+                            {% csrf_token %}
+                            <input type="hidden" name="user" value="{{ member }}">
+                            <button type="submit" class="btn btn-danger btn-xs">{% trans "Kick member" %}</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+
+        {% if is_leader %}
+        {% blocktrans asvar disband_team_line %}Are you sure you want to disband team {{ team }}?{% endblocktrans %}
+        <form class="inline-button-form" action="{% url 'disband_team' team.id %}" method="post" onsubmit="return confirm('{{ disband_team_line }}');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">{% trans "Disband team" %}</button>
+        </form>
+        {% endif %}
+        {% if is_normal_member %}
+        {% blocktrans asvar leave_line %}Are you sure you want to leave team {{ team }}?{% endblocktrans %}
+        <form class="inline-button-form" action="{% url 'leave_team' team.id %}" method="post" onsubmit="return confirm('{{ leave_line }}');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">{% trans "Leave team" %}</button>
+        </form>
+        {% endif %}
+        {% if my_invitation %}
+        <form class="inline-button-form" action="{% url 'accept_member_invite' team.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">{% trans "Accept invitation" %}</button>
+        </form>
+        <form class="inline-button-form" action="{% url 'decline_member_invite' team.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">{% trans "Decline invitation" %}</button>
+        </form>
+        {% endif %}
+
+        {% if is_leader or is_normal_member or perms.team.show_invitations %}
+        <h3 id="invitations">{% trans "Invitations" %}</h3>
+        <table class="table table-bordered table-striped" aria-describedby="invitations">
+            <thead>
+                <th scope="col" class="col-md-4">{% trans "Username" %}</th>
+                <th scope="col" class="col-md-2">{% trans "Actions" %}</th>
+            </thead>
+            <tbody>
+                {% for invite in invitations %}
+                <tr>
+                    <td>
+                        <a href="{% url 'public_profile' invite.invitee %}">{{ invite.invitee }}</a>
+                    </td>
+                    <td>
+                        {% if is_leader %}
+                        {% blocktrans asvar uninvite_line %}Are you sure you want to uninvite {{ member }} from {{ team }}?{% endblocktrans %}
+                        <form action="{% url 'uninvite_member' team.id %}" method="post" onsubmit="return confirm('{{ uninvite_line }}');">
+                            {% csrf_token %}
+                            <input type="hidden" name="user" value="{{ invite.invitee }}">
+                            <button type="submit" class="btn btn-danger btn-xs">{% trans "Uninvite" %}</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        {% if is_leader %}
+        <h4>{% trans "Invite New Member" %}</h4>
+        <form class="form-horizontal" action="{% url 'invite_member' team.id %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="col-md-1 control-label" for="user">{% trans "User" %}</label>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="user" required placeholder="{% trans "Username" %}" />
+                </div>
+                <div class="col-md-2 center-on-collapse form-actions-collapsed">
+                    <input type="submit" class="btn btn-primary" value="{% trans "Invite member" %}" />
+                </div>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

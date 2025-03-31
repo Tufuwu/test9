@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load misc %}
+
+{% block title %}
+{% trans "Error 500" %}
+{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9">
+        <h1 class="page-header">{% trans "Server Error (500)" %}</h1>
+        {% blocktrans trimmed %}
+        <p>We've encountered an internal server error.</p>
+        <p>Administrators have been notified, but please contact us and tell us how it happened.</p>
+        {% endblocktrans %}
+    </div>
+</div>
+{% endblock content %}
