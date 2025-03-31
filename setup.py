@@ -1,42 +1,43 @@
-"""Translate Django model data using gettext"""
-import io
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+# vim:fenc=utf-8
+#
+"""
+"""
+
 from setuptools import setup, find_packages
 
-LONG_DESCRIPTION_FILES = ('README.rst', 'CHANGELOG.rst')
+# Setuptools config
+NAME = "numerizer"
+DESCRIPTION = "Python module for converting natural language numbers into ints and floats."
+with open('README.rst', encoding='utf-8') as f:
+    LONG_DESCRIPTION = f.read()
+MAINTAINER = 'Jaidev Deshpande'
+MAINTAINER_EMAIL = 'deshpande.jaidev@gmail.com'
+URL = "https://github.com/jaidevd/numerizer"
+DOWNLOAD_URL = 'https://pypi.org/project/numerizer/#files'
+LICENSE = 'MIT'
+PROJECT_URLS = {
+    'Bug Tracker': 'https://github.com/jaidevd/numerizer/issues',
+    'Documentation': 'https://github.com/jaidevd/numerizer/tree/master/README.rst',
+    'Source Code': 'https://github.com/jaidevd/numerizer'
+}
+VERSION = '0.2.3'
 
+# Requirements
+install_requires = []
 
-def yield_long_description_files():
-    for description_file in LONG_DESCRIPTION_FILES:
-        with io.open(description_file, 'r', encoding='utf-8') as f:
-            yield f.read()
-
-
+# Setup
 setup(
-    name="django-vinaigrette",
-    version="2.0.1",
+    name=NAME,
+    maintainer=MAINTAINER,
+    maintainer_email=MAINTAINER_EMAIL,
+    description=DESCRIPTION,
+    license=LICENSE,
+    url=URL,
+    download_url=DOWNLOAD_URL,
+    version=VERSION,
+    long_description=LONG_DESCRIPTION,
     packages=find_packages(),
-    description=__doc__,
-    long_description='\n\n'.join(yield_long_description_files()),
-    author="Ecometrica Ltd",
-    author_email="dev@ecometrica.com",
-    maintainer="Ecometrica Ltd",
-    maintainer_email="software@ecometrica.com",
-    url="https://github.com/ecometrica/django-vinaigrette/",
-    keywords=[
-        "django", "translation", "gettext",
-        "internationalization", "i18n", "database", "model"
-    ],
-    classifiers=[
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Development Status :: 4 - Beta",
-        "License :: OSI Approved :: BSD License",
-        "Operating System :: POSIX",
-        "Topic :: Software Development :: Internationalization",
-        "Framework :: Django",
-        "Framework :: Django :: 1.11",
-        "Framework :: Django :: 2.0",
-        "Framework :: Django :: 2.1",
-    ],
+    install_requires=install_requires
 )

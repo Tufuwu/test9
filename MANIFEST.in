@@ -1,4 +1,0 @@
-include *.py
-include *.rst
-include LICENSE
-include tox.ini
