@@ -1,3 +1,0 @@
-[run]
-include = casbin_adapter/*
-omit = *migrations*, *tests*
