@@ -1,3 +1,25 @@
+# Hide sublime text stuff
+*.sublime-project
+*.sublime-workspace
+
+# Hide some OS X stuff
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Thumbnails
+._*
+
+# IntelliJ IDEA
+.idea
+*.iml
+
+# pytest
+.pytest_cache
+.cache
+
+# GITHUB Proposed Python stuff:
 *.py[cod]
 
 # C extensions
@@ -9,6 +31,7 @@
 dist
 build
 eggs
+.eggs
 parts
 bin
 var
@@ -17,16 +40,21 @@ develop-eggs
 .installed.cfg
 lib
 lib64
-__pycache__
+pip-wheel-metadata
 
-# Installer logs
+# Logs
+*.log
 pip-log.txt
 
 # Unit test / coverage reports
 .coverage
 .tox
+coverage.xml
 nosetests.xml
-unittests.xml
+htmlcov/
+test-reports/
+test-results.xml
+test-output.xml
 
 # Translations
 *.mo
@@ -36,38 +64,38 @@ unittests.xml
 .project
 .pydevproject
 
-# QA
-coverage.xml
-diff_*.html
-*.report
-report
-edx_analytics.log
+.python-version
+
+# emacs auto backups
+*~
+*#
+*.orig
+
+# venv stuff
+pyvenv.cfg
+pip-selfcheck.json
 venv
+.venv
+Pipfile*
+share/*
+Scripts/
 
-# Override config files
-override.cfg
-
-# JetBrains
-.idea
-
-
-.DS_Store
-
-*.trace
-.eggs
-
+# vimmy stuff
 *.swp
-catalog_test.json
-course_structure.json
+*.swo
+tags
+ctags.tmp
 
-# Sphinx docs
-docs/*
-docs/source/all.rst
-docs/source/toctree.rst
-docs/source/workflow_entry_point.rst
-!docs/source/
-!docs/source/_themes/*
+# vagrant stuff
+virtualization/vagrant/setup_done
+virtualization/vagrant/.vagrant
+virtualization/vagrant/config
 
-*.java
-TempStatsStore/
-derby.log
+# Visual Studio Code
+.vscode/*
+!.vscode/cSpell.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+
+# Typing
+.mypy_cache

@@ -1,94 +1,83 @@
-Open edX Data Pipeline
-======================
-A data pipeline for analyzing Open edX data. This is a batch analysis engine that is capable of running complex data processing workflows.
+Python library for the OpenZWave MQTT implementation.
 
-The data pipeline takes large amounts of raw data, analyzes it and produces higher value outputs that are used by various downstream tools.
+Consumes MQTT output from https://github.com/OpenZWave/qt-openzwave
 
-The primary consumer of this data is [Open edX Insights](http://edx.readthedocs.io/projects/edx-insights/en/latest/).
+For Home Assistant integration, see the custom component [homeassistant-zwave_mqtt](https://github.com/cgarwood/homeassistant-zwave_mqtt).
 
-It is also used to generate a variety of packaged outputs for research, business intelligence and other reporting.
+## Structure
 
-It gathers input from a variety of sources including (but not limited to):
+Each object maps to one or two parts in the topic. A topic can contain the following parts:
 
-* [Tracking log](http://edx.readthedocs.io/projects/devdata/en/latest/internal_data_formats/event_list.html) files - This is the primary data source.
-* LMS database
-* Otto database
-* LMS APIs (course blocks, course listings)
+- `<Prefix>`: the prefix of each topic. This is ignored in the processing. Usually `openzwave/`.
+- `<CollectionType>/<CollectionID>`: The collection type and the ID of the item in the collection. Example: `value/3`
+- `<CollectionID>`: Some objects will have a direct collection that is not typed in the topic. Example is the OZW instance in `<Prefix>/1`
+- `<ObjectType>`: If there is only a single instance of a type under a parent. For example `node/2/statistics`.
 
-It outputs to:
+### Example
 
-* S3 - CSV reports, packaged exports
-* MySQL - This is known as the "result store" and is consumed by Insights
-* Elasticsearch - This is also used by Insights
+A message is sent to topic `openzwave/1/node/2/statistics`. This maps to:
 
-This tool uses [spotify/luigi](https://github.com/spotify/luigi) as the core of the workflow engine.
+| Type                | ID  |
+| ------------------- | --- |
+| Prefix              | -   |
+| `OZWInstance`       | `1` |
+| `OZWNode`           | `2` |
+| `OZWNodeStatistics` | -   |
 
-Data transformation and analysis is performed with the assistance of the following third party tools (among others):
+## Message ordering
 
-* Python
-* [Pandas](http://pandas.pydata.org/)
-* [Hive](https://hive.apache.org/)
-* [Hadoop](http://hadoop.apache.org/)
-* [Sqoop](http://sqoop.apache.org/)
+We work with signals to signal listeners when things change. However, when we connect to MQTT we will receive a lot of retained messages at once. To prevent signals being sent out of order, we will hold all messages for children until the parent has received its information.
 
-The data pipeline is designed to be invoked on a periodic basis by an external scheduler. This can be cron, jenkins or any other system that can periodically run shell commands.
+This has been disabled for `OZWManager` and `OZWInstance`.
 
-Here is a simplified, high level, view of the architecture:
+If we receive messages on the following topics:
 
-![Open edX Analytics Architectural Overview](http://edx.readthedocs.io/projects/edx-installing-configuring-and-running/en/latest/_images/Analytics_Pipeline.png)
+1. `openzwave/1/node/2/statistics`
+2. `openzwave/1/node/2`
 
-Setting up Docker-based Development Environment
------------------------------------------------
+We will process the messages in the reverse order:
 
-As part of our movement towards the adoption of [OEP-5](https://github.com/edx/open-edx-proposals/blob/master/oeps/oep-0005-arch-containerize-devstack.rst), we have 
-ported our development setup from Vagrant to Docker, which uses a multi-container approach driven by Docker Compose. 
-There is a guide in place for [Setting up Docker Analyticstack](https://github.com/edx/devstack#getting-started-on-analytics) in
-the devstack repository which can help you set up a new analyticstack. 
+1. `openzwave/1/node/2`
+2. `openzwave/1/node/2/statistics`
 
-Here is a diagram showing how the components are related and connected to one another:
+## Modelling Rules
 
-![the analyticstack](/images/docker_analyticstack.png?raw=true)
+This library should not aim to do fancy things. We should, as much as possible, represent the data from MQTT as-is. We don't want to change names besides making them Pythonic (CamelCase -> snake_case).
 
-Setting up a Vagrant-based Development Environment
--------------------------------------------------- 
+## Automatic added helpers
 
-We call this environment the Vagrant "analyticstack". It contains many of the services needed to develop new features for Insights and the data pipeline.
+Models will have automatic helpers added based on their child models. For example, the `Node` model has the following child collections:
 
-A few of the services included are:
+```python
+    def create_collections(self):
+        """Create collections that Node supports."""
+        return {
+            # A collection of children
+            "instance": ItemCollection(OZWNodeInstance),
+            # A single child
+            "statistics": OZWNodeStatistics,
+        }
+```
 
-- LMS (edx-platform)
-- Studio (edx-platform)
-- Insights (edx-analytics-dashboard)
-- Analytics API (edx-analytics-data-api)
+This means that `Node` has the following automatic functions created:
 
-We currently have a separate development from the core edx-platform devstack because the data pipeline depends on
-several services that dramatically increase the footprint of the virtual machine. Given that a small fraction of
-Open edX contributors are looking to develop features that leverage the data pipeline, we chose to build a variant of
-the devstack that includes them. In the future we hope to adopt [OEP-5](https://github.com/edx/open-edx-proposals/blob/master/oeps/oep-0005-arch-containerize-devstack.rst)
-which would allow developers to mix and match the services they are using for development at a much more granular level.
-In the meantime, you will need to do some juggling if you are also running a traditional Open edX devstack to ensure
-that both it and the analyticstack are not trying to run at the same time (they compete for the same ports).
+- `get_instance(item_id)` to get an instance by ID.
+- `instances()` to get an iterator over all available instances.
+- `get_statistics()` get the direct child.
 
-If you are running a generic Open edX devstack, navigate to the directory that contains the Vagrantfile for it and run `vagrant halt`.
+## Gathering Data
 
-Please follow the [analyticstack installation guide](http://edx.readthedocs.io/projects/edx-installing-configuring-and-running/en/latest/installation/analytics/index.html).
+This library is instantiated using messages received from MQTT. To make development easier, we have created two helper scripts. One that will dump all MQTT messages and one that will read messages from a text file and instantiate an `OZWManager` with all the data. This can be used to develop, test or reproduce bugs.
 
-**Note:** Vagrant "analyticstack" official support is coming to end after [Hawthorn](https://groups.google.com/forum/#!topic/edx-code/KWp1RHoN5n0).
+```
+python3 -m script.dump_mqtt > dump.csv
+python3 -m script.instance_from_file dump.csv
+```
 
-Running In Production
-=====================
+## Development
 
-For small installations, you may want to use our [single instance installation guide](https://openedx.atlassian.net/wiki/display/OpenOPS/edX+Analytics+Installation).
+- Install all requirements:
 
-For larger installations, we do not have a similarly detailed guide, you can start with our [installation guide](http://edx.readthedocs.io/projects/edx-installing-configuring-and-running/en/latest/insights/index.html).
-
-
-How to Contribute
------------------
-
-Contributions are very welcome, but for legal reasons, you must submit a signed
-[individual contributor's agreement](http://code.edx.org/individual-contributor-agreement.pdf)
-before we can accept your contribution. See our
-[CONTRIBUTING](https://github.com/edx/edx-platform/blob/master/CONTRIBUTING.rst)
-file for more information -- it also contains guidelines for how to maintain
-high code quality, which will make your contribution more likely to be accepted.
+  ```sh
+  pip install -r requirements_dev.txt
+  ```
