@@ -1,16 +1,35 @@
-.idea
-.pytest_cache
-.coverage
-htmlcov
-.nox
-coverage.xml
-
-# byte-compiled / optimized
-__pycache__
+others_code/
+pyndl/ndl_parallel.c
+pyndl/ndl_openmp.c
+pyndl/corr_parallel.c
+pyndl/wh_parallel.c
+pyndl/correlation_openmp.c
+latex/
 *.pyc
-*.egg-info
+__pycache__/
+tests/__pycache__/
+.coverage*
+htmlcov/
+.cache/
+*.swp
+notebooks/
+prof/
+pyndl.tar.gz
+pyndl/tests/binary_resources/
+.venv/
+.#*
+.eggs/
+build/
+dist/
+*.so
+pyndl.egg-info/
+.tox/
+doc/data/levent.tab
+doc/data/levent.tab.filtered
+doc/data/weights.nc
 
-# packaging / distribution
-site
-dist
-build
+# copybutton js script
+copybutton.js
+
+# pypoetry
+poetry.lock
