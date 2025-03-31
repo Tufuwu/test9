@@ -1,15 +1,34 @@
-name: 'Gitbook Action Build'
-on:
-  push:
-    branches:
-      - main  # trigger branch
+name: Build
+
+on: [push]
+
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout action
-      uses: actions/checkout@v2
-    - name: Gitbook Action           # https://github.com/ZanderZhao/gitbook-action/releases
-      uses: ZanderZhao/gitbook-action@v1.2.4  # -> or ZanderZhao/gitbook-action@main.  If not use main click above, use latest please 
-      with:                                   #    or fork this repo and use YourName/gitbook-action@main
-        token: ${{ secrets.PERSONAL_TOKEN }}  # -> remember add this in settings/secrets as following
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install MPI
+      run: |
+        sudo apt install -y -q mpich libmpich-dev
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        make install
+    - name: Lint
+      run: |
+        make lint
+    - name: Type-check
+      run: |
+        make type-check
+    - name: Test
+      run: |
+        make coverage
+    - name: Scan
+      uses: SonarSource/sonarcloud-github-action@main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
