@@ -1,10 +1,9 @@
+# Copyright (c) 2017-2019 Uber Technologies, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+import logging
 import os
 
-
-def sample_data(filename, sample_data_dir):
-    base_path = os.path.split(__file__)[0]
-    resource_path = os.path.join(base_path, "files", sample_data_dir)
-    path = os.path.join(resource_path, filename)
-
-    with open(path) as f:
-        return f.read()
+# create log handler for tests
+level = logging.INFO if "CI" in os.environ else logging.DEBUG
+logging.basicConfig(format='%(levelname).1s \t %(message)s', level=level)
