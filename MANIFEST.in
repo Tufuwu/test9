@@ -1,2 +1,0 @@
-include README.rst CHANGES.rst requirements_test.txt
-recursive-exclude tests *

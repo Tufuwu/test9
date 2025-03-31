@@ -1,56 +1,46 @@
-""" Setup file """
-import os
+#!/usr/bin/env python
+# -*- coding: utf-8; py-indent-offset:4 -*-
+import setuptools
 
-from setuptools import find_packages, setup
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-HERE = os.path.abspath(os.path.dirname(__file__))
+setuptools.setup(
+    name='backtrader_plotting',
 
-with open(os.path.join(HERE, "README.rst")) as f:
-    README = f.read()
+    version='2.0.0',
 
-with open(os.path.join(HERE, "CHANGES.rst")) as f:
-    CHANGES = f.read()
+    description='Plotting package for Backtrader (Bokeh)',
 
-REQUIREMENTS_TEST = open(os.path.join(HERE, "requirements_test.txt")).readlines()
+    python_requires='>=3.6',
 
-REQUIREMENTS = [
-    "botocore>=0.89.0",
-]
+    author='verybadsolider',
+    author_email='vbs@springrts.de',
 
-if __name__ == "__main__":
-    setup(
-        name="dynamo3",
-        version="1.0.0",
-        description="Python 3 compatible library for DynamoDB",
-        long_description=README + "\n\n" + CHANGES,
-        classifiers=[
-            "Development Status :: 4 - Beta",
-            "Intended Audience :: Developers",
-            "License :: OSI Approved :: MIT License",
-            "Operating System :: OS Independent",
-            "Programming Language :: Python",
-            "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.6",
-            "Programming Language :: Python :: 3.7",
-            "Programming Language :: Python :: 3.8",
-            "Programming Language :: Python :: 3.9",
-        ],
-        author="Steven Arcangeli",
-        author_email="stevearc@stevearc.com",
-        url="http://github.com/stevearc/dynamo3",
-        keywords="aws dynamo dynamodb",
-        include_package_data=True,
-        packages=find_packages(exclude=("tests",)),
-        license="MIT",
-        entry_points={
-            "console_scripts": [
-                "dynamodb-local = dynamo3.testing:run_dynamo_local",
-            ],
-            "nose.plugins": [
-                "dynamolocal=dynamo3.testing:DynamoLocalPlugin",
-            ],
-        },
-        python_requires=">=3.6",
-        install_requires=REQUIREMENTS,
-        tests_require=REQUIREMENTS + REQUIREMENTS_TEST,
-    )
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+
+    license='GPLv3+',
+    url="https://github.com/verybadsoldier/backtrader_plotting",
+    project_urls={
+        "Bug Tracker": "https://github.com/verybadsoldier/backtrader_plotting/issues",
+        "Documentation": "https://github.com/verybadsoldier/backtrader_plotting/wiki",
+        "Source Code": "https://github.com/verybadsoldier/backtrader_plotting",
+        "Demos": "https://github.com/verybadsoldier/backtrader_plotting/tree/gh-pages",
+    },
+
+    keywords=['trading', 'development', 'plotting', 'backtrader'],
+
+    packages=setuptools.find_packages(),
+    
+    package_data={'backtrader_plotting.bokeh': ['templates/*.j2']},
+
+    install_requires=[
+        'backtrader',
+        'bokeh~=2.3.0',
+        'jinja2',
+        'pandas',
+        'matplotlib',
+        'markdown2',
+    ],
+)
