@@ -1,6 +1,0 @@
-.github
-docs
-setup.py
-.pre-commit-config.yaml
-readthedocs.yml
-tests
