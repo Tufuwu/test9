@@ -1,2 +1,0 @@
-tox >= 3.2
-pre-commit

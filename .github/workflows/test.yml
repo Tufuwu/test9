@@ -1,61 +1,30 @@
-name: tests
+name: CI
 
 on:
   push:
-    branches:
-      - main
-      - releases/*
-
   pull_request:
-    paths:
-      - "pystiche/**"
-      - "tests/**"
-      - "setup.cfg"
-      - "pyproject.toml"
-      - "pytest.ini"
-      - ".coveragerc"
-      - "codecov.yml"
-      - "tox.ini"
-      - "requirements-dev.txt"
-      - ".github/workflows/tests.yml"
+  schedule:
+    - cron: '0 0 * * 2'
 
 jobs:
-  run:
+  industrial_ci:
+    name: Industrial CI - ${{ github.event_name }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python: ["3.9", "3.10"]
-      fail-fast: true
-
-    runs-on: ${{ matrix.os }}
+        env:
+          - {ROS_DISTRO: melodic, ROS_REPO: main}
     env:
-      OS: ${{ matrix.os }}
-      PYTHON: ${{ matrix.python }}
-
+      ADDITIONAL_DEBS: "python-pip"
+      BEFORE_INSTALL_TARGET_DEPENDENCIES: "pip install --upgrade pip && hash -r pip && pip install --upgrade --progress-bar=off enum34 pyasn1-modules 'tensorflow>=2.1' 'keras<2.4'"
+      CCACHE_DIR: /github/home/.ccache # Directory for ccache (and how we enable ccache in industrial_ci)
+    runs-on: ubuntu-latest
     steps:
-      - name: Set up python
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v2
+      # This step will fetch/store the directory used by ccache before/after the ci run
+      - uses: actions/cache@v4
         with:
-          python-version: ${{ matrix.python }}
-
-      - name: Upgrade and install additional system packages
-        run: pip install --upgrade pip virtualenv setuptools wheel
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Install dev requirements
-        run: pip install -r requirements-dev.txt
-
-      - name: Create environment
-        run: tox -e py --notest
-
-      - name: Run tests
-        run: tox -e py -- --skip-large-download
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v1.0.7
-        with:
-          env_vars: OS,PYTHON
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
+      # Run industrial_ci
+      - uses: 'ros-industrial/industrial_ci@main'
+        env: ${{ matrix.env }}
