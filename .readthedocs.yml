@@ -1,14 +1,8 @@
-version: 2
-
-sphinx:
-  configuration: docs/conf.py
-
-formats: all
-
 build:
-  image: latest
+    image: latest
 
 python:
-  version: 3.8
-  install:
-    - requirements: requirements.txt
+    version: 3.7
+    pip_install: true
+    extra_requirements:
+        - dev

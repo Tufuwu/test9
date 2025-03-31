@@ -1,26 +1,14 @@
-django-queryable-properties
-===========================
+.. include:: ../README.rst
+   :end-before: end-of-readme-intro
 
-Write Django model properties that can be used in database queries.
+Table of contents
+=================
 
 .. toctree::
-   :maxdepth: 1
+   :includehidden:
+   :maxdepth: 2
 
-   intro
-   installation
-   basics
-   standard_features
-   filters
-   annotations
-   annotation_based
-   updating
-   common
-   api
-   changelog
-
-Indices and tables
-==================
-
-- :ref:`genindex`
-- :ref:`modindex`
-- :ref:`search`
+   overview.rst
+   api.rst
+   resources.rst
+   project.rst

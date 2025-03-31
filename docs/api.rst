@@ -1,30 +1,49 @@
-API
-===
+API Reference
+=============
 
-Module ``queryable_properties.properties``
-------------------------------------------
+.. automodule:: loguru
 
-.. automodule:: queryable_properties.properties
-   :members:
-   :member-order: bysource
+.. toctree::
+   :hidden:
+   :includehidden:
 
-Module ``queryable_properties.managers``
-----------------------------------------
+   api/logger.rst
+   api/type_hints.rst
 
-.. automodule:: queryable_properties.managers
-   :members:
-   :exclude-members: QueryablePropertiesIterable
 
-.. autoattribute:: queryable_properties.managers.QueryablePropertiesManager
+* :class:`~loguru._logger.Logger`
 
-Module ``queryable_properties.utils``
--------------------------------------
+    * :meth:`~loguru._logger.Logger.add`
 
-.. automodule:: queryable_properties.utils
-   :members:
+        * :ref:`sink`
+        * :ref:`message`
+        * :ref:`levels`
+        * :ref:`record`
+        * :ref:`time`
+        * :ref:`file`
+        * :ref:`color`
+        * :ref:`env`
 
-Module ``queryable_properties.exceptions``
-------------------------------------------
+    * :meth:`~loguru._logger.Logger.remove`
+    * :meth:`~loguru._logger.Logger.complete`
+    * :meth:`~loguru._logger.Logger.catch`
+    * :meth:`~loguru._logger.Logger.opt`
+    * :meth:`~loguru._logger.Logger.bind`
+    * :meth:`~loguru._logger.Logger.contextualize`
+    * :meth:`~loguru._logger.Logger.patch`
+    * :meth:`~loguru._logger.Logger.level`
+    * :meth:`~loguru._logger.Logger.disable`
+    * :meth:`~loguru._logger.Logger.enable`
+    * :meth:`~loguru._logger.Logger.configure`
+    * :meth:`~loguru._logger.Logger.parse`
+    * :meth:`~loguru._logger.Logger.trace`
+    * :meth:`~loguru._logger.Logger.debug`
+    * :meth:`~loguru._logger.Logger.info`
+    * :meth:`~loguru._logger.Logger.success`
+    * :meth:`~loguru._logger.Logger.warning`
+    * :meth:`~loguru._logger.Logger.error`
+    * :meth:`~loguru._logger.Logger.critical`
+    * :meth:`~loguru._logger.Logger.log`
+    * :meth:`~loguru._logger.Logger.exception`
 
-.. automodule:: queryable_properties.exceptions
-   :members:
+* :ref:`type-hints`
