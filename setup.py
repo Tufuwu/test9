@@ -1,73 +1,40 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from setuptools import setup, find_packages
 
-from setuptools import setup
+with open('flavio/_version.py', encoding='utf-8') as f:
+    exec(f.read())
 
-setup(
-    name="xbox-webapi",
-    version="1.1.8",
-    author="OpenXbox",
-    description="A library to authenticate with Windows Live/Xbox Live and use their API",
-    long_description=open('README.rst').read() + '\n\n' + open('HISTORY.rst').read(),
-    license="GPL",
-    keywords="xbox one live api",
-    url="https://github.com/OpenXbox/xbox-webapi-python",
-    packages=[
-        'xbox.webapi',
-        'xbox.webapi.common',
-        'xbox.webapi.scripts',
-        'xbox.webapi.api',
-        'xbox.webapi.api.provider',
-        'xbox.webapi.authentication'
-    ],
-    namespace_packages=['xbox'],
-    zip_safe=False,
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8"
-    ],
-    test_suite="tests",
-    install_requires=[
-        'requests',
-        'demjson',
-        'appdirs',
-        'urwid'
-    ],
-    setup_requires=['pytest-runner'],
-    tests_require=[
-        'pytest',
-        'betamax'
-    ],
-    extras_require={
-        'dev': [
-            'pip',
-            'bump2version',
-            'wheel',
-            'watchdog',
-            'flake8',
-            'tox',
-            'coverage',
-            'Sphinx',
-            'twine',
-            'betamax',
-            'pytest',
-            'pytest-runner'
-        ],
-    },
-    entry_points={
-        'console_scripts': [
-            'xbox-auth-via-browser=xbox.webapi.scripts.browserauth:main',
-            'xbox-authenticate=xbox.webapi.scripts.authenticate:main',
-            'xbox-auth-tui=xbox.webapi.scripts.tui:main',
-            'xbox-searchlive=xbox.webapi.scripts.search:main',
-            'xbox-change-gt=xbox.webapi.scripts.change_gamertag:main'
-        ]
-    }
-)
+with open('README.md', encoding='utf-8') as f:
+    LONG_DESCRIPTION = f.read()
+
+setup(name='flavio',
+      version=__version__,
+      author='David M. Straub',
+      author_email='straub@protonmail.com',
+      url='https://flav-io.github.io',
+      description='A Python package for flavour physics phenomenology in the Standard Model and beyond',
+      long_description=LONG_DESCRIPTION,
+      long_description_content_type='text/markdown',
+      license='MIT',
+      packages=find_packages(),
+      package_data={
+      'flavio':['data/*.yml',
+                'data/test/*',
+                'physics/data/arXiv-0810-4077v3/*',
+                'physics/data/arXiv-1503-05534v1/*',
+                'physics/data/arXiv-1503-05534v2/*',
+                'physics/data/arXiv-1501-00367v2/*',
+                'physics/data/arXiv-1602-01399v1/*',
+                'physics/data/arXiv-1602-01399v1/*',
+                'physics/data/arXiv-1811-00983v1/*',
+                'physics/data/qcdf_interpolate/*',
+                'physics/data/wcsm/*',
+                ]
+      },
+      install_requires=['numpy>=1.16.5', 'scipy', 'setuptools>=3.3', 'pyyaml',
+                        'ckmutil', 'wilson>=2.0', 'particle>=0.16.0', ],
+      extras_require={
+            'testing': ['nose2'],
+            'plotting': ['matplotlib>=2.0'],
+            'sampling': ['iminuit>=2.0'],
+            },
+    )
