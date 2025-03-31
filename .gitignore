@@ -1,22 +1,25 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+*$py.class
+
+# Tilde files
+*~
 
 # C extensions
 *.so
-
-# IntelliJ folders - Pycharm
-.idea
 
 # Distribution / packaging
 .Python
 env/
 build/
+!litex/build
 develop-eggs/
 dist/
 downloads/
 eggs/
-/lib/
+.eggs/
+lib/
 lib64/
 parts/
 sdist/
@@ -39,9 +42,12 @@ pip-delete-this-directory.txt
 htmlcov/
 .tox/
 .coverage
+.coverage.*
 .cache
 nosetests.xml
 coverage.xml
+*,cover
+.hypothesis/
 
 # Translations
 *.mo
@@ -49,6 +55,14 @@ coverage.xml
 
 # Django stuff:
 *.log
+local_settings.py
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
 
 # Sphinx documentation
 docs/_build/
@@ -56,15 +70,24 @@ docs/_build/
 # PyBuilder
 target/
 
-# editors
-*.komodoproject
-.vscode
+# IPython Notebook
+.ipynb_checkpoints
 
-# other
-*.DS_Store*
-*~
-._*
-local_settings.py
-*.db
-*.tar.gz
-Pipfile
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# dotenv
+.env
+
+# virtualenv
+venv/
+ENV/
+
+# Spyder project settings
+.spyderproject
+
+# Rope project settings
+.ropeproject
