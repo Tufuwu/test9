@@ -1,2 +1,0 @@
-# http://krlmlr.github.io/using-gitattributes-to-avoid-merge-conflicts/
-/CHANGELOG.md merge=union
