@@ -1,129 +1,211 @@
-[![REUSE status](https://api.reuse.software/badge/github.com/SAP/cloud-pysec)](https://api.reuse.software/info/github.com/SAP/cloud-pysec)
+[![Build Status](https://github.com/hukkinj1/typenv/workflows/Tests/badge.svg?branch=master)](https://github.com/hukkinj1/typenv/actions?query=workflow%3ATests+branch%3Amaster+event%3Apush)
+[![codecov.io](https://codecov.io/gh/hukkinj1/typenv/branch/master/graph/badge.svg)](https://codecov.io/gh/hukkinj1/typenv)
+[![PyPI version](https://img.shields.io/pypi/v/typenv)](https://pypi.org/project/typenv)
 
-# Description
-This project is a python client library called *sap_xssec* for validation of *OAuth access tokens* issued by the *XSUAA*. 
+# typenv
 
-### OAuth Authorization Code Flow
-The typical web application use the OAuth authorization code flow for authentication, which is described as follows:
-1. A user accesses the web application using a browser.
-2. The web application (in typical SAP Cloud Platform applications, this is an application router) acts as OAuth client and redirects
-to the OAuth server for authorization.
-3. Upon authentication, the web application uses the code issued by the authorization server to request an access token.
-4. The web application uses the access token to request data from the OAuth resource server.
-The OAuth resource server validates the token using online or offline validation.
-For this validation libraries like sap_xssec are used.
+<!--- Don't edit the version line below manually. Let bump2version do it for you. -->
 
+> Version 0.1.5
 
-![alt text](https://raw.githubusercontent.com/SAP/cloud-security-xsuaa-integration/1.4.0/images/oauth.png "OAuth authorization code flow")
+> Typed environment variable parsing for Python
 
+**Table of Contents**  *generated with [mdformat-toc](https://github.com/hukkinj1/mdformat-toc)*
 
-### Usage
+<!-- mdformat-toc start --slug=github --maxlevel=6 --minlevel=2 -->
 
-For the usage of this library it is necessary to pass a JWT access token that should be validated to the library.
-The examples below rely on users and credentials that you should substitute with the ones in your context.
+- [Background](<#background>)
+- [Installing](<#installing>)
+- [Usage](<#usage>)
+  - [Basics](<#basics>)
+  - [Supported types](<#supported-types>)
+  - [Default values](<#default-values>)
+  - [Name prefixes](<#name-prefixes>)
+  - [Name character set](<#name-character-set>)
+  - [Name uppercasing](<#name-uppercasing>)
+  - [Validation](<#validation>)
+  - [Reading from a `.env` file](<#reading-from-a-env-file>)
+  - [Dumping parsed values](<#dumping-parsed-values>)
+- [Acknowledgments](<#acknowledgments>)
 
-The typical use case for calling this API lies from within a container when an HTTP request is received and it must 
-be checked if the requester is authorized to execute this method.
-In this case, the access token is contained in the authorization header (with keyword `bearer`).
-You can remove the prefix `bearer` and pass the remaining string (just as in the following example as `access_token`) to the API.
+<!-- mdformat-toc end -->
+
+## Background<a name="background"></a>
+
+Typenv does environment variable parsing with an API almost identical to the excellent [environs](https://github.com/sloria/environs).
+There are a few reasons why typenv might be preferred:
+
+- Type annotated typecast functions: type checkers are able to understand types of parsed environment variables.
+- More flexible prefix manipulation of environment variable names.
+- Validation of environment variable names.
+- Optional automatic uppercasing of environment variable names.
+- Ability to generate a .env.example that shows expected types of environment variables.
+- Less dependencies. No [marshmallow](https://github.com/marshmallow-code/marshmallow) required.
+
+## Installing<a name="installing"></a>
+
+Installing from PyPI repository (https://pypi.org/project/typenv):
+
+```bash
+pip install typenv
+```
+
+## Usage<a name="usage"></a>
+
+### Basics<a name="basics"></a>
+
+Set environment variables:
+
+```bash
+export NAME='Harry Potter'
+export AGE=14
+export IS_WIZARD=true
+export PATRONUM_SUCCESS_RATE=0.92
+export BANK_BALANCE=134599.01
+export LUCKY_NUMBERS=7,3,11
+export EXTRA_DETAILS='{"friends": ["Hermione", "Ron"]}'
+```
+
+Parse the values in Python:
 
 ```python
-from sap import xssec
-from cfenv import AppEnv
+from typenv import Env
 
-env = AppEnv()
-uaa_service = env.get_service(name='<uaa_service_name>').credentials
+env = Env()
 
-security_context = xssec.create_security_context(access_token, uaa_service)
+NAME = env.str("NAME")  # => "Harry Potter"
+AGE = env.int("AGE")  # => 14
+IS_WIZARD = env.bool("IS_WIZARD")  # => True
+PATRONUM_SUCCESS_RATE = env.float("PATRONUM_SUCCESS_RATE")  # => 0.92
+BANK_BALANCE = env.decimal("BANK_BALANCE")  # => decimal.Decimal("134599.01")
+LUCKY_NUMBERS = env.list("LUCKY_NUMBERS", subcast=int)  # => [7, 3, 11]
+EXTRA_DETAILS = env.json("EXTRA_DETAILS")  # => {"friends": ["Hermione", "Ron"]}
+
+# Optional settings must have a default value
+IS_DEATH_EATER = env.bool("IS_DEATH_EATER", default=False)  # => False
 ```
 
-**Note:** That the example above uses module [`cfenv`](https://pypi.python.org/pypi/cfenv) to retrieve the configuration of the uaa
-service instance.
-`uaa_service` is a dict that contains the necessary client information and looks like:
+### Supported types<a name="supported-types"></a>
+
+The types supported by typenv are:
+
+- `env.str`
+- `env.int`
+- `env.bool`
+- `env.float`
+- `env.decimal`
+- `env.json`
+- `env.list`
+  - Takes a subcast argument for casting list items to one of `str`, `int` , `bool`, `float` or `decimal.Decimal`
+- `env.bytes`
+
+### Default values<a name="default-values"></a>
+
+Normally, if an environment variable is not found, typenv raises an exception.
+If a default value is provided, however, that will be returned instead of raising.
+
+```python
+from typenv import Env
+
+env = Env()
+
+BOOL = env.bool("NON_EXISTING_NAME", default=False)  # => False
+LIST = env.list("NON_EXISTING_NAME", default=["a", "b"])  # => ["a", "b"]
+OPTIONAL_INT = env.int("NON_EXISTING_NAME", default=None)  # => None
 ```
-{
-    'clientid' : 'example_clientid'               // the id of the client
-    'clientsecret': 'example_clientsecret'        // the secret of the client
-    'url': 'example_url'                          // the url of the uaa
-    'uaadomain': 'example_uaadomain'              // the domain of the uaa
-    'verificationkey': 'example_verification key' // (optional) the key used for the verfication of the token
+
+### Name prefixes<a name="name-prefixes"></a>
+
+TODO: document here
+
+### Name character set<a name="name-character-set"></a>
+
+Typenv validates environment variable names.
+By default, the set of allowed characters includes upper case ASCII letters, digits and the underscore (`_`).
+
+The set of allowed characters can be configured:
+
+```python
+from typenv import Env
+
+env = Env(allowed_chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+```
+
+### Name uppercasing<a name="name-uppercasing"></a>
+
+```bash
+export UPPER_CASE_NAME=true
+```
+
+```python
+from typenv import Env
+
+# Environment variable names in type cast methods will automatically be upper
+# cased when `upper=True` is set here.
+env = Env(upper=True)
+
+NAME = env.bool("upper_casE_Name")
+```
+
+### Validation<a name="validation"></a>
+
+```bash
+export NAME='Harry Potter'
+export AGE=14
+```
+
+```python
+from typenv import Env
+
+env = Env()
+
+# A single validator function
+NAME = env.str("NAME", validate=lambda n: n.startswith("Harry"))
+
+# A validator function can signal error by raising an exception
+def is_positive(num):
+    if num <= 0:
+        raise Exception("Number is not positive")
+
+
+# A validator function can alternatively return `False` to signal an error
+def is_less_than_thousand(num):
+    if num >= 1000:
+        return False
+    return True
+
+
+# Multiple validator functions can be passed as an iterable of callables
+AGE = env.int("AGE", validate=(is_positive, is_less_than_thousand))
+```
+
+### Reading from a `.env` file<a name="reading-from-a-env-file"></a>
+
+TODO: document here
+
+### Dumping parsed values<a name="dumping-parsed-values"></a>
+
+```bash
+export SOME_STR=blaablaa
+export SOME_INT=99
+```
+
+```python
+from typenv import Env, ParsedValue
+
+env = Env()
+
+SOME_STR = env.str("SOME_STR")
+SOME_INT = env.int("SOME_INT")
+
+assert env.dump() == {
+    "SOME_INT": ParsedValue(value=99, type="int", optional=False),
+    "SOME_STR": ParsedValue(value="blaablaa", type="str", optional=False),
 }
-
-```
-If the `uaadomain` is set in the `uaa_service` and the `jku` and `kid` are set in the incomming token, the key is requested from the uaa. As a fallback, the `verificationkey` configured in `uaa_service` is used for offline validation. Requested keys are cached for 15 minutes to avoid extensive load on the uaa.
-
-The creation function `xssec.create_security_context` is to be used for an end-user token (e.g. for grant_type `password`
- or grant_type `authorization_code`) where user information is expected to be available within the token and thus within the security context.
-
-`create_security_context` also accepts a token of grant_type `client_credentials`.
-This leads to the creation of a limited *SecurityContext* where certain functions are not available.
-For more details please consult the API description in the wiki.
-
-For example, the `security_context` object can then be used to check if a user has a required scope:
-
-``` 
-security_context.check_scope('uaa.user')
 ```
 
-or to receive the client id of a user:
+## Acknowledgments<a name="acknowledgments"></a>
 
-``` 
-security_context.get_clientid()
-```
-
-More details on the API can be found in the [wiki](https://github.com/SAP/cloud-pysec/wiki).
-### Offline Validation
-
-sap_xssec offers offline validation of the access token, which requires no additional call to the UAA.
-The trust for this offline validation is created by binding the XS UAA service instance to your application.
-Inside the credentials section in the environment variable `VCAP_SERVICES`, the key for validation of tokens is included.
-By default, the offline validation check will only accept tokens intended for the same OAuth2 client in the same UAA identity zone.
-This makes sense and will cover the vast majority of use cases.
-
-⚠️From version 2.1.0, the `SAP_JWT_TRUST_ACL` environment variable is no longer supported.
-
-If you want to enable another (foreign) application to use some of your application's scopes, you can add a ```granted-apps``` marker to your scope in the ```xs-security.json``` file (as in the following example). The value of the marker is a list of applications that is allowed to request a token with the denoted scope.
-
-```JSON
-{
-  "xsappname"     : "sample-leave-request-app",
-  "description"   : "This sample application demos leave requests",
-  "scopes"        : [ { "name"                : "$XSAPPNAME.createLR",
-                        "description"         : "create leave requests" },
-                      { "name"                : "$XSAPPNAME.approveLR",
-                        "description"         : "approve leave requests",
-                        "granted-apps"        : ["MobileApprovals"] }
-                    ],
-  "attributes"    : [ { "name"                : "costcenter",
-                        "description"         : "costcenter",
-                        "valueType"           : "string"
-                    } ],
-  "role-templates": [ { "name"                : "employee",
-                        "description"         : "Role for creating leave requests",
-                        "scope-references"    : [ "$XSAPPNAME.createLR","JobScheduler.scheduleJobs" ],
-                        "attribute-references": [ "costcenter"] },
-                      { "name"                : "manager",
-                        "description"         : "Role for creating and approving leave requests",
-                        "scope-references"    : [ "$XSAPPNAME.createLR","$XSAPPNAME.approveLR","JobScheduler.scheduleJobs" ],
-                        "attribute-references": [ "costcenter" ] }
-                    ]
-}
-```
-
-# Configuration
-~~To configure whether the *sap-jwt* or the *py-jwt* library should be used for validation of the jwt token, 
-change the `USE_SAP_PY_JWT` environment variable to `true`.~~
-
-⚠️From version 4.0.0, the `USE_SAP_PY_JWT` environment variable is no longer supported and therefore *py-jwt* is installed by default.
-
-# Requirements
-*sap_xssec* requires *python 3.7* or newer.
-
-
-# Download and Installation
-As this package is deployed to PyPI, you can simply add `sap_xssec` as a dependency to your python project or 
-install this package by running `pip install sap_xssec`.
-
-# Known Issues
-# How to obtain support
-Open an issue in GitHub.
+The public API of this library is almost an exact copy of [environs](https://github.com/sloria/environs),
+which is based on [envparse](https://github.com/rconradharris/envparse) and [django-environ](https://github.com/joke2k/django-environ).
+Credit for the interface goes to the authors of those libraries.
