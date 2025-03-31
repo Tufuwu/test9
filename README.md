@@ -1,45 +1,106 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1341346.svg)](https://doi.org/10.5281/zenodo.1341346)
-[![Build Status](https://travis-ci.com/raysect/source.svg?branch=master)](https://travis-ci.com/raysect/source)
+# PeekabooAV #
 
-<a name="logo"/>
-<a href="https://www.raysect.org/" target="_blank">
-<img src="https://raysect.github.io/documentation/_images/RaysectLogo_small.png" alt="Raysect Logo"></img>
-</a>
+[![Testsuite](https://github.com/scVENUS/PeekabooAV/actions/workflows/testsuite.yml/badge.svg)](https://github.com/scVENUS/PeekabooAV/actions/workflows/testsuite.yml)
 
-Raysect Python Raytracing Package
-=================================
+**Peekaboo Extended Email Attachment Behavior Observation Owl**
 
-A ray-tracing framework for optical/non-optical physics simulations.
+* PeekabooAV is an Anti Virus software
+* It gets email attachments from AMaViSd, checks them, uses Cuckoo for behavioral checks, and evaluates and rates fully automatic
+* PeekabooAV is written in Python, multi-threaded, scalable, has a very powerful ruleset, and is easy to extend and personalize
+* It is able to detect: malware by its behavior, exploitation of zero days, and targeted attacks
 
-The aims of the Raysect project are as follows:
+* We develop and work in Germany
+* PeekabooAV is entirely open source
+* can run 100% local and does not require any external service
+* any file with any application can be scanned
 
-* develop a ray-tracer that is easy for scientists and engineers to use and extend
+If you run mail on-site, distrust security vendors and need a high level of security and secrecy
+PeekabooAV is for you.
 
-* the raytracer must be robust and high precision
-
-The general development philosophy is ease of use trumps performance, but performance is not to be ignored.
-
-For more information, see the [documentation pages](http://www.raysect.org/).
+For news and announcements follow us on twitter [@peekabooAV](https://twitter.com/peekabooav).
 
 
-![Dispersion of light passing through a prism](docs/source/demonstrations/optics/prism_720x405.png)
 
-*Caption: a simulation of Newton's classic experiment, white light being dispersed by a glass prism.*
+## Getting Started ##
+
+### Prerequisites ####
+
+* [Python](https://www.python.org/downloads/) (3.6+ required)
+* [Cuckoo 2.0](https://github.com/cuckoosandbox/cuckoo)
+* [AMaViSd 2.11.0](https://www.ijs.si/software/amavisd/)
+* Installer is available: [PeekabooAV-Installer](https://github.com/scVENUS/PeekabooAV-Installer)
 
 
-Please note, this code is currently under heavy development and subject to change.
+### Installation ###
 
-Raysect currently only supports Linux. Windows support will come at a later stage.
+Install from PyPI into a new virtual environment:
+```shell
+virtualenv --python=python3 /path/to/venv
+/path/to/venv/bin/pip install peekabooav
+```
 
-Please note, for legal reasons we require the copyright to any contributed code to be passed to the Raysect project. Please see CONTRIBUTING.txt in the repository.
+Or use this repository:
+```shell
+git clone https://github.com/scVENUS/PeekabooAV.git
+virtualenv --python=python3 /path/to/venv
+/path/to/venv/bin/pip install .
+```
 
-Development Team
-----------------
+This will pull in all required packages and install them into the virtualenv.
 
-* Dr Alex Meakins
-* Dr Matthew Carr
+### Configuration ###
+Take a look at ``peekaboo.conf.sample`` and ``ruleset.conf.sample``.
 
-Citing the Code
----------------
 
-* Dr Alex Meakins, & Matthew Carr. (2018, August 7). raysect/source: v0.5.2 Release (Version v0.5.2). Zenodo. http://doi.org/10.5281/zenodo.1341376
+## Running the tests ##
+
+Runs the unit tests
+```shell
+/path/to/venv/bin/python tests/test.py
+```
+
+
+## Usage ##
+
+Now, you can run PeekabooAV with
+```shell
+/path/to/venv/bin/peekaboo -c /path/to/your/peekaboo.conf
+```
+
+**Note:** If you put your PeekabooAV configuration file at
+``/opt/peekaboo/etc/peekaboo.conf`` you can omit the ``-c`` option.
+Also, for detailed command line options run
+```shell
+peekaboo --help
+```
+
+### Development Quickstart ###
+
+Just install Peekaboo using pip like above but in editable/development mode:
+
+```shell
+/path/to/venv/bin/pip install -e .
+```
+
+Now you can run it as before but changes to the source code will take effect
+without reinstallation.
+See the [development documentation](docs/source/development.rst) for details.
+
+## Contributing ##
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+
+
+## Versioning ##
+
+We use [SemVer](http://semver.org/) for versioning. For the versions available,
+see the [tags on this repository](https://github.com/scVENUS/PeekabooAV/releases).
+
+## Past and present Developers and Contributors ##
+
+* **Felix Bauer** - *Security Analyst and Project Leader* - [@Jack28](https://github.com/Jack28)
+* **Michael Weiser** - *Developer* - [@michaelweiser](https://github.com/michaelweiser)
+* **Sebastian Deiss** - *Former Technical Lead* - [@SebastianDeiss](https://github.com/SebastianDeiss)
+
+## License ##
+
+This project is licensed under the GPL 3 license - see the [LICENSE.txt](LICENSE.txt) file for details.

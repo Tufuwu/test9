@@ -1,90 +1,38 @@
-.. title:: Home
+.. Peekaboo documentation master file, created by
+   sphinx-quickstart on Mon Apr 10 12:58:45 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-|
+Welcome to Peekaboo's documentation!
+====================================
 
-.. image:: RaysectLogo_small.png
-   :align: center
+Peekaboo Extended Email Attachment Behavior Observation Owl
 
-|
-|
+Status: **DRAFT**.
 
-Welcome
-=======
+* PeekabooAV is an Anti Virus software
+* It gets email attachments from AMaViSd, checks them, uses Cuckoo for behavioral checks, and evaluates and rates fully automatic
+* PeekabooAV is written in Python, multi-threaded, scalable, has a very powerful ruleset, and is easy to extend and personalize
+* It is able to detect: malware by its behavior, exploitation of zero days, and targeted attacks
 
-Welcome to Raysect, an OOP ray-tracing framework for Python. Raysect has been built with scientific ray-tracing in mind. Some of its features include:
+**Current active developers:**
 
-* Fully spectral, high precision. Supports scientific ray-tracing of spectra from physical light sources such as plasmas.
-* All core loops are written in cython for speed.
-* Easily extensible, written with user customisation of materials and emissive sources in mind.
-* Different observer types supported such as Pinhole cameras and optical fibres.
+* Felix Bauer
+* Michael Weiser
+* Christoph Herrmann
 
-.. image:: demonstrations/optics/prism_720x405.png
-   :align: center
+**Past developers and contributors:**
 
+* Sebastian Deiß
+* Mark Pröhl
 
-The Raysect Development Team:
------------------------------
-
-* Dr Alex Meakins
-* Dr Matthew Carr
-
-
-Quick Installation
-------------------
-
-The easiest way to install Raysect is using `pip <https://pip.pypa.io/en/stable/>`_::
-
-    pip install raysect
-
-For more detailed installation instructions see :any:`installation`.
-
-Need Help?
-----------
-
-Please post a question on the `github issue queue <https://github.com/raysect/source/issues>`_.
-
-.. toctree::
-   :maxdepth: 2
-   :numbered:
-   :caption: Table of Contents
-   :name: mastertoc
-
-   introduction
-   license
-   installation
-   how_it_works
-   quickstart_guide
-   observers
-   primitives
-   materials
-   conventions
-   references
-   glossary
+For news and announcements follow us on twitter [@peekabooAV](https://twitter.com/peekabooav).
 
 
 .. toctree::
+   install
+   config
+   ruleset
+   development
+   l18n
    :maxdepth: 3
-   :numbered:
-   :caption: Demonstrations
-   :name: demonstrations
-
-   demonstrations/demonstrations
-
-
-.. toctree::
-   :maxdepth: 3
-   :numbered:
-   :caption: API Reference
-   :name: apireferenceto
-
-   api_reference/core/core
-   api_reference/primitives/primitives
-   api_reference/optical/optical
-
-Indices and Tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-

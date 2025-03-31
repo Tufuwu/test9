@@ -1,112 +1,131 @@
-from setuptools import setup, find_packages, Extension
-import sys
-import numpy
-import os
-import os.path as path
-import multiprocessing
+#!/usr/bin/env python
 
-multiprocessing.set_start_method('fork')
+###############################################################################
+#                                                                             #
+# Peekaboo Extended Email Attachment Behavior Observation Owl                 #
+#                                                                             #
+# setup.py                                                                    #
+###############################################################################
+#                                                                             #
+# Copyright (C) 2016-2022 science + computing ag                              #
+#                                                                             #
+# This program is free software: you can redistribute it and/or modify        #
+# it under the terms of the GNU General Public License as published by        #
+# the Free Software Foundation, either version 3 of the License, or (at       #
+# your option) any later version.                                             #
+#                                                                             #
+# This program is distributed in the hope that it will be useful, but         #
+# WITHOUT ANY WARRANTY; without even the implied warranty of                  #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           #
+# General Public License for more details.                                    #
+#                                                                             #
+# You should have received a copy of the GNU General Public License           #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.       #
+#                                                                             #
+###############################################################################
 
-use_cython = True
-force = False
-profile = False
-line_profile = False
-annotate = False
 
-if "--skip-cython" in sys.argv:
-    use_cython = False
-    del sys.argv[sys.argv.index("--skip-cython")]
+from codecs import open
+from os import path
+from sys import path as pythonpath
+from setuptools import setup, find_packages
 
-if "--force" in sys.argv:
-    force = True
-    del sys.argv[sys.argv.index("--force")]
+# Add peekaboo to PYTHONPATH
+pythonpath.append(path.dirname(path.dirname(path.abspath(__file__))))
+from peekaboo import __version__, __author__, __license__, __description__
 
-if "--profile" in sys.argv:
-    profile = True
-    del sys.argv[sys.argv.index("--profile")]
+here = path.abspath(path.dirname(__file__))
 
-if "--line-profile" in sys.argv:
-    line_profile = True
-    del sys.argv[sys.argv.index("--line-profile")]
+# Get the long description from the README file
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
-if "--annotate" in sys.argv:
-    annotate = True
-    sys.argv.remove("--annotate")
+# get the dependencies and installs
+with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+    all_reqs = f.read().split('\n')
 
-source_paths = ['raysect', 'demos']
-compilation_includes = [".", numpy.get_include()]
-compilation_args = ['-O3']
-cython_directives = {
-    # 'auto_pickle': True,
-    'language_level': 3
-}
-setup_path = path.dirname(path.abspath(__file__))
+install_requires = []
+for req in all_reqs:
+    # for git repo references, extract the egg/package name from the end and
+    # prepend it with @ as per pip Github issue 3939
+    if 'git+' in req:
+        egg = req.split('=')[-1]
+        req = "%s @ %s" % (egg, req)
 
-if line_profile:
-    compilation_args.append("-DCYTHON_TRACE=1")
-    compilation_args.append("-DCYTHON_TRACE_NOGIL=1")
-    cython_directives["linetrace"] = True
-
-if use_cython:
-
-    from Cython.Build import cythonize
-
-    # build .pyx extension list
-    extensions = []
-    for package in source_paths:
-        for root, dirs, files in os.walk(path.join(setup_path, package)):
-            for file in files:
-                if path.splitext(file)[1] == ".pyx":
-                    pyx_file = path.relpath(path.join(root, file), setup_path)
-                    module = path.splitext(pyx_file)[0].replace("/", ".")
-                    extensions.append(Extension(module, [pyx_file], include_dirs=compilation_includes, extra_compile_args=compilation_args),)
-
-    if profile:
-        cython_directives["profile"] = True
-
-    # generate .c files from .pyx
-    extensions = cythonize(extensions, nthreads=multiprocessing.cpu_count(), force=force, compiler_directives=cython_directives, annotate=annotate)
-
-else:
-
-    # build .c extension list
-    extensions = []
-    for package in source_paths:
-        for root, dirs, files in os.walk(path.join(setup_path, package)):
-            for file in files:
-                if path.splitext(file)[1] == ".c":
-                    c_file = path.relpath(path.join(root, file), setup_path)
-                    module = path.splitext(c_file)[0].replace("/", ".")
-                    extensions.append(Extension(module, [c_file], include_dirs=compilation_includes, extra_compile_args=compilation_args),)
-
-# parse the package version number
-with open(path.join(path.dirname(__file__), 'raysect/VERSION')) as version_file:
-    version = version_file.read().strip()
+    install_requires.append(req.strip())
 
 setup(
-    name="raysect",
-    version=version,
-    url="http://www.raysect.org",
-    author="Dr Alex Meakins et al.",
-    author_email="developers@raysect.org",
-    description='A Ray-tracing Framework for Science and Engineering',
-    license="BSD",
+    name='PeekabooAV',
+    version=__version__,
+    description=__description__,
+    long_description=long_description,
+    url='https://github.com/scVENUS/PeekabooAV.git',
+    download_url='https://github.com/scVENUS/PeekabooAV/archive/master.zip',
+    license=__license__,
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Science/Research",
-        "Intended Audience :: Education",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: BSD License",
-        "Natural Language :: English",
-        "Operating System :: POSIX :: Linux",
-        "Programming Language :: Cython",
-        "Programming Language :: Python :: 3",
-        "Topic :: Multimedia :: Graphics :: 3D Rendering",
-        "Topic :: Scientific/Engineering :: Physics"
+      'Development Status :: 4 - Beta',
+      'Operating System :: POSIX',
+      'Programming Language :: Python',
+      'Programming Language :: Python :: 3',
+      'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+      'Natural Language :: English',
+      'Natural Language :: German',
+      'Topic :: Communications :: Email :: Filters',
     ],
-    install_requires=['numpy', 'matplotlib'],
-    packages=find_packages(),
+    keywords='Cuckoo, Amavis',
+    packages=find_packages(exclude=['docs', 'tests*']),
     include_package_data=True,
-    zip_safe=False,
-    ext_modules=extensions
+    # package_files augments MANIFEST.in in what is packaged into a
+    # distribution. Files to add must be inside a package. Thus files in the
+    # root of our source directory cannot be packaged with this. Files inside
+    # packages will stay there, totally obscured to the user. Meant for default
+    # configuration or other package-internal data.
+    #  package_files=[...],
+    #
+    # data_files is another way to augment what is installed from the
+    # distribution. Allows paths outside packages for both sources and targets.
+    # Absolute paths are strongly discouraged because they exhibit confusing if
+    # not downright broken behaviour. Relative paths are added to the
+    # distribution and then installed into
+    # site-packages/<package>-<ver>.egg/<relative path> (setup.py) or <python
+    # prefix>/<relative path> (pip). The latter works well with venvs and
+    # distribution-provided pip (e.g. /usr/local/<relative path>).
+    # We go this route for providing sample files because using setup.py
+    # directly is discouraged anyway and "only" tucks the files away in the egg
+    # directory, providing the most consistent option.
+    data_files=[
+        ("share/doc/peekaboo", [
+            "README.md",
+            "CHANGELOG.md",
+            "peekaboo.conf.sample",
+            "ruleset.conf.sample",
+            "analyzers.conf.sample",
+        ]),
+        ("share/doc/peekaboo/systemd", [
+            "systemd/peekaboo.service",
+        ]),
+        ("share/doc/peekaboo/amavis", [
+            "amavis/10-ask_peekaboo",
+        ]),
+    ],
+    # overriding the whole install_data command allows for arbitrary
+    # installation mechanics but does not solve the problem of adding files to
+    # a binary distribution (e.g. wheel, which pip uses internally always) in
+    # such a way that they will later be put at the correct location. Thus they
+    # would go around pip entirely, be missing from any actual wheel
+    # distribution package, pollute the system directly and not be removed upon
+    # uninstall or upgrade.
+    #  cmdclass={
+    #      'install_data': OffsetDataInstall,
+    #  },
+    author=__author__,
+    python_requires='>=3.6',
+    install_requires=install_requires,
+    author_email='felix.bauer@atos.net',
+    entry_points={
+        'console_scripts': [
+            'peekaboo = peekaboo.daemon:run',
+            'peekaboo-util = peekaboo.cli:main',
+        ],
+    }
 )

@@ -1,4 +1,0 @@
-[run]
-plugins = Cython.Coverage
-source = raysect
-omit = *tests*

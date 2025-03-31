@@ -1,3 +1,0 @@
-cython>=0.23
-numpy>=1.9
-matplotlib
