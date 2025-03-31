@@ -4,16 +4,11 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-kodistubs = "~=19.0.2"
-pycodestyle = "*"
 
 [packages]
-requests = "~=2.22.0"
+tabulate = "*"
+pyyaml = "*"
+yamllint = "*"
+jsonschema = "*"
+tqdm = "*"
 
-[requires]
-python_version = "3"
-
-[scripts]
-build = "python scripts/build.py"
-lint = "pycodestyle --max-line-length=99 --statistics resources"
-test = "python -m unittest discover"

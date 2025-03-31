@@ -1,35 +1,56 @@
-name: "Continuous Integration"
+name: build
 on:
-  - pull_request
   - push
+  - pull_request
 
 jobs:
-  run:
-    name: "Test"
-    runs-on: ${{ matrix.operating-system }}
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install python packages
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install black
+
+      - name: Run black
+        run: |
+          black --check $(git ls-files '*.py')
+
+  build:
     strategy:
       fail-fast: false
       matrix:
-        operating-system: ['ubuntu-latest']
         python-version: ["3.9", "3.10"]
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    runs-on: ubuntu-latest
 
-      - name: Install Python
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install pipenv
-        run: pip install pipenv
-
       - name: Install dependencies
-        run: pipenv install --dev
+        run: |
+          python -m pip install --upgrade pip
+          pip install \
+            pipenv \
+            pyyaml
+
+      - name: Prepare environment
+        run: |
+          pipenv install --python=${{ matrix.python-version }}
 
       - name: Test
-        run: pipenv run test
+        run: |
+          ./ci/test.py -vb
 
-      - name: Lint
-        run: pipenv run lint
+
