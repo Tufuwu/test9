@@ -1,19 +1,18 @@
-[![Build Status](https://travis-ci.com/w3c/feedvalidator.svg)](https://travis-ci.com/w3c/feedvalidator)
+# **_re:load_**
 
-Some tests, and some functionality, will not be enabled unless a full set
-of 32-bit character encodings are available through Python.
+An analytics ETL for BigQuery. Pairs well with [Redash](https://github.com/getredash/redash).
 
-The feedvalidator relies on html5lib for parsing HTML.
+## Run Server
 
-The package 'iconvcodec' provides the necessary codecs, if your underlying
-operating system supports them. Its web page is at
-<http://cjkpython.i18n.org/#iconvcodec>, and a range of packages are
-provided.
+`make dev`
 
-Python 2.3.x is required, for its Unicode support.
+## Rebuild `ra.min.js`
 
-To run with Docker:
-```bash
-docker build -t feedvalidator .
-docker run -p 8080:80 feedvalidator
 ```
+npm install
+npm run build
+```
+
+## Integration testing
+
+Start the server and point your browser to `localhost:port/client/test.html`. Check that no javascript errors were thrown.

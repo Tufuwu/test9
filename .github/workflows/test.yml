@@ -1,22 +1,26 @@
-name: Run test suite
-
+name: ci
 on:
   push:
     branches:
       - main
-  pull_request: {}
+      - releases/**
+  pull_request:
 
 jobs:
   test:
+    name: lint and test
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
+
+      # Until GH composite actions can use `uses`, we need to setup python here
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run test sutie
-        run: python runtest.py
+          python-version: 3.9
+
+      - run: make requirements-test
+
+      - run: make lint
+
+      - run: make test
