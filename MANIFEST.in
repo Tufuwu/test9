@@ -1,4 +1,3 @@
-include README.md LICENSE
-recursive-include micropy/project/template *
-recursive-include micropy *.json
-recursive-include micropy/lib *
+include tox.ini
+include requirements/*.txt
+include default.cfg
