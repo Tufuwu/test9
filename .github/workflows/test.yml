@@ -1,79 +1,55 @@
-name: Build
+name: build
 
-on: [push, pull_request]
+on: ['push', 'pull_request']
 
 jobs:
-  macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Setup PYTHONPATH
-        run: echo "PYTHONPATH=$PYTHONPATH:$PWD:$PWD/spotify_lyric" >> $GITHUB_ENV
-      - name: Run test
-        working-directory: tests
-        run: python -m unittest discover . "*_test.py"
-      - name: Build .app
-        run: pyinstaller SpotifyLyrics.pyw -F -w -i icon.icns --add-data "icon.png:."
-      - name: Upload .app
-        uses: actions/upload-artifact@v4.1.4
-        with:
-          name: macos
-          path: dist/SpotifyLyrics.app
-  linux:
+  build:
+
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[dev]
+        python setup.py develop
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 xbox --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 xbox --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        pytest
+  
+  deploy:
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      - name: Set up Python 3.7
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
-      - name: Install dbus
-        run: sudo apt install libdbus-1-dev libdbus-glib-1-dev --yes
+          python-version: '3.9'
       - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Setup PYTHONPATH
-        run: echo "PYTHONPATH=$PYTHONPATH:$PWD:$PWD/spotify_lyric" >> $GITHUB_ENV
-      - name: Run test
-        working-directory: tests
-        run: python -m unittest discover . "*_test.py"
-      - name: Build executable
-        run: pyinstaller SpotifyLyrics.pyw -F -w -i icon.ico --add-data "icon.png:."
-      - name: Upload executable
-        uses: actions/upload-artifact@v4.1.4
-        with:
-          name: linux
-          path: dist/SpotifyLyrics
-  windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Setup PYTHONPATH
-        run: echo "PYTHONPATH=${env:PYTHONPATH};${env:GITHUB_WORKSPACE};${env:GITHUB_WORKSPACE}\spotify_lyric" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf-8 -Append
-      - name: Run test
-        working-directory: tests
-        run: python -m unittest discover . "*_test.py"
-      - name: Build .exe
-        run: pyinstaller SpotifyLyrics.pyw -F -w -i icon.ico --add-data "icon.png;."
-      - name: Upload .exe
-        uses: actions/upload-artifact@v4.1.4
-        with:
-          name: windows
-          path: dist/SpotifyLyrics.exe
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine
+      - name: Build and publish
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_KEY }}
+        run: |
+          python setup.py sdist bdist_wheel
+          twine upload dist/*
