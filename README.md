@@ -1,149 +1,159 @@
-# Lyrics Generator
+# <img height="24" src="https://raw.githubusercontent.com/yezyilomo/django-restql/master/docs/img/icon.svg" /> [  Django RESTQL](https://yezyilomo.github.io/django-restql)
 
-![build status](https://github.com/dlebech/lyrics-generator/actions/workflows/python-app.yml/badge.svg)
-[![codecov](https://codecov.io/gh/dlebech/lyrics-generator/branch/master/graph/badge.svg)](https://codecov.io/gh/dlebech/lyrics-generator)
+[![Build Status](https://api.travis-ci.com/yezyilomo/django-restql.svg?branch=master)](https://api.travis-ci.com/yezyilomo/django-restql) 
+[![Latest Version](https://img.shields.io/pypi/v/django-restql.svg)](https://pypi.org/project/django-restql/) 
+[![Python Versions](https://img.shields.io/pypi/pyversions/django-restql.svg)](https://pypi.org/project/django-restql/) 
+[![License](https://img.shields.io/pypi/l/django-restql.svg)](https://pypi.org/project/django-restql/)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+[![Downloads](https://pepy.tech/badge/django-restql)](https://pepy.tech/project/django-restql) 
+[![Downloads](https://pepy.tech/badge/django-restql/month)](https://pepy.tech/project/django-restql) 
+[![Downloads](https://pepy.tech/badge/django-restql/week)](https://pepy.tech/project/django-restql)
 
-This is a small experiment in generating lyrics with a recurrent neural network, trained with Keras and Tensorflow 2.
 
-It works in the browser with Tensorflow.js! Try it [here](https://davidlebech.com/lyrics/).
+**Django RESTQL** is a python library which allows you to turn your API made with **Django REST Framework(DRF)** into a GraphQL like API. With **Django RESTQL** you will be able to
 
-## Train the model
+* Send a query to your API and get exactly what you need, nothing more and nothing less.
 
-### Install dependencies
+* Control the data you get, not the server.
 
-```shell
-pip install -r requirements.txt
+* Get predictable results, since you control what you get from the server.
+
+* Get nested resources in a single request.
+
+* Avoid Over-fetching and Under-fetching of data.
+
+* Write(create & update) nested data of any level in a single request.
+
+Isn't it cool?.
+
+Want to see how this library is making all that possible? 
+
+Check out the full documentation at [https://yezyilomo.github.io/django-restql](https://yezyilomo.github.io/django-restql)
+
+Or try a live demo on [Django RESTQL Playground](https://django-restql-playground.yezyilomo.me)
+
+
+## Requirements
+* Python >= 3.5
+* Django >= 1.11
+* Django REST Framework >= 3.5
+
+
+## Installing
+```py
+pip install django-restql
 ```
 
-The requirement file has been reduced in size so if any of the scripts fail,
-just install the missing packages :-)
 
-### Get the data
+## Getting Started
+Using **Django RESTQL** to query data is very simple, you just have to inherit the `DynamicFieldsMixin` class when defining a serializer that's all.
+```py
+from rest_framework import serializers
+from django.contrib.auth.models import User
+from django_restql.mixins import DynamicFieldsMixin
 
-- ~~Download the [songdata dataset](https://www.kaggle.com/mousehead/songlyrics).~~ Unfortunately, this dataset is no longer available. See ["Create your own song dataset"](#create-your-own-song-dataset) below.
-  - Save the `songdata.csv` file in a `data` sub-directory.
-- Download the [Glove embeddings](http://nlp.stanford.edu/data/glove.6B.zip)
-  - Save the `glove.6B.50d.txt` file in a `data` sub-directory.
-  - Alternatively, you can create your a word2vec embedding (see below)
 
-### Create your own song dataset
-
-The code expects an input dataset to be stored at `date/songdata.csv` by default (this can be changed in `config.py`).
-
-The file should be in CSV format with the following columns (case sensitive):
-- `artist`
-  - A string, e.g. "The Beatles"
-- `text`
-  - A string with the entire lyrics for one song, including newlines.
-  
-### (Optional) Create a word2vec embedding matrix
-
-If you have the `songdata.csv` file from above, you can simply create the
-word2vec vectors like this:
-
-```shell
-python -m lyrics.embedding --name-suffix myembedding
+class UserSerializer(DynamicFieldsMixin, serializer.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email']
 ```
 
-This will create `word2vec_myembedding.model` and `word2vec_myembedding.txt`
-files in the default data directory `data/`. Use `-h` to see other options
-like artists.
+**Django RESTQL** handle all requests with a `query` parameter, this parameter is the one used to pass all fields to be included/excluded in a response. For example to select `id` and `username` fields from User model, send a request with a ` query` parameter as shown below.
 
-### Run the training
-
-```shell
-python -m lyrics.train -h
+`GET /users/?query={id, username}`
+```js
+[
+    {
+        "id": 1,
+        "username": "yezyilomo"
+    },
+    ...
+]
 ```
 
-This command by default takes care of all the training. Warning: it takes a
-very long time on a normal CPU!
+**Django RESTQL** support querying both flat and nested resources, so you can expand or query nested fields at any level as defined on a serializer. In an example below we have `location` as a nested field on User model.
 
-Check `-h` for options. For example, if you want to use a different embedding
-than the glove embedding:
+```py
+from rest_framework import serializers
+from django.contrib.auth.models import User
+from django_restql.mixins import DynamicFieldsMixin
 
-```shell
-python -m lyrics.train --embedding-file ./embeddings.txt
+from app.models import GroupSerializer, LocationSerializer
+
+
+class LocationSerializer(DynamicFieldsMixin, serializer.ModelSerializer):
+    class Meta:
+        model = Location
+        fields = ['id', 'country',  'city', 'street']
+
+
+class UserSerializer(DynamicFieldsMixin, serializer.ModelSerializer):
+    location = LocationSerializer(many=False, read_only=True) 
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'location']
 ```
 
-The embeddings are still assumed to be 50 dimensional.
+If you want only `country` and `city` fields on a `location` field when retrieving users here is how you can do it
 
-The output model and tokenizer is stored in a timestamped folder like `export/2020-01-01T010203` by default.
-
-**Note**: During experimentation, I found that raising the batch size to something like 2048 speeds up processing, but it depends on your hardware resources whether this is feasible of course.
-
-#### Training on GPU
-
-The requirements.txt file refers to the CPU version of Tensorflow but manually
-uninstalling and installing the GPU version should work fine.
-
-However, it might be a bit easier with Docker and [nvidia-docker](https://github.com/NVIDIA/nvidia-docker),
-so follow the instructions there to install it first, and then:
-
-```shell
-docker build -t lyrics-gpu .
-docker run --rm -it --gpus all -v $PWD:/tf/src -u $(id -u):$(id -g) lyrics-gpu bash
+`GET /users/?query={id, username, location{country, city}}`
+```js
+[
+    {
+        "id": 1,
+        "username": "yezyilomo",
+        "location": {
+            "contry": "Tanzania",
+            "city": "Dar es salaam"
+        }
+    },
+    ...
+]
 ```
 
-Then run the normal commands from there, e.g. `python -m lyrics.train`.
+You can even rename your fields when querying data, In an example below the field `location` is renamed to `address`
 
-Tip: You might want to use the parameter `--gpu-speedup`
-
-Tip: If you get a cryptic Tensorflow error like `errors_impl.CancelledError:  [_Derived_]RecvAsync is cancelled.` while training on GPU, try pre-prending the train command with `TF_FORCE_GPU_ALLOW_GROWTH=true`, e.g.:
-```shell
-TF_FORCE_GPU_ALLOW_GROWTH=true python -m lyrics.train --transform-words --num-lines-to-include=10 --artists '*' --gpu-speedup
+`GET /users/?query={id, username, address: location{country, city}}`
+```js
+[
+    {
+        "id": 1,
+        "username": "yezyilomo",
+        "address": {
+            "contry": "Tanzania",
+            "city": "Dar es salaam"
+        }
+    },
+    ...
+]
 ```
 
-#### Use transformer network
 
-To use the universal sentence encoder architecture:
+## [Documentation :pencil:](https://yezyilomo.github.io/django-restql)
+You can do a lot with **Django RESTQL** apart from querying data, like
+- Rename fields
+- Restrict some fields on nested fields
+- Optimize data fetching on nested fields
+- Data filtering and pagination by using query arguments
+- Data mutation(Create and update nested data of any level in a single request)
 
-```shell
-python -m lyrics.train --embedding-not-trainable --transform-words --use-full-sentences --transformer-network use
-```
+Full documentation for this project is available at [https://yezyilomo.github.io/django-restql](https://yezyilomo.github.io/django-restql), you are encouraged to read it inorder to utilize this library to the fullest.
 
-**Note** This model is not going to work in Tensorflow JS currently, so it
-should only be used from the command-line.
 
-## Create new lyrics
+## [Django RESTQL Play Ground](https://django-restql-playground.yezyilomo.me)
+[**Django RESTQL Play Ground**](https://django-restql-playground.yezyilomo.me) is a graphical, interactive, in-browser tool which you can use to test **Django RESTQL** features like data querying, mutations etc to get the idea of how the library works before installing it. It's more like a [**live demo**](https://django-restql-playground.yezyilomo.me) for **Django RESTQL**, it's available at [https://django-restql-playground.yezyilomo.me](https://django-restql-playground.yezyilomo.me)
 
-```shell
-python -m cli lyrics model.h5 tokenizer.pickle
-```
 
-Try `python -m cli lyrics -h` to find out more
+## Running Tests
+`python runtests.py`
 
-## Export to Tensorflow JS (used for the app)
 
-**Note**: Make sure to use the `--tfjs-compatible` flag during training!
+## Credits
+* Implementation of this library is based on the idea behind [GraphQL](https://graphql.org/).
+* My intention is to extend the capability of [drf-dynamic-fields](https://github.com/dbrgn/drf-dynamic-fields) library to support more functionalities like allowing to query nested fields both flat and iterable at any level and allow writing on nested fields while maintaining simplicity.
 
-```shell
-python -m cli export model.h5 tokenizer.pickle
-```
 
-This creates a sub-directory `export/js` with the relevant files (can be used
-for the app).
+## Contributing [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-## Single-page "app" for creating lyrics
-
-**Note**: Make sure to use the `--tfjs-compatible` flag during training!
-
-The `lyrics-tfjs` sub-directory has a simple web-page that can be used to
-create lyrics in the browser. The code expects data to be found in a `data/`
-sub-directory. This includes the `words.json` file, `model.json` and any extra
-files generated by the Tensorflow export.
-
-[Demo](https://davidlebech.com/lyrics/).
-
-## Development
-
-Make sure to get all dependencies:
-
-```shell
-pip install -r requirements_dev.txt
-```
-
-### Testing
-
-```shell
-python -m pytest --cov=lyrics tests/
-```
+We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.com/yezyilomo/django-restql/blob/master/CONTRIBUTING.md) first. You can submit any ideas as [pull requests](https://github.com/yezyilomo/django-restql/pulls) or as [GitHub issues](https://github.com/yezyilomo/django-restql/issues). If you'd like to improve code, check out the [Code Style Guide](https://github.com/yezyilomo/django-restql/blob/master/CONTRIBUTING.md#styleguides) and have a good time!.
