@@ -186,7 +186,7 @@
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright 2019 EMBL-EBI
+   Copyright 2017 Tubular Labs, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -199,3 +199,42 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+
+=======================================================================
+Sparkly Subcomponents:
+
+The Sparkly project contains subcomponents with separate copyright
+notices and license terms. Your use of the source code for the these
+subcomponents is subject to the terms and conditions of the following
+licenses.
+
+========================================================================
+Apache licenses
+========================================================================
+
+The following dependencies are provided under a Apache license. See project link for details.
+
+(Apache License 2.0) Spark (https://github.com/apache/spark)
+(Apache License 2.0) cassandra-driver (https://github.com/datastax/python-driver)
+
+========================================================================
+BSD-style licenses
+========================================================================
+
+The following dependencies are provided under a BSD-style license. See project link for details.
+
+(BSD License) mock (https://github.com/testing-cabal/mock)
+(PSF License) Sphinx (https://github.com/sphinx-doc/sphinx)
+
+========================================================================
+MIT licenses
+========================================================================
+
+The following dependencies are provided under the MIT License. See project link for details.
+
+(MIT License) sphinx_rtd_theme (https://github.com/snide/sphinx_rtd_theme)
+(MIT License) pytest (https://github.com/pytest-dev/pytest)
+(MIT License) pytest-cov (https://github.com/pytest-dev/pytest-cov)
+(MIT License) PyMySQL (https://github.com/PyMySQL/PyMySQL)
+

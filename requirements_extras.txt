@@ -14,4 +14,8 @@
 # limitations under the License.
 #
 
-pylru==1.0.9
+cassandra-driver==3.25.0
+PyMySQL==0.9.3
+kafka-python==2.0.2
+redis==2.10.5
+ujson==1.35

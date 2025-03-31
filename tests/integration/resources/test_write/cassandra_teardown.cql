@@ -1,0 +1,1 @@
+DROP KEYSPACE sparkly_test;

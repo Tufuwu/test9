@@ -14,4 +14,9 @@
 # limitations under the License.
 #
 
-pylru==1.0.9
+from sparkly.session import SparklySession
+
+assert SparklySession
+
+
+__version__ = '3.0.0'
