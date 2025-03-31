@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2013 The glucometerutils Authors
+#
+# SPDX-License-Identifier: MIT
+
+pull_request_rules:
+  - name: Automatic merge on approval
+    conditions:
+      - "#approved-reviews-by>=1"
+      - "status-success=pytest (ubuntu-latest, 3.7)"
+      - "status-success=pytest (ubuntu-latest, 3.8)"
+      - "status-success=pytest (ubuntu-latest, 3.9)"
+      - "status-success=pre-commit"
+    actions:
+      merge:
+        method: rebase
+  - name: Automatic merge from Flameeyes
+    conditions:
+      - "author=Flameeyes"
+      - "status-success=pytest (ubuntu-latest, 3.7)"
+      - "status-success=pytest (ubuntu-latest, 3.8)"
+      - "status-success=pytest (ubuntu-latest, 3.9)"
+      - "status-success=pre-commit"
+    actions:
+      merge:
+        method: rebase

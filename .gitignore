@@ -1,55 +1,16 @@
-# Compiled Python modules
-*.pyo
+# SPDX-FileCopyrightText: 2013 The glucometerutils Authors
+#
+# SPDX-License-Identifier: MIT
+
+*.egg-info/
 *.pyc
-
-# SQLite
-*.db
-*.s3db
-*.sqlite3
-
-# Vagrant private files
-.vagrant/*
-.vagrant*
-
-#logs
-*.log
-*.log.*
-
-#pids
-*.pid
-
-#ppa public keys
-*.asc*
-
-# markdown preview
-README.html
-
-# vscode editor
+*~
+.cache
+.mypy_cache/
 .vscode/
-*.DS_Store
-
-#Coverage
-.coverage
-htmlcov/
-coverage.xml
-
-# Setuptools distribution folder.
+/MANIFEST
 /dist/
-/build/
-
-# Python egg metadata, regenerated from source files by setuptools.
-/*.egg-info
-
-# virtualenv
-.venv
-
-# mypy
-*.mypy_cache/
-
-# pytype
-.pytype/
-
-# sphinx
-sphinx-build
-docs/.buildinfo
-docs/.doctrees/
+__pycache__/
+build
+.idea/
+*venv/
