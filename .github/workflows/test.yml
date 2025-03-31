@@ -1,45 +1,31 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+name: ci
 
-name: PHOTONAI tests
-
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+on: [push, pull_request]
 
 jobs:
-  pytest:
-
+  build:
     runs-on: ubuntu-latest
-    
-    services:
-      mongodb:
-        image: mongo:latest
-        ports:
-          - 27017:27017
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.7.6
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.3.9
-#    - name: Install os dependencies
-#      run: | 
-#        sudo apt-get update
-#        sudo apt-get -y install gfortran swig
-    - name: Install dependencies
-      run: |
-        pip install wheel flake8 
-        python setup.py egg_info
-        pip install tensorflow pytest pytest-cov coveralls -r photonai.egg-info/requires.txt -r photonai/optimization/smac/requirements.txt -r photonai/optimization/nevergrad/requirements.txt
-    - name: Test with pytest
-      run: |
-        PYTHONPATH=./ pytest ./test --cov=./photonai
-    - name: Coveralls
-      run: coveralls
-      env: 
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Checkout Repository
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Install Tools
+      - name: Install Tools
+        run: |
+          sudo apt-get install wget build-essential python3
+          pip3 install setuptools
+
+      # Install (n)Migen / LiteX / Cores
+      - name: Install LiteX
+        run: |
+          wget https://raw.githubusercontent.com/enjoy-digital/litex/main/litex_setup.py
+          python3 litex_setup.py init install --user
+
+      # Install Project
+      - name: Install Project
+        run: python3 setup.py develop --user
+
+      # Test
+      - name: Run Tests
+        run: python3 setup.py test

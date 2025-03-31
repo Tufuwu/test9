@@ -1,15 +1,3 @@
-# Photon specific stuff
-configuration.ini
-
-documentation/site/
-site/
-
-**/photon_setup_errors.log
-.pypirc
-**/tmp
-**/cache
-**/dask-worker-space
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -23,15 +11,15 @@ __pycache__/
 env/
 build/
 develop-eggs/
+dist/
 downloads/
 eggs/
 .eggs/
+lib/
 lib64/
 parts/
 sdist/
-dist/
 var/
-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -73,12 +61,12 @@ instance/
 .scrapy
 
 # Sphinx documentation
-documentation/docs/_build/
+docs/_build/
 
 # PyBuilder
 target/
 
-# Jupyter Notebook
+# IPython Notebook
 .ipynb_checkpoints
 
 # pyenv
@@ -91,7 +79,6 @@ celerybeat-schedule
 .env
 
 # virtualenv
-.venv/
 venv/
 ENV/
 
@@ -100,84 +87,3 @@ ENV/
 
 # Rope project settings
 .ropeproject
-
-
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
-
-# User-specific stuff:
-.idea/workspace.xml
-.idea/tasks.xml
-
-# Sensitive or high-churn files:
-.idea/dataSources/
-.idea/dataSources.ids
-.idea/dataSources.xml
-.idea/dataSources.local.xml
-.idea/sqlDataSources.xml
-.idea/dynamic.xml
-.idea/uiDesigner.xml
-
-# Mongo Explorer plugin:
-.idea/mongoSettings.xml
-
-## File-based project format:
-*.iws
-
-## Plugin-specific files:
-
-# JIRA plugin
-atlassian-ide-plugin.xml
-
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
-
-# User-specific stuff:
-.idea/
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/dictionaries
-
-# Sensitive or high-churn files:
-.idea/**/dataSources/
-.idea/**/dataSources.ids
-.idea/**/dataSources.xml
-.idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xml
-.idea/**/dynamic.xml
-.idea/**/uiDesigner.xml
-
-
-# Mongo Explorer plugin:
-.idea/**/mongoSettings.xml
-
-## Plugin-specific files:
-
-# IntelliJ
-/out/
-
-# mpeltonen/sbt-idea plugin
-.idea_modules/
-
-# Crashlytics plugin (for Android Studio and IntelliJ)
-com_crashlytics_export_strings.xml
-crashlytics.properties
-crashlytics-build.properties
-fabric.properties
-
-# OS generated files #
-######################
-.DS_Store
-ehthumbs.db
-Icon
-Thumbs.db
-.tmtags
-.idea
-tags
-vendor.tags
-tmtagsHistory
-*.sublime-project
-*.sublime-workspace
-.bundle
-/hyperpipe_results.csv
-/config_history.csv
