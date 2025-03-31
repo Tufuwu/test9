@@ -1,9 +1,5 @@
-.coverage
-.mypy_cache
-.tox/
-.venv
-__pycache__/
-pyairvisual.egg-info
-coverage.xml
-poetry.lock
-tags
+/android-libs-*/
+/darwin-libs-a/
+/freebsd-libs-*/
+/linux-libs-*/
+/win-libs-*/
