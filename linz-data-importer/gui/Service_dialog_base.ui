@@ -1,0 +1,884 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1153</width>
+    <height>682</height>
+   </rect>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::ClickFocus</enum>
+  </property>
+  <property name="windowTitle">
+   <string>LINZ Data Importer</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QListWidget" name="uListOptions">
+       <property name="maximumSize">
+        <size>
+         <width>140</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSplitter" name="splitter">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="childrenCollapsible">
+        <bool>false</bool>
+       </property>
+       <widget class="QStackedWidget" name="uStackedWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>400</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="acceptDrops">
+         <bool>false</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="swTableView">
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <widget class="QLabel" name="uLabelWarning">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="hly_4">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="uLabelDatasets">
+              <property name="text">
+               <string>Filter Data Sets</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="uTextFilter"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QTableView" name="uTableView">
+            <property name="editTriggers">
+             <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::EditKeyPressed</set>
+            </property>
+            <property name="alternatingRowColors">
+             <bool>true</bool>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>true</bool>
+            </attribute>
+            <attribute name="verticalHeaderVisible">
+             <bool>false</bool>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="ExtendedCombobox" name="uCRSCombo">
+              <property name="maximumSize">
+               <size>
+                <width>160</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="uBtnImport">
+              <property name="text">
+               <string>Add Layer</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="uLabelImgPreview">
+              <property name="minimumSize">
+               <size>
+                <width>300</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTextEdit" name="uTextDescription">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>200</height>
+               </size>
+              </property>
+              <property name="autoFillBackground">
+               <bool>true</bool>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="swSettings">
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QGroupBox" name="uGroupBoxApiKey">
+              <property name="title">
+               <string/>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <widget class="QLabel" name="uWarningSettings">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="groupBox_2">
+                 <property name="title">
+                  <string>API Keys</string>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_6">
+                  <item>
+                   <layout class="QVBoxLayout" name="verticalLayout_10">
+                    <item>
+                     <layout class="QHBoxLayout" name="horizontalLayout_6">
+                      <item>
+                       <widget class="QComboBox" name="uComboBoxDomain">
+                        <property name="minimumSize">
+                         <size>
+                          <width>220</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>220</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="uBtnAddDomain">
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset>
+                          <normaloff>:/plugins/linz-data-importer/icons/add.png</normaloff>:/plugins/linz-data-importer/icons/add.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer_2">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                     </layout>
+                    </item>
+                    <item>
+                     <layout class="QGridLayout" name="gridLayout_4">
+                      <item row="5" column="1">
+                       <widget class="QLineEdit" name="uTextAPIKey5">
+                        <property name="font">
+                         <font>
+                          <italic>true</italic>
+                         </font>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="1">
+                       <widget class="QLabel" name="label_2">
+                        <property name="text">
+                         <string>Key:</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="1">
+                       <widget class="QLineEdit" name="uTextAPIKey1">
+                        <property name="font">
+                         <font>
+                          <italic>true</italic>
+                         </font>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="1">
+                       <widget class="QLineEdit" name="uTextAPIKey2">
+                        <property name="font">
+                         <font>
+                          <italic>true</italic>
+                         </font>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="7" column="3">
+                       <widget class="QPushButton" name="uBtnSaveDomain7">
+                        <property name="text">
+                         <string>Save</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="1">
+                       <widget class="QLineEdit" name="uTextAPIKey4">
+                        <property name="font">
+                         <font>
+                          <italic>true</italic>
+                         </font>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="8" column="1">
+                       <widget class="QLineEdit" name="uTextAPIKey8">
+                        <property name="font">
+                         <font>
+                          <italic>true</italic>
+                         </font>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="3">
+                       <widget class="QPushButton" name="uBtnSaveDomain1">
+                        <property name="maximumSize">
+                         <size>
+                          <width>170</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>Save</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="6" column="1">
+                       <widget class="QLineEdit" name="uTextAPIKey6">
+                        <property name="font">
+                         <font>
+                          <italic>true</italic>
+                         </font>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="10" column="1">
+                       <widget class="QLineEdit" name="uTextAPIKey10">
+                        <property name="font">
+                         <font>
+                          <italic>true</italic>
+                         </font>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="9" column="1">
+                       <widget class="QLineEdit" name="uTextAPIKey9">
+                        <property name="font">
+                         <font>
+                          <italic>true</italic>
+                         </font>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="0">
+                       <widget class="QLineEdit" name="uTextDomain1">
+                        <property name="maximumSize">
+                         <size>
+                          <width>220</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="10" column="0">
+                       <widget class="QLineEdit" name="uTextDomain10">
+                        <property name="maximumSize">
+                         <size>
+                          <width>220</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="8" column="0">
+                       <widget class="QLineEdit" name="uTextDomain8">
+                        <property name="maximumSize">
+                         <size>
+                          <width>220</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="9" column="0">
+                       <widget class="QLineEdit" name="uTextDomain9">
+                        <property name="maximumSize">
+                         <size>
+                          <width>220</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="6" column="3">
+                       <widget class="QPushButton" name="uBtnSaveDomain6">
+                        <property name="text">
+                         <string>Save</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="3" column="3">
+                       <widget class="QPushButton" name="uBtnSaveDomain3">
+                        <property name="text">
+                         <string>Save</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="10" column="3">
+                       <widget class="QPushButton" name="uBtnSaveDomain10">
+                        <property name="text">
+                         <string>Save</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="8" column="3">
+                       <widget class="QPushButton" name="uBtnSaveDomain8">
+                        <property name="text">
+                         <string>Save</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="3">
+                       <widget class="QPushButton" name="uBtnSaveDomain2">
+                        <property name="maximumSize">
+                         <size>
+                          <width>170</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>Save</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="6" column="0">
+                       <widget class="QLineEdit" name="uTextDomain6">
+                        <property name="maximumSize">
+                         <size>
+                          <width>220</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="7" column="0">
+                       <widget class="QLineEdit" name="uTextDomain7">
+                        <property name="maximumSize">
+                         <size>
+                          <width>220</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="0">
+                       <widget class="QLineEdit" name="uTextDomain4">
+                        <property name="maximumSize">
+                         <size>
+                          <width>220</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="5" column="0">
+                       <widget class="QLineEdit" name="uTextDomain5">
+                        <property name="maximumSize">
+                         <size>
+                          <width>220</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="2">
+                       <widget class="QPushButton" name="uBtnRemoveDomain1">
+                        <property name="minimumSize">
+                         <size>
+                          <width>22</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset>
+                          <normaloff>:/plugins/linz-data-importer/icons/remove.png</normaloff>:/plugins/linz-data-importer/icons/remove.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="3" column="1">
+                       <widget class="QLineEdit" name="uTextAPIKey3">
+                        <property name="font">
+                         <font>
+                          <italic>true</italic>
+                         </font>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="3">
+                       <widget class="QPushButton" name="uBtnSaveDomain4">
+                        <property name="text">
+                         <string>Save</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="0">
+                       <widget class="QLabel" name="label">
+                        <property name="text">
+                         <string>Domain:</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="9" column="3">
+                       <widget class="QPushButton" name="uBtnSaveDomain9">
+                        <property name="text">
+                         <string>Save</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="0">
+                       <widget class="QLineEdit" name="uTextDomain2">
+                        <property name="maximumSize">
+                         <size>
+                          <width>220</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="3" column="0">
+                       <widget class="QLineEdit" name="uTextDomain3">
+                        <property name="maximumSize">
+                         <size>
+                          <width>220</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="5" column="3">
+                       <widget class="QPushButton" name="uBtnSaveDomain5">
+                        <property name="text">
+                         <string>Save</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="7" column="1">
+                       <widget class="QLineEdit" name="uTextAPIKey7">
+                        <property name="font">
+                         <font>
+                          <italic>true</italic>
+                         </font>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="2">
+                       <widget class="QPushButton" name="uBtnRemoveDomain2">
+                        <property name="minimumSize">
+                         <size>
+                          <width>22</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset>
+                          <normaloff>:/plugins/linz-data-importer/icons/remove.png</normaloff>:/plugins/linz-data-importer/icons/remove.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="3" column="2">
+                       <widget class="QPushButton" name="uBtnRemoveDomain3">
+                        <property name="minimumSize">
+                         <size>
+                          <width>22</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset>
+                          <normaloff>:/plugins/linz-data-importer/icons/remove.png</normaloff>:/plugins/linz-data-importer/icons/remove.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="2">
+                       <widget class="QPushButton" name="uBtnRemoveDomain4">
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset>
+                          <normaloff>:/plugins/linz-data-importer/icons/remove.png</normaloff>:/plugins/linz-data-importer/icons/remove.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="5" column="2">
+                       <widget class="QPushButton" name="uBtnRemoveDomain5">
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset>
+                          <normaloff>:/plugins/linz-data-importer/icons/remove.png</normaloff>:/plugins/linz-data-importer/icons/remove.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="6" column="2">
+                       <widget class="QPushButton" name="uBtnRemoveDomain6">
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset>
+                          <normaloff>:/plugins/linz-data-importer/icons/remove.png</normaloff>:/plugins/linz-data-importer/icons/remove.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="7" column="2">
+                       <widget class="QPushButton" name="uBtnRemoveDomain7">
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset>
+                          <normaloff>:/plugins/linz-data-importer/icons/remove.png</normaloff>:/plugins/linz-data-importer/icons/remove.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="8" column="2">
+                       <widget class="QPushButton" name="uBtnRemoveDomain8">
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset>
+                          <normaloff>:/plugins/linz-data-importer/icons/remove.png</normaloff>:/plugins/linz-data-importer/icons/remove.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="9" column="2">
+                       <widget class="QPushButton" name="uBtnRemoveDomain9">
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset>
+                          <normaloff>:/plugins/linz-data-importer/icons/remove.png</normaloff>:/plugins/linz-data-importer/icons/remove.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="10" column="2">
+                       <widget class="QPushButton" name="uBtnRemoveDomain10">
+                        <property name="maximumSize">
+                         <size>
+                          <width>30</width>
+                          <height>16777215</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset>
+                          <normaloff>:/plugins/linz-data-importer/icons/remove.png</normaloff>:/plugins/linz-data-importer/icons/remove.png</iconset>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <spacer name="verticalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_3">
+                 <property name="font">
+                  <font>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>* When saving the domain details for the first time the UI may appear to &quot;freeze&quot; while obtaining domain data. Please be patient, this will be cached and updated in the background thereafter.</string>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="swAbout">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QTextBrowser" name="hAboutHtml"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page">
+         <layout class="QVBoxLayout" name="verticalLayout_3"/>
+        </widget>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ExtendedCombobox</class>
+   <extends>QComboBox</extends>
+   <header>tablemodel.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>uTextFilter</tabstop>
+  <tabstop>uBtnImport</tabstop>
+  <tabstop>uListOptions</tabstop>
+  <tabstop>uTableView</tabstop>
+  <tabstop>uTextDescription</tabstop>
+  <tabstop>uComboBoxDomain</tabstop>
+  <tabstop>uBtnAddDomain</tabstop>
+  <tabstop>uTextAPIKey5</tabstop>
+  <tabstop>uTextAPIKey1</tabstop>
+  <tabstop>uTextAPIKey2</tabstop>
+  <tabstop>uBtnSaveDomain7</tabstop>
+  <tabstop>uTextAPIKey4</tabstop>
+  <tabstop>uTextAPIKey8</tabstop>
+  <tabstop>uBtnSaveDomain1</tabstop>
+  <tabstop>uTextAPIKey6</tabstop>
+  <tabstop>uTextAPIKey10</tabstop>
+  <tabstop>uTextAPIKey9</tabstop>
+  <tabstop>uTextDomain1</tabstop>
+  <tabstop>uTextDomain10</tabstop>
+  <tabstop>uTextDomain8</tabstop>
+  <tabstop>uTextDomain9</tabstop>
+  <tabstop>uBtnSaveDomain6</tabstop>
+  <tabstop>uBtnSaveDomain3</tabstop>
+  <tabstop>uBtnSaveDomain10</tabstop>
+  <tabstop>uBtnSaveDomain8</tabstop>
+  <tabstop>uBtnSaveDomain2</tabstop>
+  <tabstop>uTextDomain6</tabstop>
+  <tabstop>uTextDomain7</tabstop>
+  <tabstop>uTextDomain4</tabstop>
+  <tabstop>uTextDomain5</tabstop>
+  <tabstop>uBtnRemoveDomain1</tabstop>
+  <tabstop>uTextAPIKey3</tabstop>
+  <tabstop>uBtnSaveDomain4</tabstop>
+  <tabstop>uBtnSaveDomain9</tabstop>
+  <tabstop>uTextDomain2</tabstop>
+  <tabstop>uTextDomain3</tabstop>
+  <tabstop>uBtnSaveDomain5</tabstop>
+  <tabstop>uTextAPIKey7</tabstop>
+  <tabstop>uBtnRemoveDomain2</tabstop>
+  <tabstop>uBtnRemoveDomain3</tabstop>
+  <tabstop>uBtnRemoveDomain4</tabstop>
+  <tabstop>uBtnRemoveDomain5</tabstop>
+  <tabstop>uBtnRemoveDomain6</tabstop>
+  <tabstop>uBtnRemoveDomain7</tabstop>
+  <tabstop>uBtnRemoveDomain8</tabstop>
+  <tabstop>uBtnRemoveDomain9</tabstop>
+  <tabstop>uBtnRemoveDomain10</tabstop>
+  <tabstop>hAboutHtml</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

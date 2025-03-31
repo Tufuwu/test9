@@ -1,56 +1,56 @@
-name: CI
+name: ci
 
 on:
-  pull_request: {}
-  push: {}
+  push:
+    branches:
+      - main_qgis3
+    tags-ignore:
+      - 'debian/*'
+      - '*-start'
+  pull_request:
+    branches:
+      - '*'
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install tox tox-gh-actions
-    - run: tox -e lint
-
-  check-docs:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install tox tox-gh-actions
-    - run: tox -e check-docs
 
   test:
+
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.9", "3.10"]
-        experimental: [false]
-        include:
-          - python-version: '3.9-dev'
-            experimental: true
+        matrix:
+            qgis: [ 'main' ]
+            python: ["3.9", "3.10"]
+    env:
+      # Make apt non-interactive by default, and not showing progress
+      APT: "apt-get -o Dpkg::Progress=0 -o Dpkg::Use-Pty=0"
+      IMAGE: 'elpaso/qgis-testing-environment'
+      QGIS_VERSION_TAG: ${{ matrix.qgis }}
+      PLUGIN_NAME: "linz-data-importer"
+      LDI_LINZ_KEY: ${{ secrets.LDI_LINZ_KEY }}
+      LDI_MFE_KEY: ${{ secrets.LDI_MFE_KEY }}
+      LDI_NZDF_KEY: ${{ secrets.LDI_NZDF_KEY }}
+      LDI_BASEMAPS_KEY: ${{ secrets.LDI_BASEMAPS_KEY }}
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Pull docker image
       run: |
-        python3 -m pip install --upgrade pip setuptools
-        python3 -m pip install tox tox-gh-actions
-    - run: tox
+        docker pull ${IMAGE}:${QGIS_VERSION_TAG}
+    - name: Setup docker container
+      run: |
+        docker run -d --name qgis-testing-environment \
+          -v ${PWD}:/tests_directory \
+          -e LDI_LINZ_KEY \
+          -e LDI_MFE_KEY \
+          -e LDI_NZDF_KEY \
+          -e LDI_BASEMAPS_KEY \
+          -e DISPLAY=:99 \
+          ${IMAGE}:${QGIS_VERSION_TAG}
+        sleep 10
+        docker exec qgis-testing-environment \
+          sh -c "qgis_setup.sh ${PLUGIN_NAME}"
+        docker exec qgis-testing-environment \
+          sh -c "ln -s /tests_directory /root/.local/share/QGIS/QGIS3/profiles/default/${PLUGIN_NAME}"
+    - name: Run test in container
+      run: |
+        docker exec -t qgis-testing-environment \
+          sh -c "qgis_testrunner.sh ${PLUGIN_NAME}.tests.run_tests.run_test_modules"
