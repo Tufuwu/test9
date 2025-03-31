@@ -1,4 +1,11 @@
+include CONTRIBUTING.rst
 include LICENSE
-include README.md
-include DESCRIPTION.rst
-recursive-include etesync_dav/templates *
+include README.rst
+
+recursive-include newsfeed/static *
+recursive-include newsfeed/migrations *
+recursive-include newsfeed/templates *
+recursive-include newsfeed/utils *
+
+global-exclude __pycache__
+global-exclude *.py[co]
